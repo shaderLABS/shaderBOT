@@ -14,6 +14,8 @@ PORT=
 - TOKEN is the discord bot token which you can get by creating a bot application at https://discord.com/developers/applications.
 - PORT is the port the server will run on. If not specified, the server will run on port 3001.
 
+After that, configure `cfg.json`. Especially IDs should be updated if to match the setup on your development server.
+
 To start the project, run:
 ```
 npm run dev
