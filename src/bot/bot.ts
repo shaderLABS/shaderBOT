@@ -1,13 +1,32 @@
-import discord, { Collection } from 'discord.js';
+import { Client, Collection } from 'discord.js';
 import { Command, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 
-export type CustomClient = discord.Client & { commands: Collection<string, Command>; events: Collection<string, Event> };
+import mongoose from 'mongoose';
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 
-export function startBot() {
-    const client: CustomClient = Object.assign(new discord.Client(), {
+export type Database = {
+    tickets: mongoose.Connection;
+    settings: mongoose.Connection;
+};
+
+export type CustomClient = Client & {
+    commands: Collection<string, Command>;
+    events: Collection<string, Event>;
+    db: Database;
+};
+
+export async function startBot() {
+    const client: CustomClient = Object.assign(new Client(), {
         commands: new Collection<string, Command>(),
         events: new Collection<string, Event>(),
+        db: {
+            tickets: await mongoose.createConnection('mongodb://127.0.0.1/tickets'),
+            settings: await mongoose.createConnection('mongodb://127.0.0.1/settings'),
+        },
     });
 
     client.once('ready', () => {
