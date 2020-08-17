@@ -1,6 +1,6 @@
-import cfg from '../../cfg.json';
-import { BitFieldResolvable, PermissionString, Message } from 'discord.js';
-import { CustomClient } from './bot.js';
+import { settings } from './bot.js';
+import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, NewsChannel } from 'discord.js';
+import { client } from './bot.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -15,13 +15,13 @@ export type Command = {
     callback: (message: Message, args: string[], text: string) => void;
 };
 
-export async function registerCommands(client: CustomClient, dir: string) {
+export async function registerCommands(dir: string) {
     const filePath = path.join(path.resolve(), dir);
     const files = await fs.readdir(filePath);
     for (const file of files) {
         const stat = await fs.lstat(path.join(filePath, file));
         if (stat.isDirectory()) {
-            registerCommands(client, path.join(dir, file));
+            registerCommands(path.join(dir, file));
         } else if (file.endsWith('.js')) {
             const { command }: { command: Command } = await import(path.join(filePath, file));
             console.log(`Registering command "${file}"...`);
@@ -31,6 +31,10 @@ export async function registerCommands(client: CustomClient, dir: string) {
             }
         }
     }
+}
+
+export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
+    channel.send(`Syntax Error: ${settings.prefix + syntax}`);
 }
 
 export function runCommand(command: Command, message: Message, invoke: string, args: string[]): void {
@@ -69,10 +73,10 @@ export function runCommand(command: Command, message: Message, invoke: string, a
     }
 
     if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) {
-        channel.send(`Syntax Error: ${cfg.prefix + invoke} ${expectedArgs}`);
+        syntaxError(channel, `${invoke} ${expectedArgs}`);
         return;
     }
 
-    callback(message, args, content.slice(cfg.prefix.length + invoke.length).trim());
+    callback(message, args, content.slice(settings.prefix.length + invoke.length).trim());
     return;
 }

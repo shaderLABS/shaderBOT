@@ -1,5 +1,6 @@
 import { Command } from '../commandHandler.js';
 import { log } from '../util.js';
+import { TextChannel } from 'discord.js';
 
 export const command: Command = {
     commands: ['purge'],
@@ -7,8 +8,10 @@ export const command: Command = {
     maxArgs: 1,
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message, args) => {
-        const count = +args[0];
         const { channel, member, guild } = message;
+        if (!(channel instanceof TextChannel)) return;
+
+        const count = +args[0];
 
         if (isNaN(count) || count < 0 || count > 100) {
             channel.send('Please use a number between 0 and 100 as the first argument.');
