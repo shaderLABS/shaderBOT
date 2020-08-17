@@ -6,7 +6,7 @@ import { log } from '../util.js';
 
 export const event: Event = {
     name: 'channelDelete',
-    callback: async (_client: CustomClient, channel: Channel) => {
+    callback: async (channel: Channel) => {
         if (!(channel instanceof TextChannel)) return;
         const messages = channel.messages.cache;
 
