@@ -1,7 +1,7 @@
 import { ClientEvents } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { client } from './bot.js';
+import { client, events } from './bot.js';
 
 export type Event = {
     name: keyof ClientEvents;
@@ -19,7 +19,7 @@ export async function registerEvents(dir: string) {
             const { event }: { event: Event } = await import(path.join(filePath, file));
             console.log(`Registering event "${file}"...`);
 
-            client.events.set(event.name, event);
+            events.set(event.name, event);
             client.on(event.name, event.callback.bind(event));
         }
     }

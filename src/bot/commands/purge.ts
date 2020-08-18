@@ -1,5 +1,5 @@
 import { Command } from '../commandHandler.js';
-import { log } from '../util.js';
+import log from '../../util/log.js';
 import { TextChannel } from 'discord.js';
 
 export const command: Command = {
@@ -8,7 +8,7 @@ export const command: Command = {
     maxArgs: 1,
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message, args) => {
-        const { channel, member, guild } = message;
+        const { channel, member } = message;
         if (!(channel instanceof TextChannel)) return;
 
         const count = +args[0];
@@ -20,6 +20,6 @@ export const command: Command = {
 
         await message.delete();
         const deleted = await channel.bulkDelete(count);
-        if (guild) log(guild, `<@${member?.id}> deleted ${deleted.size} (out of ${count}) message(s) in <#${channel.id}>.`);
+        log(`<@${member?.id}> deleted ${deleted.size} (out of ${count}) message(s) in <#${channel.id}>.`);
     },
 };

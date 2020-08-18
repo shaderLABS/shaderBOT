@@ -9,25 +9,20 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
-export type CustomClient = Client & {
-    commands: Collection<string, Command>;
-    events: Collection<string, Event>;
-};
-
-export let client: CustomClient;
+export let client: Client;
+export let commands: Collection<string, Command>;
+export let events: Collection<string, Event>;
 export let settings: settingsFile.Settings;
 
-export function startBot() {
-    client = Object.assign(new Client(), {
-        commands: new Collection<string, Command>(),
-        events: new Collection<string, Event>(),
-    });
+export async function startBot() {
+    client = new Client();
+    commands = new Collection<string, Command>();
+    events = new Collection<string, Event>();
+    settings = await settingsFile.read();
 
-    client.once('ready', async () => {
+    client.once('ready', () => {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as '${client.user.username}#${client.user.discriminator}'.`);
-
-        settings = await settingsFile.read();
 
         registerCommands('./src/bot/commands');
         registerEvents('./src/bot/events');
