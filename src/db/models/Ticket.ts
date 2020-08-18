@@ -6,13 +6,13 @@ import mongoose from 'ts-mongoose';
 //     avatar: mongoose.Type.string({ required: true }),
 // });
 
-const CommentSchema = mongoose.createSchema({
+export const CommentSchema = mongoose.createSchema({
     author: mongoose.Type.string({ required: true }),
     content: mongoose.Type.string({ required: true }),
     timestamp: mongoose.Type.string({ required: true }),
 });
 
-const TicketSchema = mongoose.createSchema({
+export const TicketSchema = mongoose.createSchema({
     _id: mongoose.Type.objectId({ required: true }),
     title: mongoose.Type.string({ required: true }),
     topic: mongoose.Type.string({ required: true }),

@@ -1,6 +1,6 @@
 import { Command } from '../commandHandler.js';
 import { shutdown } from '../../index.js';
-import { log } from '../util.js';
+import log from '../../util/log.js';
 
 export const command: Command = {
     commands: ['shutdown', 'stop'],
@@ -8,10 +8,7 @@ export const command: Command = {
     maxArgs: 0,
     requiredPermissions: ['ADMINISTRATOR'],
     callback: (message) => {
-        const { guild } = message;
-        if (!guild) return;
-
-        log(guild, `The bot has been stopped by <@${message.member?.id}>.`);
+        log(`The bot has been stopped by <@${message.member?.id}>.`);
         shutdown();
     },
 };

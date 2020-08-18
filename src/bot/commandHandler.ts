@@ -1,6 +1,6 @@
 import { settings } from './bot.js';
 import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, NewsChannel } from 'discord.js';
-import { client } from './bot.js';
+import { commands } from './bot.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -27,7 +27,7 @@ export async function registerCommands(dir: string) {
             console.log(`Registering command "${file}"...`);
 
             for (const invoke of command.commands) {
-                client.commands.set(invoke, command);
+                commands.set(invoke, command);
             }
         }
     }

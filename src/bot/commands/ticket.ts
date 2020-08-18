@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Ticket from '../../db/models/Ticket.js';
 import { Message, TextChannel, DMChannel, NewsChannel, MessageEmbed } from 'discord.js';
 import { settings } from '../bot.js';
+import { getOpenTicket, getClosedTicket } from '../../util/searchMessage.js';
 
 const expectedArgs = '<create|open|close>';
 
@@ -11,21 +12,19 @@ export const command: Command = {
     expectedArgs,
     minArgs: 1,
     maxArgs: null,
-    callback: (message, args) => {
-        const { channel } = message;
-
-        switch (args[0]) {
+    callback: (message, args, text) => {
+        switch (args[0].toLowerCase()) {
             case 'create':
                 createTicket(message);
                 break;
             case 'open':
-                openTicket(message, args);
+                openTicket(message, args, text);
                 break;
             case 'close':
-                closeTicket(message, args);
+                closeTicket(message, args, text);
                 break;
             default:
-                syntaxError(channel, 'ticket ' + expectedArgs);
+                syntaxError(message.channel, 'ticket ' + expectedArgs);
                 break;
         }
     },
@@ -89,40 +88,24 @@ async function createTicket(message: Message) {
     }
 }
 
-async function closeTicket(message: Message, args: string[]) {
-    const { channel, author } = message;
-    const ticket = (await Ticket.find().where('_id', args[1]).where('closed', false).exec())[0];
-
-    if (!ticket) {
-        channel.send('No open ticket with this ID was found.');
-        return;
+async function closeTicket(message: Message, args: string[], text: string) {
+    try {
+        let ticket = await getOpenTicket(message, args, text);
+        ticket.closed = true;
+        await ticket.save();
+        message.channel.send('Ticket closed.');
+    } catch (error) {
+        message.channel.send(error);
     }
-
-    if (ticket.author !== author.id) {
-        channel.send('You do not have permission to close this ticket.');
-        return;
-    }
-
-    ticket.closed = true;
-    await ticket.save();
-    channel.send('Ticket closed.');
 }
 
-async function openTicket(message: Message, args: string[]) {
-    const { channel, author } = message;
-    const ticket = (await Ticket.find().where('_id', args[1]).where('closed', true).exec())[0];
-
-    if (!ticket) {
-        channel.send('No closed ticket with this ID was found.');
-        return;
+async function openTicket(message: Message, args: string[], text: string) {
+    try {
+        let ticket = await getClosedTicket(message, args, text);
+        ticket.closed = false;
+        await ticket.save();
+        message.channel.send('Ticket opened.');
+    } catch (error) {
+        message.channel.send(error);
     }
-
-    if (ticket.author !== author.id) {
-        channel.send('You do not have permission to open this ticket.');
-        return;
-    }
-
-    ticket.closed = true;
-    await ticket.save();
-    channel.send('Ticket opened.');
 }
