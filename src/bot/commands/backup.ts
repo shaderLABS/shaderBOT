@@ -27,7 +27,6 @@ export const command: Command = {
         );
 
         message.channel.send(
-            '',
             new MessageEmbed()
                 .setAuthor('BACKUP')
                 .setColor('#0000ff')

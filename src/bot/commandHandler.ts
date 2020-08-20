@@ -1,5 +1,5 @@
 import { settings } from './bot.js';
-import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, NewsChannel } from 'discord.js';
+import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, NewsChannel, Collection } from 'discord.js';
 import { commands } from './bot.js';
 import fs from 'fs/promises';
 import path from 'path';
@@ -12,6 +12,7 @@ export type Command = {
     requiredRoles?: string[] | undefined;
     requiredPermissions?: BitFieldResolvable<PermissionString>[] | undefined;
     permissionError?: string | undefined;
+    superCommand?: string | undefined;
     callback: (message: Message, args: string[], text: string) => void;
 };
 
@@ -24,10 +25,21 @@ export async function registerCommands(dir: string) {
             registerCommands(path.join(dir, file));
         } else if (file.endsWith('.js')) {
             const { command }: { command: Command } = await import(path.join(filePath, file));
-            console.log(`Registering command "${file}"...`);
 
-            for (const invoke of command.commands) {
-                commands.set(invoke, command);
+            if (!command.superCommand) {
+                for (const invoke of command.commands) {
+                    commands.set(invoke, command);
+                }
+                console.log(`Registered command "${file}".`);
+            } else {
+                const superCmd = commands.get(command.superCommand) || new Collection<string, Command>();
+                if (!(superCmd instanceof Collection)) return;
+
+                for (const invoke of command.commands) {
+                    superCmd.set(invoke, command);
+                }
+                commands.set(command.superCommand, superCmd);
+                console.log(`Registered command "${file}" (subcommand of "${command.superCommand}").`);
             }
         }
     }
@@ -37,7 +49,16 @@ export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, synt
     channel.send(`Syntax Error: ${settings.prefix + syntax}`);
 }
 
-export function runCommand(command: Command, message: Message, invoke: string, args: string[]): void {
+export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]): void {
+    if (command instanceof Collection) {
+        const subCommand = command.get(args[0].toLowerCase());
+        if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
+
+        command = subCommand;
+        invoke += ' ' + args[0];
+        args.shift();
+    }
+
     let {
         expectedArgs = '',
         minArgs = 0,
