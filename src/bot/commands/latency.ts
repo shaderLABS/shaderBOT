@@ -1,7 +1,7 @@
 import { Command } from '../commandHandler.js';
 
 export const command: Command = {
-    commands: ['ping', 'latency'],
+    commands: ['latency'],
     minArgs: 0,
     maxArgs: 0,
     callback: (message) => {

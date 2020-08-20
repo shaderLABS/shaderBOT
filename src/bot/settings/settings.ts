@@ -6,6 +6,7 @@ const settingsFile = path.join(path.resolve(), '/src/bot/settings/settings.json'
 export type Settings = {
     prefix: string;
     logChannelID: string;
+    ticketCategoryID: string;
 };
 
 export function write(data: Object) {

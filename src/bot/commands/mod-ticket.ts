@@ -1,7 +1,8 @@
 import { Command, syntaxError } from '../commandHandler.js';
 import { Message } from 'discord.js';
 import Ticket from '../../db/models/Ticket.js';
-import { getUser, getTicket } from '../../util/searchMessage.js';
+import { getUser, getTicket } from '../../misc/searchMessage.js';
+import { client } from '../bot.js';
 
 const expectedArgs = '<delete|purgeUser>';
 
@@ -31,11 +32,15 @@ async function deleteTicket(message: Message, args: string[], text: string) {
 
     try {
         const ticket = await getTicket(message, args, text);
-        await ticket.deleteOne();
 
+        if (ticket.channel) {
+            (await client.channels.fetch(ticket.channel)).delete();
+        }
+
+        await ticket.deleteOne();
         channel.send('Ticket deleted.');
     } catch (error) {
-        channel.send(error);
+        if (error) channel.send(error);
     }
 }
 
@@ -44,15 +49,19 @@ async function purgeUserTickets(message: Message, args: string[]) {
 
     try {
         let user = await getUser(message, args[1]);
-        const deletedTickets = await Ticket.deleteMany({ author: user.id });
+        const deleteTickets = await Ticket.find({ author: user.id });
 
-        if (deletedTickets.deletedCount === 0) {
-            channel.send(`No tickets by ${user.username} were found.`);
-            return;
+        if (deleteTickets.length === 0) return channel.send(`No tickets by ${user.username} were found.`);
+
+        for (const ticket of deleteTickets) {
+            if (!ticket.closed && ticket.channel) {
+                (await client.channels.fetch(ticket.channel)).delete();
+            }
+            ticket.deleteOne();
         }
 
-        channel.send(`Deleted ${deletedTickets.deletedCount} ticket(s) by ${user.username}.`);
+        channel.send(`Deleted ${deleteTickets.length} ticket(s) by ${user.username}.`);
     } catch (error) {
-        channel.send(error);
+        if (error) channel.send(error);
     }
 }

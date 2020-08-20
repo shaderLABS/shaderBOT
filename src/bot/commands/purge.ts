@@ -1,11 +1,12 @@
 import { Command } from '../commandHandler.js';
-import log from '../../util/log.js';
+import log from '../../misc/log.js';
 import { TextChannel } from 'discord.js';
 
 export const command: Command = {
     commands: ['purge'],
     minArgs: 1,
     maxArgs: 1,
+    expectedArgs: '<amount>',
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message, args) => {
         const { channel, member } = message;
