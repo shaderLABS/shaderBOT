@@ -1,6 +1,6 @@
 import { Command } from '../commandHandler.js';
 import { shutdown } from '../../index.js';
-import log from '../../util/log.js';
+import log from '../../misc/log.js';
 
 export const command: Command = {
     commands: ['shutdown', 'stop'],
