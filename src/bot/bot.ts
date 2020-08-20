@@ -10,7 +10,7 @@ mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
 export let client: Client;
-export let commands: Collection<string, Command>;
+export let commands: Collection<string, Command | Collection<string, Command>>;
 export let events: Collection<string, Event>;
 export let settings: settingsFile.Settings;
 
