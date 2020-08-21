@@ -1,20 +1,21 @@
 import { Command } from '../../commandHandler.js';
 import { Message, MessageEmbed } from 'discord.js';
 import { settings, client } from '../../bot.js';
-import { getTicket } from '../../../misc/searchMessage.js';
+import { getTicketMod } from '../../../misc/searchMessage.js';
 
 export const command: Command = {
     commands: ['open'],
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'ticket',
+    requiredPermissions: ['MANAGE_MESSAGES'],
+    superCommand: 'modticket',
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, member } = message;
         if (!guild || !member) return;
 
         try {
-            let ticket = await getTicket(message, args, text, true);
+            let ticket = await getTicketMod(message, args, text, true);
 
             ticket.closed = false;
 

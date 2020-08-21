@@ -1,29 +1,33 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
-import { getTicketMod } from '../../../misc/searchMessage.js';
 import { client } from '../../bot.js';
+import { getTicketMod } from '../../../misc/searchMessage.js';
 
 export const command: Command = {
-    commands: ['delete'],
+    commands: ['close'],
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'modticket',
     requiredPermissions: ['MANAGE_MESSAGES'],
+    superCommand: 'modticket',
     callback: async (message: Message, args: string[], text: string) => {
-        const { channel } = message;
+        const { member } = message;
+        if (!member) return;
 
         try {
-            const ticket = await getTicketMod(message, args, text, undefined);
+            let ticket = await getTicketMod(message, args, text, false);
+
+            ticket.closed = true;
 
             if (ticket.channel) {
                 (await client.channels.fetch(ticket.channel)).delete();
+                ticket.channel = undefined;
             }
 
-            await ticket.deleteOne();
-            channel.send('Ticket deleted.');
+            await ticket.save();
+            message.channel.send('Ticket closed.');
         } catch (error) {
-            if (error) channel.send(error);
+            if (error) message.channel.send(error);
         }
     },
 };

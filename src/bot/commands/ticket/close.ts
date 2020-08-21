@@ -1,7 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { client } from '../../bot.js';
-import { getOpenTicket } from '../../../misc/searchMessage.js';
+import { getTicket } from '../../../misc/searchMessage.js';
 
 export const command: Command = {
     commands: ['close'],
@@ -12,8 +12,9 @@ export const command: Command = {
     callback: async (message: Message, args: string[], text: string) => {
         const { member } = message;
         if (!member) return;
+
         try {
-            let ticket = await getOpenTicket(message, args, text);
+            let ticket = await getTicket(message, args, text, false);
 
             ticket.closed = true;
 
