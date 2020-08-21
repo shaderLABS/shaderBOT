@@ -20,13 +20,8 @@ export async function startBot() {
     events = new Collection<string, Event>();
     settings = await settingsFile.read();
 
-    client.once('ready', () => {
-        if (!client.user) return console.error('Failed to login.');
-        console.log(`Logged in as '${client.user.username}#${client.user.discriminator}'.`);
-
-        registerCommands('./src/bot/commands');
-        registerEvents('./src/bot/events');
-    });
+    registerCommands('./src/bot/commands');
+    registerEvents('./src/bot/events');
 
     mongoose.connection.once('open', async () => {
         console.log('Connected to MongoDB.');

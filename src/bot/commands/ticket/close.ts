@@ -13,12 +13,6 @@ export const command: Command = {
         const { member } = message;
         if (!member) return;
         try {
-            // if (ticket.author !== member.id && !member.permissions.has('MANAGE_MESSAGES')) {
-            //     const project = await Project.findOne({ channel: ticket.project });
-            //     if (!project || !project.owners) return;
-            //     if (!project.owners.includes(member.id)) return;
-            // }
-
             let ticket = await getOpenTicket(message, args, text);
 
             ticket.closed = true;

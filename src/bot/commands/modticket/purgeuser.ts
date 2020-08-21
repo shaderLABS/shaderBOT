@@ -15,7 +15,7 @@ export const command: Command = {
         const { channel } = message;
 
         try {
-            let user = await getUser(message, args[1]);
+            let user = await getUser(message, args[0]);
             const deleteTickets = await Ticket.find({ author: user.id });
 
             if (deleteTickets.length === 0) return channel.send(`No tickets by ${user.username} were found.`);

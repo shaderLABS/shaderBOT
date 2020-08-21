@@ -2,8 +2,6 @@ import { Command } from '../../commandHandler.js';
 import Project from '../../../db/models/Project.js';
 import { Message } from 'discord.js';
 
-const expectedArgs = '<ping|setup|delete>';
-
 export const command: Command = {
     commands: ['ping'],
     minArgs: 0,

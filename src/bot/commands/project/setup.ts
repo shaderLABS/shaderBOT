@@ -14,7 +14,6 @@ export const command: Command = {
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
-        if (!args[1]) return syntaxError(channel, 'project setup <@user|userID> <...>');
         if (await Project.exists({ channel: channel.id })) return channel.send('This channel is already linked to a project.');
 
         let owners: GuildMember[] = [];
@@ -22,7 +21,7 @@ export const command: Command = {
         const mentionedMembers = message.mentions.members;
         if (mentionedMembers) owners = owners.concat(mentionedMembers.array());
 
-        for (const potentialID of args.slice(1)) {
+        for (const potentialID of args) {
             if (!isNaN(Number(potentialID))) {
                 const user = await guild.members.fetch(potentialID);
                 if (user) owners.push(user);
