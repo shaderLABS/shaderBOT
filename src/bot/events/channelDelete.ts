@@ -4,12 +4,23 @@ import axios from 'axios';
 import log from '../../misc/log.js';
 import Project from '../../db/models/Project.js';
 import { settings } from '../bot.js';
+import Ticket from '../../db/models/Ticket.js';
 
 export const event: Event = {
     name: 'channelDelete',
     callback: async (channel: Channel) => {
         if (!(channel instanceof TextChannel)) return;
-        if (channel.parentID === settings.ticketCategoryID) return;
+
+        if (channel.parentID === settings.ticketCategoryID) {
+            const ticket = await Ticket.findOne({ channel: channel.id });
+            if (!ticket) return;
+
+            ticket.closed = true;
+            await ticket.save();
+
+            return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
+        }
+
         const messages = channel.messages.cache;
 
         let content = '';
@@ -32,8 +43,6 @@ export const event: Event = {
 
         const res = await axios.post('https://hastebin.com/documents', `CACHED MESSAGES OF #${channel.name}\n\n${content}`);
 
-        log(
-            `The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`
-        );
+        log(`The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`);
     },
 };
