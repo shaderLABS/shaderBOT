@@ -51,16 +51,21 @@ export const command: Command = {
             await ticketChannel.send(ticketEmbed);
 
             if (ticket.comments) {
-                for (const comment of ticket.comments) {
-                    const author = await client.users.fetch(comment.author);
-                    await ticketChannel.send(
-                        new MessageEmbed()
-                            .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
-                            .setFooter('ID: ' + comment._id)
-                            .setTimestamp(new Date(comment.timestamp))
-                            .setDescription(comment.content)
-                    );
-                }
+                await Promise.all(
+                    ticket.comments.map(async (comment) => {
+                        const author = await client.users.fetch(comment.author);
+                        const commentMessage = await ticketChannel.send(
+                            new MessageEmbed()
+                                .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
+                                .setFooter('ID: ' + comment._id)
+                                .setTimestamp(new Date(comment.timestamp))
+                                .setDescription(comment.content)
+                        );
+
+                        comment.message = commentMessage.id;
+                        return comment;
+                    })
+                );
             }
 
             await ticket.save();
