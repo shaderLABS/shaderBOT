@@ -7,6 +7,8 @@ import mongoose from 'ts-mongoose';
 // });
 
 export const CommentSchema = mongoose.createSchema({
+    _id: mongoose.Type.objectId({ required: true }),
+    message: mongoose.Type.string({ required: true }),
     author: mongoose.Type.string({ required: true }),
     content: mongoose.Type.string({ required: true }),
     timestamp: mongoose.Type.string({ required: true }),

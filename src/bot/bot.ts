@@ -15,7 +15,7 @@ export let events: Collection<string, Event>;
 export let settings: settingsFile.Settings;
 
 export async function startBot() {
-    client = new Client({ disableMentions: 'everyone' });
+    client = new Client({ disableMentions: 'everyone', partials: ['MESSAGE'] });
     commands = new Collection<string, Command>();
     events = new Collection<string, Event>();
     settings = await settingsFile.read();
