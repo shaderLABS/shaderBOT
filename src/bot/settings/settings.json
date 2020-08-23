@@ -1,1 +1,6 @@
-{ "prefix": "!", "logChannelID": "743955581160783933", "ticketCategoryID": "745760024063901747" }
+{
+    "prefix": "!",
+    "logChannelID": "743955581160783933",
+    "ticketCategoryID": "745760024063901747",
+    "manageTicketsChannelID": "747142980497834017"
+}

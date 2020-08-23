@@ -7,6 +7,7 @@ export type Settings = {
     prefix: string;
     logChannelID: string;
     ticketCategoryID: string;
+    manageTicketsChannelID: string;
 };
 
 export function write(data: Object) {

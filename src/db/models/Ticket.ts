@@ -12,6 +12,7 @@ export const CommentSchema = mongoose.createSchema({
     author: mongoose.Type.string({ required: true }),
     content: mongoose.Type.string({ required: true }),
     timestamp: mongoose.Type.string({ required: true }),
+    edited: mongoose.Type.boolean({ required: false, default: false }),
 });
 
 export const TicketSchema = mongoose.createSchema({
