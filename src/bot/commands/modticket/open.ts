@@ -57,7 +57,7 @@ export const command: Command = {
                         const commentMessage = await ticketChannel.send(
                             new MessageEmbed()
                                 .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
-                                .setFooter('ID: ' + comment._id)
+                                .setFooter('ID: ' + comment.edited ? comment._id + ' (edited)' : comment._id)
                                 .setTimestamp(new Date(comment.timestamp))
                                 .setDescription(comment.content)
                         );
