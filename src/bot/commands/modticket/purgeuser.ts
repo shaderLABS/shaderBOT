@@ -1,8 +1,8 @@
 import { Command } from '../../commandHandler.js';
-import { Message } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import Ticket from '../../../db/models/Ticket.js';
 import { getUser } from '../../../misc/searchMessage.js';
-import { client } from '../../bot.js';
+import { client, settings } from '../../bot.js';
 
 export const command: Command = {
     commands: ['purgeuser'],
@@ -20,10 +20,20 @@ export const command: Command = {
 
             if (deleteTickets.length === 0) return channel.send(`No tickets by ${user.username} were found.`);
 
+            const guild = message.guild;
+            if (!guild) return;
+            const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+            if (!(subscriptionChannel instanceof TextChannel)) return;
+
             for (const ticket of deleteTickets) {
                 if (!ticket.closed && ticket.channel) {
                     (await client.channels.fetch(ticket.channel)).delete();
                 }
+
+                if (ticket.subscriptionMessage) {
+                    (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
+                }
+
                 ticket.deleteOne();
             }
 

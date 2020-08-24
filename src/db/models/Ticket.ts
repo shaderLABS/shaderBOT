@@ -12,7 +12,7 @@ export const CommentSchema = mongoose.createSchema({
     author: mongoose.Type.string({ required: true }),
     content: mongoose.Type.string({ required: true }),
     timestamp: mongoose.Type.string({ required: true }),
-    edited: mongoose.Type.boolean({ required: false, default: false }),
+    edited: mongoose.Type.string({ required: false }),
 });
 
 export const TicketSchema = mongoose.createSchema({
@@ -23,7 +23,9 @@ export const TicketSchema = mongoose.createSchema({
     author: mongoose.Type.string({ required: true }), // fetch user object (client side?) using https://discord.com/developers/docs/resources/user#get-user
     timestamp: mongoose.Type.string({ required: true }),
     closed: mongoose.Type.boolean({ required: true }),
+    edited: mongoose.Type.string({ required: false }),
     channel: mongoose.Type.string({ required: false }),
+    subscriptionMessage: mongoose.Type.string({ required: false }),
     comments: mongoose.Type.array().of(CommentSchema),
 });
 

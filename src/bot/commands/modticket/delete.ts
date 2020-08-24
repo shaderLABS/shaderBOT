@@ -1,7 +1,7 @@
 import { Command } from '../../commandHandler.js';
-import { Message } from 'discord.js';
+import { Message, TextChannel } from 'discord.js';
 import { getTicketMod } from '../../../misc/searchMessage.js';
-import { client } from '../../bot.js';
+import { client, settings } from '../../bot.js';
 
 export const command: Command = {
     commands: ['delete'],
@@ -18,6 +18,16 @@ export const command: Command = {
 
             if (ticket.channel) {
                 (await client.channels.fetch(ticket.channel)).delete();
+            }
+
+            if (ticket.subscriptionMessage) {
+                const guild = message.guild;
+                if (!guild) return;
+                const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+                if (!(subscriptionChannel instanceof TextChannel)) return;
+
+                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
+                ticket.subscriptionMessage = '';
             }
 
             await ticket.deleteOne();

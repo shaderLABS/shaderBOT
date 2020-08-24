@@ -11,7 +11,7 @@ export const event: Event = {
         const { content, channel } = message;
 
         if (!(channel instanceof TextChannel) || message.author.bot) return;
-        if (channel.parentID === settings.ticketCategoryID) return ticketComment(message);
+        if (channel.parentID === settings.ticket.categoryID) return ticketComment(message);
         if (!content.startsWith(settings.prefix)) return;
 
         const [invoke, ...args] = content.slice(settings.prefix.length).trim().split(/[ ]+/);
@@ -38,7 +38,7 @@ async function ticketComment(message: Message) {
     const commentMessage = await channel.send(
         new MessageEmbed()
             .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-            .setFooter('ID: ' + comment._id)
+            // .setFooter('ID: ' + comment._id)
             .setTimestamp(new Date(comment.timestamp))
             .setDescription(content)
     );

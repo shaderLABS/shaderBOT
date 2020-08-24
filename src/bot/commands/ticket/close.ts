@@ -1,6 +1,6 @@
 import { Command } from '../../commandHandler.js';
-import { Message } from 'discord.js';
-import { client } from '../../bot.js';
+import { Message, TextChannel } from 'discord.js';
+import { client, settings } from '../../bot.js';
 import { getTicket } from '../../../misc/searchMessage.js';
 
 export const command: Command = {
@@ -10,13 +10,23 @@ export const command: Command = {
     maxArgs: null,
     superCommand: 'ticket',
     callback: async (message: Message, args: string[], text: string) => {
-        const { member } = message;
-        if (!member) return;
+        const { member, channel } = message;
+        if (!member || channel.id !== settings.ticket.managementChannelID) return;
 
         try {
             let ticket = await getTicket(message, args, text, false);
 
             ticket.closed = true;
+
+            if (ticket.subscriptionMessage) {
+                const guild = message.guild;
+                if (!guild) return;
+                const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+                if (!(subscriptionChannel instanceof TextChannel)) return;
+
+                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
+                ticket.subscriptionMessage = '';
+            }
 
             if (ticket.channel) {
                 (await client.channels.fetch(ticket.channel)).delete();
