@@ -27,10 +27,13 @@ export const command: Command = {
 
             const ticketAuthor = await client.users.fetch(ticket.author);
 
+            let ticketFooter = `ID: ${ticket._id}`;
+            if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
+
             const ticketEmbed = new MessageEmbed()
                 .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.avatarURL() || undefined)
                 .setColor('#0000ff')
-                .setFooter(`ID: ${ticket._id}`)
+                .setFooter(ticketFooter)
                 .addFields([
                     {
                         name: 'Title',
