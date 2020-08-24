@@ -16,12 +16,12 @@ export const event: Event = {
         const member = await guild.members.fetch(user);
         if (!member) return;
 
-        if (reaction.emoji.name === '✏️') editComment(reaction, user, guild, channel);
+        if (reaction.emoji.name === '✏️') edit(reaction, user, guild, channel);
         else if (reaction.emoji.name === '❌') deleteComment(reaction, user, member, channel);
     },
 };
 
-async function editComment(reaction: MessageReaction, user: User, guild: Guild, channel: TextChannel) {
+async function edit(reaction: MessageReaction, user: User, guild: Guild, channel: TextChannel) {
     const ticket = await Ticket.findOne({ channel: channel.id });
     if (!ticket || !ticket.comments) return;
 
@@ -32,46 +32,127 @@ async function editComment(reaction: MessageReaction, user: User, guild: Guild, 
         if (!originalMessage) return;
         const originalContent = originalMessage.content;
 
+        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+
+        let subscriptionMessage;
+        if (subscriptionChannel instanceof TextChannel && ticket.subscriptionMessage) {
+            subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscriptionMessage);
+        }
+
         const embed = originalMessage.embeds[0];
         if (
             !embed ||
             !embed.footer ||
             !embed.footer.text ||
-            embed.footer.text.substring(4) !== ticket._id ||
+            embed.footer.text.split(' | ')[0].substring(4) != ticket._id ||
             ticket.author !== user.id
         )
             return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
-        const question = await managementChannel.send(`<@${user.id}>, please enter the new ticket description:`);
+        const editPartQuestion = await managementChannel.send(
+            `<@${user.id}>, please enter the part of the ticket which you want to edit (title or description):`
+        );
 
-        const newMessage = (
+        const editPart = (
             await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
                 time: 30000,
                 max: 1,
             })
         ).first();
 
-        if (!newMessage) {
-            await question.delete();
+        if (!editPart) {
+            reaction.remove();
+            editPartQuestion.delete();
             return;
         }
 
-        ticket.description = newMessage.content;
+        if (editPart.content.toLowerCase() === 'title') {
+            const titleQuestion = await managementChannel.send(`<@${user.id}>, please enter the new title:`);
+
+            const newTitle = (
+                await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
+                    time: 30000,
+                    max: 1,
+                })
+            ).first();
+
+            if (!newTitle) {
+                reaction.remove();
+                editPartQuestion.delete();
+                editPart.delete();
+                titleQuestion.delete();
+                return;
+            }
+
+            ticket.title = newTitle.content;
+            embed.fields[0].value = newTitle.content;
+
+            if (ticket.channel) {
+                const ticketChannel = guild.channels.cache.get(ticket.channel);
+                if (ticketChannel instanceof TextChannel) {
+                    ticketChannel.edit(
+                        {
+                            name: newTitle.content,
+                        },
+                        'the ticket title has been changed'
+                    );
+                }
+            }
+
+            editPartQuestion.delete();
+            editPart.delete();
+            titleQuestion.delete();
+            newTitle.delete();
+
+            log(`<@${user.id}> edited their ticket title from:\n\n${originalContent}\n\nto:\n\n${newTitle.content}`);
+        } else if (editPart.content.toLowerCase() === 'description') {
+            const descriptionQuestion = await managementChannel.send(`<@${user.id}>, please enter the new description:`);
+
+            const newDescription = (
+                await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
+                    time: 30000,
+                    max: 1,
+                })
+            ).first();
+
+            if (!newDescription) {
+                reaction.remove();
+                editPartQuestion.delete();
+                editPart.delete();
+                descriptionQuestion.delete();
+                return;
+            }
+
+            ticket.description = newDescription.content;
+            embed.fields[2].value = newDescription.content;
+
+            editPartQuestion.delete();
+            editPart.delete();
+            descriptionQuestion.delete();
+            newDescription.delete();
+
+            log(
+                `<@${user.id}> edited their ticket description from:\n\n${originalContent}\n\nto:\n\n${newDescription.content}`
+            );
+        } else {
+            reaction.remove();
+            editPartQuestion.delete();
+            editPart.delete();
+            return;
+        }
+
         ticket.edited = new Date().toISOString();
 
-        if (!embed.footer || !embed.footer.text) embed.setFooter(`edited at ${new Date(ticket.edited).toLocaleString()}`);
-        embed.setDescription(newMessage.content);
+        if (!embed.footer || !embed.footer.text || !embed.footer.text.includes('edited'))
+            embed.setFooter(embed.footer.text + ` | edited at ${new Date(ticket.edited).toLocaleString()}`);
 
         await originalMessage.edit(embed);
+        if (subscriptionMessage) subscriptionMessage.edit(embed);
 
         ticket.save();
         reaction.remove();
-        question.delete();
-        newMessage.delete();
-
-        log(`<@${user.id}> edited their ticket description from:\n\n${originalContent}\n\nto:\n\n${newMessage.content}`);
     } else {
         if (comment.author !== user.id) return reaction.remove();
 

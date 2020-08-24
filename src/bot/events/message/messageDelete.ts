@@ -8,7 +8,7 @@ export const event: Event = {
     name: 'messageDelete',
     callback: async (message: Message) => {
         const { channel } = message;
-        if (!(channel instanceof TextChannel) || channel.parentID !== settings.ticketCategoryID || !channel.topic) return;
+        if (!(channel instanceof TextChannel) || channel.parentID !== settings.ticket.categoryID || !channel.topic) return;
 
         if (!message.partial) if (!message.author.bot || message.embeds.length === 0) return;
 
