@@ -1,5 +1,5 @@
 import { Command } from '../../commandHandler.js';
-import { Message, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { settings, client } from '../../bot.js';
 import { getTicket } from '../../../misc/searchMessage.js';
 
@@ -10,8 +10,8 @@ export const command: Command = {
     maxArgs: null,
     superCommand: 'ticket',
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, member } = message;
-        if (!guild || !member) return;
+        const { guild, member, channel } = message;
+        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;
 
         try {
             let ticket = await getTicket(message, args, text, true);
@@ -20,7 +20,7 @@ export const command: Command = {
 
             const ticketChannel = await guild.channels.create(ticket.title, {
                 type: 'text',
-                parent: settings.ticketCategoryID,
+                parent: settings.ticket.categoryID,
                 topic: `${ticket._id} | <#${ticket.project}>`,
             });
             ticket.channel = ticketChannel.id;
@@ -49,6 +49,12 @@ export const command: Command = {
 
             await ticketChannel.send(ticketEmbed);
 
+            const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+            if (!(subscriptionChannel instanceof TextChannel)) return;
+
+            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+            ticket.subscriptionMessage = subscriptionMessage.id;
+
             if (ticket.comments) {
                 await Promise.all(
                     ticket.comments.map(async (comment) => {
@@ -56,7 +62,7 @@ export const command: Command = {
                         const commentMessage = await ticketChannel.send(
                             new MessageEmbed()
                                 .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
-                                .setFooter('ID: ' + comment.edited ? comment._id + ' (edited)' : comment._id)
+                                .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
                                 .setTimestamp(new Date(comment.timestamp))
                                 .setDescription(comment.content)
                         );

@@ -12,7 +12,7 @@ export const command: Command = {
     superCommand: 'ticket',
     callback: async (message: Message) => {
         const { channel, author, guild } = message;
-        if (!guild) return;
+        if (!guild || channel.id !== settings.ticket.managementChannelID) return;
 
         const ticketEmbed = new MessageEmbed()
             .setTitle('CREATE TICKET')
@@ -29,8 +29,10 @@ export const command: Command = {
             title.delete();
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
-            if (title.content.length > 32 || title.content.length < 2) return channel.send('The title must be between 2 and 32 characters long!');
-            if (await Ticket.exists({ title: title.content })) return channel.send('A ticket with this name already exists.');
+            if (title.content.length > 32 || title.content.length < 2)
+                return channel.send('The title must be between 2 and 32 characters long!');
+            if (await Ticket.exists({ title: title.content }))
+                return channel.send('A ticket with this name already exists.');
 
             const projectQuestion = await channel.send('Please mention the project:');
             const project = await awaitResponse(channel, author.id);
@@ -40,7 +42,8 @@ export const command: Command = {
 
             const projectChannel = project.mentions.channels.first();
             if (!projectChannel) return channel.send('The message does not contain a mentioned text channel.');
-            if (!(await Project.exists({ channel: projectChannel.id }))) return channel.send('The mentioned text channel is not a valid project.');
+            if (!(await Project.exists({ channel: projectChannel.id })))
+                return channel.send('The mentioned text channel is not a valid project.');
 
             const descriptionQuestion = await channel.send('Please enter the description:');
             const description = await awaitResponse(channel, author.id);
@@ -51,9 +54,16 @@ export const command: Command = {
 
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
-                parent: settings.ticketCategoryID,
+                parent: settings.ticket.categoryID,
                 topic: `${ticketID} | <#${projectChannel.id}>`,
             });
+
+            const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+            if (!(subscriptionChannel instanceof TextChannel)) return;
+
+            ticketEmbed.setTitle('');
+            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+            ticketChannel.send(ticketEmbed);
 
             Ticket.create({
                 _id: ticketID,
@@ -64,11 +74,8 @@ export const command: Command = {
                 timestamp: new Date().toISOString(),
                 closed: false,
                 channel: ticketChannel.id,
+                subscriptionMessage: subscriptionMessage.id,
             });
-
-            ticketEmbed.setTitle('');
-            if (channel.id !== projectChannel.id) projectChannel.send(ticketEmbed);
-            ticketChannel.send(ticketEmbed);
         } catch (error) {
             if (error) channel.send(error);
         }

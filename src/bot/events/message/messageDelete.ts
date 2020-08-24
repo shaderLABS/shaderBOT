@@ -10,12 +10,7 @@ export const event: Event = {
         const { channel } = message;
         if (!(channel instanceof TextChannel) || channel.parentID !== settings.ticketCategoryID || !channel.topic) return;
 
-        if (!message.partial) {
-            if (!message.author.bot) return;
-
-            const embed = message.embeds[0];
-            if (!embed || !embed.footer || !embed.footer.text) return;
-        }
+        if (!message.partial) if (!message.author.bot || message.embeds.length === 0) return;
 
         const ticket = await Ticket.findOne({ channel: channel.id });
         if (!ticket || !ticket.comments) return;

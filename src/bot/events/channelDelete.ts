@@ -3,7 +3,7 @@ import { Channel, TextChannel } from 'discord.js';
 import axios from 'axios';
 import log from '../../misc/log.js';
 import Project from '../../db/models/Project.js';
-import { settings } from '../bot.js';
+import { settings, client } from '../bot.js';
 import Ticket from '../../db/models/Ticket.js';
 
 export const event: Event = {
@@ -11,11 +11,22 @@ export const event: Event = {
     callback: async (channel: Channel) => {
         if (!(channel instanceof TextChannel)) return;
 
-        if (channel.parentID === settings.ticketCategoryID) {
+        if (channel.parentID === settings.ticket.categoryID) {
             const ticket = await Ticket.findOne({ channel: channel.id });
             if (!ticket) return;
 
             ticket.closed = true;
+
+            if (ticket.subscriptionMessage) {
+                const guild = client.guilds.cache.first();
+                if (!guild) return;
+                const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+                if (!(subscriptionChannel instanceof TextChannel)) return;
+
+                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
+                ticket.subscriptionMessage = '';
+            }
+
             await ticket.save();
 
             return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
@@ -39,10 +50,15 @@ export const event: Event = {
             }
         }
 
-        if (content === '') return log(`The channel #${channel.name} has been deleted. There were no cached messages to upload. ${projectLog}`);
+        if (content === '')
+            return log(
+                `The channel #${channel.name} has been deleted. There were no cached messages to upload. ${projectLog}`
+            );
 
         const res = await axios.post('https://hastebin.com/documents', `CACHED MESSAGES OF #${channel.name}\n\n${content}`);
 
-        log(`The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`);
+        log(
+            `The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`
+        );
     },
 };
