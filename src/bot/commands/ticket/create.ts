@@ -4,6 +4,8 @@ import Ticket from '../../../db/models/Ticket.js';
 import { TextChannel, DMChannel, NewsChannel, MessageEmbed, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import Project from '../../../db/models/Project.js';
+import { sendError, sendInfo } from '../../../misc/embeds.js';
+import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['create'],
@@ -17,35 +19,35 @@ export const command: Command = {
         const ticketEmbed = new MessageEmbed()
             .setTitle('CREATE TICKET')
             .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
-            .setColor('#0000ff')
+            .setColor('#006fff')
             .setFooter(`HINT: Type "${settings.prefix}cancel" to stop.`)
             .setTimestamp(Date.now());
         const ticketMessage = await channel.send(ticketEmbed);
 
         try {
-            const titleQuestion = await channel.send('Please enter the title:');
+            const titleQuestion = await sendInfo(channel, 'Please enter the title:');
             const title = await awaitResponse(channel, author.id);
             titleQuestion.delete();
             title.delete();
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
             if (title.content.length > 32 || title.content.length < 2)
-                return channel.send('The title must be between 2 and 32 characters long!');
+                return sendError(channel, 'The title must be between 2 and 32 characters long!');
             if (await Ticket.exists({ title: title.content }))
-                return channel.send('A ticket with this name already exists.');
+                return sendError(channel, 'A ticket with this name already exists.');
 
-            const projectQuestion = await channel.send('Please mention the project:');
+            const projectQuestion = await sendInfo(channel, 'Please mention the project:');
             const project = await awaitResponse(channel, author.id);
             projectQuestion.delete();
             project.delete();
             ticketMessage.edit(ticketEmbed.addField('Project', project.content));
 
             const projectChannel = project.mentions.channels.first();
-            if (!projectChannel) return channel.send('The message does not contain a mentioned text channel.');
+            if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
             if (!(await Project.exists({ channel: projectChannel.id })))
-                return channel.send('The mentioned text channel is not a valid project.');
+                return sendError(channel, 'The mentioned text channel is not a valid project.');
 
-            const descriptionQuestion = await channel.send('Please enter the description:');
+            const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
             const description = await awaitResponse(channel, author.id);
             descriptionQuestion.delete();
             description.delete();
@@ -76,8 +78,10 @@ export const command: Command = {
                 channel: ticketChannel.id,
                 subscriptionMessage: subscriptionMessage.id,
             });
+
+            log(`<@${message.author.id}> created a ticket ("${title.content}").`);
         } catch (error) {
-            if (error) channel.send(error);
+            if (error) sendError(channel, error);
         }
     },
 };

@@ -1,6 +1,7 @@
 import { Command } from '../commandHandler.js';
 import log from '../../misc/log.js';
 import { TextChannel } from 'discord.js';
+import { sendError } from '../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['purge'],
@@ -15,7 +16,7 @@ export const command: Command = {
         const count = +args[0];
 
         if (isNaN(count) || count < 0 || count > 100) {
-            channel.send('Please use a number between 0 and 100 as the first argument.');
+            sendError(channel, 'Please use a number between 0 and 100 as the first argument.');
             return;
         }
 

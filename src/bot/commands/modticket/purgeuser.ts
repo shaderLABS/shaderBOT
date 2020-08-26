@@ -3,6 +3,8 @@ import { Message, TextChannel } from 'discord.js';
 import Ticket from '../../../db/models/Ticket.js';
 import { getUser } from '../../../misc/searchMessage.js';
 import { client, settings } from '../../bot.js';
+import { sendError, sendSuccess } from '../../../misc/embeds.js';
+import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['purgeuser'],
@@ -18,7 +20,7 @@ export const command: Command = {
             let user = await getUser(message, args[0]);
             const deleteTickets = await Ticket.find({ author: user.id });
 
-            if (deleteTickets.length === 0) return channel.send(`No tickets by ${user.username} were found.`);
+            if (deleteTickets.length === 0) return sendError(channel, `No tickets by ${user.username} were found.`);
 
             const guild = message.guild;
             if (!guild) return;
@@ -37,9 +39,10 @@ export const command: Command = {
                 ticket.deleteOne();
             }
 
-            channel.send(`Deleted ${deleteTickets.length} ticket(s) by ${user.username}.`);
+            sendSuccess(channel, `Deleted ${deleteTickets.length} ticket(s) by ${user.username}.`);
+            log(`<@${message.author.id}> deleted ${deleteTickets.length} ticket(s) by "${user.username}".`);
         } catch (error) {
-            if (error) channel.send(error);
+            if (error) sendError(channel, error);
         }
     },
 };

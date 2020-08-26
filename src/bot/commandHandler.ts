@@ -3,6 +3,7 @@ import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, 
 import { commands } from './bot.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { sendError } from '../misc/embeds.js';
 
 export type Command = {
     commands: string[];
@@ -46,10 +47,15 @@ export async function registerCommands(dir: string) {
 }
 
 export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
-    channel.send(`Syntax Error: ${settings.prefix + syntax}`);
+    sendError(channel, settings.prefix + syntax, 'SYNTAX ERROR');
 }
 
-export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]): void {
+export function runCommand(
+    command: Command | Collection<string, Command>,
+    message: Message,
+    invoke: string,
+    args: string[]
+) {
     if (command instanceof Collection) {
         const subCommand = command.get(args[0].toLowerCase());
         if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
@@ -73,7 +79,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
 
     for (const permission of requiredPermissions) {
         if (!member?.hasPermission(permission)) {
-            channel.send(permissionError);
+            sendError(channel, permissionError);
             return;
         }
     }
@@ -82,13 +88,13 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         const role = guild?.roles.cache.find((role) => role.name === requiredRole);
 
         if (!role) {
-            channel.send(`The role required to run this command ('${requiredRole}') does not exist.`);
+            sendError(channel, `The role required to run this command ('${requiredRole}') does not exist.`);
             return;
         }
 
         if (!member?.roles.cache.has(role.id)) {
             // channel.send(`You do not have the required role ('${role}') to run this comamnd.`);
-            channel.send(permissionError);
+            sendError(channel, permissionError);
             return;
         }
     }

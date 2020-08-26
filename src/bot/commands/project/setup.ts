@@ -3,6 +3,7 @@ import Project from '../../../db/models/Project.js';
 import { Message, TextChannel, MessageEmbed, GuildMember } from 'discord.js';
 import mongoose from 'mongoose';
 import log from '../../../misc/log.js';
+import { sendError } from '../../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['setup'],
@@ -14,7 +15,8 @@ export const command: Command = {
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
-        if (await Project.exists({ channel: channel.id })) return channel.send('This channel is already linked to a project.');
+        if (await Project.exists({ channel: channel.id }))
+            return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: GuildMember[] = [];
 
@@ -59,7 +61,7 @@ export const command: Command = {
             new MessageEmbed()
                 .setAuthor(channel.name)
                 .setFooter('ID: ' + projectID)
-                .setColor('#00ff00')
+                .setColor('#00ff11')
                 .addFields([
                     {
                         name: owners.length > 1 ? 'Owners' : 'Owner',
@@ -71,6 +73,6 @@ export const command: Command = {
                     },
                 ])
         );
-        log('Created project linked to <#' + channel.id + '>.');
+        log(`<@${message.author.id}> created a project linked to <#${channel.id}>.`);
     },
 };

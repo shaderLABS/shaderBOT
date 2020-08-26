@@ -30,7 +30,6 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
     if (!comment) {
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
-        const originalContent = originalMessage.content;
 
         const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
 
@@ -48,6 +47,8 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             ticket.author !== user.id
         )
             return reaction.remove();
+
+        const originalEmbed = embed;
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
@@ -106,7 +107,9 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             titleQuestion.delete();
             newTitle.delete();
 
-            log(`<@${user.id}> edited their ticket title from:\n\n${originalContent}\n\nto:\n\n${newTitle.content}`);
+            log(
+                `<@${user.id}> edited their ticket title from:\n\n${originalEmbed.fields[0].value}\n\nto:\n\n${newTitle.content}`
+            );
         } else if (editPart.content.toLowerCase() === 'description') {
             const descriptionQuestion = await managementChannel.send(`<@${user.id}>, please enter the new description:`);
 
@@ -134,7 +137,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             newDescription.delete();
 
             log(
-                `<@${user.id}> edited their ticket description from:\n\n${originalContent}\n\nto:\n\n${newDescription.content}`
+                `<@${user.id}> edited their ticket description from:\n\n${originalEmbed.fields[2].value}\n\nto:\n\n${newDescription.content}`
             );
         } else {
             reaction.remove();

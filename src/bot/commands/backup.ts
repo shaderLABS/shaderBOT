@@ -1,6 +1,7 @@
 import { Command } from '../commandHandler.js';
 import { TextChannel, MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import { sendSuccess } from '../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['backup'],
@@ -26,13 +27,10 @@ export const command: Command = {
             `BACKUP OF #${channel.name} (${backupMessages.size} MESSAGES)\n\n${backupContent}`
         );
 
-        message.channel.send(
-            new MessageEmbed()
-                .setAuthor('BACKUP')
-                .setColor('#0000ff')
-                .setDescription(
-                    `Backup of <#${channel.id}> created. ${backupMessages.size} messages have been [uploaded](https://www.hastebin.com/${res.data.key}).`
-                )
+        sendSuccess(
+            message.channel,
+            `Backup of <#${channel.id}> created. ${backupMessages.size} messages have been [uploaded](https://www.hastebin.com/${res.data.key}).`,
+            'BACKUP'
         );
     },
 };

@@ -2,6 +2,8 @@ import { Command } from '../../commandHandler.js';
 import { Message, TextChannel } from 'discord.js';
 import { client, settings } from '../../bot.js';
 import { getTicket } from '../../../misc/searchMessage.js';
+import { sendSuccess, sendError } from '../../../misc/embeds.js';
+import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['close'],
@@ -34,9 +36,10 @@ export const command: Command = {
             }
 
             await ticket.save();
-            message.channel.send('Ticket closed.');
+            sendSuccess(message.channel, 'Ticket closed.');
+            log(`<@${member.id}> closed the ticket "${ticket.title}".`);
         } catch (error) {
-            if (error) message.channel.send(error);
+            if (error) sendError(message.channel, error);
         }
     },
 };
