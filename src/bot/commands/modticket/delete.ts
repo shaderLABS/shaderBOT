@@ -2,6 +2,8 @@ import { Command } from '../../commandHandler.js';
 import { Message, TextChannel } from 'discord.js';
 import { getTicketMod } from '../../../misc/searchMessage.js';
 import { client, settings } from '../../bot.js';
+import { sendSuccess, sendError } from '../../../misc/embeds.js';
+import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['delete'],
@@ -31,9 +33,10 @@ export const command: Command = {
             }
 
             await ticket.deleteOne();
-            channel.send('Ticket deleted.');
+            sendSuccess(channel, 'Ticket deleted.');
+            log(`<@${message.author.id}> deleted the ticket "${ticket.title}" by <@${ticket.author}>.`);
         } catch (error) {
-            if (error) channel.send(error);
+            if (error) sendError(channel, error);
         }
     },
 };

@@ -2,6 +2,8 @@ import { Command } from '../../commandHandler.js';
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { settings, client } from '../../bot.js';
 import { getTicketMod } from '../../../misc/searchMessage.js';
+import { sendSuccess, sendError } from '../../../misc/embeds.js';
+import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['open'],
@@ -33,7 +35,7 @@ export const command: Command = {
 
             const ticketEmbed = new MessageEmbed()
                 .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.avatarURL() || undefined)
-                .setColor('#0000ff')
+                .setColor('#006fff')
                 .setFooter(ticketFooter)
                 .addFields([
                     {
@@ -78,9 +80,10 @@ export const command: Command = {
             }
 
             await ticket.save();
-            message.channel.send('Ticket opened.');
+            sendSuccess(message.channel, 'Ticket opened.');
+            log(`<@${member.id}> opened the ticket "${ticket.title}" by <@${ticket.author}>.`);
         } catch (error) {
-            if (error) message.channel.send(error);
+            if (error) sendError(message.channel, error);
         }
     },
 };

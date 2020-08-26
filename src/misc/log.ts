@@ -7,5 +7,10 @@ export default function (content: string) {
 
     const logChannel = guild.channels.cache.get(settings.logging.channelID);
     if (logChannel instanceof TextChannel)
-        logChannel.send('', new MessageEmbed().setAuthor('LOG').setColor('#00ff00').setDescription(content));
+        logChannel.send(
+            new MessageEmbed()
+                .setAuthor('LOG', 'https://img.icons8.com/officexs/48/000000/clock.png')
+                .setColor('#006fff')
+                .setDescription(content)
+        );
 }

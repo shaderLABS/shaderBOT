@@ -8,7 +8,7 @@ export const command: Command = {
     maxArgs: 0,
     requiredPermissions: ['ADMINISTRATOR'],
     callback: (message) => {
-        log(`The bot has been stopped by <@${message.member?.id}>.`);
+        log(`The bot has been stopped by <@${message.author.id}>.`);
         shutdown();
     },
 };
