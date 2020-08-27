@@ -9,6 +9,8 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
+// type Commands = Collection<string, Command | Commands>;
+
 export let client: Client;
 export let commands: Collection<string, Command | Collection<string, Command>>;
 export let events: Collection<string, Event>;
