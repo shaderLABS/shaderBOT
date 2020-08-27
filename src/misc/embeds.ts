@@ -16,10 +16,10 @@ export async function sendError(channel: TextChannel | DMChannel | NewsChannel, 
     return await channel.send(embed);
 }
 
-export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
+export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? 'https://img.icons8.com/color/48/000000/info--v1.png' : undefined)
         .setDescription(description)
         .setColor('#006fff');
-    return await channel.send(embed);
+    return await channel.send(message, embed);
 }
