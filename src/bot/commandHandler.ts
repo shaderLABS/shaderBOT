@@ -50,13 +50,9 @@ export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, synt
     sendError(channel, settings.prefix + syntax, 'SYNTAX ERROR');
 }
 
-export function runCommand(
-    command: Command | Collection<string, Command>,
-    message: Message,
-    invoke: string,
-    args: string[]
-) {
+export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
     if (command instanceof Collection) {
+        if (args.length === 0) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
         const subCommand = command.get(args[0].toLowerCase());
         if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
 

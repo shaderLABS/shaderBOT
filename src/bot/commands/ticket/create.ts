@@ -31,10 +31,8 @@ export const command: Command = {
             title.delete();
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
-            if (title.content.length > 32 || title.content.length < 2)
-                return sendError(channel, 'The title must be between 2 and 32 characters long!');
-            if (await Ticket.exists({ title: title.content }))
-                return sendError(channel, 'A ticket with this name already exists.');
+            if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long!');
+            if (await Ticket.exists({ title: title.content })) return sendError(channel, 'A ticket with this name already exists.');
 
             const projectQuestion = await sendInfo(channel, 'Please mention the project:');
             const project = await awaitResponse(channel, author.id);
@@ -44,20 +42,22 @@ export const command: Command = {
 
             const projectChannel = project.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
-            if (!(await Project.exists({ channel: projectChannel.id })))
-                return sendError(channel, 'The mentioned text channel is not a valid project.');
+            if (!(await Project.exists({ channel: projectChannel.id }))) return sendError(channel, 'The mentioned text channel is not a valid project.');
 
             const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
             const description = await awaitResponse(channel, author.id);
             descriptionQuestion.delete();
             description.delete();
+            if (description.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
             const ticketID = new mongoose.Types.ObjectId();
             ticketMessage.edit(ticketEmbed.addField('Description', description.content).setFooter(`ID: ${ticketID}`));
+            // await ticketMessage.edit(ticketEmbed.setDescription(description.content).setFooter(`ID: ${ticketID}`));
 
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
                 parent: settings.ticket.categoryID,
                 topic: `${ticketID} | <#${projectChannel.id}>`,
+                rateLimitPerUser: 10,
             });
 
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
@@ -82,6 +82,7 @@ export const command: Command = {
             log(`<@${message.author.id}> created a ticket ("${title.content}").`);
         } catch (error) {
             if (error) sendError(channel, error);
+            return;
         }
     },
 };

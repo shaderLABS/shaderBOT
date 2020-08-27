@@ -24,6 +24,7 @@ export const command: Command = {
                 type: 'text',
                 parent: settings.ticket.categoryID,
                 topic: `${ticket._id} | <#${ticket.project}>`,
+                rateLimitPerUser: 10,
             });
             ticket.channel = ticketChannel.id;
 
@@ -67,10 +68,7 @@ export const command: Command = {
                         const commentMessage = await ticketChannel.send(
                             new MessageEmbed()
                                 .setColor(member.displayHexColor || '#212121')
-                                .setAuthor(
-                                    member.user.username + '#' + member.user.discriminator,
-                                    member.user.avatarURL() || undefined
-                                )
+                                .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
                                 .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
                                 .setTimestamp(new Date(comment.timestamp))
                                 .setDescription(comment.content)
