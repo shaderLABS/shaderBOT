@@ -37,6 +37,7 @@ async function ticketComment(message: Message) {
     await message.delete();
     const commentMessage = await channel.send(
         new MessageEmbed()
+            .setColor(message.member?.displayHexColor || '#212121')
             .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
             // .setFooter('ID: ' + comment._id)
             .setTimestamp(new Date(comment.timestamp))

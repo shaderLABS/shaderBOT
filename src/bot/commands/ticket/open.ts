@@ -63,10 +63,14 @@ export const command: Command = {
             if (ticket.comments) {
                 await Promise.all(
                     ticket.comments.map(async (comment) => {
-                        const author = await client.users.fetch(comment.author);
+                        const member = await guild.members.fetch(comment.author);
                         const commentMessage = await ticketChannel.send(
                             new MessageEmbed()
-                                .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
+                                .setColor(member.displayHexColor || '#212121')
+                                .setAuthor(
+                                    member.user.username + '#' + member.user.discriminator,
+                                    member.user.avatarURL() || undefined
+                                )
                                 .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
                                 .setTimestamp(new Date(comment.timestamp))
                                 .setDescription(comment.content)
