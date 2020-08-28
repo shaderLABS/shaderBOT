@@ -45,14 +45,14 @@ export async function registerCommands(dir: string) {
 }
 
 export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
-    sendError(channel, settings.prefix + syntax, 'SYNTAX ERROR');
+    sendError(channel, '`' + settings.prefix + syntax + '`', 'SYNTAX ERROR');
 }
 
 export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
     if (command instanceof Collection) {
-        if (args.length === 0) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
+        if (args.length === 0) return syntaxError(message.channel, `${invoke} <${command.keyArray().map((value) => JSON.parse(value)).join('|')}>`);
         const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
-        if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
+        if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().map((value) => JSON.parse(value)).join('|')}>`);
 
         command = subCommand;
         invoke += ' ' + args[0];
