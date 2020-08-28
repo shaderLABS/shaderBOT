@@ -67,25 +67,41 @@ export async function openTicket(ticket: ExtractDoc<typeof TicketSchema>, guild:
     ticket.subscriptionMessage = subscriptionMessage.id;
 
     if (ticket.comments) {
-        await Promise.all(
-            ticket.comments.map(async (comment) => {
-                const member = await guild.members.fetch(comment.author);
+        for (let i = 0; i < ticket.comments.length; i++) {
+            const comment = ticket.comments[i];
+            const member = await guild.members.fetch(comment.author);
 
-                const commentEmbed = new MessageEmbed()
-                    .setColor(member.displayHexColor || '#212121')
-                    .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-                    .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
-                    .setTimestamp(new Date(comment.timestamp))
-                    .setDescription(comment.content);
+            const commentEmbed = new MessageEmbed()
+                .setColor(member.displayHexColor || '#212121')
+                .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+                .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
+                .setTimestamp(new Date(comment.timestamp))
+                .setDescription(comment.content);
 
-                if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+            if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+            const commentMessage = await ticketChannel.send(commentEmbed);
+            comment.message = commentMessage.id;
+        }
 
-                const commentMessage = await ticketChannel.send(commentEmbed);
+        // await Promise.all(
+        //     ticket.comments.map(async (comment) => {
+        //         const member = await guild.members.fetch(comment.author);
 
-                comment.message = commentMessage.id;
-                return comment;
-            })
-        );
+        //         const commentEmbed = new MessageEmbed()
+        //             .setColor(member.displayHexColor || '#212121')
+        //             .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+        //             .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
+        //             .setTimestamp(new Date(comment.timestamp))
+        //             .setDescription(comment.content);
+
+        //         if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+
+        //         const commentMessage = await ticketChannel.send(commentEmbed);
+
+        //         comment.message = commentMessage.id;
+        //         return comment;
+        //     })
+        // );
     }
 
     await ticket.save();

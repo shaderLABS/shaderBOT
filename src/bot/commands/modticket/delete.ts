@@ -24,7 +24,7 @@ export const command: Command = {
             }
 
             if (ticket.subscriptionMessage) {
-                const guild = message.guild;
+                const { guild } = message;
                 if (!guild) return;
                 const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
                 if (!(subscriptionChannel instanceof TextChannel)) return;

@@ -14,7 +14,7 @@ export const command: Command = {
     maxArgs: null,
     superCommands: ['modticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message: Message, args: string[], text: string) => {
+    callback: async (message: Message, args: string[]) => {
         const { channel } = message;
 
         try {
@@ -23,7 +23,7 @@ export const command: Command = {
 
             if (deleteTickets.length === 0) return sendError(channel, `No tickets by ${user.username} were found.`);
 
-            const guild = message.guild;
+            const { guild } = message;
             if (!guild) return;
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
             if (!(subscriptionChannel instanceof TextChannel)) return;
