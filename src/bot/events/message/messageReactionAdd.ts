@@ -1,5 +1,5 @@
 import { Event } from '../../eventHandler.js';
-import { MessageReaction, User, TextChannel, Message, GuildMember, Guild, GuildChannel } from 'discord.js';
+import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
 import { settings, client } from '../../bot.js';
 import Ticket from '../../../db/models/Ticket.js';
 import log from '../../../misc/log.js';
@@ -105,7 +105,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             titleQuestion.delete();
             newTitle.delete();
 
-            log(`<@${user.id}> edited their ticket title from:\n\n${originalFieldValues[0]}\n\nto:\n\n${newTitle.content}`);
+            log(`<@${user.id}> edited their ticket title from:\n\n${originalFieldValues[0] || '<empty comment>'}\n\nto:\n\n${newTitle.content}`);
         } else if (editPart.content.toLowerCase() === 'description') {
             const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description:', undefined, `<@${user.id}>`);
 

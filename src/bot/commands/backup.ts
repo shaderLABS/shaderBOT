@@ -1,5 +1,5 @@
 import { Command } from '../commandHandler.js';
-import { TextChannel, MessageEmbed } from 'discord.js';
+import { TextChannel } from 'discord.js';
 import axios from 'axios';
 import { sendSuccess } from '../../misc/embeds.js';
 

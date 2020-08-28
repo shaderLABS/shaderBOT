@@ -1,7 +1,7 @@
 import { Command } from '../commandHandler.js';
-import { sendInfo, sendError } from '../../misc/embeds.js';
+import { sendInfo } from '../../misc/embeds.js';
 import { settings, commands } from '../bot.js';
-import { Collection, GuildMember, TextChannel, BitFieldResolvable, PermissionString, Message } from 'discord.js';
+import { Collection, Message } from 'discord.js';
 
 export const command: Command = {
     commands: ['help'],

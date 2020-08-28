@@ -15,18 +15,25 @@ export const event: Event = {
         if (!content.startsWith(settings.prefix)) return;
 
         const [invoke, ...args] = content.slice(settings.prefix.length).trim().split(/[ ]+/);
-        const command = commands.find((_value, key) => key.includes(invoke));
+        const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
         if (command) runCommand(command, message, invoke, args);
     },
 };
 
 async function ticketComment(message: Message) {
-    const { channel, member, content } = message;
+    const { channel, member, content, attachments } = message;
     if (message.partial || !(channel instanceof TextChannel) || !channel.topic || !member) return;
 
     const id = channel.topic.split(' | ')[0];
 
-    const comment = {
+    const comment: {
+        _id: mongoose.Types.ObjectId;
+        author: string;
+        message: string;
+        content: string;
+        timestamp: string;
+        attachments?: string[];
+    } = {
         _id: new mongoose.Types.ObjectId(),
         author: member.id,
         message: '',
@@ -34,15 +41,29 @@ async function ticketComment(message: Message) {
         timestamp: new Date().toISOString(),
     };
 
+    const commentEmbed = new MessageEmbed()
+        .setColor(message.member?.displayHexColor || '#212121')
+        .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+        .setTimestamp(new Date(comment.timestamp))
+        .setDescription(content);
+
+    if (attachments && attachments.size !== 0) {
+        let attachmentURLs: string[] = [];
+        const attachmentStorage = message.guild?.channels.cache.get(settings.ticket.attachmentCacheChannelID);
+        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return;
+
+        for (const attachment of attachments) {
+            const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
+            if (storedAttachment) attachmentURLs.push(storedAttachment.url);
+        }
+
+        commentEmbed.attachFiles(attachmentURLs);
+        comment.attachments = attachmentURLs;
+    }
+
     await message.delete();
-    const commentMessage = await channel.send(
-        new MessageEmbed()
-            .setColor(message.member?.displayHexColor || '#212121')
-            .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-            // .setFooter('ID: ' + comment._id)
-            .setTimestamp(new Date(comment.timestamp))
-            .setDescription(content)
-    );
+
+    const commentMessage = await channel.send(commentEmbed);
 
     comment.message = commentMessage.id;
 
