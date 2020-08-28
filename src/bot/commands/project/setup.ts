@@ -7,16 +7,16 @@ import { sendError } from '../../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['setup'],
+    help: 'Setup a project linked to the current channel.',
     expectedArgs: '<@user|userID> <...>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'project',
+    superCommands: ['project'],
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
-        if (await Project.exists({ channel: channel.id }))
-            return sendError(channel, 'This channel is already linked to a project.');
+        if (await Project.exists({ channel: channel.id })) return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: GuildMember[] = [];
 

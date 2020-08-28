@@ -4,6 +4,7 @@ import { client } from '../bot.js';
 
 export const command: Command = {
     commands: ['latency'],
+    help: 'Display the API and bot latency.',
     minArgs: 0,
     maxArgs: 0,
     callback: async (message) => {

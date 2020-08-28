@@ -7,13 +7,15 @@ import { sendError } from '../misc/embeds.js';
 
 export type Command = {
     commands: string[];
+    help: string;
     expectedArgs?: string | undefined;
     minArgs?: number | undefined;
     maxArgs?: number | null | undefined;
     requiredRoles?: string[] | undefined;
     requiredPermissions?: BitFieldResolvable<PermissionString>[] | undefined;
+    permissionOverwrites?: boolean | undefined;
     permissionError?: string | undefined;
-    superCommand?: string | undefined;
+    superCommands?: string[] | undefined;
     callback: (message: Message, args: string[], text: string) => void;
 };
 
@@ -27,20 +29,16 @@ export async function registerCommands(dir: string) {
         } else if (file.endsWith('.js')) {
             const { command }: { command: Command } = await import(path.join(filePath, file));
 
-            if (!command.superCommand) {
-                for (const invoke of command.commands) {
-                    commands.set(invoke, command);
-                }
+            if (!command.superCommands) {
+                commands.set(JSON.stringify(command.commands), command);
                 console.log(`Registered command "${file}".`);
             } else {
-                const superCmd = commands.get(command.superCommand) || new Collection<string, Command>();
+                const superCmd = commands.get(JSON.stringify(command.superCommands)) || new Collection<string, Command>();
                 if (!(superCmd instanceof Collection)) return;
 
-                for (const invoke of command.commands) {
-                    superCmd.set(invoke, command);
-                }
-                commands.set(command.superCommand, superCmd);
-                console.log(`Registered command "${file}" (subcommand of "${command.superCommand}").`);
+                superCmd.set(JSON.stringify(command.commands), command);
+                commands.set(JSON.stringify(command.superCommands), superCmd);
+                console.log(`Registered command "${file}" (subcommand of "${command.superCommands.join('/')}").`);
             }
         }
     }
@@ -53,7 +51,7 @@ export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, synt
 export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
     if (command instanceof Collection) {
         if (args.length === 0) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
-        const subCommand = command.get(args[0].toLowerCase());
+        const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
         if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().join('|')}>`);
 
         command = subCommand;
@@ -73,10 +71,19 @@ export function runCommand(command: Command | Collection<string, Command>, messa
 
     const { member, content, channel, guild } = message;
 
-    for (const permission of requiredPermissions) {
-        if (!member?.hasPermission(permission)) {
-            sendError(channel, permissionError);
-            return;
+    if (command.permissionOverwrites === true) {
+        for (const permission of requiredPermissions) {
+            if (!member?.permissionsIn(channel).has(permission)) {
+                sendError(channel, permissionError);
+                return;
+            }
+        }
+    } else {
+        for (const permission of requiredPermissions) {
+            if (!member?.hasPermission(permission)) {
+                sendError(channel, permissionError);
+                return;
+            }
         }
     }
 

@@ -7,10 +7,11 @@ import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['close'],
+    help: 'Close any of your open tickets.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'ticket',
+    superCommands: ['ticket'],
     callback: async (message: Message, args: string[], text: string) => {
         const { member, channel } = message;
         if (!member || channel.id !== settings.ticket.managementChannelID) return;

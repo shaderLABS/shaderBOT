@@ -5,6 +5,7 @@ import { sendSuccess } from '../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['backup'],
+    help: 'Backup messages sent in the current channel.',
     expectedArgs: '[text_channel] [limit]',
     minArgs: 0,
     maxArgs: 2,
@@ -22,10 +23,7 @@ export const command: Command = {
             backupContent += `${backupMessage.author.username}#${backupMessage.author.discriminator}: ${backupMessage.content}\n`;
         });
 
-        const res = await axios.post(
-            'https://hastebin.com/documents',
-            `BACKUP OF #${channel.name} (${backupMessages.size} MESSAGES)\n\n${backupContent}`
-        );
+        const res = await axios.post('https://hastebin.com/documents', `BACKUP OF #${channel.name} (${backupMessages.size} MESSAGES)\n\n${backupContent}`);
 
         sendSuccess(
             message.channel,

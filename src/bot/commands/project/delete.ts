@@ -6,9 +6,10 @@ import { sendError, sendSuccess } from '../../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['delete'],
+    help: 'Delete the project linked to the current channel.',
     minArgs: 0,
     maxArgs: 0,
-    superCommand: 'project',
+    superCommands: ['project'],
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message: Message) => {
         const { channel } = message;
@@ -16,6 +17,8 @@ export const command: Command = {
 
         const deleted = await Project.findOne({ channel: channel.id });
         if (!deleted) return sendError(channel, 'No project has been set up for this channel.');
+
+        channel.overwritePermissions(channel.permissionOverwrites.filter((overwrite) => overwrite.type !== 'member' || !deleted.owners?.includes(overwrite.id)));
 
         const role = await channel.guild.roles.fetch(deleted.pingRole);
         if (role) role.delete();
