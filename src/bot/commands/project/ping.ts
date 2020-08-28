@@ -4,10 +4,12 @@ import { Message } from 'discord.js';
 
 export const command: Command = {
     commands: ['ping'],
+    help: 'Ping all users that are subscribed to the project of this channel.',
     minArgs: 0,
     maxArgs: 0,
-    superCommand: 'project',
+    superCommands: ['project'],
     requiredPermissions: ['MANAGE_CHANNELS'],
+    permissionOverwrites: true,
     callback: async (message: Message) => {
         const { channel } = message;
 

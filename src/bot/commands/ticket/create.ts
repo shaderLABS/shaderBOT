@@ -9,9 +9,10 @@ import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['create'],
+    help: 'Create a new ticket.',
     minArgs: 0,
     maxArgs: 0,
-    superCommand: 'ticket',
+    superCommands: ['ticket'],
     callback: async (message: Message) => {
         const { channel, author, guild } = message;
         if (!guild || channel.id !== settings.ticket.managementChannelID) return;

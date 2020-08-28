@@ -7,10 +7,11 @@ import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['open'],
+    help: 'Open any of your closed tickets.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'ticket',
+    superCommands: ['ticket'],
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, member, channel } = message;
         if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;

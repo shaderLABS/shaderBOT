@@ -15,7 +15,7 @@ export const event: Event = {
         if (!content.startsWith(settings.prefix)) return;
 
         const [invoke, ...args] = content.slice(settings.prefix.length).trim().split(/[ ]+/);
-        const command = commands.get(invoke);
+        const command = commands.find((_value, key) => key.includes(invoke));
         if (command) runCommand(command, message, invoke, args);
     },
 };

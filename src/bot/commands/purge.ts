@@ -5,6 +5,7 @@ import { sendError } from '../../misc/embeds.js';
 
 export const command: Command = {
     commands: ['purge'],
+    help: 'Bulk delete messages in the current channel.',
     minArgs: 1,
     maxArgs: 1,
     expectedArgs: '<amount>',

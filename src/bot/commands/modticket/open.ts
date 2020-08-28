@@ -7,11 +7,12 @@ import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['open'],
+    help: 'Open any closed ticket.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
+    superCommands: ['modticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
-    superCommand: 'modticket',
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, member } = message;
         if (!guild || !member) return;

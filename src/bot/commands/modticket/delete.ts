@@ -7,10 +7,11 @@ import log from '../../../misc/log.js';
 
 export const command: Command = {
     commands: ['delete'],
+    help: 'Delete any ticket.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommand: 'modticket',
+    superCommands: ['modticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
         const { channel } = message;
