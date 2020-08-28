@@ -2,7 +2,7 @@ import { Event } from '../../eventHandler.js';
 import { Message, TextChannel } from 'discord.js';
 import { settings } from '../../bot.js';
 import Ticket from '../../../db/models/Ticket.js';
-import log from '../../../misc/log.js';
+import log from '../../lib/log.js';
 
 export const event: Event = {
     name: 'messageDelete',

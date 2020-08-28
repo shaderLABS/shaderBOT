@@ -2,8 +2,8 @@ import { Command, syntaxError } from '../../commandHandler.js';
 import Project from '../../../db/models/Project.js';
 import { Message, TextChannel, MessageEmbed, GuildMember } from 'discord.js';
 import mongoose from 'mongoose';
-import log from '../../../misc/log.js';
-import { sendError } from '../../../misc/embeds.js';
+import log from '../../lib/log.js';
+import { sendError } from '../../lib/embeds.js';
 
 export const command: Command = {
     commands: ['setup'],

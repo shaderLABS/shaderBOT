@@ -2,8 +2,8 @@ import { Event } from '../../eventHandler.js';
 import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
 import { settings, client } from '../../bot.js';
 import Ticket from '../../../db/models/Ticket.js';
-import log from '../../../misc/log.js';
-import { sendInfo } from '../../../misc/embeds.js';
+import log from '../../lib/log.js';
+import { sendInfo } from '../../lib/embeds.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',

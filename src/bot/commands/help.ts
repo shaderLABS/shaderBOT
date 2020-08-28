@@ -1,7 +1,7 @@
-import { Command } from '../commandHandler.js';
-import { sendInfo } from '../../misc/embeds.js';
+import { Command, hasPermissions } from '../commandHandler.js';
+import { sendInfo } from '../lib/embeds.js';
 import { settings, commands } from '../bot.js';
-import { Collection, Message } from 'discord.js';
+import { Collection } from 'discord.js';
 
 export const command: Command = {
     commands: ['help'],
@@ -27,28 +27,3 @@ export const command: Command = {
         sendInfo(message.channel, helpContent, 'HELP');
     },
 };
-
-function hasPermissions(message: Message, command: Command): boolean {
-    const { member, channel, guild } = message;
-
-    if (command.requiredPermissions) {
-        if (command.permissionOverwrites === true) {
-            for (const permission of command.requiredPermissions) {
-                if (!member?.permissionsIn(channel).has(permission)) return false;
-            }
-        } else {
-            for (const permission of command.requiredPermissions) {
-                if (!member?.hasPermission(permission)) return false;
-            }
-        }
-    }
-
-    if (command.requiredRoles) {
-        for (const requiredRole of command.requiredRoles) {
-            const role = guild?.roles.cache.find((role) => role.name === requiredRole);
-            if (!role || !member?.roles.cache.has(role.id)) return false;
-        }
-    }
-
-    return true;
-}

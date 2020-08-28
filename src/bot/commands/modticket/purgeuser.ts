@@ -1,10 +1,10 @@
 import { Command } from '../../commandHandler.js';
 import { Message, TextChannel } from 'discord.js';
 import Ticket from '../../../db/models/Ticket.js';
-import { getUser } from '../../../misc/searchMessage.js';
+import { getUser } from '../../lib/searchMessage.js';
 import { client, settings } from '../../bot.js';
-import { sendError, sendSuccess } from '../../../misc/embeds.js';
-import log from '../../../misc/log.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
 
 export const command: Command = {
     commands: ['purgeuser'],

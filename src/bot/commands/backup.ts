@@ -1,7 +1,7 @@
 import { Command } from '../commandHandler.js';
 import { TextChannel } from 'discord.js';
 import axios from 'axios';
-import { sendSuccess } from '../../misc/embeds.js';
+import { sendSuccess } from '../lib/embeds.js';
 
 export const command: Command = {
     commands: ['backup'],

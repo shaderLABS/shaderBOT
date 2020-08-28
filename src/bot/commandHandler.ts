@@ -3,7 +3,7 @@ import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, 
 import { commands } from './bot.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { sendError } from '../misc/embeds.js';
+import { sendError } from './lib/embeds.js';
 
 export type Command = {
     commands: string[];
@@ -48,11 +48,50 @@ export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, synt
     sendError(channel, '`' + settings.prefix + syntax + '`', 'SYNTAX ERROR');
 }
 
+export function hasPermissions(message: Message, command: Command): boolean {
+    const { member, channel, guild } = message;
+
+    if (command.requiredPermissions) {
+        if (command.permissionOverwrites === true) {
+            for (const permission of command.requiredPermissions) {
+                if (!member?.permissionsIn(channel).has(permission)) return false;
+            }
+        } else {
+            for (const permission of command.requiredPermissions) {
+                if (!member?.hasPermission(permission)) return false;
+            }
+        }
+    }
+
+    if (command.requiredRoles) {
+        for (const requiredRole of command.requiredRoles) {
+            const role = guild?.roles.cache.find((role) => role.name === requiredRole);
+            if (!role || !member?.roles.cache.has(role.id)) return false;
+        }
+    }
+
+    return true;
+}
+
 export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
     if (command instanceof Collection) {
-        if (args.length === 0) return syntaxError(message.channel, `${invoke} <${command.keyArray().map((value) => JSON.parse(value)).join('|')}>`);
+        if (args.length === 0)
+            return syntaxError(
+                message.channel,
+                `${invoke} <${command
+                    .keyArray()
+                    .map((value) => JSON.parse(value))
+                    .join('|')}>`
+            );
         const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
-        if (!subCommand) return syntaxError(message.channel, `${invoke} <${command.keyArray().map((value) => JSON.parse(value)).join('|')}>`);
+        if (!subCommand)
+            return syntaxError(
+                message.channel,
+                `${invoke} <${command
+                    .keyArray()
+                    .map((value) => JSON.parse(value))
+                    .join('|')}>`
+            );
 
         command = subCommand;
         invoke += ' ' + args[0];
@@ -71,36 +110,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
 
     const { member, content, channel, guild } = message;
 
-    if (command.permissionOverwrites === true) {
-        for (const permission of requiredPermissions) {
-            if (!member?.permissionsIn(channel).has(permission)) {
-                sendError(channel, permissionError);
-                return;
-            }
-        }
-    } else {
-        for (const permission of requiredPermissions) {
-            if (!member?.hasPermission(permission)) {
-                sendError(channel, permissionError);
-                return;
-            }
-        }
-    }
-
-    for (const requiredRole of requiredRoles) {
-        const role = guild?.roles.cache.find((role) => role.name === requiredRole);
-
-        if (!role) {
-            sendError(channel, `The role required to run this command ('${requiredRole}') does not exist.`);
-            return;
-        }
-
-        if (!member?.roles.cache.has(role.id)) {
-            // channel.send(`You do not have the required role ('${role}') to run this comamnd.`);
-            sendError(channel, permissionError);
-            return;
-        }
-    }
+    if (!hasPermissions(message, command)) return sendError(channel, permissionError);
 
     if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) {
         syntaxError(channel, `${invoke} ${expectedArgs}`);
