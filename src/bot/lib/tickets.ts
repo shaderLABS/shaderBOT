@@ -1,5 +1,5 @@
 import { Message, TextChannel, Guild, MessageEmbed } from 'discord.js';
-import { settings, client } from '../bot';
+import { settings, client } from '../bot.js';
 import { ExtractDoc } from 'ts-mongoose';
 import { TicketSchema } from '../../db/models/Ticket.js';
 
