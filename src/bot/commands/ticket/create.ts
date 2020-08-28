@@ -29,6 +29,7 @@ export const command: Command = {
             const titleQuestion = await sendInfo(channel, 'Please enter the title:');
             const title = await awaitResponse(channel, author.id);
             titleQuestion.delete();
+            let attachments = await cacheAttachments(title);
             title.delete();
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
@@ -38,6 +39,7 @@ export const command: Command = {
             const projectQuestion = await sendInfo(channel, 'Please mention the project:');
             const project = await awaitResponse(channel, author.id);
             projectQuestion.delete();
+            attachments = [...attachments, ...(await cacheAttachments(project))];
             project.delete();
             ticketMessage.edit(ticketEmbed.addField('Project', project.content));
 
@@ -48,11 +50,11 @@ export const command: Command = {
             const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
             const description = await awaitResponse(channel, author.id);
             descriptionQuestion.delete();
+            attachments = [...attachments, ...(await cacheAttachments(description))];
             description.delete();
             if (description.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
             const ticketID = new mongoose.Types.ObjectId();
             ticketMessage.edit(ticketEmbed.addField('Description', description.content).setFooter(`ID: ${ticketID}`));
-            // await ticketMessage.edit(ticketEmbed.setDescription(description.content).setFooter(`ID: ${ticketID}`));
 
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
@@ -66,6 +68,11 @@ export const command: Command = {
 
             ticketEmbed.setTitle('');
             const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+
+            ticketEmbed.attachFiles(attachments);
+
+            await ticketMessage.delete();
+            channel.send(ticketEmbed);
             ticketChannel.send(ticketEmbed);
 
             Ticket.create({
@@ -73,6 +80,7 @@ export const command: Command = {
                 title: title.content,
                 project: projectChannel.id,
                 description: description.content,
+                attachments: attachments,
                 author: author.id,
                 timestamp: new Date().toISOString(),
                 closed: false,
@@ -100,4 +108,20 @@ async function awaitResponse(channel: TextChannel | DMChannel | NewsChannel, aut
     if (response.content === `${settings.prefix}cancel`) return Promise.reject('The ticket creation was canceled.');
 
     return response;
+}
+
+async function cacheAttachments(message: Message): Promise<string[]> {
+    const attachmentURLs: string[] = [];
+
+    if (message.attachments) {
+        const attachmentStorage = message.guild?.channels.cache.get(settings.ticket.attachmentCacheChannelID);
+        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return attachmentURLs;
+
+        for (const attachment of message.attachments) {
+            const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
+            if (storedAttachment) attachmentURLs.push(storedAttachment.url);
+        }
+    }
+
+    return attachmentURLs;
 }

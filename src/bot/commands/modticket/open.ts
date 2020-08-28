@@ -55,6 +55,8 @@ export const command: Command = {
                 ])
                 .setTimestamp(new Date(ticket.timestamp));
 
+            if (ticket.attachments) ticketEmbed.attachFiles(ticket.attachments);
+
             await ticketChannel.send(ticketEmbed);
 
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
@@ -67,14 +69,17 @@ export const command: Command = {
                 await Promise.all(
                     ticket.comments.map(async (comment) => {
                         const member = await guild.members.fetch(comment.author);
-                        const commentMessage = await ticketChannel.send(
-                            new MessageEmbed()
-                                .setColor(member.displayHexColor || '#212121')
-                                .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-                                .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
-                                .setTimestamp(new Date(comment.timestamp))
-                                .setDescription(comment.content)
-                        );
+
+                        const commentEmbed = new MessageEmbed()
+                            .setColor(member.displayHexColor || '#212121')
+                            .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+                            .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
+                            .setTimestamp(new Date(comment.timestamp))
+                            .setDescription(comment.content);
+
+                        if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+
+                        const commentMessage = await ticketChannel.send(commentEmbed);
 
                         comment.message = commentMessage.id;
                         return comment;

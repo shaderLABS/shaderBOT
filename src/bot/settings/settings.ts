@@ -12,6 +12,7 @@ export type Settings = {
         categoryID: string;
         managementChannelID: string;
         subscriptionChannelID: string;
+        attachmentCacheChannelID: string;
     };
 };
 
