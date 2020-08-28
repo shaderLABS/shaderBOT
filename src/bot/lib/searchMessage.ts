@@ -1,10 +1,10 @@
 import { User, Message } from 'discord.js';
-import { client } from '../bot/bot.js';
+import { client } from '../bot.js';
 import { ExtractDoc } from 'ts-mongoose';
 import mongoose from 'mongoose';
-import Ticket, { TicketSchema } from '../db/models/Ticket.js';
+import Ticket, { TicketSchema } from '../../db/models/Ticket.js';
 import { similarityLevenshtein } from './similarity.js';
-import Project from '../db/models/Project.js';
+import Project from '../../db/models/Project.js';
 
 export async function getUser(message: Message, potentialUser: string): Promise<User> {
     let user = message.mentions.users.first();
@@ -82,9 +82,12 @@ export async function getTicketMod(message: Message, args: string[], text: strin
 
     let ticket;
     if (mongoose.Types.ObjectId.isValid(id)) {
-        ticket = await Ticket.findById(id);
-
-        if (!ticket) return Promise.reject(`There is no ticket with this ID.`);
+        try {
+            ticket = await Ticket.findById(id);
+            if (!ticket) return Promise.reject(`There is no ticket with this ID.`);
+        } catch {
+            return Promise.reject(`There is no ticket with this ID.`);
+        }
     } else {
         ticket = await Ticket.findOne({ title: text });
 

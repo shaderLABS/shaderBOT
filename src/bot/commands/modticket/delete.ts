@@ -1,9 +1,9 @@
 import { Command } from '../../commandHandler.js';
 import { Message, TextChannel } from 'discord.js';
-import { getTicketMod } from '../../../misc/searchMessage.js';
+import { getTicketMod } from '../../lib/searchMessage.js';
 import { client, settings } from '../../bot.js';
-import { sendSuccess, sendError } from '../../../misc/embeds.js';
-import log from '../../../misc/log.js';
+import { sendSuccess, sendError } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
 
 export const command: Command = {
     commands: ['delete'],

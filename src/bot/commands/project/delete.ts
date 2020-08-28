@@ -1,8 +1,8 @@
 import { Command } from '../../commandHandler.js';
 import Project from '../../../db/models/Project.js';
 import { Message, TextChannel } from 'discord.js';
-import log from '../../../misc/log.js';
-import { sendError, sendSuccess } from '../../../misc/embeds.js';
+import log from '../../lib/log.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 
 export const command: Command = {
     commands: ['delete'],

@@ -4,8 +4,9 @@ import Ticket from '../../../db/models/Ticket.js';
 import { TextChannel, DMChannel, NewsChannel, MessageEmbed, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import Project from '../../../db/models/Project.js';
-import { sendError, sendInfo } from '../../../misc/embeds.js';
-import log from '../../../misc/log.js';
+import { sendError, sendInfo } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
+import { cacheAttachments } from '../../lib/tickets.js';
 
 export const command: Command = {
     commands: ['create'],
@@ -108,20 +109,4 @@ async function awaitResponse(channel: TextChannel | DMChannel | NewsChannel, aut
     if (response.content === `${settings.prefix}cancel`) return Promise.reject('The ticket creation was canceled.');
 
     return response;
-}
-
-async function cacheAttachments(message: Message): Promise<string[]> {
-    const attachmentURLs: string[] = [];
-
-    if (message.attachments) {
-        const attachmentStorage = message.guild?.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return attachmentURLs;
-
-        for (const attachment of message.attachments) {
-            const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
-            if (storedAttachment) attachmentURLs.push(storedAttachment.url);
-        }
-    }
-
-    return attachmentURLs;
 }
