@@ -4,6 +4,10 @@ import { ExtractDoc } from 'ts-mongoose';
 import { TicketSchema } from '../../db/models/Ticket.js';
 
 export async function cacheAttachments(message: Message): Promise<string[]> {
+    let fileUploadLimit = 8388119;
+    if (message.guild?.premiumTier === 2) fileUploadLimit = 52428308;
+    else if (message.guild?.premiumTier === 3) fileUploadLimit = 104856616;
+
     const attachmentURLs: string[] = [];
 
     if (message.attachments) {
@@ -11,6 +15,7 @@ export async function cacheAttachments(message: Message): Promise<string[]> {
         if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return attachmentURLs;
 
         for (const attachment of message.attachments) {
+            if (attachment[1].size > fileUploadLimit) return Promise.reject('The attachment is too large.');
             const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
             if (storedAttachment) attachmentURLs.push(storedAttachment.url);
         }

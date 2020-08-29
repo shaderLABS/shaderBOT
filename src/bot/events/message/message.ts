@@ -4,6 +4,8 @@ import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
 import Ticket from '../../../db/models/Ticket.js';
 import mongoose from 'mongoose';
+import { cacheAttachments } from '../../lib/tickets.js';
+import { sendError } from '../../lib/embeds.js';
 
 export const event: Event = {
     name: 'message',
@@ -47,21 +49,20 @@ async function ticketComment(message: Message) {
         .setTimestamp(new Date(comment.timestamp))
         .setDescription(content);
 
-    if (attachments && attachments.size !== 0) {
-        let attachmentURLs: string[] = [];
-        const attachmentStorage = message.guild?.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return;
-
-        for (const attachment of attachments) {
-            const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
-            if (storedAttachment) attachmentURLs.push(storedAttachment.url);
+    try {
+        const attachmentURLs = await cacheAttachments(message);
+        if (attachmentURLs.length !== 0) {
+            commentEmbed.attachFiles(attachmentURLs);
+            comment.attachments = attachmentURLs;
         }
-
-        commentEmbed.attachFiles(attachmentURLs);
-        comment.attachments = attachmentURLs;
+    } catch (error) {
+        const errorMessage = await sendError(channel, error);
+        setTimeout(() => errorMessage.delete(), 10000);
     }
 
     await message.delete();
+
+    if ((!comment.attachments || comment.attachments.length === 0) && (!comment.content || comment.content === '')) return;
 
     const commentMessage = await channel.send(commentEmbed);
 
