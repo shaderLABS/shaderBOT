@@ -34,7 +34,7 @@ export const command: Command = {
             title.delete();
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
-            if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long!');
+            if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
             if (await Ticket.exists({ title: title.content })) return sendError(channel, 'A ticket with this name already exists.');
 
             const projectQuestion = await sendInfo(channel, 'Please mention the project:');
@@ -56,6 +56,10 @@ export const command: Command = {
             if (description.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
             const ticketID = new mongoose.Types.ObjectId();
             ticketMessage.edit(ticketEmbed.addField('Description', description.content).setFooter(`ID: ${ticketID}`));
+
+            if ((!attachments || attachments.length === 0) && (!description.content || description.content === '')) {
+                return sendError(channel, 'The description may not be empty.');
+            }
 
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
