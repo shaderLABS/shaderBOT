@@ -1,4 +1,4 @@
-import { TextChannel, MessageEmbed, DMChannel, NewsChannel } from 'discord.js';
+import { TextChannel, MessageEmbed, DMChannel, NewsChannel, Message, User } from 'discord.js';
 
 export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
@@ -22,4 +22,30 @@ export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, d
         .setDescription(description)
         .setColor('#006fff');
     return await channel.send(message, embed);
+}
+
+export async function embedPages(message: Message, author: User, pages: string[]) {
+    const embed = message.embeds[0];
+    if (!embed || pages.length === 1 || pages.length === 0) return;
+
+    message.react('➡️');
+    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { time: 60000 });
+
+    let index = 0;
+    collector.on('collect', async (reaction) => {
+        if (reaction.emoji.name === '⬅️' && pages[index - 1]) index--;
+        else if (reaction.emoji.name === '➡️' && pages[index + 1]) index++;
+        else return;
+
+        await message.reactions.removeAll();
+        // if (pageFooter) embed.setFooter(`Page ${index + 1}/${pages.length}`);
+        message.edit(embed.setDescription(pages[index]));
+
+        if (index !== 0) message.react('⬅️');
+        if (index + 1 < pages.length) message.react('➡️');
+    });
+
+    collector.on('end', () => {
+        message.reactions.removeAll();
+    });
 }

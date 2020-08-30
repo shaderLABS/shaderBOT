@@ -12,7 +12,7 @@ export const command: Command = {
     expectedArgs: '<@user|userID|username>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['modticket'],
+    superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[]) => {
         const { channel } = message;

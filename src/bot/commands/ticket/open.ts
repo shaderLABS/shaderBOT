@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { getTicket } from '../../lib/searchMessage.js';
-import { sendSuccess, sendError } from '../../lib/embeds.js';
+import { sendSuccess, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { openTicket } from '../../lib/tickets.js';
 
@@ -19,7 +19,10 @@ export const command: Command = {
 
         try {
             let ticket = await getTicket(message, args, text, true);
+
+            const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
             await openTicket(ticket, guild);
+            await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');
             log(`<@${message.author.id}> opened the ticket "${ticket.title}".`);

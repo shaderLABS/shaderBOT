@@ -20,7 +20,9 @@ export async function registerEvents(dir: string) {
             console.log(`Registering event "${file}"...`);
 
             events.set(event.name, event);
-            client.on(event.name, event.callback.bind(event));
+
+            if (event.name === 'ready') client.once(event.name, event.callback.bind(event));
+            else client.on(event.name, event.callback.bind(event));
         }
     }
 }
