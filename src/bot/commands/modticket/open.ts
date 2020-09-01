@@ -14,20 +14,17 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel } = message;
-        if (!guild) return;
-
-        try {
-            let ticket = await getTicketMod(message, args, text, true);
-
-            const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
-            await openTicket(ticket, guild);
-            await loadingEmbed.delete();
-
-            sendSuccess(channel, 'Ticket opened.');
-            log(`<@${message.author.id}> opened the ticket "${ticket.title}" by <@${ticket.author}>.`);
-        } catch (error) {
-            if (error) sendError(channel, error);
-        }
+        // const { guild, channel } = message;
+        // if (!guild) return;
+        // try {
+        //     let ticket = await getTicketMod(message, args, text, true);
+        //     const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
+        //     await openTicket(ticket, guild);
+        //     await loadingEmbed.delete();
+        //     sendSuccess(channel, 'Ticket opened.');
+        //     log(`<@${message.author.id}> opened the ticket "${ticket.title}" by <@${ticket.author}>.`);
+        // } catch (error) {
+        //     if (error) sendError(channel, error);
+        // }
     },
 };

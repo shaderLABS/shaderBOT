@@ -14,30 +14,25 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { channel } = message;
-
-        try {
-            const ticket = await getTicketMod(message, args, text, undefined);
-
-            if (ticket.channel) {
-                (await client.channels.fetch(ticket.channel)).delete();
-            }
-
-            if (ticket.subscriptionMessage) {
-                const { guild } = message;
-                if (!guild) return;
-                const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-                if (!(subscriptionChannel instanceof TextChannel)) return;
-
-                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
-                ticket.subscriptionMessage = '';
-            }
-
-            await ticket.deleteOne();
-            sendSuccess(channel, 'Ticket deleted.');
-            log(`<@${message.author.id}> deleted the ticket "${ticket.title}" by <@${ticket.author}>.`);
-        } catch (error) {
-            if (error) sendError(channel, error);
-        }
+        // const { channel } = message;
+        // try {
+        //     const ticket = await getTicketMod(message, args, text, undefined);
+        //     if (ticket.channel) {
+        //         (await client.channels.fetch(ticket.channel)).delete();
+        //     }
+        //     if (ticket.subscriptionMessage) {
+        //         const { guild } = message;
+        //         if (!guild) return;
+        //         const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+        //         if (!(subscriptionChannel instanceof TextChannel)) return;
+        //         (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
+        //         ticket.subscriptionMessage = '';
+        //     }
+        //     await ticket.deleteOne();
+        //     sendSuccess(channel, 'Ticket deleted.');
+        //     log(`<@${message.author.id}> deleted the ticket "${ticket.title}" by <@${ticket.author}>.`);
+        // } catch (error) {
+        //     if (error) sendError(channel, error);
+        // }
     },
 };
