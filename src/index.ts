@@ -1,15 +1,17 @@
 import { startWebserver } from './web/server.js';
 import { startBot } from './bot/bot.js';
-import mongoose from 'mongoose';
+import { connectPostgreSQL, db } from './db/postgres.js';
+import "reflect-metadata";
 
 export function shutdown() {
     console.log('Shutting down...');
 
-    mongoose.connection.close();
+    db.end();
     process.exit();
 }
 
 process.on('SIGINT', shutdown);
 
+await connectPostgreSQL();
 startWebserver();
 startBot();

@@ -6,6 +6,7 @@ import Ticket from '../../../db/models/Ticket.js';
 import mongoose from 'mongoose';
 import { cacheAttachments } from '../../lib/tickets.js';
 import { sendError } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.js';
 
 export const event: Event = {
     name: 'message',
@@ -23,7 +24,7 @@ export const event: Event = {
 };
 
 async function ticketComment(message: Message) {
-    const { channel, member, content, attachments } = message;
+    const { channel, member, content } = message;
     if (message.partial || !(channel instanceof TextChannel) || !channel.topic || !member) return;
 
     const id = channel.topic.split(' | ')[0];
@@ -49,11 +50,12 @@ async function ticketComment(message: Message) {
         .setTimestamp(new Date(comment.timestamp))
         .setDescription(content);
 
+    let attachments;
     try {
         const attachmentURLs = await cacheAttachments(message);
         if (attachmentURLs.length !== 0) {
             commentEmbed.attachFiles(attachmentURLs);
-            comment.attachments = attachmentURLs;
+            attachments = attachmentURLs;
         }
     } catch (error) {
         const errorMessage = await sendError(channel, error);
@@ -62,15 +64,15 @@ async function ticketComment(message: Message) {
 
     await message.delete();
 
-    if ((!comment.attachments || comment.attachments.length === 0) && (!comment.content || comment.content === '')) return;
+    if ((!attachments || attachments.length === 0) && (!content || content === '')) return;
 
     const commentMessage = await channel.send(commentEmbed);
 
     comment.message = commentMessage.id;
 
-    await Ticket.findByIdAndUpdate(id, {
-        $push: {
-            comments: comment,
-        },
-    });
+    await db.query(
+        `INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+        [id, member.id, commentMessage.id, content, attachments, new Date()]
+    );
 }

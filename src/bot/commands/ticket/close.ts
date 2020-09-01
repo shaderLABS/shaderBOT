@@ -1,7 +1,6 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
-import { getTicket } from '../../lib/searchMessage.js';
 import { sendSuccess, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { closeTicket } from '../../lib/tickets.js';
@@ -14,15 +13,13 @@ export const command: Command = {
     maxArgs: null,
     superCommands: ['ticket'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel } = message;
-        if (!guild || channel.id !== settings.ticket.managementChannelID) return;
+        const { guild, channel, member } = message;
+        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;
 
         try {
-            let ticket = await getTicket(message, args, text, false);
-            await closeTicket(ticket, guild);
-
+            const title = await closeTicket(args, text, member);
             sendSuccess(channel, 'Ticket closed.');
-            log(`<@${message.author.id}> closed the ticket "${ticket.title}".`);
+            log(`<@${message.author.id}> closed the ticket "${title}".`);
         } catch (error) {
             if (error) sendError(channel, error);
         }

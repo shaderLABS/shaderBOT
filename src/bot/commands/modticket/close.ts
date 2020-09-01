@@ -14,17 +14,15 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel } = message;
-        if (!guild) return;
-
-        try {
-            let ticket = await getTicketMod(message, args, text, false);
-            closeTicket(ticket, guild);
-
-            sendSuccess(channel, 'Ticket closed.');
-            log(`<@${message.author.id}> closed the ticket "${ticket.title}" by <@${ticket.author}>.`);
-        } catch (error) {
-            if (error) sendError(channel, error);
-        }
+        //     const { guild, channel } = message;
+        //     if (!guild) return;
+        //     try {
+        //         let ticket = await getTicketMod(message, args, text, false);
+        //         closeTicket(ticket, guild);
+        //         sendSuccess(channel, 'Ticket closed.');
+        //         log(`<@${message.author.id}> closed the ticket "${ticket.title}" by <@${ticket.author}>.`);
+        //     } catch (error) {
+        //         if (error) sendError(channel, error);
+        //     }
     },
 };
