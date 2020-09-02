@@ -15,7 +15,7 @@ export const command: Command = {
         const { channel } = message;
         if (!(channel instanceof TextChannel)) return;
 
-        const deleted = await db.query('DELETE FROM project WHERE channel_id=$1 RETURNING owners::TEXT[], role_id', [channel.id]);
+        const deleted = await db.query(/*sql*/ `DELETE FROM project WHERE channel_id=$1 RETURNING owners::TEXT[], role_id`, [channel.id]);
         if (deleted.rowCount === 0) return sendError(channel, 'No project has been set up for this channel.');
 
         channel.overwritePermissions(channel.permissionOverwrites.filter((overwrite) => overwrite.type !== 'member' || !deleted.rows[0].owners.includes(overwrite.id)));

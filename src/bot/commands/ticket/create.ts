@@ -34,7 +34,7 @@ export const command: Command = {
             ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
             if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
-            if ((await db.query('SELECT EXISTS (SELECT 1 FROM ticket WHERE title=$1) AS "exists";', [title.content])).rows[0].exists)
+            if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM ticket WHERE title=$1) AS "exists";`, [title.content])).rows[0].exists)
                 return sendError(channel, 'A ticket with this name already exists.');
 
             const projectQuestion = await sendInfo(channel, 'Please mention the project:');
@@ -47,7 +47,7 @@ export const command: Command = {
             const projectChannel = project.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
 
-            const projectID = await db.query('SELECT project_id FROM project WHERE channel_id=$1 LIMIT 1;', [projectChannel.id]);
+            const projectID = await db.query(/*sql*/ `SELECT project_id FROM project WHERE channel_id=$1 LIMIT 1;`, [projectChannel.id]);
             if (projectID.rowCount === 0) return sendError(channel, 'The mentioned text channel is not a valid project.');
 
             const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
@@ -83,7 +83,8 @@ export const command: Command = {
             ticketChannel.send(ticketEmbed);
 
             await db.query(
-                `INSERT INTO ticket (ticket_id, title, project_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
+                /*sql*/ `
+                INSERT INTO ticket (ticket_id, title, project_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
                 [ticketID, title.content, projectID.rows[0].project_id, description.content, attachments, author.id, new Date(), ticketChannel.id, subscriptionMessage.id]
             );

@@ -16,7 +16,7 @@ export const command: Command = {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
 
-        if ((await db.query('SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";', [channel.id])).rows[0].exists)
+        if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [channel.id])).rows[0].exists)
             return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: GuildMember[] = [];
@@ -57,7 +57,8 @@ export const command: Command = {
         });
 
         const insert = await db.query(
-            `INSERT INTO project (channel_id, owners, role_id) 
+            /*sql*/ `
+            INSERT INTO project (channel_id, owners, role_id) 
             VALUES ($1, $2, $3) 
             RETURNING project_id;`,
             [channel.id, owners.map((owner) => owner.id), role.id]
