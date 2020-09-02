@@ -2,7 +2,6 @@ import { Event } from '../../eventHandler.js';
 import { Message, TextChannel, MessageEmbed } from 'discord.js';
 import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
-import Ticket from '../../../db/models/Ticket.js';
 import mongoose from 'mongoose';
 import { cacheAttachments } from '../../lib/tickets.js';
 import { sendError } from '../../lib/embeds.js';
@@ -71,8 +70,9 @@ async function ticketComment(message: Message) {
     comment.message = commentMessage.id;
 
     await db.query(
-        `INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
+        /*sql*/ `
+        INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [id, member.id, commentMessage.id, content, attachments, new Date()]
+        [id, member.user.id, commentMessage.id, content, attachments, new Date()]
     );
 }

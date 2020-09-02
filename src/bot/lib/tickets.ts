@@ -1,7 +1,5 @@
 import { Message, TextChannel, Guild, MessageEmbed, GuildMember } from 'discord.js';
 import { settings, client } from '../bot.js';
-import { ExtractDoc } from 'ts-mongoose';
-import { TicketSchema } from '../../db/models/Ticket.js';
 import { db } from '../../db/postgres.js';
 import uuid from 'uuid-random';
 
@@ -30,7 +28,8 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     const { guild } = member;
 
     const response = await db.query(
-        `SELECT ticket_id, title, project.project_id, project.channel_id AS project_channel_id, description, author_id, edited, attachments, timestamp 
+        /*sql*/ `
+        SELECT ticket_id, title, project.project_id, project.channel_id AS project_channel_id, description, author_id, edited, attachments, timestamp 
             FROM ticket, project  
             WHERE ticket.project_id = project.project_id
                 AND ${uuid.test(args[0]) ? 'ticket_id = $1' : 'title = $1'} 
@@ -42,7 +41,8 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
     if (response.rowCount === 0) {
         const similarResults = await db.query(
-            `SELECT ticket_id, title 
+            /*sql*/ `
+            SELECT ticket_id, title 
             FROM ticket, project
             WHERE ticket.project_id = project.project_id
                 AND ($1::NUMERIC = ANY (project.owners) OR ticket.author_id = $1) 
@@ -102,14 +102,16 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
 
     await db.query(
-        `UPDATE ticket
+        /*sql*/ `
+        UPDATE ticket
         SET closed = FALSE, channel_id = $1, subscription_message_id = $2  
         WHERE ticket_id = $3;`,
         [ticketChannel.id, subscriptionMessage.id, ticket.ticket_id]
     );
 
     const comments = await db.query(
-        `SELECT comment_id, author_id, edited, timestamp, content, attachments
+        /*sql*/ `
+        SELECT comment_id, author_id, edited, timestamp, content, attachments
         FROM comment
         WHERE ticket_id = $1`,
         [ticket.ticket_id]
@@ -143,20 +145,22 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
 export async function closeTicket(args: string[], text: string, member: GuildMember): Promise<string> {
     const response = await db.query(
-        `UPDATE ticket
-        SET closed = TRUE, channel_id = NULL, subscription_message_id = NULL 
-        FROM ticket old_ticket, project
-        WHERE ticket.ticket_id = old_ticket.ticket_id AND ticket.project_id = project.project_id
+        /*sql*/ `
+        UPDATE ticket
+        SET closed = TRUE 
+        FROM project
+        WHERE ticket.project_id = project.project_id
             AND ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
             AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2) 
             AND ticket.closed = false
-        RETURNING old_ticket.subscription_message_id, old_ticket.channel_id, ticket.title;`,
+        RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title;`,
         [uuid.test(args[0]) ? args[0] : text, member.id]
     );
 
     if (response.rowCount === 0) {
         const similarResults = await db.query(
-            `SELECT ticket_id, title 
+            /*sql*/ `
+            SELECT ticket_id, title 
             FROM ticket, project
             WHERE ticket.project_id = project.project_id
                 AND ($1::NUMERIC = ANY (project.owners) OR ticket.author_id = $1) 

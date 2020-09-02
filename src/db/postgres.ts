@@ -11,7 +11,8 @@ export const db = new pg.Client({
 const tables = [
     {
         name: 'ticket',
-        data: `ticket_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        data: /*sql*/ `
+            ticket_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             title TEXT UNIQUE NOT NULL,
             project_id UUID NOT NULL,
             description TEXT,
@@ -25,7 +26,8 @@ const tables = [
     },
     {
         name: 'comment',
-        data: `comment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        data: /*sql*/ `
+            comment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             ticket_id UUID NOT NULL,
             author_id NUMERIC(20) NOT NULL,
             message_id NUMERIC(20) UNIQUE,
@@ -36,7 +38,8 @@ const tables = [
     },
     {
         name: 'project',
-        data: `project_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        data: /*sql*/ `
+            project_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             channel_id NUMERIC(20) UNIQUE NOT NULL,
             owners NUMERIC(20)[] NOT NULL,
             role_id NUMERIC(20) UNIQUE NOT NULL`,
@@ -48,8 +51,8 @@ export async function connectPostgreSQL() {
         await db.connect();
         console.log('Connected to PostgreSQL database.');
 
-        await db.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-                        CREATE EXTENSION IF NOT EXISTS "pg_trgm";`);
+        await db.query(/*sql*/ `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+                                CREATE EXTENSION IF NOT EXISTS "pg_trgm";`);
 
         let statements = '';
         for (const table of tables) statements += `CREATE TABLE IF NOT EXISTS ${table.name} (${table.data});\n`;

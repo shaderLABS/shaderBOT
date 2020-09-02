@@ -2,9 +2,8 @@ import { Event } from '../eventHandler.js';
 import { Channel, TextChannel } from 'discord.js';
 import axios from 'axios';
 import log from '../lib/log.js';
-import Project from '../../db/models/Project.js';
 import { settings, client } from '../bot.js';
-import Ticket from '../../db/models/Ticket.js';
+import { db } from '../../db/postgres.js';
 
 export const event: Event = {
     name: 'channelDelete',
@@ -12,22 +11,26 @@ export const event: Event = {
         if (!(channel instanceof TextChannel)) return;
 
         if (channel.parentID === settings.ticket.categoryID) {
-            const ticket = await Ticket.findOne({ channel: channel.id });
+            const ticket = (
+                await db.query(
+                    /*sql*/ `
+                    UPDATE ticket 
+                    SET closed = TRUE 
+                    WHERE channel_id = $1 AND closed = FALSE 
+                    RETURNING subscription_message_id`,
+                    [channel.id]
+                )
+            ).rows[0];
             if (!ticket) return;
 
-            ticket.closed = true;
-
-            if (ticket.subscriptionMessage) {
+            if (ticket.subscription_message_id) {
                 const guild = client.guilds.cache.first();
                 if (!guild) return;
                 const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
                 if (!(subscriptionChannel instanceof TextChannel)) return;
 
-                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
-                ticket.subscriptionMessage = '';
+                (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
             }
-
-            await ticket.save();
 
             return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
         }
@@ -40,10 +43,10 @@ export const event: Event = {
         });
 
         let projectLog = '';
-        const deleteProject = await Project.findOne({ channel: channel.id });
+        // const deleteProject = await Project.findOne({ channel: channel.id });
+        const deleteProject = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
         if (deleteProject) {
-            const role = await channel.guild.roles.fetch(deleteProject.pingRole);
-            deleteProject.deleteOne();
+            const role = await channel.guild.roles.fetch(deleteProject.role_id);
             if (role) {
                 role.delete();
                 projectLog = 'The role and project that were linked to this channel have been removed.';
