@@ -47,8 +47,8 @@ export const command: Command = {
             const projectChannel = project.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
 
-            const projectID = await db.query(/*sql*/ `SELECT project_id FROM project WHERE channel_id=$1 LIMIT 1;`, [projectChannel.id]);
-            if (projectID.rowCount === 0) return sendError(channel, 'The mentioned text channel is not a valid project.');
+            if (!(await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [projectChannel.id])).rows[0].exists)
+                return sendError(channel, 'The mentioned text channel is not a valid project.');
 
             const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
             const description = await awaitResponse(channel, author.id);
@@ -84,9 +84,9 @@ export const command: Command = {
 
             await db.query(
                 /*sql*/ `
-                INSERT INTO ticket (ticket_id, title, project_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
+                INSERT INTO ticket (ticket_id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-                [ticketID, title.content, projectID.rows[0].project_id, description.content, attachments, author.id, new Date(), ticketChannel.id, subscriptionMessage.id]
+                [ticketID, title.content, projectChannel.id, description.content, attachments, author.id, new Date(), ticketChannel.id, subscriptionMessage.id]
             );
 
             log(`<@${message.author.id}> created a ticket ("${title.content}").`);

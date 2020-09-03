@@ -29,9 +29,9 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
     const response = await db.query(
         /*sql*/ `
-        SELECT ticket_id, title, project.channel_id AS project_channel_id, description, author_id, edited, attachments, timestamp 
+        SELECT ticket_id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
             FROM ticket 
-            LEFT JOIN project ON ticket.project_id = project.project_id
+            ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ${uuid.test(args[0]) ? 'ticket_id = $1' : 'title = $1'} 
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
                 AND closed = TRUE 
@@ -43,12 +43,12 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
         const similarResults = await db.query(
             /*sql*/ `
             SELECT ticket_id, title 
-            FROM ${moderate ? 'ticket' : 'ticket, project'}
+            FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = TRUE
-                ${moderate ? '' : 'AND ((ticket.project_id = project.project_id AND $1::NUMERIC = ANY (project.owners)) OR ticket.author_id = $1)'} 
-            ORDER BY SIMILARITY(title, ${moderate ? '$1' : '$2'}) DESC
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,
-            moderate ? [text] : [member.id, text]
+            moderate ? [text] : [text, member.id]
         );
 
         let errorMessage = 'No closed tickets were found.';
@@ -147,10 +147,10 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
         /*sql*/ `
         UPDATE ticket
         SET closed = TRUE 
-        ${moderate ? '' : 'FROM project'}
+        ${moderate ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
         WHERE ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
             AND ticket.closed = FALSE
-            ${moderate ? '' : 'AND ((ticket.project_id = project.project_id AND $2::NUMERIC = ANY (project.owners)) OR ticket.author_id = $2)'} 
+            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
         RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title;`,
         moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
     );
@@ -159,9 +159,9 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
         const similarResults = await db.query(
             /*sql*/ `
             SELECT ticket_id, title 
-            FROM ${moderate ? 'ticket' : 'ticket, project'}
+            FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = FALSE
-                ${moderate ? '' : 'AND ((ticket.project_id = project.project_id AND $2::NUMERIC = ANY (project.owners)) OR ticket.author_id = $2)'} 
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
             ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,
             moderate ? [text] : [text, member.id]

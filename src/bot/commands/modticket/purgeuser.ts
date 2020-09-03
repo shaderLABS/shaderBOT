@@ -1,8 +1,6 @@
 import { Command } from '../../commandHandler.js';
-import { Message, TextChannel } from 'discord.js';
-import Ticket from '../../../db/models/Ticket.js';
+import { Message } from 'discord.js';
 import { getUser } from '../../lib/searchMessage.js';
-import { client, settings } from '../../bot.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { purgeAllTickets } from '../../lib/tickets.js';
