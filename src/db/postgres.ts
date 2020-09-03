@@ -14,7 +14,7 @@ const tables = [
         data: /*sql*/ `
             ticket_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             title TEXT UNIQUE NOT NULL,
-            project_id UUID NOT NULL,
+            project_channel_id NUMERIC(20) NOT NULL,
             description TEXT,
             attachments TEXT[],
             author_id NUMERIC(20) NOT NULL,
