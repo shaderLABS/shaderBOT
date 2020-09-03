@@ -17,7 +17,7 @@ export const command: Command = {
         if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;
 
         try {
-            const title = await closeTicket(args, text, member);
+            const { title } = await closeTicket(args, text, member);
             sendSuccess(channel, 'Ticket closed.');
             log(`<@${message.author.id}> closed the ticket "${title}".`);
         } catch (error) {

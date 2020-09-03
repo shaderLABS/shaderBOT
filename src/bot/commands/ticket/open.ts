@@ -1,7 +1,6 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
-// import { getTicket } from '../../lib/searchMessage.js';
 import { sendSuccess, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { openTicket } from '../../lib/tickets.js';
@@ -20,11 +19,11 @@ export const command: Command = {
         const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 
         try {
-            const ticketTitle = await openTicket(args, text, member);
+            const { title } = await openTicket(args, text, member);
             await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');
-            log(`<@${message.author.id}> opened the ticket "${ticketTitle}".`);
+            log(`<@${message.author.id}> opened the ticket "${title}".`);
         } catch (error) {
             await loadingEmbed.delete();
             if (error) sendError(channel, error);
