@@ -1,7 +1,7 @@
-import { Message, TextChannel, Guild, MessageEmbed } from 'discord.js';
+import { Message, TextChannel, Guild, MessageEmbed, GuildMember, User } from 'discord.js';
 import { settings, client } from '../bot.js';
-import { ExtractDoc } from 'ts-mongoose';
-import { TicketSchema } from '../../db/models/Ticket.js';
+import { db } from '../../db/postgres.js';
+import uuid from 'uuid-random';
 
 export async function cacheAttachments(message: Message): Promise<string[]> {
     let fileUploadLimit = 8388119;
@@ -24,21 +24,51 @@ export async function cacheAttachments(message: Message): Promise<string[]> {
     return attachmentURLs;
 }
 
-export async function openTicket(ticket: ExtractDoc<typeof TicketSchema>, guild: Guild) {
-    ticket.closed = false;
+export async function openTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
+    const { guild } = member;
+
+    const response = await db.query(
+        /*sql*/ `
+        SELECT ticket_id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
+            FROM ticket 
+            ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
+            WHERE ${uuid.test(args[0]) ? 'ticket_id = $1' : 'title = $1'} 
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+                AND closed = TRUE 
+            LIMIT 1`,
+        moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
+    );
+
+    if (response.rowCount === 0) {
+        const similarResults = await db.query(
+            /*sql*/ `
+            SELECT ticket_id, title 
+            FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
+            WHERE ticket.closed = TRUE
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            ORDER BY SIMILARITY(title, $1) DESC
+            LIMIT 3`,
+            moderate ? [text] : [text, member.id]
+        );
+
+        let errorMessage = 'No closed tickets were found.';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        return Promise.reject(errorMessage);
+    }
+
+    const ticket = response.rows[0];
 
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
         parent: settings.ticket.categoryID,
-        topic: `${ticket._id} | <#${ticket.project}>`,
+        topic: `${ticket.ticket_id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
         rateLimitPerUser: 10,
         permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
     });
-    ticket.channel = ticketChannel.id;
 
-    const ticketAuthor = await client.users.fetch(ticket.author);
+    const ticketAuthor = await client.users.fetch(ticket.author_id);
 
-    let ticketFooter = `ID: ${ticket._id}`;
+    let ticketFooter = `ID: ${ticket.ticket_id}`;
     if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
 
     const ticketEmbed = new MessageEmbed()
@@ -52,7 +82,7 @@ export async function openTicket(ticket: ExtractDoc<typeof TicketSchema>, guild:
             },
             {
                 name: 'Project',
-                value: `<#${ticket.project}>`,
+                value: ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT',
             },
             {
                 name: 'Description',
@@ -66,68 +96,166 @@ export async function openTicket(ticket: ExtractDoc<typeof TicketSchema>, guild:
     await ticketChannel.send(ticketEmbed);
 
     const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-    if (!(subscriptionChannel instanceof TextChannel)) return;
+    if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
 
     const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
-    ticket.subscriptionMessage = subscriptionMessage.id;
 
-    if (ticket.comments) {
-        for (let i = 0; i < ticket.comments.length; i++) {
-            const comment = ticket.comments[i];
-            const member = await guild.members.fetch(comment.author);
+    await db.query(
+        /*sql*/ `
+        UPDATE ticket
+        SET closed = FALSE, channel_id = $1, subscription_message_id = $2  
+        WHERE ticket_id = $3;`,
+        [ticketChannel.id, subscriptionMessage.id, ticket.ticket_id]
+    );
+
+    const comments = await db.query(
+        /*sql*/ `
+        SELECT comment_id, author_id, edited, timestamp, content, attachments
+        FROM comment
+        WHERE ticket_id = $1`,
+        [ticket.ticket_id]
+    );
+
+    if (comments.rowCount !== 0) {
+        let commentMessageQuery = '';
+
+        for (let i = 0; i < comments.rowCount; i++) {
+            const comment = comments.rows[i];
+            const author = await member.guild.members.fetch(comment.author_id);
 
             const commentEmbed = new MessageEmbed()
-                .setColor(member.displayHexColor || '#212121')
-                .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+                .setColor(author.displayHexColor || '#212121')
+                .setAuthor(author.user.username + '#' + author.user.discriminator, author.user.avatarURL() || undefined)
                 .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);
 
             if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
             const commentMessage = await ticketChannel.send(commentEmbed);
-            comment.message = commentMessage.id;
+            commentMessageQuery += `UPDATE comment SET message_id = ${commentMessage.id} WHERE comment_id = '${comment.comment_id}';\n`;
         }
 
-        // await Promise.all(
-        //     ticket.comments.map(async (comment) => {
-        //         const member = await guild.members.fetch(comment.author);
-
-        //         const commentEmbed = new MessageEmbed()
-        //             .setColor(member.displayHexColor || '#212121')
-        //             .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-        //             .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
-        //             .setTimestamp(new Date(comment.timestamp))
-        //             .setDescription(comment.content);
-
-        //         if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
-
-        //         const commentMessage = await ticketChannel.send(commentEmbed);
-
-        //         comment.message = commentMessage.id;
-        //         return comment;
-        //     })
-        // );
+        await db.query(commentMessageQuery);
     }
 
-    await ticket.save();
     ticketChannel.overwritePermissions([]);
+    return { title: ticket.title, author: ticket.author_id };
 }
 
-export async function closeTicket(ticket: ExtractDoc<typeof TicketSchema>, guild: Guild) {
-    ticket.closed = true;
+export async function closeTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
+    const response = await db.query(
+        /*sql*/ `
+        UPDATE ticket
+        SET closed = TRUE 
+        ${moderate ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
+        WHERE ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
+            AND ticket.closed = FALSE
+            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+        RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title;`,
+        moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
+    );
 
-    if (ticket.subscriptionMessage) {
+    if (response.rowCount === 0) {
+        const similarResults = await db.query(
+            /*sql*/ `
+            SELECT ticket_id, title 
+            FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
+            WHERE ticket.closed = FALSE
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            ORDER BY SIMILARITY(title, $1) DESC
+            LIMIT 3`,
+            moderate ? [text] : [text, member.id]
+        );
+
+        let errorMessage = 'No open tickets were found.';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        return Promise.reject(errorMessage);
+    }
+
+    const ticket = response.rows[0];
+
+    if (ticket.subscription_message_id) {
+        const subscriptionChannel = member.guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+        if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
+        (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
+    }
+
+    if (ticket.channel_id) {
+        const ticketChannel = member.guild.channels.cache.get(ticket.channel_id);
+        if (ticketChannel) ticketChannel.delete();
+    }
+
+    return { title: ticket.title, author: ticket.author_id };
+}
+
+export async function deleteTicket(args: string[], text: string, guild: Guild) {
+    const response = await db.query(
+        /*sql*/ `
+        DELETE FROM ticket
+        WHERE ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
+        RETURNING subscription_message_id, channel_id, title, author_id;`,
+        [uuid.test(args[0]) ? args[0] : text]
+    );
+
+    if (response.rowCount === 0) {
+        const similarResults = await db.query(
+            /*sql*/ `
+            SELECT ticket_id, title 
+            FROM ticket
+            ORDER BY SIMILARITY(title, $1) DESC
+            LIMIT 3`,
+            [text]
+        );
+
+        let errorMessage = 'No tickets were found.';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        return Promise.reject(errorMessage);
+    }
+
+    const ticket = response.rows[0];
+
+    if (ticket.subscription_message_id) {
         const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-        if (!(subscriptionChannel instanceof TextChannel)) return;
-
-        (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
-        ticket.subscriptionMessage = '';
+        if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
+        (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
     }
 
-    if (ticket.channel) {
-        (await client.channels.fetch(ticket.channel)).delete();
-        ticket.channel = undefined;
+    if (ticket.channel_id) {
+        const ticketChannel = guild.channels.cache.get(ticket.channel_id);
+        if (ticketChannel) ticketChannel.delete();
     }
 
-    await ticket.save();
+    return { title: ticket.title, author: ticket.author_id };
+}
+
+export async function purgeAllTickets(user: User, guild: Guild) {
+    const response = await db.query(
+        /*sql*/ `
+        DELETE FROM ticket
+        WHERE ticket.author_id = $1 
+        RETURNING subscription_message_id, channel_id, title;`,
+        [user.id]
+    );
+
+    if (response.rowCount === 0) {
+        return Promise.reject(`<@${user.id}> does not have any tickets.`);
+    }
+
+    const titles: string[] = [];
+    for (const ticket of response.rows) {
+        if (ticket.subscription_message_id) {
+            const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+            if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
+            (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
+        }
+
+        if (ticket.channel_id) {
+            const ticketChannel = guild.channels.cache.get(ticket.channel_id);
+            if (ticketChannel) ticketChannel.delete();
+        }
+
+        titles.push(ticket.title);
+    }
+
+    return { titles: titles, amount: response.rowCount };
 }

@@ -1,6 +1,5 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
-import { getTicketMod } from '../../lib/searchMessage.js';
 import { sendSuccess, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { openTicket } from '../../lib/tickets.js';
@@ -14,19 +13,19 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel } = message;
-        if (!guild) return;
+        const { guild, channel, member } = message;
+        if (!guild || !member) return;
+
+        const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 
         try {
-            let ticket = await getTicketMod(message, args, text, true);
-
-            const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
-            await openTicket(ticket, guild);
+            const ticket = await openTicket(args, text, member, true);
             await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');
             log(`<@${message.author.id}> opened the ticket "${ticket.title}" by <@${ticket.author}>.`);
         } catch (error) {
+            await loadingEmbed.delete();
             if (error) sendError(channel, error);
         }
     },

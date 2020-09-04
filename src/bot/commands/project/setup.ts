@@ -1,9 +1,8 @@
 import { Command, syntaxError } from '../../commandHandler.js';
-import Project from '../../../db/models/Project.js';
 import { Message, TextChannel, MessageEmbed, GuildMember } from 'discord.js';
-import mongoose from 'mongoose';
 import log from '../../lib/log.js';
 import { sendError } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.js';
 
 export const command: Command = {
     commands: ['setup'],
@@ -16,7 +15,9 @@ export const command: Command = {
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
-        if (await Project.exists({ channel: channel.id })) return sendError(channel, 'This channel is already linked to a project.');
+
+        if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [channel.id])).rows[0].exists)
+            return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: GuildMember[] = [];
 
@@ -47,7 +48,7 @@ export const command: Command = {
             });
         }
 
-        const pingRole = await guild.roles.create({
+        const role = await guild.roles.create({
             data: {
                 name: `${channel.name}`,
                 mentionable: false,
@@ -55,14 +56,14 @@ export const command: Command = {
             reason: `Create notification role for #${channel.name}.`,
         });
 
-        const projectID = new mongoose.Types.ObjectId();
-
-        await Project.create({
-            _id: projectID,
-            channel: channel.id,
-            owners: owners.map((owner) => owner.id),
-            pingRole: pingRole.id,
-        });
+        const insert = await db.query(
+            /*sql*/ `
+            INSERT INTO project (channel_id, owners, role_id) 
+            VALUES ($1, $2, $3) 
+            RETURNING project_id;`,
+            [channel.id, owners.map((owner) => owner.id), role.id]
+        );
+        const projectID = insert.rows[0].project_id;
 
         channel.send(
             new MessageEmbed()
@@ -76,7 +77,7 @@ export const command: Command = {
                     },
                     {
                         name: 'Notification Role',
-                        value: '<@&' + pingRole.id + '>',
+                        value: role.toString(),
                     },
                 ])
         );

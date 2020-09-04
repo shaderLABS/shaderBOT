@@ -1,9 +1,9 @@
 import { Event } from '../../eventHandler.js';
 import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
 import { settings, client } from '../../bot.js';
-import Ticket from '../../../db/models/Ticket.js';
 import log from '../../lib/log.js';
 import { sendInfo } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -23,24 +23,24 @@ export const event: Event = {
 };
 
 async function edit(reaction: MessageReaction, user: User, guild: Guild, channel: TextChannel) {
-    const ticket = await Ticket.findOne({ channel: channel.id });
-    if (!ticket || !ticket.comments) return;
-
-    const comment = ticket.comments.find((comment) => comment.message === reaction.message.id);
+    const comment = (await db.query(/*sql*/ `SELECT * FROM comment WHERE message_id = $1 LIMIT 1`, [reaction.message.id])).rows[0];
 
     if (!comment) {
+        const ticket = (await db.query(/*sql*/ `SELECT * FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
+        if (!ticket) return;
+
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
 
         const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
 
         let subscriptionMessage;
-        if (subscriptionChannel instanceof TextChannel && ticket.subscriptionMessage) {
-            subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscriptionMessage);
+        if (subscriptionChannel instanceof TextChannel && ticket.subscription_message_id) {
+            subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscription_message_id);
         }
 
         const embed = originalMessage.embeds[0];
-        if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket._id || ticket.author !== user.id)
+        if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket.ticket_id || ticket.author_id !== user.id)
             return reaction.remove();
 
         const originalFieldValues = [embed.fields[0].value.slice(0), embed.fields[2].value.slice(0)];
@@ -56,7 +56,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
         const editPart = (
             await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                time: 30000,
+                time: 60000,
                 max: 1,
             })
         ).first();
@@ -67,12 +67,14 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             return;
         }
 
+        const editedAt = new Date();
+
         if (editPart.content.toLowerCase() === 'title') {
             const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title:', undefined, `<@${user.id}>`);
 
             const newTitle = (
                 await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                    time: 30000,
+                    time: 60000,
                     max: 1,
                 })
             ).first();
@@ -85,11 +87,10 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 return;
             }
 
-            ticket.title = newTitle.content;
             embed.fields[0].value = newTitle.content;
 
-            if (ticket.channel) {
-                const ticketChannel = guild.channels.cache.get(ticket.channel);
+            if (ticket.channel_id) {
+                const ticketChannel = guild.channels.cache.get(ticket.channel_id);
                 if (ticketChannel instanceof TextChannel) {
                     ticketChannel.edit(
                         {
@@ -99,6 +100,8 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                     );
                 }
             }
+
+            await db.query(/*sql*/ `UPDATE ticket SET title = $1, edited = $2 WHERE ticket_id = $3`, [newTitle.content, editedAt, ticket.ticket_id]);
 
             editPartQuestion.delete();
             editPart.delete();
@@ -111,7 +114,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
             const newDescription = (
                 await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                    time: 30000,
+                    time: 60000,
                     max: 1,
                 })
             ).first();
@@ -124,8 +127,9 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 return;
             }
 
-            ticket.description = newDescription.content;
             embed.fields[2].value = newDescription.content;
+
+            await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE ticket_id = $3`, [newDescription.content, editedAt, ticket.ticket_id]);
 
             editPartQuestion.delete();
             editPart.delete();
@@ -140,17 +144,14 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             return;
         }
 
-        ticket.edited = new Date().toISOString();
-
-        if (embed.footer && embed.footer.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${new Date(ticket.edited).toLocaleString()}`);
+        if (embed.footer && embed.footer.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${editedAt.toLocaleString()}`);
 
         await originalMessage.edit(embed);
         if (subscriptionMessage) subscriptionMessage.edit(embed);
 
-        ticket.save();
         reaction.remove();
     } else {
-        if (comment.author !== user.id) return reaction.remove();
+        if (comment.author_id !== user.id) return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
@@ -158,7 +159,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
         const newMessage = (
             await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                time: 30000,
+                time: 60000,
                 max: 1,
             })
         ).first();
@@ -172,41 +173,50 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         if (!originalMessage) return;
 
         const embed = originalMessage.embeds[0];
-        const originalContent = embed.description;
         if (!embed) return;
 
-        comment.content = newMessage.content;
-        comment.edited = new Date().toISOString();
+        const editedAt = new Date();
 
-        embed.setFooter(`edited at ${new Date(comment.edited).toLocaleString()}`);
+        embed.setFooter(`edited at ${editedAt.toLocaleString()}`);
         embed.setDescription(newMessage.content);
 
         await originalMessage.edit(embed);
 
-        ticket.save();
+        await db.query(
+            /*sql*/ `
+            UPDATE comment 
+            SET content = $1, edited = $2 
+            WHERE comment_id = $3`,
+            [newMessage.content, editedAt, comment.comment_id]
+        );
+
         reaction.remove();
         question.delete();
         newMessage.delete();
 
-        log(`<@${user.id}> edited their ticket comment from:\n\n${originalContent}\n\nto:\n\n${newMessage.content}`);
+        log(`<@${user.id}> edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${newMessage.content}`);
     }
 }
 
 async function deleteComment(reaction: MessageReaction, user: User, member: GuildMember, channel: TextChannel) {
-    const ticket = await Ticket.findOne({ channel: channel.id });
-    if (!ticket || !ticket.comments) return;
+    if (!channel.topic) return;
+    const id = channel.topic.split(' | ')[0];
+    const managePerm = member.hasPermission('MANAGE_MESSAGES');
 
-    const comment = ticket.comments.find((comment) => comment.message === reaction.message.id);
-    if (!comment) return;
+    const comment = (
+        await db.query(
+            /*sql*/ `
+            DELETE FROM comment 
+            WHERE ticket_id = $1 AND message_id = $2 ${managePerm ? '' : 'AND author_id = $3'}
+            RETURNING content`,
+            managePerm ? [id, reaction.message.id] : [id, reaction.message.id, user.id]
+        )
+    ).rows[0];
 
-    if (member.hasPermission('MANAGE_MESSAGES') || comment.author === user.id) {
-        if (reaction.message.deletable) reaction.message.delete();
-        else (await channel.messages.fetch(reaction.message.id)).delete();
+    if (!comment) return reaction.remove();
 
-        comment.remove();
-        ticket.save();
-        log(`Removed ticket comment from <#${ticket.channel}>:\n\n${comment.content}`);
-    } else {
-        reaction.remove();
-    }
+    if (!reaction.partial && reaction.message.deletable === true) reaction.message.delete();
+    else (await channel.messages.fetch(reaction.message.id)).delete();
+
+    log(`Removed ticket comment from <#${channel.id}>:\n\n${comment.content}`);
 }

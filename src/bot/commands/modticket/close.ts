@@ -1,6 +1,5 @@
 import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
-import { getTicketMod } from '../../lib/searchMessage.js';
 import { sendSuccess, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { closeTicket } from '../../lib/tickets.js';
@@ -14,13 +13,11 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel } = message;
-        if (!guild) return;
+        const { guild, member, channel } = message;
+        if (!guild || !member) return;
 
         try {
-            let ticket = await getTicketMod(message, args, text, false);
-            closeTicket(ticket, guild);
-
+            const ticket = await closeTicket(args, text, member, true);
             sendSuccess(channel, 'Ticket closed.');
             log(`<@${message.author.id}> closed the ticket "${ticket.title}" by <@${ticket.author}>.`);
         } catch (error) {

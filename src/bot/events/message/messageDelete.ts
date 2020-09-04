@@ -1,8 +1,8 @@
 import { Event } from '../../eventHandler.js';
 import { Message, TextChannel } from 'discord.js';
 import { settings } from '../../bot.js';
-import Ticket from '../../../db/models/Ticket.js';
 import log from '../../lib/log.js';
+import { db } from '../../../db/postgres.js';
 
 export const event: Event = {
     name: 'messageDelete',
@@ -12,14 +12,15 @@ export const event: Event = {
 
         if (!message.partial) if (!message.author.bot || message.embeds.length === 0) return;
 
-        const ticket = await Ticket.findOne({ channel: channel.id });
-        if (!ticket || !ticket.comments) return;
+        const results = await db.query(
+            /*sql*/ `
+            DELETE FROM comment 
+            WHERE channel_id = $1 AND message_id = $2
+            RETURNING content`,
+            [channel.id, message.id]
+        );
 
-        const comment = ticket.comments.find((comment) => comment.message === message.id);
-        if (!comment) return;
-
-        comment.remove();
-        ticket.save();
-        log(`Removed ticket comment from <#${ticket.channel}>:\n\n${comment.content}`);
+        if (results.rowCount === 0) return;
+        log(`Removed ticket comment from <#${channel.id}>:\n\n${results.rows[0].content}`);
     },
 };

@@ -1,9 +1,8 @@
 import { Command } from '../../commandHandler.js';
-import { Message, TextChannel } from 'discord.js';
-import { getTicketMod } from '../../lib/searchMessage.js';
-import { client, settings } from '../../bot.js';
+import { Message } from 'discord.js';
 import { sendSuccess, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { deleteTicket } from '../../lib/tickets.js';
 
 export const command: Command = {
     commands: ['delete'],
@@ -14,26 +13,12 @@ export const command: Command = {
     superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
-        const { channel } = message;
+        const { channel, guild } = message;
+        if (!guild) return;
 
         try {
-            const ticket = await getTicketMod(message, args, text, undefined);
+            const ticket = await deleteTicket(args, text, guild);
 
-            if (ticket.channel) {
-                (await client.channels.fetch(ticket.channel)).delete();
-            }
-
-            if (ticket.subscriptionMessage) {
-                const { guild } = message;
-                if (!guild) return;
-                const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-                if (!(subscriptionChannel instanceof TextChannel)) return;
-
-                (await subscriptionChannel.messages.fetch(ticket.subscriptionMessage)).delete();
-                ticket.subscriptionMessage = '';
-            }
-
-            await ticket.deleteOne();
             sendSuccess(channel, 'Ticket deleted.');
             log(`<@${message.author.id}> deleted the ticket "${ticket.title}" by <@${ticket.author}>.`);
         } catch (error) {
