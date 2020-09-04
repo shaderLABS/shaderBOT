@@ -16,7 +16,7 @@ export async function registerEvents(dir: string) {
         if (stat.isDirectory()) {
             registerEvents(path.join(dir, file));
         } else if (file.endsWith('.js')) {
-            const { event }: { event: Event } = await import(path.join(filePath, file));
+            const { event }: { event: Event } = await import(process.platform === "win32" ? path.join("file://", filePath, file) : path.join(filePath, file));
             console.log(`Registering event "${file}"...`);
 
             events.set(event.name, event);

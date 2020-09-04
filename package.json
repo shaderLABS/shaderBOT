@@ -7,7 +7,7 @@
     "scripts": {
         "build": "tsc",
         "start": "node --experimental-json-modules src/index.js",
-        "dev": "tsc && node --experimental-json-modules --trace-warnings -r dotenv/config src/index.js"
+        "dev": "tsc && node --trace-warnings -r dotenv/config src/index.js"
     },
     "author": "shaderLABS",
     "type": "module",
