@@ -2,7 +2,6 @@ import { Event } from '../../eventHandler.js';
 import { Message, TextChannel, MessageEmbed } from 'discord.js';
 import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
-import mongoose from 'mongoose';
 import { cacheAttachments } from '../../lib/tickets.js';
 import { sendError } from '../../lib/embeds.js';
 import { db } from '../../../db/postgres.js';
@@ -27,26 +26,12 @@ async function ticketComment(message: Message) {
     if (message.partial || !(channel instanceof TextChannel) || !channel.topic || !member) return;
 
     const id = channel.topic.split(' | ')[0];
-
-    const comment: {
-        _id: mongoose.Types.ObjectId;
-        author: string;
-        message: string;
-        content: string;
-        timestamp: string;
-        attachments?: string[];
-    } = {
-        _id: new mongoose.Types.ObjectId(),
-        author: member.id,
-        message: '',
-        content,
-        timestamp: new Date().toISOString(),
-    };
+    const timestamp = new Date();
 
     const commentEmbed = new MessageEmbed()
         .setColor(message.member?.displayHexColor || '#212121')
         .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-        .setTimestamp(new Date(comment.timestamp))
+        .setTimestamp(timestamp)
         .setDescription(content);
 
     let attachments;
@@ -67,12 +52,10 @@ async function ticketComment(message: Message) {
 
     const commentMessage = await channel.send(commentEmbed);
 
-    comment.message = commentMessage.id;
-
     await db.query(
         /*sql*/ `
         INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [id, member.user.id, commentMessage.id, content, attachments, new Date()]
+        [id, member.user.id, commentMessage.id, content, attachments, timestamp]
     );
 }
