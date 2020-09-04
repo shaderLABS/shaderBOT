@@ -2,10 +2,9 @@ import { Event } from '../../eventHandler.js';
 import { Message, TextChannel, MessageEmbed } from 'discord.js';
 import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
-import Ticket from '../../../db/models/Ticket.js';
-import mongoose from 'mongoose';
 import { cacheAttachments } from '../../lib/tickets.js';
 import { sendError } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.js';
 
 export const event: Event = {
     name: 'message',
@@ -23,37 +22,24 @@ export const event: Event = {
 };
 
 async function ticketComment(message: Message) {
-    const { channel, member, content, attachments } = message;
+    const { channel, member, content } = message;
     if (message.partial || !(channel instanceof TextChannel) || !channel.topic || !member) return;
 
     const id = channel.topic.split(' | ')[0];
-
-    const comment: {
-        _id: mongoose.Types.ObjectId;
-        author: string;
-        message: string;
-        content: string;
-        timestamp: string;
-        attachments?: string[];
-    } = {
-        _id: new mongoose.Types.ObjectId(),
-        author: member.id,
-        message: '',
-        content,
-        timestamp: new Date().toISOString(),
-    };
+    const timestamp = new Date();
 
     const commentEmbed = new MessageEmbed()
         .setColor(message.member?.displayHexColor || '#212121')
         .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
-        .setTimestamp(new Date(comment.timestamp))
+        .setTimestamp(timestamp)
         .setDescription(content);
 
+    let attachments;
     try {
         const attachmentURLs = await cacheAttachments(message);
         if (attachmentURLs.length !== 0) {
             commentEmbed.attachFiles(attachmentURLs);
-            comment.attachments = attachmentURLs;
+            attachments = attachmentURLs;
         }
     } catch (error) {
         const errorMessage = await sendError(channel, error);
@@ -62,15 +48,14 @@ async function ticketComment(message: Message) {
 
     await message.delete();
 
-    if ((!comment.attachments || comment.attachments.length === 0) && (!comment.content || comment.content === '')) return;
+    if ((!attachments || attachments.length === 0) && (!content || content === '')) return;
 
     const commentMessage = await channel.send(commentEmbed);
 
-    comment.message = commentMessage.id;
-
-    await Ticket.findByIdAndUpdate(id, {
-        $push: {
-            comments: comment,
-        },
-    });
+    await db.query(
+        /*sql*/ `
+        INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+        [id, member.user.id, commentMessage.id, content, attachments, timestamp]
+    );
 }
