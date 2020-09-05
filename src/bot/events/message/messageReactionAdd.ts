@@ -40,7 +40,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         }
 
         const embed = originalMessage.embeds[0];
-        if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket.ticket_id || ticket.author_id !== user.id)
+        if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket.id || ticket.author_id !== user.id)
             return reaction.remove();
 
         const originalFieldValues = [embed.fields[0].value.slice(0), embed.fields[2].value.slice(0)];
@@ -101,7 +101,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 }
             }
 
-            await db.query(/*sql*/ `UPDATE ticket SET title = $1, edited = $2 WHERE ticket_id = $3`, [newTitle.content, editedAt, ticket.ticket_id]);
+            await db.query(/*sql*/ `UPDATE ticket SET title = $1, edited = $2 WHERE id = $3`, [newTitle.content, editedAt, ticket.id]);
 
             editPartQuestion.delete();
             editPart.delete();
@@ -129,7 +129,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
             embed.fields[2].value = newDescription.content;
 
-            await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE ticket_id = $3`, [newDescription.content, editedAt, ticket.ticket_id]);
+            await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE id = $3`, [newDescription.content, editedAt, ticket.id]);
 
             editPartQuestion.delete();
             editPart.delete();
@@ -186,8 +186,8 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             /*sql*/ `
             UPDATE comment 
             SET content = $1, edited = $2 
-            WHERE comment_id = $3`,
-            [newMessage.content, editedAt, comment.comment_id]
+            WHERE id = $3`,
+            [newMessage.content, editedAt, comment.id]
         );
 
         reaction.remove();
