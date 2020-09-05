@@ -60,10 +60,10 @@ export const command: Command = {
             /*sql*/ `
             INSERT INTO project (channel_id, owners, role_id) 
             VALUES ($1, $2, $3) 
-            RETURNING project_id;`,
+            RETURNING id;`,
             [channel.id, owners.map((owner) => owner.id), role.id]
         );
-        const projectID = insert.rows[0].project_id;
+        const projectID = insert.rows[0].id;
 
         channel.send(
             new MessageEmbed()

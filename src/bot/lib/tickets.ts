@@ -29,10 +29,10 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
     const response = await db.query(
         /*sql*/ `
-        SELECT ticket_id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
+        SELECT id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
             FROM ticket 
             ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
-            WHERE ${uuid.test(args[0]) ? 'ticket_id = $1' : 'title = $1'} 
+            WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'} 
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
                 AND closed = TRUE 
             LIMIT 1`,
@@ -42,7 +42,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT ticket_id, title 
+            SELECT id, title 
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = TRUE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
@@ -52,7 +52,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
         );
 
         let errorMessage = 'No closed tickets were found.';
-        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row: any) => `${row.id} | ${row.title}`).join('\n') + '```';
         return Promise.reject(errorMessage);
     }
 
@@ -61,14 +61,14 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
         parent: settings.ticket.categoryID,
-        topic: `${ticket.ticket_id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
+        topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
         rateLimitPerUser: 10,
         permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
     });
 
     const ticketAuthor = await client.users.fetch(ticket.author_id);
 
-    let ticketFooter = `ID: ${ticket.ticket_id}`;
+    let ticketFooter = `ID: ${ticket.id}`;
     if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
 
     const ticketEmbed = new MessageEmbed()
@@ -104,16 +104,16 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
         /*sql*/ `
         UPDATE ticket
         SET closed = FALSE, channel_id = $1, subscription_message_id = $2  
-        WHERE ticket_id = $3;`,
-        [ticketChannel.id, subscriptionMessage.id, ticket.ticket_id]
+        WHERE id = $3;`,
+        [ticketChannel.id, subscriptionMessage.id, ticket.id]
     );
 
     const comments = await db.query(
         /*sql*/ `
-        SELECT comment_id, author_id, edited, timestamp, content, attachments
+        SELECT id, author_id, edited, timestamp, content, attachments
         FROM comment
         WHERE ticket_id = $1`,
-        [ticket.ticket_id]
+        [ticket.id]
     );
 
     if (comments.rowCount !== 0) {
@@ -132,7 +132,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
             if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
             const commentMessage = await ticketChannel.send(commentEmbed);
-            commentMessageQuery += `UPDATE comment SET message_id = ${commentMessage.id} WHERE comment_id = '${comment.comment_id}';\n`;
+            commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
         }
 
         await db.query(commentMessageQuery);
@@ -148,7 +148,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
         UPDATE ticket
         SET closed = TRUE 
         ${moderate ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
-        WHERE ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
+        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'} 
             AND ticket.closed = FALSE
             ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
         RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title;`,
@@ -158,7 +158,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT ticket_id, title 
+            SELECT id, title 
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = FALSE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
@@ -168,7 +168,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
         );
 
         let errorMessage = 'No open tickets were found.';
-        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row: any) => `${row.id} | ${row.title}`).join('\n') + '```';
         return Promise.reject(errorMessage);
     }
 
@@ -192,7 +192,7 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
     const response = await db.query(
         /*sql*/ `
         DELETE FROM ticket
-        WHERE ${uuid.test(args[0]) ? 'ticket.ticket_id = $1' : 'ticket.title = $1'} 
+        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'} 
         RETURNING subscription_message_id, channel_id, title, author_id;`,
         [uuid.test(args[0]) ? args[0] : text]
     );
@@ -200,7 +200,7 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT ticket_id, title 
+            SELECT id, title 
             FROM ticket
             ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,
@@ -208,7 +208,7 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
         );
 
         let errorMessage = 'No tickets were found.';
-        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row) => `${row.ticket_id} | ${row.title}`).join('\n') + '```';
+        if (similarResults.rowCount !== 0) errorMessage += '\nSimilar results:\n```' + similarResults.rows.map((row: any) => `${row.id} | ${row.title}`).join('\n') + '```';
         return Promise.reject(errorMessage);
     }
 

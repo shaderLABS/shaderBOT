@@ -35,7 +35,7 @@ export const command: Command = {
             UPDATE project 
             SET owners = $1 
             FROM project old_project 
-            WHERE project.project_id = old_project.project_id 
+            WHERE project.id = old_project.id 
                 AND project.channel_id = $2 
             RETURNING old_project.owners::TEXT[] AS old_owners`,
             [owners.map((owner) => owner.id), channel.id]
