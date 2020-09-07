@@ -44,7 +44,7 @@ To start the project, run:
 npm run dev
 ```
 
-This will transpile the typescript files and run the Node.js server.
+This will transpile the TypeScript files and run the Node.js server.
 
 ## Recommended VSCode Settings and Extensions
 
@@ -65,7 +65,7 @@ Adding the following options to your `settings.json` is highly recommended:
     }
 ```
 
-This will hide the transpiled javascript files if there are corresponding typescript files.
+This will hide the transpiled JavaScript files if there are corresponding TypeScript files.
 
 ### Extensions
 

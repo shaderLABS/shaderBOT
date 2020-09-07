@@ -4,7 +4,7 @@ const router = express.Router();
 
 router.get('/', passport.authenticate('discord'));
 router.get('/redirect', passport.authenticate('discord'), (req, res) => {
-    res.sendStatus(200);
+    res.redirect('http://localhost:5000');
 });
 router.get('/me', (req, res) => {
     if (req.user) {

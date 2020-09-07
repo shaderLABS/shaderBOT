@@ -1,6 +1,7 @@
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { db } from '../../db/postgres.js';
+import { settings, client } from '../../bot/bot.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.user_id);
@@ -8,7 +9,16 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (user_id, done) => {
     try {
-        const user = (await db.query(/*sql*/ `SELECT * FROM "user" WHERE user_id = $1 LIMIT 1`, [user_id])).rows[0];
+        const user = (
+            await db.query(
+                /*sql*/ `
+                SELECT "user_id"::TEXT, "username", "discriminator", "avatar", "role_ids"::TEXT[] 
+                FROM "user" 
+                WHERE user_id = $1 
+                LIMIT 1`,
+                [user_id]
+            )
+        ).rows[0];
         return user ? done(undefined, user) : done(null);
     } catch (error) {
         console.log(error);
@@ -22,23 +32,36 @@ passport.use(
             clientID: process.env.APPLICATION_CLIENT_ID || '',
             clientSecret: process.env.APPLICATION_CLIENT_SECRET || '',
             callbackURL: '/api/auth/redirect',
-            scope: ['identify', 'guilds'],
+            scope: ['identify'],
         },
-        async (accessToken, refreshToken, profile, done) => {
-            const { id, username, discriminator, avatar, guilds } = profile;
-            if (!guilds) return done(new Error("The user isn't in any guilds."));
+        async (_accessToken, _refreshToken, profile, done) => {
+            const { id, username, discriminator, avatar } = profile;
+
+            const member = await client.guilds.cache.first()?.members.fetch(id);
+            if (!member) return done(new Error('NOT IN REQUIRED GUILD'));
+
+            const roles = member.roles.cache.keyArray().filter((role) => role !== member.guild.roles.everyone.id);
+            if (roles.length === 0) return done(new Error('NO ROLES'));
 
             try {
-                const user = await db.query(
+                const user = {
+                    user_id: id,
+                    username,
+                    discriminator,
+                    avatar,
+                    role_ids: roles,
+                };
+
+                await db.query(
                     /*sql*/ `
-                    INSERT INTO "user" (user_id, username, discriminator, avatar, guild_ids) 
+                    INSERT INTO "user" (user_id, username, discriminator, avatar, role_ids) 
                     VALUES ($1, $2, $3, $4, $5)
                     ON CONFLICT (user_id) DO UPDATE
-                    SET username = $2, discriminator = $3, avatar = $4, guild_ids = $5
-                    RETURNING user_id, username, discriminator, avatar, guild_ids`,
-                    [id, username, discriminator, avatar, guilds.map((guild) => guild.id)]
+                    SET username = $2, discriminator = $3, avatar = $4, role_ids = $5`,
+                    Object.values(user)
                 );
-                done(undefined, user.rows[0]);
+
+                done(undefined, user);
             } catch (error) {
                 console.log(error);
                 done(error);
