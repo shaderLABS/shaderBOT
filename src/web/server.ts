@@ -5,6 +5,8 @@ import passport from 'passport';
 import routes from './routes/main.js';
 import session from 'express-session';
 import store from 'connect-pg-simple';
+import cors from 'cors';
+
 import './strategies/discord.js';
 import { db } from '../db/postgres.js';
 
@@ -13,6 +15,13 @@ const pg_store = store(session);
 const port = process.env.PORT || 3001;
 const dirname = path.resolve();
 const app = express();
+
+app.use(
+    cors({
+        origin: ['http://localhost:5000'],
+        credentials: true,
+    })
+);
 
 app.use(helmet());
 app.use(express.json());
