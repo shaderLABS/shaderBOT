@@ -1,11 +1,19 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
+DROP TABLE IF EXISTS "project";
+CREATE TABLE "project" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    channel_id NUMERIC(20) UNIQUE NOT NULL,
+    owners NUMERIC(20)[] NOT NULL,
+    role_id NUMERIC(20) UNIQUE NOT NULL
+);
+
 DROP TABLE IF EXISTS "ticket";
 CREATE TABLE "ticket" (            
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT UNIQUE NOT NULL,
-    project_channel_id NUMERIC(20) NOT NULL,
+    project_channel_id NUMERIC(20) NOT NULL REFERENCES project(channel_id),
     description TEXT,
     attachments TEXT[],
     author_id NUMERIC(20) NOT NULL,
@@ -19,7 +27,7 @@ CREATE TABLE "ticket" (
 DROP TABLE IF EXISTS "comment";
 CREATE TABLE "comment" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    ticket_id UUID NOT NULL,
+    ticket_id UUID NOT NULL REFERENCES ticket(id),
     author_id NUMERIC(20) NOT NULL,
     message_id NUMERIC(20) UNIQUE,
     content TEXT,
@@ -28,21 +36,13 @@ CREATE TABLE "comment" (
     edited TIMESTAMP WITH TIME ZONE
 );
 
-DROP TABLE IF EXISTS "project";
-CREATE TABLE "project" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    channel_id NUMERIC(20) UNIQUE NOT NULL,
-    owners NUMERIC(20)[] NOT NULL,
-    role_id NUMERIC(20) UNIQUE NOT NULL
-);
-
 DROP TABLE IF EXISTS "user";
 CREATE TABLE "user" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) UNIQUE NOT NULL,
     username VARCHAR(32) NOT NULL,
     discriminator SMALLINT NOT NULL,
-    avatar TEXT NOT NULL,
+    avatar TEXT,
     role_ids NUMERIC(20)[] NOT NULL
 );
 

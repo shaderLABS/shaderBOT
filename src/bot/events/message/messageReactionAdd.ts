@@ -23,10 +23,10 @@ export const event: Event = {
 };
 
 async function edit(reaction: MessageReaction, user: User, guild: Guild, channel: TextChannel) {
-    const comment = (await db.query(/*sql*/ `SELECT * FROM comment WHERE message_id = $1 LIMIT 1`, [reaction.message.id])).rows[0];
+    const comment = (await db.query(/*sql*/ `SELECT id, author_id, content FROM comment WHERE message_id = $1 LIMIT 1`, [reaction.message.id])).rows[0];
 
     if (!comment) {
-        const ticket = (await db.query(/*sql*/ `SELECT * FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
+        const ticket = (await db.query(/*sql*/ `SELECT id, author_id, channel_id, subscription_message_id FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
         if (!ticket) return;
 
         const originalMessage = await channel.messages.fetch(reaction.message.id);

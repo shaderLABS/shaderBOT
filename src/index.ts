@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { startWebserver } from './web/server.js';
 import { startBot } from './bot/bot.js';
 import { connectPostgreSQL, db } from './db/postgres.js';

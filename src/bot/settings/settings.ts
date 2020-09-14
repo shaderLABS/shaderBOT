@@ -14,7 +14,7 @@ export type Settings = {
         subscriptionChannelID: string;
         attachmentCacheChannelID: string;
     };
-    requiredGuildID: string;
+    mediaChannelIDs: string[];
 };
 
 export function write(data: Object) {

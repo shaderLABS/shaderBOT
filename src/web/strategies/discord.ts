@@ -1,7 +1,7 @@
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { db } from '../../db/postgres.js';
-import { settings, client } from '../../bot/bot.js';
+import { client } from '../../bot/bot.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.user_id);
@@ -34,14 +34,15 @@ passport.use(
             callbackURL: '/api/auth/redirect',
             scope: ['identify'],
         },
+
         async (_accessToken, _refreshToken, profile, done) => {
             const { id, username, discriminator, avatar } = profile;
 
             const member = await client.guilds.cache.first()?.members.fetch(id);
-            if (!member) return done(new Error('NOT IN REQUIRED GUILD'));
+            if (!member) return done(undefined, undefined, { error: 0 });
 
             const roles = member.roles.cache.keyArray().filter((role) => role !== member.guild.roles.everyone.id);
-            if (roles.length === 0) return done(new Error('NO ROLES'));
+            if (roles.length === 0) return done(undefined, undefined, { error: 1 });
 
             try {
                 const user = {

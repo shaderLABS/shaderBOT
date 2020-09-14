@@ -29,7 +29,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
     const response = await db.query(
         /*sql*/ `
-        SELECT id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
+        SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
             FROM ticket 
             ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'} 
@@ -42,7 +42,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT id, title 
+            SELECT ticket.id, title 
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = TRUE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
@@ -158,7 +158,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT id, title 
+            SELECT ticket.id, title 
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = FALSE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
