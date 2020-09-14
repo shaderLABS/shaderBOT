@@ -6,15 +6,35 @@ import routes from './routes/main.js';
 import session from 'express-session';
 import store from 'connect-pg-simple';
 import cors from 'cors';
+import apollo from 'apollo-server-express';
 
 import './strategies/discord.js';
 import { db } from '../db/postgres.js';
+import typegraphql from 'type-graphql';
+import { TicketResolver } from '../db/resolvers/TicketResolver.js';
+import { UserResolver } from '../db/resolvers/UserResolver.js';
 
 const pg_store = store(session);
 
 const port = process.env.PORT || 3001;
 const dirname = path.resolve();
 const app = express();
+
+const server = new apollo.ApolloServer({
+    schema: await typegraphql.buildSchema({
+        resolvers: [TicketResolver, UserResolver],
+    }),
+    context: ({ req, res }) => ({ req, res }),
+    // typeDefs: typedefinitions,
+    // // resolvers,
+    // // resolvers: [],
+    // context: ({ req }) => ({
+    //     getUser: () => req.user,
+    //     logout: () => req.logOut(),
+    // }),
+});
+
+server.applyMiddleware({ app });
 
 app.use(
     cors({
@@ -39,10 +59,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api', routes);
-
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
 
 export function startWebserver() {
     app.listen(port, () => console.log(`Started web server on port ${port}.`));

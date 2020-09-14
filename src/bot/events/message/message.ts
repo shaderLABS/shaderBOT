@@ -13,6 +13,7 @@ export const event: Event = {
 
         if (!(channel instanceof TextChannel) || message.author.bot) return;
         if (channel.parentID === settings.ticket.categoryID) return ticketComment(message);
+        if (mediaOnly(message)) return;
         if (!content.startsWith(settings.prefix)) return;
 
         const [invoke, ...args] = content.slice(settings.prefix.length).trim().split(/[ ]+/);
@@ -20,6 +21,19 @@ export const event: Event = {
         if (command) runCommand(command, message, invoke, args);
     },
 };
+
+function mediaOnly(message: Message) {
+    if (
+        !settings.mediaChannelIDs.includes(message.channel.id) ||
+        message.attachments.size !== 0 ||
+        new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?').test(message.content) ||
+        message.member?.permissions.has('MANAGE_MESSAGES')
+    )
+        return false;
+
+    message.delete();
+    return true;
+}
 
 async function ticketComment(message: Message) {
     const { channel, member, content } = message;

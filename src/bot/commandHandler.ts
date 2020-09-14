@@ -27,7 +27,7 @@ export async function registerCommands(dir: string) {
         if (stat.isDirectory()) {
             registerCommands(path.join(dir, file));
         } else if (file.endsWith('.js')) {
-            const { command }: { command: Command } = await import(process.platform === "win32" ? path.join("file://", filePath, file) : path.join(filePath, file));
+            const { command }: { command: Command } = await import(process.platform === 'win32' ? path.join('file://', filePath, file) : path.join(filePath, file));
 
             if (!command.superCommands) {
                 commands.set(JSON.stringify(command.commands), command);
