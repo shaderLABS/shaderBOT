@@ -13,6 +13,7 @@ import { db } from '../db/postgres.js';
 import typegraphql from 'type-graphql';
 import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
+import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 
 const pg_store = store(session);
 
@@ -22,7 +23,7 @@ const app = express();
 
 const server = new apollo.ApolloServer({
     schema: await typegraphql.buildSchema({
-        resolvers: [TicketResolver, UserResolver],
+        resolvers: [TicketResolver, UserResolver, ProjectResolver],
     }),
     context: ({ req, res }) => ({ req, res }),
     // typeDefs: typedefinitions,
