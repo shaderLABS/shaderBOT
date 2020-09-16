@@ -1,4 +1,3 @@
-import { GraphQLResolveInfo } from 'graphql';
 import tgq from 'type-graphql';
 import { client } from '../../bot/bot.js';
 import { db } from '../postgres.js';
@@ -26,8 +25,21 @@ export class ProjectResolver {
         return results;
     }
 
+    @tgq.FieldResolver({ name: 'tickets', nullable: true })
+    async tickets(@tgq.Root() project: Project) {
+        return (
+            await db.query(
+                /*sql*/ `
+            SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
+            FROM ticket
+            WHERE project_channel_id = $1`,
+                [project.channel_id]
+            )
+        ).rows;
+    }
+
     @tgq.Query(() => Project)
-    async projectByChannelID(@tgq.Arg('id', () => String) id: string, @tgq.Info() info: GraphQLResolveInfo) {
+    async projectByChannelID(@tgq.Arg('id', () => String) id: string) {
         const project = (
             await db.query(
                 /*sql*/ `

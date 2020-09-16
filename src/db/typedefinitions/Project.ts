@@ -1,4 +1,5 @@
 import tgq from 'type-graphql';
+import { Ticket } from './Ticket.js';
 import { User } from './User.js';
 
 @tgq.ObjectType()
@@ -26,6 +27,9 @@ export class Project {
 
     @tgq.Field(() => ProjectChannel)
     channel!: ProjectChannel;
+
+    @tgq.Field(() => [Ticket])
+    tickets!: Ticket[];
 
     // @tgq.Field(() => String)
     // role_id!: string;
