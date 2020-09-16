@@ -1,24 +1,39 @@
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
-import { db } from '../../db/postgres.js';
+// import { db } from '../../db/postgres.js';
 import { client } from '../../bot/bot.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.user_id);
 });
 
-passport.deserializeUser(async (user_id, done) => {
+passport.deserializeUser(async (user_id: string, done) => {
     try {
-        const user = (
-            await db.query(
-                /*sql*/ `
-                SELECT "user_id"::TEXT, "username", "discriminator", "avatar", "role_ids"::TEXT[] 
-                FROM "user" 
-                WHERE user_id = $1 
-                LIMIT 1`,
-                [user_id]
-            )
-        ).rows[0];
+        // const user = (
+        //     await db.query(
+        //         /*sql*/ `
+        //         SELECT "user_id"::TEXT, "username", "discriminator", "avatar", "role_ids"::TEXT[]
+        //         FROM "user"
+        //         WHERE user_id = $1
+        //         LIMIT 1`,
+        //         [user_id]
+        //     )
+        // ).rows[0];
+
+        const member = await client.guilds.cache.first()?.members.fetch(user_id);
+        if (!member) return done(null);
+
+        const roles = member.roles.cache.keyArray().filter((role) => role !== member.guild.roles.everyone.id);
+        if (roles.length === 0) return done(null);
+
+        const user = {
+            user_id: member.id,
+            username: member.user.username,
+            discriminator: member.user.discriminator,
+            avatar: member.user.avatar,
+            role_ids: roles,
+        };
+
         return user ? done(undefined, user) : done(null);
     } catch (error) {
         console.log(error);
@@ -36,9 +51,9 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
-            const { id, username, discriminator, avatar } = profile;
+            // const { id, username, discriminator, avatar } = profile;
 
-            const member = await client.guilds.cache.first()?.members.fetch(id);
+            const member = await client.guilds.cache.first()?.members.fetch(profile.id);
             if (!member) return done(undefined, undefined, { error: 0 });
 
             const roles = member.roles.cache.keyArray().filter((role) => role !== member.guild.roles.everyone.id);
@@ -46,21 +61,25 @@ passport.use(
 
             try {
                 const user = {
-                    user_id: id,
-                    username,
-                    discriminator,
-                    avatar,
+                    user_id: member.id,
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    avatar: member.user.avatar,
                     role_ids: roles,
+                    // user_id: id,
+                    // username,
+                    // discriminator,
+                    // avatar,
                 };
 
-                await db.query(
-                    /*sql*/ `
-                    INSERT INTO "user" (user_id, username, discriminator, avatar, role_ids) 
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (user_id) DO UPDATE
-                    SET username = $2, discriminator = $3, avatar = $4, role_ids = $5`,
-                    Object.values(user)
-                );
+                // await db.query(
+                //     /*sql*/ `
+                //     INSERT INTO "user" (user_id, username, discriminator, avatar, role_ids)
+                //     VALUES ($1, $2, $3, $4, $5)
+                //     ON CONFLICT (user_id) DO UPDATE
+                //     SET username = $2, discriminator = $3, avatar = $4, role_ids = $5`,
+                //     Object.values(user)
+                // );
 
                 done(undefined, user);
             } catch (error) {

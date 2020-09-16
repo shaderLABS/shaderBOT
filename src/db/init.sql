@@ -36,15 +36,15 @@ CREATE TABLE "comment" (
     edited TIMESTAMP WITH TIME ZONE
 );
 
-DROP TABLE IF EXISTS "user";
-CREATE TABLE "user" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id NUMERIC(20) UNIQUE NOT NULL,
-    username VARCHAR(32) NOT NULL,
-    discriminator SMALLINT NOT NULL,
-    avatar TEXT,
-    role_ids NUMERIC(20)[] NOT NULL
-);
+-- DROP TABLE IF EXISTS "user";
+-- CREATE TABLE "user" (
+--     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+--     user_id NUMERIC(20) UNIQUE NOT NULL,
+--     username VARCHAR(32) NOT NULL,
+--     discriminator SMALLINT NOT NULL,
+--     avatar TEXT,
+--     role_ids NUMERIC(20)[] NOT NULL
+-- );
 
 DROP TABLE IF EXISTS "session";
 CREATE TABLE "session" (
