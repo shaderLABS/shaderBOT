@@ -72,7 +72,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
 
     const ticketEmbed = new MessageEmbed()
-        .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.avatarURL() || undefined)
+        .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
         .setColor('#006fff')
         .setFooter(ticketFooter)
         .addFields([
@@ -125,7 +125,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
             const commentEmbed = new MessageEmbed()
                 .setColor(author.displayHexColor || '#212121')
-                .setAuthor(author.user.username + '#' + author.user.discriminator, author.user.avatarURL() || undefined)
+                .setAuthor(author.user.username + '#' + author.user.discriminator, author.user.displayAvatarURL() || undefined)
                 .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);

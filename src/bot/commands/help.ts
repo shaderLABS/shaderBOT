@@ -38,7 +38,7 @@ export const command: Command = {
             }
         }
 
-        pages.push(helpContent);
+        if (helpContent.length !== 0) pages.push(helpContent);
 
         embedPages(await sendInfo(message.channel, pages[0], 'HELP'), message.author, pages);
     },

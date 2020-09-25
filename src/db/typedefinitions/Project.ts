@@ -22,6 +22,7 @@ export class Project {
     @tgq.Field(() => [String])
     owners!: string[];
 
+    // @tgq.Authorized('P_ADMINISTRATOR')
     @tgq.Field(() => [User], { nullable: true })
     ownerUsers!: User[];
 

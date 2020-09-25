@@ -6,7 +6,7 @@
     "private": true,
     "scripts": {
         "build": "tsc",
-        "start": "node --experimental-json-modules src/index.js",
+        "start": "node src/index.js",
         "dev": "nodemon"
     },
     "author": "shaderLABS",

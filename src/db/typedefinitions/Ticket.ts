@@ -1,4 +1,5 @@
 import tgq from 'type-graphql';
+import { Comment } from './Comment.js';
 import { Project } from './Project.js';
 import { User } from './User.js';
 
@@ -36,4 +37,7 @@ export class Ticket {
 
     @tgq.Field(() => Boolean)
     closed!: boolean;
+
+    @tgq.Field(() => [Comment])
+    comments!: Comment[];
 }

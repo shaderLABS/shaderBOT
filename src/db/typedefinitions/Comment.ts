@@ -1,5 +1,5 @@
 import tgq from 'type-graphql';
-import { Ticket } from './Ticket.js';
+// import { Ticket } from './Ticket.js';
 import { User } from './User.js';
 
 @tgq.ObjectType()
@@ -10,8 +10,8 @@ export class Comment {
     @tgq.Field(() => String)
     ticket_id!: string;
 
-    @tgq.Field(() => Ticket)
-    ticket!: Ticket;
+    // @tgq.Field(() => Ticket, { nullable: true })
+    // ticket!: Ticket;
 
     @tgq.Field(() => String)
     author_id!: string;

@@ -1,6 +1,28 @@
+import { Permissions } from 'discord.js';
 import tgq from 'type-graphql';
 import { Project } from './Project.js';
 import { Ticket } from './Ticket.js';
+
+@tgq.ObjectType()
+export class Warning {
+    @tgq.Field(() => tgq.Int)
+    severity!: number;
+}
+
+@tgq.ObjectType()
+export class Role {
+    @tgq.Field(() => String)
+    id!: string;
+
+    @tgq.Field(() => String)
+    hexColor!: string;
+
+    @tgq.Field(() => String)
+    name!: string;
+
+    // @tgq.Field(() => tgq.Int)
+    // position!: number;
+}
 
 @tgq.ObjectType()
 export class User {
@@ -17,11 +39,23 @@ export class User {
     discriminator!: string;
 
     @tgq.Field(() => String, { nullable: true })
-    avatar!: string[];
+    avatarURL!: string[];
+
+    @tgq.Field(() => Number, { nullable: true })
+    permissions!: Number;
+
+    @tgq.Field(() => [Role], { nullable: true })
+    allRoles!: Role[];
+
+    @tgq.Field(() => String, { nullable: true })
+    roleColor!: String;
 
     @tgq.Field(() => [Ticket], { nullable: true })
     tickets!: Ticket[];
 
     @tgq.Field(() => [Project], { nullable: true })
     projects!: Project[];
+
+    @tgq.Field(() => [Warning], { nullable: true })
+    warnings!: Warning[];
 }

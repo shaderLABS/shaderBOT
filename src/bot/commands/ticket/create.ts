@@ -19,7 +19,7 @@ export const command: Command = {
 
         const ticketEmbed = new MessageEmbed()
             .setTitle('CREATE TICKET')
-            .setAuthor(author.username + '#' + author.discriminator, author.avatarURL() || undefined)
+            .setAuthor(author.username + '#' + author.discriminator, author.displayAvatarURL() || undefined)
             .setColor('#006fff')
             .setFooter(`HINT: Type "${settings.prefix}cancel" to stop.`)
             .setTimestamp(Date.now());
@@ -31,9 +31,10 @@ export const command: Command = {
             titleQuestion.delete();
             let attachments = await cacheAttachments(title);
             title.delete();
-            ticketMessage.edit(ticketEmbed.addField('Title', title.content));
 
             if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
+            ticketMessage.edit(ticketEmbed.addField('Title', title.content));
+
             if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM ticket WHERE title=$1) AS "exists";`, [title.content])).rows[0].exists)
                 return sendError(channel, 'A ticket with this name already exists.');
 
@@ -42,10 +43,10 @@ export const command: Command = {
             projectQuestion.delete();
             attachments = [...attachments, ...(await cacheAttachments(project))];
             project.delete();
-            ticketMessage.edit(ticketEmbed.addField('Project', project.content));
 
             const projectChannel = project.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
+            ticketMessage.edit(ticketEmbed.addField('Project', project.content));
 
             if (!(await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [projectChannel.id])).rows[0].exists)
                 return sendError(channel, 'The mentioned text channel is not a valid project.');
@@ -57,11 +58,11 @@ export const command: Command = {
             description.delete();
             if (description.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
             const ticketID = uuid();
-            ticketMessage.edit(ticketEmbed.addField('Description', description.content).setFooter(`ID: ${ticketID}`));
 
             if ((!attachments || attachments.length === 0) && (!description.content || description.content === '')) {
                 return sendError(channel, 'The description may not be empty.');
             }
+            ticketMessage.edit(ticketEmbed.addField('Description', description.content || 'EMPTY').setFooter(`ID: ${ticketID}`));
 
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
             if (!(subscriptionChannel instanceof TextChannel)) return;
