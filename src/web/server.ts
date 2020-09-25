@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import helmet from 'helmet';
 import passport from 'passport';
 import routes from './routes/main.js';
@@ -14,36 +13,29 @@ import typegraphql from 'type-graphql';
 import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
+import { CommentResolver } from '../db/resolvers/CommentResolver.js';
+import { authChecker } from './gqlAuth.js';
 
 const pg_store = store(session);
 
-const port = process.env.PORT || 3001;
-const dirname = path.resolve();
+const port = Number(process.env.PORT) || 3001;
 const app = express();
 
 const server = new apollo.ApolloServer({
     schema: await typegraphql.buildSchema({
-        resolvers: [TicketResolver, UserResolver, ProjectResolver],
+        resolvers: [TicketResolver, UserResolver, ProjectResolver, CommentResolver],
+        authChecker,
     }),
     context: ({ req, res }) => ({ req, res }),
-    // typeDefs: typedefinitions,
-    // // resolvers,
-    // // resolvers: [],
-    // context: ({ req }) => ({
-    //     getUser: () => req.user,
-    //     logout: () => req.logOut(),
-    // }),
+    // playground: false
 });
 
-server.applyMiddleware({ app });
+const corsConfig = {
+    origin: ['http://localhost:5000'],
+    credentials: true,
+};
 
-app.use(
-    cors({
-        origin: ['http://localhost:5000'],
-        credentials: true,
-    })
-);
-
+app.use(cors(corsConfig));
 app.use(helmet());
 app.use(express.json());
 
@@ -61,6 +53,8 @@ app.use(passport.session());
 
 app.use('/api', routes);
 
+server.applyMiddleware({ app, cors: corsConfig });
+
 export function startWebserver() {
-    app.listen(port, () => console.log(`Started web server on port ${port}.`));
+    app.listen(port, /*'192.168.0.12',*/ () => console.log(`Started web server on port ${port}.`));
 }

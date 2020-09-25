@@ -24,6 +24,19 @@ export class TicketResolver {
         ).rows[0];
     }
 
+    @tgq.FieldResolver({ name: 'comments' })
+    async comments(@tgq.Root() ticket: Ticket) {
+        return (
+            await db.query(
+                /*sql*/ `
+                SELECT id::TEXT, ticket_id::TEXT, author_id::TEXT, content, attachments, timestamp::TEXT, edited::TEXT
+                FROM comment
+                WHERE ticket_id = $1`,
+                [ticket.id]
+            )
+        ).rows;
+    }
+
     // @tgq.Mutation(() => Boolean)
     // createTicket(@tgq.Arg('title', () => String) title: string, @tgq.Arg('project', () => String) project: string, @tgq.Arg('description', () => String) description: string) {
     //     console.log(title, project, description);

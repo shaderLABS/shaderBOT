@@ -30,9 +30,9 @@ export class ProjectResolver {
         return (
             await db.query(
                 /*sql*/ `
-            SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
-            FROM ticket
-            WHERE project_channel_id = $1`,
+                SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
+                FROM ticket
+                WHERE project_channel_id = $1`,
                 [project.channel_id]
             )
         ).rows;

@@ -3,8 +3,23 @@ import { client } from '../../bot/bot.js';
 import { User } from '../typedefinitions/User.js';
 import { db } from '../postgres.js';
 
-export function fetchUser(id: string) {
-    return client.users.fetch(id);
+export async function fetchUser(id: string) {
+    const guild = client.guilds.cache.first();
+    if (!guild) return Promise.reject("The bot isn't in any guilds.");
+
+    const member = await guild.members.fetch(id);
+    if (member) {
+        return {
+            ...member.user,
+            avatarURL: member.user.displayAvatarURL(),
+            roleColor: member.displayHexColor,
+            permissions: member.permissions.bitfield,
+            allRoles: member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id).map(({ id, hexColor, name }) => ({ id, hexColor, name })),
+        };
+    } else {
+        const user = await client.users.fetch(id);
+        return { ...user, avatarURL: user.displayAvatarURL() };
+    }
 }
 
 @tgq.Resolver(() => User)
@@ -38,5 +53,11 @@ export class UserResolver {
     @tgq.Query(() => User)
     async user(@tgq.Arg('id', () => String) id: string) {
         return await fetchUser(id);
+    }
+
+    @tgq.Query(() => User, { nullable: true })
+    async me(@tgq.Ctx() ctx: any) {
+        console.log(ctx.req.user);
+        return ctx.req.user;
     }
 }

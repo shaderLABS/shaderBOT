@@ -14,8 +14,9 @@ export const command: Command = {
 
         pinging.edit(
             pinging.embeds[0].setDescription('').addFields([
-                { name: 'Bot Latency', value: latency + 'ms' },
+                { name: 'Bot Latency', value: latency - client.ws.ping + 'ms' },
                 { name: 'API Latency', value: client.ws.ping + 'ms' },
+                { name: 'Total Latency', value: latency + 'ms' },
             ])
         );
     },

@@ -36,6 +36,23 @@ CREATE TABLE "comment" (
     edited TIMESTAMP WITH TIME ZONE
 );
 
+DROP TABLE IF EXISTS "warn";
+CREATE TABLE "warn" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20) NOT NULL,
+    severity SMALLINT NOT NULL,
+    reason TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP FUNCTION IF EXISTS "expire_warns";
+CREATE FUNCTION expire_warns() RETURNS VOID AS $$
+	BEGIN
+		DELETE FROM warn WHERE timestamp < NOW() - INTERVAL '1 minute';
+	END;
+$$ LANGUAGE plpgsql;
+
 -- DROP TABLE IF EXISTS "user";
 -- CREATE TABLE "user" (
 --     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

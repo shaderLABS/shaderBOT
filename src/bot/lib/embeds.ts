@@ -24,25 +24,39 @@ export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, d
     return await channel.send(message, embed);
 }
 
-export async function embedPages(message: Message, author: User, pages: string[]) {
+export async function embedPages(message: Message, author: User, pages?: string[], fields?: { name: string; value: string; inline: boolean }[][]) {
     const embed = message.embeds[0];
-    if (!embed || pages.length === 1 || pages.length === 0) return;
+    if (!embed || (pages && (pages.length === 1 || pages.length === 0)) || (fields && (fields.length === 0 || fields.length === 1))) return;
 
     message.react('➡️');
-    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { time: 60000 });
+    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 60000, time: 240000 });
 
     let index = 0;
     collector.on('collect', async (reaction) => {
-        if (reaction.emoji.name === '⬅️' && pages[index - 1]) index--;
-        else if (reaction.emoji.name === '➡️' && pages[index + 1]) index++;
-        else return;
+        if (pages) {
+            if (reaction.emoji.name === '⬅️' && pages[index - 1]) index--;
+            else if (reaction.emoji.name === '➡️' && pages[index + 1]) index++;
+            else return;
 
-        await message.reactions.removeAll();
-        // if (pageFooter) embed.setFooter(`Page ${index + 1}/${pages.length}`);
-        message.edit(embed.setDescription(pages[index]));
+            await message.reactions.removeAll();
+            // if (pageFooter) embed.setFooter(`Page ${index + 1}/${pages.length}`);
+            message.edit(embed.setDescription(pages[index]));
 
-        if (index !== 0) message.react('⬅️');
-        if (index + 1 < pages.length) message.react('➡️');
+            if (index !== 0) message.react('⬅️');
+            if (index + 1 < pages.length) message.react('➡️');
+        } else if (fields) {
+            if (reaction.emoji.name === '⬅️' && fields[index - 1]) index--;
+            else if (reaction.emoji.name === '➡️' && fields[index + 1]) index++;
+            else return;
+
+            await message.reactions.removeAll();
+
+            embed.fields = fields[index];
+            message.edit(embed);
+
+            if (index !== 0) message.react('⬅️');
+            if (index + 1 < fields.length) message.react('➡️');
+        }
     });
 
     collector.on('end', () => {

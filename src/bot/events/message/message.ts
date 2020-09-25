@@ -44,7 +44,7 @@ async function ticketComment(message: Message) {
 
     const commentEmbed = new MessageEmbed()
         .setColor(message.member?.displayHexColor || '#212121')
-        .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.avatarURL() || undefined)
+        .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.displayAvatarURL() || undefined)
         .setTimestamp(timestamp)
         .setDescription(content);
 
