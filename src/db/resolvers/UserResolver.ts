@@ -57,7 +57,6 @@ export class UserResolver {
 
     @tgq.Query(() => User, { nullable: true })
     async me(@tgq.Ctx() ctx: any) {
-        console.log(ctx.req.user);
         return ctx.req.user;
     }
 }
