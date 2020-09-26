@@ -70,3 +70,5 @@ This will hide the transpiled JavaScript files if there are corresponding TypeSc
 ### Extensions
 
 -   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL Syntax Hightlighting inside of TypeScript
+
+## Made with [<img src="https://cdn.discordapp.com/emojis/758513218770567188.gif" width="40" height="40"/>](https://files.catbox.moe/3nyc47.mp3) by [Niemand](https://github.com/NiemandTV)
