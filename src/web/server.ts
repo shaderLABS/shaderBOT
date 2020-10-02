@@ -6,6 +6,7 @@ import session from 'express-session';
 import store from 'connect-pg-simple';
 import cors from 'cors';
 import apollo from 'apollo-server-express';
+import ssr from '@roxi/ssr';
 
 import './strategies/discord.js';
 import { db } from '../db/postgres.js';
@@ -20,6 +21,7 @@ const pg_store = store(session);
 
 const port = Number(process.env.PORT) || 3001;
 const app = express();
+const production = process.env.NODE_ENV === 'production';
 
 const server = new apollo.ApolloServer({
     schema: await typegraphql.buildSchema({
@@ -27,16 +29,28 @@ const server = new apollo.ApolloServer({
         authChecker,
     }),
     context: ({ req, res }) => ({ req, res }),
-    // playground: false
+    playground: !production,
 });
 
 const corsConfig = {
-    origin: ['http://localhost:5000'],
+    origin: ['http://localhost:5000', 'http://localhost:5005', 'http://localhost'],
     credentials: true,
 };
 
 app.use(cors(corsConfig));
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                'default-src': ["'self'"],
+                'img-src': ["'self'", 'cdn.discordapp.com'],
+                'media-src': ["'self'", 'cdn.discordapp.com'],
+                'style-src': ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+                'font-src': ["'self'", 'fonts.gstatic.com'],
+            },
+        },
+    })
+);
 app.use(express.json());
 
 app.use(
@@ -52,6 +66,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api', routes);
+
+if (production) {
+    const ENTRYPOINT = 'dist/__app.html';
+    const APP = 'dist/build/bundle.js';
+
+    app.use(express.static('dist'));
+
+    app.get('*', async (req, res) => {
+        const html = await ssr.ssr(ENTRYPOINT, APP, req.url);
+        res.send(html);
+    });
+}
 
 server.applyMiddleware({ app, cors: corsConfig });
 
