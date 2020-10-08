@@ -6,7 +6,7 @@ import session from 'express-session';
 import store from 'connect-pg-simple';
 import cors from 'cors';
 import apollo from 'apollo-server-express';
-import ssr from '@roxi/ssr';
+import ssr from 'tossr';
 
 import './strategies/discord.js';
 import { db } from '../db/postgres.js';
@@ -16,6 +16,7 @@ import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { authChecker } from './gqlAuth.js';
+import path from 'path';
 
 const pg_store = store(session);
 
@@ -67,14 +68,17 @@ app.use(passport.session());
 
 app.use('/api', routes);
 
-if (production) {
-    const ENTRYPOINT = 'dist/__app.html';
-    const APP = 'dist/build/bundle.js';
+console.log(path.resolve());
 
-    app.use(express.static('dist'));
+if (production) {
+    const DISTPATH = path.join(path.resolve(), 'dist');
+    const ENTRYPOINT = path.join(DISTPATH, '__app.html');
+    const APP = path.join(DISTPATH, 'build', 'bundle.js');
+
+    app.use(express.static(DISTPATH));
 
     app.get('*', async (req, res) => {
-        const html = await ssr.ssr(ENTRYPOINT, APP, req.url);
+        const html = await ssr.tossr(ENTRYPOINT, APP, req.url, { inlineDynamicImports: true, timeout: 10000 });
         res.send(html);
     });
 }

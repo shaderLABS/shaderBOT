@@ -56,7 +56,95 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
         return Promise.reject(errorMessage);
     }
 
-    const ticket = response.rows[0];
+    const ticket = await openTicketLib(response.rows[0], guild);
+    return { title: ticket.title, author: ticket.author_id };
+
+    // const ticketChannel = await guild.channels.create(ticket.title, {
+    //     type: 'text',
+    //     parent: settings.ticket.categoryID,
+    //     topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
+    //     rateLimitPerUser: 10,
+    //     permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
+    // });
+
+    // const ticketAuthor = await client.users.fetch(ticket.author_id);
+
+    // let ticketFooter = `ID: ${ticket.id}`;
+    // if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
+
+    // const ticketEmbed = new MessageEmbed()
+    //     .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
+    //     .setColor('#006fff')
+    //     .setFooter(ticketFooter)
+    //     .addFields([
+    //         {
+    //             name: 'Title',
+    //             value: ticket.title,
+    //         },
+    //         {
+    //             name: 'Project',
+    //             value: ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT',
+    //         },
+    //         {
+    //             name: 'Description',
+    //             value: ticket.description,
+    //         },
+    //     ])
+    //     .setTimestamp(new Date(ticket.timestamp));
+
+    // if (ticket.attachments) ticketEmbed.attachFiles(ticket.attachments);
+
+    // await ticketChannel.send(ticketEmbed);
+
+    // const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+    // if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
+
+    // const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+
+    // await db.query(
+    //     /*sql*/ `
+    //     UPDATE ticket
+    //     SET closed = FALSE, channel_id = $1, subscription_message_id = $2
+    //     WHERE id = $3;`,
+    //     [ticketChannel.id, subscriptionMessage.id, ticket.id]
+    // );
+
+    // const comments = await db.query(
+    //     /*sql*/ `
+    //     SELECT id, author_id, edited, timestamp, content, attachments
+    //     FROM comment
+    //     WHERE ticket_id = $1`,
+    //     [ticket.id]
+    // );
+
+    // if (comments.rowCount !== 0) {
+    //     let commentMessageQuery = '';
+
+    //     for (let i = 0; i < comments.rowCount; i++) {
+    //         const comment = comments.rows[i];
+    //         const author = await member.guild.members.fetch(comment.author_id);
+
+    //         const commentEmbed = new MessageEmbed()
+    //             .setColor(author.displayHexColor || '#212121')
+    //             .setAuthor(author.user.username + '#' + author.user.discriminator, author.user.displayAvatarURL() || undefined)
+    //             .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
+    //             .setTimestamp(new Date(comment.timestamp))
+    //             .setDescription(comment.content);
+
+    //         if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+    //         const commentMessage = await ticketChannel.send(commentEmbed);
+    //         commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
+    //     }
+
+    //     await db.query(commentMessageQuery);
+    // }
+
+    // ticketChannel.overwritePermissions([]);
+    // return { title: ticket.title, author: ticket.author_id };
+}
+
+export async function openTicketLib(ticket: any, guild: Guild | undefined = client.guilds.cache.first()) {
+    if (!guild) return Promise.reject('No guild.');
 
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
@@ -121,7 +209,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
         for (let i = 0; i < comments.rowCount; i++) {
             const comment = comments.rows[i];
-            const author = await member.guild.members.fetch(comment.author_id);
+            const author = await guild.members.fetch(comment.author_id);
 
             const commentEmbed = new MessageEmbed()
                 .setColor(author.displayHexColor || '#212121')
@@ -139,7 +227,9 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     }
 
     ticketChannel.overwritePermissions([]);
-    return { title: ticket.title, author: ticket.author_id };
+
+    ticket.closed = false;
+    return ticket;
 }
 
 export async function closeTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
@@ -151,7 +241,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
         WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'} 
             AND ticket.closed = FALSE
             ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
-        RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title;`,
+        RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title, ticket.author_id;`,
         moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
     );
 
@@ -174,18 +264,35 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
 
     const ticket = response.rows[0];
 
+    await closeTicketLib(ticket, member.guild);
+
+    // if (ticket.subscription_message_id) {
+    //     const subscriptionChannel = member.guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+    //     if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
+    //     (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
+    // }
+
+    // if (ticket.channel_id) {
+    //     const ticketChannel = member.guild.channels.cache.get(ticket.channel_id);
+    //     if (ticketChannel) ticketChannel.delete();
+    // }
+
+    return { title: ticket.title, author: ticket.author_id };
+}
+
+export async function closeTicketLib(ticket: any, guild: Guild | undefined = client.guilds.cache.first()) {
+    if (!guild) return Promise.reject('No guild.');
+
     if (ticket.subscription_message_id) {
-        const subscriptionChannel = member.guild.channels.cache.get(settings.ticket.subscriptionChannelID);
+        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
         if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
         (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
     }
 
     if (ticket.channel_id) {
-        const ticketChannel = member.guild.channels.cache.get(ticket.channel_id);
+        const ticketChannel = guild.channels.cache.get(ticket.channel_id);
         if (ticketChannel) ticketChannel.delete();
     }
-
-    return { title: ticket.title, author: ticket.author_id };
 }
 
 export async function deleteTicket(args: string[], text: string, guild: Guild) {
