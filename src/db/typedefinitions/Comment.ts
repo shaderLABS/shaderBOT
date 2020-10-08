@@ -1,5 +1,4 @@
 import tgq from 'type-graphql';
-// import { Ticket } from './Ticket.js';
 import { User } from './User.js';
 
 @tgq.ObjectType()
@@ -9,9 +8,6 @@ export class Comment {
 
     @tgq.Field(() => String)
     ticket_id!: string;
-
-    // @tgq.Field(() => Ticket, { nullable: true })
-    // ticket!: Ticket;
 
     @tgq.Field(() => String)
     author_id!: string;
@@ -24,6 +20,9 @@ export class Comment {
 
     @tgq.Field(() => [String], { nullable: true })
     attachments!: string[];
+
+    @tgq.Field(() => String)
+    message_id!: string;
 
     @tgq.Field(() => String)
     timestamp!: string;

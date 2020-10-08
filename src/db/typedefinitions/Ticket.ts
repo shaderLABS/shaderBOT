@@ -18,6 +18,9 @@ export class Ticket {
     project!: Project;
 
     @tgq.Field(() => String, { nullable: true })
+    channel_id!: string;
+
+    @tgq.Field(() => String, { nullable: true })
     description!: string;
 
     @tgq.Field(() => [String], { nullable: true })

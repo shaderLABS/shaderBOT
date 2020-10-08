@@ -9,11 +9,18 @@ export const db = new pg.Pool({
 });
 
 export async function connectPostgreSQL() {
-    try {
-        await db.connect();
-        console.log('Connected to PostgreSQL database.');
-    } catch (error) {
-        console.error(error);
-        process.exit();
+    let retries = 5;
+
+    while (retries) {
+        try {
+            await db.connect();
+            console.log('Connected to PostgreSQL database.');
+            break;
+        } catch (error) {
+            console.error(error);
+            retries -= 1;
+            console.log(`Retrying ${retries} more times...`);
+            await new Promise((res) => setTimeout(res, 5000));
+        }
     }
 }

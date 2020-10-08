@@ -1,0 +1,10 @@
+package-lock.json
+node_modules/
+.vscode/
+.env
+**/*.bat
+**/*.md
+LICENSE
+@types/
+nodemon.json
+.gitignore
