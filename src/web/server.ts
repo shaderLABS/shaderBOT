@@ -48,6 +48,7 @@ app.use(
                 'media-src': ["'self'", 'cdn.discordapp.com'],
                 'style-src': ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
                 'font-src': ["'self'", 'fonts.gstatic.com'],
+                'script-src': ["'self'", "'unsafe-inline'"], // reeee
             },
         },
     })
@@ -68,23 +69,20 @@ app.use(passport.session());
 
 app.use('/api', routes);
 
-console.log(path.resolve());
-
 if (production) {
-    const DISTPATH = path.join(path.resolve(), 'dist');
-    const ENTRYPOINT = path.join(DISTPATH, '__app.html');
-    const APP = path.join(DISTPATH, 'build', 'bundle.js');
+    const DIST_PATH = path.join(path.resolve(), 'dist');
+    const ENTRYPOINT = path.join(DIST_PATH, '__app.html');
+    const APP = path.join(DIST_PATH, 'build', 'main.js');
 
-    app.use(express.static(DISTPATH));
+    app.use(express.static(DIST_PATH));
 
     app.get('*', async (req, res) => {
-        const html = await ssr.tossr(ENTRYPOINT, APP, req.url, { inlineDynamicImports: true, timeout: 10000 });
-        res.send(html);
+        res.send(await ssr.tossr(ENTRYPOINT, APP, req.url, { inlineDynamicImports: true }));
     });
 }
 
 server.applyMiddleware({ app, cors: corsConfig });
 
 export function startWebserver() {
-    app.listen(port, /*'192.168.0.12',*/ () => console.log(`Started web server on port ${port}.`));
+    app.listen(port, () => console.log(`Started web server on port ${port}.`));
 }
