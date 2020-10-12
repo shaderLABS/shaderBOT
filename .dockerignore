@@ -5,6 +5,7 @@ node_modules/
 **/*.bat
 **/*.md
 LICENSE
-@types/
 nodemon.json
 .gitignore
+Dockerfile
+.git/

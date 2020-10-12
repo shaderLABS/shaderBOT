@@ -3,6 +3,5 @@ node_modules/
 .vscode/
 **/*.js
 .env
-dist
 dist/
 pgdata/
