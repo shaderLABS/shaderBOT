@@ -7,20 +7,22 @@ import store from 'connect-pg-simple';
 import cors from 'cors';
 import apollo from 'apollo-server-express';
 import ssr from 'tossr';
-
-import './strategies/discord.js';
-import { db } from '../db/postgres.js';
 import typegraphql from 'type-graphql';
+import path from 'path';
+import { db } from '../db/postgres.js';
 import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { authChecker } from './gqlAuth.js';
-import path from 'path';
+import './strategies/discord.js';
 
 const pg_store = store(session);
 
-const port = Number(process.env.PORT) || 3001;
+export const PORT = Number(process.env.PORT) || 3001;
+export const DOMAIN = process.env.DOMAIN || 'localhost';
+export const URL = `http://${DOMAIN}:${PORT}`;
+
 const app = express();
 const production = process.env.NODE_ENV === 'production';
 
@@ -34,7 +36,7 @@ const server = new apollo.ApolloServer({
 });
 
 const corsConfig = {
-    origin: ['http://localhost:5000', 'http://localhost:5005', 'http://localhost'],
+    origin: production ? [] : ['http://localhost:5000', 'http://localhost:5005', URL],
     credentials: true,
 };
 
@@ -84,5 +86,5 @@ if (production) {
 server.applyMiddleware({ app, cors: corsConfig });
 
 export function startWebserver() {
-    app.listen(port, () => console.log(`Started web server on port ${port}.`));
+    app.listen(PORT, () => console.log(`Started web server on port ${PORT}.`));
 }

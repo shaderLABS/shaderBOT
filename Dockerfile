@@ -14,4 +14,4 @@ ENV SESSION_SECRET=58262ee1f76ca7b84d559947c1cf659f275f867669cba881d6f9c33889380
 EXPOSE 80
 RUN npm run build
 
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "serve" ]
