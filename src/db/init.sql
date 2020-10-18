@@ -1,5 +1,9 @@
+-- EXTENSIONS
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+-- TABLES
 
 DROP TABLE IF EXISTS "project";
 CREATE TABLE "project" (
@@ -46,6 +50,18 @@ CREATE TABLE "warn" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP TABLE IF EXISTS "temp_punishment";
+CREATE TABLE "temp_punishment" (
+    user_id NUMERIC(20) NOT NULL PRIMARY KEY,
+    punishment SMALLINT NOT NULL, -- 1 - mute, 2 - ban
+    mod_id NUMERIC(20),
+    reason TEXT,
+    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL NOT NULL
+);
+
+-- FUNCTIONS
+
 DROP FUNCTION IF EXISTS "expire_warns";
 CREATE FUNCTION expire_warns() RETURNS VOID AS $$
 	BEGIN
@@ -53,15 +69,7 @@ CREATE FUNCTION expire_warns() RETURNS VOID AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
--- DROP TABLE IF EXISTS "user";
--- CREATE TABLE "user" (
---     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
---     user_id NUMERIC(20) UNIQUE NOT NULL,
---     username VARCHAR(32) NOT NULL,
---     discriminator SMALLINT NOT NULL,
---     avatar TEXT,
---     role_ids NUMERIC(20)[] NOT NULL
--- );
+-- SESSION
 
 DROP TABLE IF EXISTS "session";
 CREATE TABLE "session" (

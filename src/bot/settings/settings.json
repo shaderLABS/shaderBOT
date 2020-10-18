@@ -9,5 +9,6 @@
         "subscriptionChannelID": "747485722285441104",
         "attachmentCacheChannelID": "748904963215982733"
     },
-    "mediaChannelIDs": ["752634215715045456"]
+    "mediaChannelIDs": ["752634215715045456"],
+    "muteRoleID": "767392369959763968"
 }
