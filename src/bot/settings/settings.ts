@@ -15,6 +15,7 @@ export type Settings = {
         attachmentCacheChannelID: string;
     };
     mediaChannelIDs: string[];
+    muteRoleID: string;
 };
 
 export function write(data: Object) {
