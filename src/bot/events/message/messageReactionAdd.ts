@@ -14,7 +14,7 @@ export const event: Event = {
         const guild = client.guilds.cache.first();
         if (!guild) return;
 
-        const member = await guild.members.fetch(user);
+        const member = await guild.members.fetch(user).catch(() => undefined);
         if (!member) return;
 
         if (reaction.emoji.name === '✏️') edit(reaction, user, guild, channel);

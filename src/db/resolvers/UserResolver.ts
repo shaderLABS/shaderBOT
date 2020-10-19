@@ -7,7 +7,7 @@ export async function fetchUser(id: string) {
     const guild = client.guilds.cache.first();
     if (!guild) return Promise.reject("The bot isn't in any guilds.");
 
-    const member = await guild.members.fetch(id);
+    const member = await guild.members.fetch(id).catch(() => undefined);
     if (member) {
         return {
             ...member.user,

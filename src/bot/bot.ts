@@ -1,7 +1,7 @@
 import { Client, Collection } from 'discord.js';
 import { Command, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
-import { loadMuteTimeouts } from './lib/mute.js';
+import { loadTimeouts } from './lib/punishments.js';
 import cron from 'node-cron';
 import * as settingsFile from './settings/settings.js';
 
@@ -11,7 +11,7 @@ export let events: Collection<string, Event>;
 export let settings: settingsFile.Settings;
 
 cron.schedule('55 23 * * *', () => {
-    loadMuteTimeouts();
+    loadTimeouts();
 });
 
 export async function startBot() {

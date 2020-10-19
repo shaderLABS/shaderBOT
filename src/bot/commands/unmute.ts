@@ -16,13 +16,18 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        const user = message.mentions.members?.first() || (await client.guilds.cache.first()?.members.fetch(args[0]));
-        if (!user) return syntaxError(channel, expectedArgs);
+        const user = message.mentions.members?.first() || (await member.guild.members.fetch(args[0]).catch(() => undefined));
+        if (!user) return syntaxError(channel, 'unmute ' + expectedArgs);
 
         if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
             return sendError(channel, "You can't unmute a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
 
-        await unmute(user, member.id);
+        try {
+            await unmute(user, member.id);
+        } catch (error) {
+            return sendError(channel, error);
+        }
+
         sendSuccess(channel, `<@${user.id}> has been unmuted.`);
     },
 };
