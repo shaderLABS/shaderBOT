@@ -26,7 +26,7 @@ export const command: Command = {
 
         for (const potentialID of args) {
             if (!isNaN(Number(potentialID))) {
-                const user = await guild.members.fetch(potentialID);
+                const user = await guild.members.fetch(potentialID).catch(() => undefined);
                 if (user) owners.push(user);
             }
         }

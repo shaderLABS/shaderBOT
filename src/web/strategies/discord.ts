@@ -9,7 +9,10 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (user_id: string, done) => {
     try {
-        const member = await client.guilds.cache.first()?.members.fetch(user_id);
+        const member = await client.guilds.cache
+            .first()
+            ?.members.fetch(user_id)
+            .catch(() => undefined);
         if (!member) return done(null);
 
         const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
@@ -43,7 +46,10 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
-            const member = await client.guilds.cache.first()?.members.fetch(profile.id);
+            const member = await client.guilds.cache
+                .first()
+                ?.members.fetch(profile.id)
+                .catch(() => undefined);
             if (!member) return done(undefined, undefined, { error: 0 });
 
             const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);

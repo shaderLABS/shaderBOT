@@ -50,13 +50,13 @@ CREATE TABLE "warn" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-DROP TABLE IF EXISTS "temp_punishment";
-CREATE TABLE "temp_punishment" (
+DROP TABLE IF EXISTS "punishment";
+CREATE TABLE "punishment" (
     user_id NUMERIC(20) NOT NULL PRIMARY KEY,
-    punishment SMALLINT NOT NULL, -- 1 - mute, 2 - ban
+    type SMALLINT NOT NULL, -- 0 - ban, 1 - tempban, 2 - mute,
     mod_id NUMERIC(20),
     reason TEXT,
-    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    expire_timestamp TIMESTAMP WITH TIME ZONE,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL NOT NULL
 );
 

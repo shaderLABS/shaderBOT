@@ -23,7 +23,7 @@ export const command: Command = {
         if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);
         const severity = severityArg === 'NORMAL' ? 0 : 1;
 
-        const user = message.mentions.members?.first() || (await client.guilds.cache.first()?.members.fetch(args[1]));
+        const user = message.mentions.members?.first() || (await member.guild.members.fetch(args[1]).catch(() => undefined));
         if (!user) return syntaxError(channel, expectedArgs);
 
         if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
