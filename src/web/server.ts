@@ -14,6 +14,7 @@ import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
+import { ChannelResolver, RoleResolver } from '../db/resolvers/MarkdownResolver.js';
 import { authChecker } from './gqlAuth.js';
 import './strategies/discord.js';
 
@@ -28,7 +29,7 @@ const production = process.env.NODE_ENV === 'production';
 
 const server = new apollo.ApolloServer({
     schema: await typegraphql.buildSchema({
-        resolvers: [TicketResolver, UserResolver, ProjectResolver, CommentResolver],
+        resolvers: [TicketResolver, UserResolver, ProjectResolver, CommentResolver, ChannelResolver, RoleResolver],
         authChecker,
     }),
     context: ({ req, res }) => ({ req, res }),

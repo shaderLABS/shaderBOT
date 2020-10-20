@@ -1,7 +1,6 @@
-import { Command, syntaxError } from '../commandHandler.js';
-import { sendError, sendSuccess } from '../lib/embeds.js';
-import { client } from '../bot.js';
-import { unmute } from '../lib/mute.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { unmute } from '../../lib/mute.js';
 
 const expectedArgs = '<@user|userID>';
 

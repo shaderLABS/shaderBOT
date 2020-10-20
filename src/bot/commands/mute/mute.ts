@@ -1,8 +1,7 @@
-import { Command, syntaxError } from '../commandHandler.js';
-import { sendError, sendSuccess } from '../lib/embeds.js';
-import { client } from '../bot.js';
-import { mute } from '../lib/mute.js';
-import stringToSeconds, { splitString } from '../lib/stringToSeconds.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { mute } from '../../lib/mute.js';
+import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
 const expectedArgs = '<@user|userID> <time> [reason]';
 

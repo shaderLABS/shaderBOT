@@ -1,4 +1,3 @@
-import { Permissions } from 'discord.js';
 import tgq from 'type-graphql';
 import { Project } from './Project.js';
 import { Ticket } from './Ticket.js';
