@@ -1,7 +1,7 @@
-import { Command, syntaxError } from '../commandHandler.js';
-import { sendError, sendSuccess } from '../lib/embeds.js';
-import { client } from '../bot.js';
-import { ban } from '../lib/ban.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { client } from '../../bot.js';
+import { ban } from '../../lib/ban.js';
 import { GuildMember } from 'discord.js';
 
 const expectedArgs = '<@user|userID> [reason]';

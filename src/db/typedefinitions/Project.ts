@@ -3,7 +3,7 @@ import { Ticket } from './Ticket.js';
 import { User } from './User.js';
 
 @tgq.ObjectType()
-export class ProjectChannel {
+export class Channel {
     @tgq.Field(() => String)
     name!: string;
 
@@ -26,8 +26,8 @@ export class Project {
     @tgq.Field(() => [User], { nullable: true })
     ownerUsers!: User[];
 
-    @tgq.Field(() => ProjectChannel)
-    channel!: ProjectChannel;
+    @tgq.Field(() => Channel)
+    channel!: Channel;
 
     @tgq.Field(() => [Ticket])
     tickets!: Ticket[];
