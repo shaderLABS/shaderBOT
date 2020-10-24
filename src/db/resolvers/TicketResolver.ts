@@ -34,7 +34,8 @@ export class TicketResolver {
                 /*sql*/ `
                 SELECT id::TEXT, message_id::TEXT, ticket_id::TEXT, author_id::TEXT, content, attachments, timestamp::TEXT, edited::TEXT
                 FROM comment
-                WHERE ticket_id = $1`,
+                WHERE ticket_id = $1
+                ORDER BY timestamp ASC;`,
                 [ticket.id]
             )
         ).rows;
@@ -46,14 +47,14 @@ export class TicketResolver {
     //     return true;
     // }
 
-    @tgq.Query(() => [Ticket])
-    async tickets() {
-        return (
-            await db.query(/*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
-                FROM ticket;`)
-        ).rows;
-    }
+    // @tgq.Query(() => [Ticket])
+    // async tickets() {
+    //     return (
+    //         await db.query(/*sql*/ `
+    //             SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
+    //             FROM ticket;`)
+    //     ).rows;
+    // }
 
     @tgq.Query(() => Ticket, { nullable: true })
     async ticketByID(@tgq.Arg('id', () => String) id: string) {
@@ -76,7 +77,8 @@ export class TicketResolver {
                 /*sql*/ `
                 SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
                 FROM ticket
-                WHERE author_id = $1;`,
+                WHERE author_id = $1
+                ORDER BY timestamp ASC;`,
                 [id]
             )
         ).rows;
@@ -89,7 +91,8 @@ export class TicketResolver {
                 /*sql*/ `
                 SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
                 FROM ticket
-                WHERE project_channel_id = $1;`,
+                WHERE project_channel_id = $1
+                ORDER BY timestamp ASC;`,
                 [id]
             )
         ).rows;

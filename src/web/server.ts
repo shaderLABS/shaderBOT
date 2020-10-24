@@ -37,7 +37,7 @@ const server = new apollo.ApolloServer({
 });
 
 const corsConfig = {
-    origin: production ? [] : ['http://localhost:5000', 'http://localhost:5005', URL],
+    origin: production ? ['http://jsdom.ssr'] : ['http://localhost:5000', 'http://localhost:5005', 'http://jsdom.ssr', URL],
     credentials: true,
 };
 
