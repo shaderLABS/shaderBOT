@@ -31,7 +31,8 @@ export class UserResolver {
                 /*sql*/ `
                 SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
                 FROM ticket
-                WHERE author_id = $1`,
+                WHERE author_id = $1
+                ORDER BY timestamp ASC;`,
                 [user.id]
             )
         ).rows;

@@ -117,7 +117,8 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = clie
         /*sql*/ `
         SELECT id, author_id, edited, timestamp, content, attachments
         FROM comment
-        WHERE ticket_id = $1`,
+        WHERE ticket_id = $1
+        ORDER BY timestamp ASC`,
         [ticket.id]
     );
 
