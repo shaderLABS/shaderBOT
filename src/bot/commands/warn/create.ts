@@ -1,8 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendInfo } from '../../lib/embeds.js';
+import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 
 const expectedArgs = '<"normal"|"severe"> <@user|userID> [reason]';
@@ -42,6 +41,8 @@ export const command: Command = {
         const normalWarnings = userWarnings.rows[0]?.count;
         const severeWarnings = userWarnings.rows[1]?.count;
 
+        const expire_days = severity === 0 ? 14 * (normalWarnings + 1) : 60 * (severeWarnings + 1);
+
         // const reason = text.substring(args[0].length + args[1].length + 1).trim();
         const reason = args.slice(2).join(' ');
         const timestamp = new Date();
@@ -49,10 +50,10 @@ export const command: Command = {
         const id = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO warn (user_id, mod_id, reason, severity, timestamp) 
+                INSERT INTO warn (user_id, mod_id, reason, severity, expire_days, timestamp) 
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING id;`,
-                [user.id, member.id, reason.length !== 0 ? reason : null, severity, timestamp]
+                [user.id, member.id, reason.length !== 0 ? reason : null, severity, expire_days, timestamp]
             )
         ).rows[0].id;
 
@@ -66,12 +67,6 @@ export const command: Command = {
                 { name: 'CREATED AT', value: timestamp.toLocaleString(), inline: true },
                 { name: 'ID', value: id, inline: true }
             );
-
-        // const content = `\`USER:\` <@${user.id}>\n\`REASON:\` ${reason.length !== 0 ? reason : 'No reason provided.'}\n\`SEVERITY:\` ${severityArg}\n\`BY:\` <@${
-        //     member.id
-        // }>\n\`CREATED AT:\` ${timestamp.toLocaleString()}\n\`ID:\` ${id}`;
-
-        // sendInfo(channel, content, 'WARNING');
 
         channel.send(embed);
         log(embed);

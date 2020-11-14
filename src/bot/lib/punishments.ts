@@ -22,14 +22,14 @@ export async function loadTimeouts() {
         await db.query(/*sql*/ `
             SELECT user_id::TEXT, "type", mod_id::TEXT, expire_timestamp::TEXT 
             FROM punishment 
-            WHERE ("type" = 1 OR "type" = 2) AND expire_timestamp <= NOW() + INTERVAL '1 day 5 minutes';`)
+            WHERE ("type" = 'tban' OR "type" = 'mute') AND expire_timestamp <= NOW() + INTERVAL '1 day 5 minutes';`)
     ).rows;
 
     for (const punishment of expiringPunishments) {
         const ms = new Date(punishment.expire_timestamp).getTime() - new Date().getTime();
 
         if (ms <= 5000) {
-            if (punishment.type === 1) {
+            if (punishment.type === 'tban') {
                 unban(punishment.user_id);
             } else {
                 const member = await client.guilds.cache
@@ -40,7 +40,7 @@ export async function loadTimeouts() {
                 else log(`System could not unmute <@${punishment.user_id}>: member not found.`);
             }
         } else {
-            if (punishment.type === 1) {
+            if (punishment.type === 'tban') {
                 const timeout = setTimeout(() => {
                     unban(punishment.user_id);
                 }, ms);
