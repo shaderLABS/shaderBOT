@@ -37,7 +37,7 @@ const server = new apollo.ApolloServer({
 });
 
 const corsConfig = {
-    origin: production ? ['http://jsdom.ssr'] : ['http://localhost:5000', 'http://localhost:5005', 'http://jsdom.ssr', URL],
+    origin: production ? ['http://jsdom.ssr'] : [`http://${DOMAIN}:5000`, `http://${DOMAIN}:5005`, 'http://jsdom.ssr', URL],
     credentials: true,
 };
 
@@ -51,7 +51,7 @@ app.use(
                 'media-src': ["'self'", 'cdn.discordapp.com'],
                 'style-src': ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
                 'font-src': ["'self'", 'fonts.gstatic.com'],
-                'script-src': ["'self'", "'unsafe-inline'"], // reeee
+                'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // reeee
             },
         },
     })

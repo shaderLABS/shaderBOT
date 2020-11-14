@@ -4,6 +4,7 @@ import { Event, registerEvents } from './eventHandler.js';
 import { loadTimeouts } from './lib/punishments.js';
 import cron from 'node-cron';
 import * as settingsFile from './settings/settings.js';
+import { db } from '../db/postgres.js';
 
 export let client: Client;
 export let commands: Collection<string, Command | Collection<string, Command>>;
@@ -12,6 +13,7 @@ export let settings: settingsFile.Settings;
 
 cron.schedule('55 23 * * *', () => {
     loadTimeouts();
+    db.query(/*sql*/ `SELECT expire_warns();`);
 });
 
 export async function startBot() {
