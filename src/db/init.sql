@@ -47,17 +47,32 @@ CREATE TABLE "warn" (
     mod_id NUMERIC(20) NOT NULL,
     severity SMALLINT NOT NULL,
     reason TEXT,
+    expired BOOLEAN NOT NULL DEFAULT FALSE,
+    expire_days SMALLINT NOT NULL,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 DROP TABLE IF EXISTS "punishment";
 CREATE TABLE "punishment" (
-    user_id NUMERIC(20) NOT NULL PRIMARY KEY,
-    type SMALLINT NOT NULL, -- 0 - ban, 1 - tempban, 2 - mute,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    type TEXT NOT NULL, -- ban, tban, mute
     mod_id NUMERIC(20),
     reason TEXT,
     expire_timestamp TIMESTAMP WITH TIME ZONE,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL NOT NULL
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP TABLE IF EXISTS "lifted_punishment";
+CREATE TABLE "lifted_punishment" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    type TEXT NOT NULL, -- ban, tban, mute
+    mod_id NUMERIC(20),
+    reason TEXT,
+    lifted_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    lifted_mod_id NUMERIC(20),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
 -- FUNCTIONS
@@ -65,7 +80,7 @@ CREATE TABLE "punishment" (
 DROP FUNCTION IF EXISTS "expire_warns";
 CREATE FUNCTION expire_warns() RETURNS VOID AS $$
 	BEGIN
-		DELETE FROM warn WHERE timestamp < NOW() - INTERVAL '1 minute';
+		DELETE FROM warn WHERE (timestamp + INTERVAL '1 day' * expire_days) < (NOW() + INTERVAL '10 minutes');
 	END;
 $$ LANGUAGE plpgsql;
 

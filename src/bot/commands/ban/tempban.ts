@@ -5,7 +5,7 @@ import { tempban } from '../../lib/ban.js';
 import { GuildMember } from 'discord.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
-const expectedArgs = '<@user|userID> <time> [reason]';
+const expectedArgs = '<@user|userID> <time> ["delete"] [reason]';
 
 export const command: Command = {
     commands: ['tempban'],
@@ -24,7 +24,8 @@ export const command: Command = {
             (await client.users.fetch(args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
 
-        const reason = args.slice(2).join(' ');
+        const deleteMessages = args[2]?.toLowerCase() === 'delete';
+        const reason = args.slice(deleteMessages ? 3 : 2).join(' ');
         const time = stringToSeconds(splitString(args[1]));
 
         if (isNaN(time) || time < 10) {
@@ -39,13 +40,13 @@ export const command: Command = {
             if (!user.bannable) return sendError(channel, 'This user is not bannable.');
 
             try {
-                await tempban(user.user, time, member.id, reason);
+                await tempban(user.user, time, member.id, reason, deleteMessages);
             } catch (error) {
                 return sendError(channel, error);
             }
         } else {
             try {
-                await tempban(user, time, member.id, reason);
+                await tempban(user, time, member.id, reason, deleteMessages);
             } catch (error) {
                 return sendError(channel, error);
             }

@@ -18,11 +18,11 @@ export async function mute(member: GuildMember, duration: number, modID: string 
         await db.query(
             /*sql*/ `
             INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp) 
-            VALUES ($1, 2, $2, $3, $4, $5)
-            ON CONFLICT (user_id) DO UPDATE 
-                SET "type" = 2, mod_id = $2, reason = $3, expire_timestamp = $4, timestamp = $5;`,
+            VALUES ($1, 'mute', $2, $3, $4, $5);`,
             [member.id, modID, reason, expire, timestamp]
         );
+        // ON CONFLICT (user_id) DO UPDATE
+        // SET "type" = 2, mod_id = $2, reason = $3, expire_timestamp = $4, timestamp = $5
     } catch (error) {
         console.error(error);
         log(`Failed to mute <@${member.id}> for ${duration} seconds: an error occurred while accessing the database.`);
@@ -57,13 +57,19 @@ export async function unmute(member: GuildMember, modID?: string) {
         const deleted = (
             await db.query(
                 /*sql*/ `
-                DELETE FROM punishment 
-                WHERE "type" = 2 AND user_id = $1;`,
-                [member.id]
+                WITH moved_rows AS (
+                    DELETE FROM punishment 
+                    WHERE "type" = 'mute' AND user_id = $1
+                    RETURNING id, user_id, type, mod_id, reason, timestamp
+                )
+                INSERT INTO lifted_punishment
+                SELECT DISTINCT *, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows;`,
+                [member.id, modID || null, new Date()]
             )
         ).rowCount;
         if (deleted === 0) return Promise.reject(`The user <@${member.id}> is not muted.`);
-    } catch {
+    } catch (error) {
+        console.error(error);
         log(`Failed to unmute <@${member.id}>: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }

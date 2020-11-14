@@ -4,7 +4,7 @@ import { client } from '../../bot.js';
 import { ban } from '../../lib/ban.js';
 import { GuildMember } from 'discord.js';
 
-const expectedArgs = '<@user|userID> [reason]';
+const expectedArgs = '<@user|userID> ["delete"] [reason]';
 
 export const command: Command = {
     commands: ['ban'],
@@ -23,7 +23,8 @@ export const command: Command = {
             (await client.users.fetch(args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
 
-        const reason = args.slice(1).join(' ');
+        const deleteMessages = args[1]?.toLowerCase() === 'delete';
+        const reason = args.slice(deleteMessages ? 2 : 1).join(' ');
 
         if (user instanceof GuildMember) {
             if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
@@ -32,13 +33,13 @@ export const command: Command = {
             if (!user.bannable) return sendError(channel, 'This user is not bannable.');
 
             try {
-                await ban(user.user, member.id, reason);
+                await ban(user.user, member.id, reason, deleteMessages);
             } catch (error) {
                 return sendError(channel, error);
             }
         } else {
             try {
-                await ban(user, member.id, reason);
+                await ban(user, member.id, reason, deleteMessages);
             } catch (error) {
                 return sendError(channel, error);
             }
