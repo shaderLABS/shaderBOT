@@ -62,7 +62,7 @@ export async function unmute(member: GuildMember, modID?: string) {
                     WHERE "type" = 'mute' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, timestamp
                 )
-                INSERT INTO lifted_punishment
+                INSERT INTO past_punishment
                 SELECT DISTINCT *, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows;`,
                 [member.id, modID || null, new Date()]
             )

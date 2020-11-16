@@ -63,14 +63,14 @@ CREATE TABLE "punishment" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-DROP TABLE IF EXISTS "lifted_punishment";
-CREATE TABLE "lifted_punishment" (
+DROP TABLE IF EXISTS "past_punishment";
+CREATE TABLE "past_punishment" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) NOT NULL,
     type TEXT NOT NULL, -- ban, tban, mute
     mod_id NUMERIC(20),
     reason TEXT,
-    lifted_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    lifted_timestamp TIMESTAMP WITH TIME ZONE,
     lifted_mod_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
@@ -80,7 +80,7 @@ CREATE TABLE "lifted_punishment" (
 DROP FUNCTION IF EXISTS "expire_warns";
 CREATE FUNCTION expire_warns() RETURNS VOID AS $$
 	BEGIN
-		DELETE FROM warn WHERE (timestamp + INTERVAL '1 day' * expire_days) < (NOW() + INTERVAL '10 minutes');
+		UPDATE warn SET expired = TRUE WHERE expired = FALSE AND (timestamp + INTERVAL '1 day' * expire_days) < (NOW() + INTERVAL '10 minutes');
 	END;
 $$ LANGUAGE plpgsql;
 
