@@ -32,16 +32,18 @@ export const command: Command = {
             /*sql*/ `
             SELECT COUNT(id)
             FROM warn
-            WHERE user_id = $1
+            WHERE expired = FALSE AND user_id = $1
             GROUP BY severity
             ORDER BY severity;`,
             [user.id]
         );
 
-        const normalWarnings = userWarnings.rows[0]?.count;
-        const severeWarnings = userWarnings.rows[1]?.count;
+        let normalWarnings = +userWarnings.rows[0]?.count || 0;
+        let severeWarnings = +userWarnings.rows[1]?.count || 0;
 
-        const expire_days = severity === 0 ? 14 * (normalWarnings + 1) : 60 * (severeWarnings + 1);
+        severity === 0 ? normalWarnings++ : severeWarnings++;
+        const expire_days = 14 * normalWarnings + 60 * severeWarnings;
+        // const expire_days = severity === 0 ? 14 * (normalWarnings + 1) : 60 * (severeWarnings + 1);
 
         // const reason = text.substring(args[0].length + args[1].length + 1).trim();
         const reason = args.slice(2).join(' ');
@@ -51,7 +53,7 @@ export const command: Command = {
             await db.query(
                 /*sql*/ `
                 INSERT INTO warn (user_id, mod_id, reason, severity, expire_days, timestamp) 
-                VALUES ($1, $2, $3, $4, $5)
+                VALUES ($1, $2, $3, $4, $5::SMALLINT, $6)
                 RETURNING id;`,
                 [user.id, member.id, reason.length !== 0 ? reason : null, severity, expire_days, timestamp]
             )
@@ -64,8 +66,8 @@ export const command: Command = {
                 { name: 'SEVERITY', value: severityArg, inline: true },
                 { name: 'REASON', value: `${reason || 'No reason provided.'}`, inline: true },
                 { name: 'MODERATOR', value: `<@${member.id}>`, inline: true },
-                { name: 'CREATED AT', value: timestamp.toLocaleString(), inline: true },
-                { name: 'ID', value: id, inline: true }
+                { name: 'EXPIRING IN', value: expire_days + ' days', inline: true },
+                { name: 'UUID', value: id, inline: true }
             );
 
         channel.send(embed);

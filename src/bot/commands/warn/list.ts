@@ -35,10 +35,10 @@ export const command: Command = {
 
         const warnings = await db.query(
             /*sql*/ `
-            SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT
+            SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired
             FROM warn 
             WHERE user_id = $1
-            ORDER BY severity DESC`,
+            ORDER BY expired ASC, severity DESC, timestamp DESC;`,
             [userID]
         );
 
@@ -59,7 +59,14 @@ export const command: Command = {
                 { name: 'REASON', value: `${row.reason || 'No reason provided.'}`, inline: true },
                 { name: 'MODERATOR', value: `<@${row.mod_id}>`, inline: true },
                 { name: 'CREATED AT', value: new Date(row.timestamp).toLocaleString(), inline: true },
-                { name: 'ID', value: row.id, inline: true },
+                {
+                    name: row.expired ? 'EXPIRED AT' : 'EXPIRING IN',
+                    value: row.expired
+                        ? new Date(new Date(row.timestamp).getTime() + row.expire_days * 86400000).toLocaleDateString()
+                        : Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000) + ' days',
+                    inline: true,
+                },
+                { name: 'UUID', value: row.id, inline: true },
             ];
         });
 
