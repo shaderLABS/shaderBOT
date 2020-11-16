@@ -1,7 +1,6 @@
 import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
-import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendInfo } from '../../lib/embeds.js';
+import { Command } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 import uuid from 'uuid-random';
 import log from '../../lib/log.js';
 
@@ -18,24 +17,38 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
         if (!member) return;
+        const isUUID = uuid.test(args[0]);
 
-        // if (uuid.test(args[0])) {
-        //     await db.query(
-        //         /*sql*/ `
-        //         DELETE FROM warn
-        //         WHERE id = $1
-        //         RETURNING user_id::TEXT, mod_id::TEXT, reason;
-        //         `,
-        //         [args[0]]
-        //     );
-        // }
+        if (!isUUID) {
+            const warnings = await db.query(
+                /*sql*/ `
+                SELECT id::TEXT, user_id::TEXT, mod_id::TEXT, reason, timestamp::TEXT 
+                FROM warn 
+                WHERE reason = $1;`,
+                [text]
+            );
+
+            if (warnings.rowCount > 1) {
+                return sendError(
+                    channel,
+                    `The specified reason is ambiguous. Please use the UUID from one of the following results instead:\n${warnings.rows
+                        .map(
+                            (row: any) =>
+                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${new Date(row.timestamp).toLocaleString()} | ${
+                                    row.id
+                                }\n`
+                        )
+                        .join('\n')}`
+                );
+            }
+        }
 
         const response = await db.query(
             /*sql*/ `
             DELETE FROM warn 
-            WHERE ${uuid.test(args[0]) ? 'id = $1' : 'reason = $1'}
-            RETURNING id::TEXT, user_id::TEXT, reason`,
-            [uuid.test(args[0]) ? args[0] : text]
+            WHERE ${isUUID ? 'id = $1' : 'reason = $1'}
+            RETURNING id::TEXT, user_id::TEXT, severity, reason`,
+            [isUUID ? args[0] : text]
         );
 
         if (response.rowCount === 0) {
@@ -54,33 +67,23 @@ export const command: Command = {
                 errorMessage +=
                     '\nSimilar results:\n' +
                     similarResults.rows
-                        .map((row: any) => `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${row.timestamp} | ${row.id}\n`)
+                        .map(
+                            (row: any) =>
+                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${new Date(row.timestamp).toLocaleString()} | ${
+                                    row.id
+                                }\n`
+                        )
                         .join('\n');
-            sendError(channel, errorMessage);
+            return sendError(channel, errorMessage);
         }
 
-        // if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
-        //     return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+        const warn = response.rows[0];
 
-        // // const reason = text.substring(args[0].length + args[1].length + 1).trim();
-        // const reason = args.slice(2).join(' ');
-        // const timestamp = new Date();
+        const userMember = await message.guild?.members.fetch(warn.user_id).catch(() => undefined);
+        if (userMember && member.roles.highest.comparePositionTo(userMember.roles.highest) <= 0)
+            return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
 
-        // const id = (
-        //     await db.query(
-        //         /*sql*/ `
-        //         INSERT INTO warn (user_id, mod_id, reason, severity, timestamp)
-        //         VALUES ($1, $2, $3, $4, $5)
-        //         RETURNING id;`,
-        //         [user.id, member.id, reason.length !== 0 ? reason : null, severity, timestamp]
-        //     )
-        // ).rows[0].id;
-
-        // const content = `\`USER:\` <@${user.id}>\n\`REASON:\` ${reason.length !== 0 ? reason : 'No reason provided.'}\n\`SEVERITY:\` ${severityArg}\n\`BY:\` <@${
-        //     member.id
-        // }>\n\`CREATED AT:\` ${timestamp.toISOString()}\n\`ID:\` ${id}`;
-
-        // sendInfo(channel, content, 'WARNING');
-        // log(content);
+        sendSuccess(channel, `Deleted ${warn.severity == 0 ? 'normal' : 'severe'} warning ${warn.id} from <@${warn.user_id}>:\n\n${warn.reason}`, 'DELETED WARNING');
+        log(`<@${member.id}> deleted ${warn.severity == 0 ? 'normal' : 'severe'} warning ${warn.id} from <@${warn.user_id}>:\n\n${warn.reason}`);
     },
 };
