@@ -24,7 +24,7 @@ export const command: Command = {
             try {
                 const user = await getUser(message, text);
 
-                if (user && user.id !== member.id && !member?.hasPermission('KICK_MEMBERS'))
+                if (user.id !== member.id && !member?.hasPermission('KICK_MEMBERS'))
                     return sendError(channel, 'You do not have permission to view the warnings of other users.');
 
                 userID = user.id;
