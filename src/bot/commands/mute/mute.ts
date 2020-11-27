@@ -16,6 +16,9 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
+        const reason = args.slice(2).join(' ');
+        if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
+
         const user = message.mentions.members?.first() || (await member.guild.members.fetch(args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'mute ' + expectedArgs);
 
@@ -28,8 +31,6 @@ export const command: Command = {
             sendError(channel, "You can't mute someone for less than 10 seconds.");
             return;
         }
-
-        const reason = args.slice(2).join(' ');
 
         const expire = await mute(user, time, member.id, reason);
         sendSuccess(channel, `<@${user.id}> has been muted for ${time} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\``);

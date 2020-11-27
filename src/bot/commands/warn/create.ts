@@ -18,6 +18,10 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
+        // const reason = text.substring(args[0].length + args[1].length + 1).trim();
+        const reason = args.slice(2).join(' ');
+        if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
+
         const severityArg = args[0].toUpperCase();
         if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);
         const severity = severityArg === 'NORMAL' ? 0 : 1;
@@ -45,8 +49,6 @@ export const command: Command = {
         const expire_days = 14 * normalWarnings + 60 * severeWarnings;
         // const expire_days = severity === 0 ? 14 * (normalWarnings + 1) : 60 * (severeWarnings + 1);
 
-        // const reason = text.substring(args[0].length + args[1].length + 1).trim();
-        const reason = args.slice(2).join(' ');
         const timestamp = new Date();
 
         const id = (

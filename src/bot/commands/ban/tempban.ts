@@ -26,6 +26,7 @@ export const command: Command = {
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
         const reason = args.slice(deleteMessages ? 3 : 2).join(' ');
+        if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
         const time = stringToSeconds(splitString(args[1]));
 
         if (isNaN(time) || time < 10) {

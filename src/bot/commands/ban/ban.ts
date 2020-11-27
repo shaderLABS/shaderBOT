@@ -25,6 +25,7 @@ export const command: Command = {
 
         const deleteMessages = args[1]?.toLowerCase() === 'delete';
         const reason = args.slice(deleteMessages ? 2 : 1).join(' ');
+        if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
         if (user instanceof GuildMember) {
             if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
