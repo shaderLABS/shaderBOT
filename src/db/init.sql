@@ -75,6 +75,15 @@ CREATE TABLE "past_punishment" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP TABLE IF EXISTS "note";
+CREATE TABLE "note" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20) NOT NULL,
+    content TEXT,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- FUNCTIONS
 
 DROP FUNCTION IF EXISTS "expire_warns";
