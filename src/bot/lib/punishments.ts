@@ -4,6 +4,15 @@ import log from './log.js';
 import { unmute } from './mute.js';
 import { unban } from './ban.js';
 
+export const typeAsString: {
+    [key: string]: string;
+} = {
+    tban: 'Temporary Ban',
+    kick: 'Kick',
+    ban: 'Ban',
+    mute: 'Mute',
+};
+
 let store: {
     mutes: Map<string, NodeJS.Timeout>;
     tempbans: Map<string, NodeJS.Timeout>;
