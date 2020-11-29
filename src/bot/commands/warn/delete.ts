@@ -47,7 +47,7 @@ export const command: Command = {
             /*sql*/ `
             DELETE FROM warn 
             WHERE ${isUUID ? 'id = $1' : 'reason = $1'}
-            RETURNING id::TEXT, user_id::TEXT, severity, reason`,
+            RETURNING id::TEXT, user_id::TEXT, mod_id::TEXT, severity, reason, expire_days`,
             [isUUID ? args[0] : text]
         );
 
@@ -83,7 +83,11 @@ export const command: Command = {
         if (userMember && member.roles.highest.comparePositionTo(userMember.roles.highest) <= 0)
             return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
 
-        sendSuccess(channel, `Deleted ${warn.severity == 0 ? 'normal' : 'severe'} warning ${warn.id} from <@${warn.user_id}>:\n\n${warn.reason}`, 'DELETED WARNING');
-        log(`<@${member.id}> deleted ${warn.severity == 0 ? 'normal' : 'severe'} warning ${warn.id} from <@${warn.user_id}>:\n\n${warn.reason}`);
+        const content = `**User:** <@${warn.user_id}>\n**Type:** ${warn.severity === 0 ? 'Normal' : 'Severe'}\n**Reason:** ${
+            warn.reason || 'No reason provided.'
+        }\n**Moderator:** <@${warn.mod_id}>\n**ID:** ${warn.id}\n**Expiring In:** ${warn.expire_days} days`;
+
+        sendSuccess(channel, content, 'Deleted Warning');
+        log(`**Deleted By:** ${member.id}\n${content}`, 'Deleted Warning');
     },
 };

@@ -45,7 +45,7 @@ export const command: Command = {
             );
 
             log(
-                `**User:** <@${user.id}>\n**Moderator:** <@${author.id}>\n**Content:** ${content}\n**Created At:** ${timestamp.toLocaleString()}\n**ID:** ${result.id}`,
+                `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${timestamp.toLocaleString()}\n**ID:** ${result.id}`,
                 'Added Note'
             );
         } catch (error) {

@@ -27,7 +27,10 @@ export async function tempban(user: User, duration: number, modID: string | null
     }
 
     guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
-    log(`${modID ? `<@${modID}>` : 'System'} temp-banned <@${user.id}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\``);
+    log(
+        `${modID ? `<@${modID}>` : 'System'} temp-banned <@${user.id}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\``,
+        'Temporary Ban'
+    );
 
     if (timestamp.getDate() === expire.getDate() && timestamp.getMonth() === expire.getMonth()) {
         const timeout = setTimeout(() => {
@@ -64,7 +67,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
     }
 
     guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
-    log(`${modID ? `<@${modID}>` : 'System'} banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\``);
+    log(`${modID ? `<@${modID}>` : 'System'} banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\``, 'Ban');
 }
 
 export async function unban(userID: string, modID?: string) {
@@ -100,5 +103,5 @@ export async function unban(userID: string, modID?: string) {
         store.tempbans.delete(userID);
     }
 
-    log(`${modID ? `<@${modID}>` : 'System'} unbanned <@${userID}>.`);
+    log(`${modID ? `<@${modID}>` : 'System'} unbanned <@${userID}>.`, 'Unban');
 }

@@ -2,7 +2,7 @@ import { TextChannel, MessageEmbed, DMChannel, NewsChannel, Message, User } from
 
 export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'SUCCESS', 'https://img.icons8.com/color/48/000000/ok--v1.png')
+        .setAuthor(title || 'Success', 'https://img.icons8.com/color/48/000000/ok--v1.png')
         .setDescription(description)
         .setColor('#00ff11');
     return await channel.send(embed);
@@ -10,7 +10,7 @@ export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel
 
 export async function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'ERROR', 'https://img.icons8.com/color/48/000000/cancel--v1.png')
+        .setAuthor(title || 'Error', 'https://img.icons8.com/color/48/000000/cancel--v1.png')
         .setDescription(description)
         .setColor('#ff1100');
     return await channel.send(embed);
