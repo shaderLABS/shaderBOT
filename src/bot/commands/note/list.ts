@@ -3,10 +3,9 @@ import { embedPages, sendError } from '../../lib/embeds.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { db } from '../../../db/postgres.js';
 import { MessageEmbed } from 'discord.js';
-import log from '../../lib/log.js';
 import uuid from 'uuid-random';
 
-const expectedArgs = '<@user|userID|username|ID>';
+const expectedArgs = '<@user|userID|username|uuid>';
 
 export const command: Command = {
     commands: ['list'],
@@ -60,7 +59,7 @@ export const command: Command = {
 
                 const pages: string[] = [];
                 notes.reduce((prev, curr, i, { length }) => {
-                    const page = `**User:** <@${curr.user_id}>\n**Moderator:** <@${curr.mod_id}>\n**Content:** ${curr.content}\n**ID:** ${curr.id}\n**Created At:** ${new Date(
+                    const page = `**User:** <@${curr.user_id}>\n**Content:** ${curr.content}\n**Moderator:** <@${curr.mod_id}>\n**ID:** ${curr.id}\n**Created At:** ${new Date(
                         curr.timestamp
                     ).toLocaleString()}`;
 

@@ -67,7 +67,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Type:** ${row.severity === 0 ? 'Normal' : 'Severe'}
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **By:** <@${row.mod_id}> 
+                            **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
                             **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days`
@@ -82,7 +82,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **By:** <@${row.mod_id}> 
+                            **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
                             **Expiring At:** ${new Date(row.expire_timestamp).toLocaleString()}`
@@ -95,9 +95,8 @@ export const command: Command = {
                     'Notes',
                     queries[2].rows.map(
                         (row) =>
-                            `\n**User:** <@${row.user_id}>
+                            `\n**Content:** ${row.content}
                             **Moderator:** <@${row.mod_id}>
-                            **Content:** ${row.content}
                             **ID:** ${row.id}
                             **Created At:** ${new Date(row.timestamp).toLocaleString()}`
                     )
@@ -110,7 +109,7 @@ export const command: Command = {
                     queries[3].rows.map((row) => {
                         let content = `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **By:** <@${row.mod_id}> 
+                            **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()}`;
 
@@ -131,7 +130,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Type:** ${row.severity === 0 ? 'Normal' : 'Severe'} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **By:** <@${row.mod_id}> 
+                            **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
                             **Expired At:** ${new Date(new Date(row.timestamp).getTime() + row.expire_days * 86400000).toLocaleDateString()}`

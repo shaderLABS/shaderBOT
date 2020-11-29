@@ -5,7 +5,7 @@ import { db } from '../../../db/postgres.js';
 import { MessageEmbed } from 'discord.js';
 import log from '../../lib/log.js';
 
-const expectedArgs = '<id>';
+const expectedArgs = '<uuid>';
 
 export const command: Command = {
     commands: ['delete'],
@@ -43,7 +43,7 @@ export const command: Command = {
         );
 
         log(
-            `**User:** <@${result.user_id}>\n**Moderator:** <@${result.mod_id}>\n**Content:** ${result.content}\n**Created At:** ${new Date(
+            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${new Date(
                 result.timestamp
             ).toLocaleString()}\n**ID:** ${args[0]}`,
             'Deleted Note'
