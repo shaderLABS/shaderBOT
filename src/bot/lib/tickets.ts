@@ -295,7 +295,7 @@ export async function getCategoryChannel(categoryIDs: string[], guild: Guild): P
         const category = guild.channels.cache.get(id);
         if (!(category instanceof CategoryChannel)) continue;
 
-        if (category.children.size < 2) return category;
+        if (category.children.size < 50) return category;
         lowestPosition = Math.max(lowestPosition, category.rawPosition + category.children.size);
     }
 
