@@ -9,7 +9,7 @@ export type Settings = {
         channelID: string;
     };
     ticket: {
-        categoryID: string;
+        categoryIDs: string[];
         managementChannelID: string;
         subscriptionChannelID: string;
         attachmentCacheChannelID: string;

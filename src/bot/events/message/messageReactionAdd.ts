@@ -9,7 +9,7 @@ export const event: Event = {
     name: 'messageReactionAdd',
     callback: async (reaction: MessageReaction, user: User) => {
         const channel = reaction.message.channel;
-        if (!(channel instanceof TextChannel) || user.bot || channel.parentID !== settings.ticket.categoryID) return;
+        if (!(channel instanceof TextChannel) || user.bot || !channel.parentID || !settings.ticket.categoryIDs.includes(channel.parentID)) return;
 
         const guild = client.guilds.cache.first();
         if (!guild) return;
