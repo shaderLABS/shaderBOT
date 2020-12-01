@@ -12,7 +12,7 @@ export const event: Event = {
         const { content, channel } = message;
 
         if (!(channel instanceof TextChannel) || message.author.bot) return;
-        if (channel.parentID === settings.ticket.categoryID) return ticketComment(message);
+        if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) return ticketComment(message);
         if (mediaOnly(message)) return;
         if (!content.startsWith(settings.prefix)) return;
 

@@ -1,7 +1,8 @@
-import { Message, TextChannel, Guild, MessageEmbed, GuildMember, User } from 'discord.js';
+import { Message, TextChannel, Guild, MessageEmbed, GuildMember, User, CategoryChannel } from 'discord.js';
 import { settings, client } from '../bot.js';
 import { db } from '../../db/postgres.js';
 import uuid from 'uuid-random';
+import { update } from '../settings/settings.js';
 
 export async function cacheAttachments(message: Message): Promise<string[]> {
     let fileUploadLimit = 8388119;
@@ -65,7 +66,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = clie
 
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
-        parent: settings.ticket.categoryID,
+        parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
         topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
         rateLimitPerUser: 10,
         permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
@@ -286,4 +287,27 @@ export async function purgeAllTickets(user: User, guild: Guild) {
     }
 
     return { titles: titles, amount: response.rowCount };
+}
+
+export async function getCategoryChannel(categoryIDs: string[], guild: Guild): Promise<CategoryChannel> {
+    let lowestPosition = 0;
+    for (const id of categoryIDs) {
+        const category = guild.channels.cache.get(id);
+        if (!(category instanceof CategoryChannel)) continue;
+
+        if (category.children.size < 2) return category;
+        lowestPosition = Math.max(lowestPosition, category.rawPosition + category.children.size);
+    }
+
+    // CREATE NEW CATEGORY
+    const newCategory = await guild.channels.create(`Tickets #${categoryIDs.length + 1}`, {
+        type: 'category',
+        position: lowestPosition + 1,
+        reason: 'Create new category for tickets.',
+    });
+
+    settings.ticket.categoryIDs.push(newCategory.id);
+    update();
+
+    return newCategory;
 }

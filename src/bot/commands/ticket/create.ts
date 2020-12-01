@@ -4,7 +4,7 @@ import { TextChannel, DMChannel, NewsChannel, MessageEmbed, Message } from 'disc
 import { settings } from '../../bot.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { cacheAttachments } from '../../lib/tickets.js';
+import { cacheAttachments, getCategoryChannel } from '../../lib/tickets.js';
 import { db } from '../../../db/postgres.js';
 
 export const command: Command = {
@@ -69,9 +69,10 @@ export const command: Command = {
 
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
-                parent: settings.ticket.categoryID,
+                parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
                 topic: `${ticketID} | <#${projectChannel.id}>`,
                 rateLimitPerUser: 10,
+                // position: 0, // new - old
             });
 
             ticketEmbed.setTitle('');

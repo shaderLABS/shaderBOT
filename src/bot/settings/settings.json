@@ -1,10 +1,8 @@
 {
     "prefix": "!",
-    "logging": {
-        "channelID": "743955581160783933"
-    },
+    "logging": { "channelID": "743955581160783933" },
     "ticket": {
-        "categoryID": "745760024063901747",
+        "categoryIDs": ["745760024063901747", "783368453348261918"],
         "managementChannelID": "747142980497834017",
         "subscriptionChannelID": "747485722285441104",
         "attachmentCacheChannelID": "748904963215982733"

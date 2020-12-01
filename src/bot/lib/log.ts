@@ -10,7 +10,7 @@ export default function (content: string | MessageEmbed, title?: string) {
         if (content instanceof MessageEmbed) logChannel.send(content);
         else
             logChannel.send(
-                new MessageEmbed().setAuthor('LOG', 'https://img.icons8.com/officexs/48/000000/clock.png').setTitle(title).setColor('#006fff').setDescription(content)
+                new MessageEmbed({ author: { name: 'LOG', iconURL: 'https://img.icons8.com/officexs/48/000000/clock.png' }, title, color: '#006fff', description: content })
             );
     }
 }

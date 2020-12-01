@@ -8,9 +8,10 @@ export const event: Event = {
     name: 'messageDelete',
     callback: async (message: Message) => {
         const { channel } = message;
-        if (!(channel instanceof TextChannel) || channel.parentID !== settings.ticket.categoryID || !channel.topic) return;
-
-        if (!message.partial) if (!message.author.bot || message.embeds.length === 0) return;
+        if (
+            !(channel instanceof TextChannel) || !channel.parentID || !settings.ticket.categoryIDs.includes(channel.parentID) || !channel.topic ||
+            (!message.partial && (!message.author.bot || message.embeds.length === 0))
+        ) return;
 
         const results = await db.query(
             /*sql*/ `
