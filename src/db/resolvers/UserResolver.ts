@@ -14,7 +14,10 @@ export async function fetchUser(id: string) {
             avatarURL: member.user.displayAvatarURL(),
             roleColor: member.displayHexColor,
             permissions: member.permissions.bitfield,
-            allRoles: member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id).map(({ id, hexColor, name }) => ({ id, hexColor, name })),
+            allRoles: member.roles.cache
+                .filter((role) => role.id !== member.guild.roles.everyone.id)
+                .sort((first, second) => first.position - second.position)
+                .map(({ id, hexColor, name }) => ({ id, hexColor, name })),
         };
     } else {
         const user = await client.users.fetch(id);

@@ -13,5 +13,5 @@ export function shutdown() {
 process.on('SIGINT', shutdown);
 
 await connectPostgreSQL();
-startWebserver();
 startBot();
+if (process.env.BOT_ONLY !== 'TRUE') startWebserver();

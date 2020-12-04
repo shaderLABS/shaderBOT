@@ -74,10 +74,12 @@ export function hasPermissions(message: Message, command: Command): boolean {
 }
 
 export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
+    const { content, channel, mentions } = message;
+
     if (command instanceof Collection) {
         if (args.length === 0)
             return syntaxError(
-                message.channel,
+                channel,
                 `${invoke} <${command
                     .keyArray()
                     .map((value) => JSON.parse(value))
@@ -86,7 +88,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
         if (!subCommand)
             return syntaxError(
-                message.channel,
+                channel,
                 `${invoke} <${command
                     .keyArray()
                     .map((value) => JSON.parse(value))
@@ -98,17 +100,9 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         args.shift();
     }
 
-    let {
-        expectedArgs = '',
-        minArgs = 0,
-        maxArgs = null,
-        requiredRoles = [],
-        requiredPermissions = [],
-        permissionError = 'You do not have permission to run this command.',
-        callback,
-    } = command;
+    if (mentions.members && mentions.members.size > 1) return sendError(channel, "You can't mention more than one member at a time.");
 
-    const { member, content, channel, guild } = message;
+    let { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', callback } = command;
 
     if (!hasPermissions(message, command)) return sendError(channel, permissionError);
 
