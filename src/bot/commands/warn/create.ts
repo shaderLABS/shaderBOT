@@ -1,4 +1,3 @@
-import { MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
@@ -19,8 +18,6 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        // const reason = text.substring(args[0].length + args[1].length + 1).trim();
-        // const reason = args.slice(2).join(' ');
         const reason = text.substring(text.indexOf(args[1]) + args[1].length).trim();
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
