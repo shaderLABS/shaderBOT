@@ -2,7 +2,7 @@ import { Event } from '../../eventHandler.js';
 import { Message, TextChannel, MessageEmbed } from 'discord.js';
 import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
-import { cacheAttachments } from '../../lib/tickets.js';
+import { cacheAttachments } from '../../lib/ticketManagement.js';
 import { sendError } from '../../lib/embeds.js';
 import { db } from '../../../db/postgres.js';
 

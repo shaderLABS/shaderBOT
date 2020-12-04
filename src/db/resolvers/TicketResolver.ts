@@ -1,7 +1,7 @@
 import { Permissions } from 'discord.js';
 import gq from 'graphql';
 import tgq from 'type-graphql';
-import { closeTicketLib, openTicketLib } from '../../bot/lib/tickets.js';
+import { closeTicketLib, openTicketLib } from '../../bot/lib/ticketManagement.js';
 import { db } from '../postgres.js';
 import { Ticket } from '../typedefinitions/Ticket.js';
 import { fetchUser } from './UserResolver.js';

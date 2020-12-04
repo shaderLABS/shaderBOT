@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { sendSuccess, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { closeTicket } from '../../lib/tickets.js';
+import { closeTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['close'],
