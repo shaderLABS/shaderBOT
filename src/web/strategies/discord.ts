@@ -25,8 +25,7 @@ passport.deserializeUser(async (user_id: string, done) => {
             avatarURL: member.user.displayAvatarURL(),
             roleColor: member.displayHexColor,
             permissions: member.permissions.bitfield,
-            allRoles: roles.map(({ id, hexColor, name }) => ({ id, hexColor, name })),
-            // role_ids: roles,
+            allRoles: roles.sort((first, second) => first.position - second.position).map(({ id, hexColor, name }) => ({ id, hexColor, name })),
         };
 
         return user ? done(undefined, user) : done(null);
