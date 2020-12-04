@@ -1,9 +1,10 @@
 import { Event } from '../../eventHandler.js';
-import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
+import { MessageReaction, User, TextChannel, GuildMember, Guild, Message } from 'discord.js';
 import { settings, client } from '../../bot.js';
 import log from '../../lib/log.js';
 import { sendInfo } from '../../lib/embeds.js';
 import { db } from '../../../db/postgres.js';
+import { editComment } from '../../lib/ticketEditing.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -26,6 +27,10 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
     const comment = (await db.query(/*sql*/ `SELECT id, author_id, content FROM comment WHERE message_id = $1 LIMIT 1`, [reaction.message.id])).rows[0];
 
     if (!comment) {
+        /***************
+         * EDIT TICKET *
+         ***************/
+
         const ticket = (await db.query(/*sql*/ `SELECT id, author_id, channel_id, subscription_message_id FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
         if (!ticket) return;
 
@@ -70,6 +75,10 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const editedAt = new Date();
 
         if (editPart.content.toLowerCase() === 'title') {
+            /*********************
+             * EDIT TICKET TITLE *
+             *********************/
+
             const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title:', undefined, `<@${user.id}>`);
 
             const newTitle = (
@@ -110,6 +119,10 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
             log(`<@${user.id}> edited their ticket title from:\n\n${originalFieldValues[0] || '<empty comment>'}\n\nto:\n\n${newTitle.content}`);
         } else if (editPart.content.toLowerCase() === 'description') {
+            /***************************
+             * EDIT TICKET DESCRIPTION *
+             ***************************/
+
             const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description:', undefined, `<@${user.id}>`);
 
             const newDescription = (
@@ -151,6 +164,10 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
         reaction.remove();
     } else {
+        /****************
+         * EDIT COMMENT *
+         ****************/
+
         if (comment.author_id !== user.id) return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
@@ -172,23 +189,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
 
-        const embed = originalMessage.embeds[0];
-        if (!embed) return;
-
-        const editedAt = new Date();
-
-        embed.setFooter(`edited at ${editedAt.toLocaleString()}`);
-        embed.setDescription(newMessage.content);
-
-        await originalMessage.edit(embed);
-
-        await db.query(
-            /*sql*/ `
-            UPDATE comment 
-            SET content = $1, edited = $2 
-            WHERE id = $3`,
-            [newMessage.content, editedAt, comment.id]
-        );
+        editComment(comment.id, originalMessage, newMessage.content);
 
         reaction.remove();
         question.delete();

@@ -66,7 +66,7 @@ async function ticketComment(message: Message) {
 
     const commentMessage = await channel.send(commentEmbed);
 
-    await db.query(
+    db.query(
         /*sql*/ `
         INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
         VALUES ($1, $2, $3, $4, $5, $6)`,

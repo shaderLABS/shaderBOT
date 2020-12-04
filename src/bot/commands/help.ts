@@ -11,8 +11,8 @@ export const command: Command = {
     callback: async (message) => {
         let pages: string[] = [];
         let helpContent = '';
-        let index = 0;
-        for (var [key, value] of commands) {
+        let i = 0;
+        for (const [key, value] of commands) {
             if (value instanceof Collection) {
                 let subCmdHelp = '';
 
@@ -22,24 +22,23 @@ export const command: Command = {
 
                 if (subCmdHelp !== '') {
                     helpContent += `\`${settings.prefix}${JSON.parse(key).join('|')}\`${subCmdHelp}\n\n`;
-                    index++;
+                    i++;
                 }
             } else {
                 if (hasPermissions(message, value)) {
                     helpContent += `\`${settings.prefix}${JSON.parse(key).join('|')}\`\n${value.help}\n\n`;
-                    index++;
+                    i++;
                 }
             }
 
-            if (index === 3) {
-                index = 0;
+            if (i === 3) {
+                i = 0;
                 pages.push(helpContent);
                 helpContent = '';
             }
         }
 
         if (helpContent.length !== 0) pages.push(helpContent);
-
         embedPages(await sendInfo(message.channel, pages[0], 'HELP'), message.author, pages);
     },
 };
