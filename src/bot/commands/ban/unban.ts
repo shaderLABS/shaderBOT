@@ -1,7 +1,7 @@
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { client } from '../../bot.js';
-import { unban } from '../../lib/ban.js';
+import { unban } from '../../lib/banUser.js';
 
 const expectedArgs = '<username|userID>';
 

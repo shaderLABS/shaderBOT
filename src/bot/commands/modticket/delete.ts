@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { sendSuccess, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { deleteTicket } from '../../lib/tickets.js';
+import { deleteTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['delete'],

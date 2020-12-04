@@ -3,7 +3,7 @@ import { Message } from 'discord.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { purgeAllTickets } from '../../lib/tickets.js';
+import { purgeAllTickets } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['purgeuser'],
