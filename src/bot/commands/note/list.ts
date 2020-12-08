@@ -25,7 +25,7 @@ export const command: Command = {
                 const note = (
                     await db.query(
                         /*sql*/ `
-                        SELECT user_id, mod_id, content, timestamp FROM note WHERE id = $1 LIMIT 1;`,
+                        SELECT user_id, mod_id, content, timestamp, edited_timestamp, edited_mod_id FROM note WHERE id = $1 LIMIT 1;`,
                         [args[0]]
                     )
                 ).rows[0];
@@ -39,7 +39,9 @@ export const command: Command = {
                         .setDescription(
                             `**User:** <@${note.user_id}>\n**Moderator:** <@${note.mod_id}>\n**Content:** ${note.content}\n**Created At:** ${new Date(
                                 note.timestamp
-                            ).toLocaleString()}`
+                            ).toLocaleString()}${
+                                note.edited_timestamp ? `\n*(last edited by <@${note.edited_mod_id}> at ${new Date(note.edited_timestamp).toLocaleString()})*` : ''
+                            }`
                         )
                         .setFooter('ID: ' + args[0])
                 );
@@ -51,7 +53,7 @@ export const command: Command = {
                 const notes = (
                     await db.query(
                         /*sql*/ `
-                        SELECT * FROM note WHERE user_id = $1;`,
+                        SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`,
                         [user.id]
                     )
                 ).rows;
@@ -61,7 +63,7 @@ export const command: Command = {
                 notes.reduce((prev, curr, i, { length }) => {
                     const page = `**User:** <@${curr.user_id}>\n**Content:** ${curr.content}\n**Moderator:** <@${curr.mod_id}>\n**ID:** ${curr.id}\n**Created At:** ${new Date(
                         curr.timestamp
-                    ).toLocaleString()}`;
+                    ).toLocaleString()}${curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${new Date(curr.edited_timestamp).toLocaleString()})*` : ''}`;
 
                     if ((i + 1) % 3 === 0 || i === length - 1) {
                         pages.push(prev + '\n\n' + page);

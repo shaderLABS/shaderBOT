@@ -4,7 +4,7 @@ import { settings, client } from '../../bot.js';
 import log from '../../lib/log.js';
 import { sendInfo } from '../../lib/embeds.js';
 import { db } from '../../../db/postgres.js';
-import { editComment } from '../../lib/ticketEditing.js';
+import { editComment } from '../../lib/editTicket.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',

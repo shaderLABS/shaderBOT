@@ -23,7 +23,7 @@ export const command: Command = {
             const warning = (
                 await db.query(
                     /*sql*/ `
-                    SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired
+                    SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired, edited_timestamp::TEXT, edited_mod_id::TEXT
                     FROM warn 
                     WHERE id = $1
                     LIMIT 1;`,
@@ -33,19 +33,20 @@ export const command: Command = {
 
             if (!warning) return sendError(channel, 'There is no warning with this UUID.');
 
+            const days = warning.expired
+                ? new Date(new Date(warning.timestamp).getTime() + warning.expire_days * 86400000).toLocaleDateString()
+                : Math.ceil((new Date(warning.timestamp).getTime() + warning.expire_days * 86400000 - new Date().getTime()) / 86400000);
+
             sendInfo(
                 channel,
                 `**User:** <@${warning.user_id}>
-                **Type:** ${warning.severity === 0 ? 'Normal' : 'Severe'}
+                **Severity:** ${warning.severity === 0 ? 'Normal' : 'Severe'}
                 **Reason:** ${warning.reason || 'No reason provided.'} 
                 **Moderator:** <@${warning.mod_id}> 
                 **ID:** ${args[0]} 
                 **Created At:** ${new Date(warning.timestamp).toLocaleString()} 
-                **${warning.expired ? 'Expired At' : 'Expiring In'}:** ${
-                    warning.expired
-                        ? new Date(new Date(warning.timestamp).getTime() + warning.expire_days * 86400000).toLocaleDateString()
-                        : Math.ceil((new Date(warning.timestamp).getTime() + warning.expire_days * 86400000 - new Date().getTime()) / 86400000) + ' days'
-                }`,
+                **${warning.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
+                ${warning.edited_timestamp ? `*(last edited by <@${warning.edited_mod_id}> at ${new Date(warning.edited_timestamp).toLocaleString()})*` : ''}`,
                 'Warning'
             );
         } else {
@@ -53,10 +54,10 @@ export const command: Command = {
              * LIST ALL WARNINGS OF USER *
              *****************************/
 
-            const showExpired = args[args.length - 1].toLowerCase() === 'expired';
+            const showExpired = args[args.length - 1]?.toLowerCase() === 'expired';
 
             let userID: string;
-            if (args.length === 0) {
+            if (args.length === 0 || (args.length === 1 && showExpired)) {
                 userID = member.id;
             } else {
                 try {
@@ -73,14 +74,14 @@ export const command: Command = {
 
             const warnings = await db.query(
                 /*sql*/ `
-                SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired
+                SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired, edited_timestamp::TEXT, edited_mod_id::TEXT
                 FROM warn 
                 WHERE user_id = $1 ${showExpired ? '' : 'AND expired = FALSE'}
                 ORDER BY expired ASC, severity DESC, timestamp DESC;`,
                 [userID]
             );
 
-            if (warnings.rowCount === 0) return sendInfo(channel, `${args.length === 0 ? 'You do' : '<@' + userID + '> does'} not have any warnings.`);
+            if (warnings.rowCount === 0) return sendInfo(channel, `${userID === member.id ? 'You do' : '<@' + userID + '> does'} not have any warnings.`);
 
             const pages: string[] = [];
             warnings.rows.reduce((prev, curr, i, { length }) => {
@@ -89,16 +90,13 @@ export const command: Command = {
                     : Math.ceil((new Date(curr.timestamp).getTime() + curr.expire_days * 86400000 - new Date().getTime()) / 86400000);
 
                 const page = `**User:** <@${userID}>
-                    **Type:** ${curr.severity === 0 ? 'Normal' : 'Severe'}
+                    **Severity:** ${curr.severity === 0 ? 'Normal' : 'Severe'}
                     **Reason:** ${curr.reason || 'No reason provided.'} 
                     **Moderator:** <@${curr.mod_id}> 
                     **ID:** ${curr.id} 
                     **Created At:** ${new Date(curr.timestamp).toLocaleString()} 
-                    **${curr.expired ? 'Expired At' : 'Expiring In'}:** ${
-                    curr.expired
-                        ? new Date(new Date(curr.timestamp).getTime() + curr.expire_days * 86400000).toLocaleDateString()
-                        : Math.ceil((new Date(curr.timestamp).getTime() + curr.expire_days * 86400000 - new Date().getTime()) / 86400000) + ' days'
-                }`;
+                    **${curr.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
+                    ${curr.edited_timestamp ? `*(last edited by <@${curr.edited_mod_id}> at ${new Date(curr.edited_timestamp).toLocaleString()})*` : ''}`;
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {
                     pages.push(prev + '\n\n' + page);

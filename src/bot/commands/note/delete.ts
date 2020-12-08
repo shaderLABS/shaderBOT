@@ -24,7 +24,7 @@ export const command: Command = {
                 /*sql*/ `
                 DELETE FROM note
                 WHERE id = $1
-                RETURNING user_id, mod_id, content, timestamp;`,
+                RETURNING user_id, mod_id, content, timestamp, edited_mod_id, edited_timestamp;`,
                 [args[0]]
             )
         ).rows[0];
@@ -37,7 +37,9 @@ export const command: Command = {
                 .setDescription(
                     `**User:** <@${result.user_id}>\n**Moderator:** <@${result.mod_id}>\n**Content:** ${result.content}\n**Created At:** ${new Date(
                         result.timestamp
-                    ).toLocaleString()}`
+                    ).toLocaleString()}${
+                        result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${new Date(result.edited_timestamp).toLocaleString()})*` : ''
+                    }`
                 )
                 .setFooter('ID: ' + args[0])
         );

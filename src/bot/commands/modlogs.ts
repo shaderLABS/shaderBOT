@@ -65,12 +65,13 @@ export const command: Command = {
                     'Warnings',
                     warns[0].map(
                         (row) =>
-                            `\n**Type:** ${row.severity === 0 ? 'Normal' : 'Severe'}
+                            `\n**Severity:** ${row.severity === 0 ? 'Normal' : 'Severe'}
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days`
+                            **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days
+                            ${row.edited_timestamp ? `*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''}`
                     )
                 );
             }
@@ -80,7 +81,7 @@ export const command: Command = {
                     'Punishments',
                     queries[1].rows.map(
                         (row) =>
-                            `\n**Type:** ${typeAsString[row.type]} 
+                            `\n**Severity:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
@@ -98,7 +99,8 @@ export const command: Command = {
                             `\n**Content:** ${row.content}
                             **Moderator:** <@${row.mod_id}>
                             **ID:** ${row.id}
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()}`
+                            **Created At:** ${new Date(row.timestamp).toLocaleString()}
+                            ${row.edited_timestamp ? `*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''}`
                     )
                 );
             }
@@ -107,7 +109,7 @@ export const command: Command = {
                 pageCategory(
                     'Past Punishments',
                     queries[3].rows.map((row) => {
-                        let content = `\n**Type:** ${typeAsString[row.type]} 
+                        let content = `\n**Severity:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
@@ -115,6 +117,7 @@ export const command: Command = {
 
                         if (row.lifted_timestamp) content += `\n**Lifted At:** ${new Date(row.lifted_timestamp).toLocaleString()}`;
                         if (row.lifted_mod_id) content += `\n**Lifted By:** <@${row.lifted_mod_id}>`;
+                        if (row.edited_timestamp) content += `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*`;
 
                         return content;
                     })
@@ -128,7 +131,7 @@ export const command: Command = {
                     'Expired Warnings',
                     warns[1].map(
                         (row) =>
-                            `\n**Type:** ${row.severity === 0 ? 'Normal' : 'Severe'} 
+                            `\n**Severity:** ${row.severity === 0 ? 'Normal' : 'Severe'} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 

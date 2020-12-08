@@ -36,7 +36,7 @@
         "@types/cors": "^2.8.8",
         "@types/express": "^4.17.9",
         "@types/express-session": "^1.17.3",
-        "@types/node": "^14.14.10",
+        "@types/node": "^14.14.11",
         "@types/node-cron": "^2.0.3",
         "@types/passport": "^1.0.4",
         "@types/passport-discord": "^0.1.3",

@@ -58,7 +58,7 @@ export const command: Command = {
             )
         ).rows[0].id;
 
-        const content = `**User:** <@${user.id}>\n**Type:** ${severity === 0 ? 'Normal' : 'Severe'}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${
+        const content = `**User:** <@${user.id}>\n**Severity:** ${severity === 0 ? 'Normal' : 'Severe'}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${
             member.id
         }>\n**ID:** ${id}\n**Expiring In:** ${expire_days} days`;
 

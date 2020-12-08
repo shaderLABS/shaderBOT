@@ -9,9 +9,10 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     callback: async (message) => {
-        let pages: string[] = [];
-        let helpContent = '';
-        let i = 0;
+        let pages: string[] = [],
+            helpContent = '',
+            i = 0;
+
         for (const [key, value] of commands) {
             if (value instanceof Collection) {
                 let subCmdHelp = '';
