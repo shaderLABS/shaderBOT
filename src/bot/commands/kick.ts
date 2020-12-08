@@ -1,6 +1,6 @@
 import { Command, syntaxError } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
-import { kick } from '../lib/kick.js';
+import { kick } from '../lib/kickUser.js';
 
 const expectedArgs = '<@user|userID> [reason]';
 

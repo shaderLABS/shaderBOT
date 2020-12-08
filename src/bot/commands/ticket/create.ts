@@ -4,7 +4,7 @@ import { TextChannel, DMChannel, NewsChannel, MessageEmbed, Message } from 'disc
 import { settings } from '../../bot.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { cacheAttachments, getCategoryChannel } from '../../lib/tickets.js';
+import { cacheAttachments, getCategoryChannel } from '../../lib/ticketManagement.js';
 import { db } from '../../../db/postgres.js';
 
 export const command: Command = {

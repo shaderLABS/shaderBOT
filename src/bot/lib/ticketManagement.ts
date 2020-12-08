@@ -185,19 +185,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     }
 
     const ticket = response.rows[0];
-
     await closeTicketLib(ticket, member.guild);
-
-    // if (ticket.subscription_message_id) {
-    //     const subscriptionChannel = member.guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-    //     if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
-    //     (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
-    // }
-
-    // if (ticket.channel_id) {
-    //     const ticketChannel = member.guild.channels.cache.get(ticket.channel_id);
-    //     if (ticketChannel) ticketChannel.delete();
-    // }
 
     return { title: ticket.title, author: ticket.author_id };
 }
