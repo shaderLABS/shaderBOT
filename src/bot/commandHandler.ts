@@ -82,7 +82,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
                 channel,
                 `${invoke} <${command
                     .keyArray()
-                    .map((value) => JSON.parse(value))
+                    .map((value) => JSON.parse(value).join('|'))
                     .join('|')}>`
             );
         const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
@@ -91,7 +91,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
                 channel,
                 `${invoke} <${command
                     .keyArray()
-                    .map((value) => JSON.parse(value))
+                    .map((value) => JSON.parse(value).join('|'))
                     .join('|')}>`
             );
 

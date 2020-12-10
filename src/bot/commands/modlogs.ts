@@ -70,8 +70,9 @@ export const command: Command = {
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days
-                            ${row.edited_timestamp ? `*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''}`
+                            **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days${
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                            }`
                     )
                 );
             }
@@ -86,7 +87,9 @@ export const command: Command = {
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expiring At:** ${new Date(row.expire_timestamp).toLocaleString()}`
+                            **Expiring At:** ${new Date(row.expire_timestamp).toLocaleString()}${
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                            }`
                     )
                 );
             }
@@ -99,8 +102,9 @@ export const command: Command = {
                             `\n**Content:** ${row.content}
                             **Moderator:** <@${row.mod_id}>
                             **ID:** ${row.id}
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()}
-                            ${row.edited_timestamp ? `*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''}`
+                            **Created At:** ${new Date(row.timestamp).toLocaleString()}${
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                            }`
                     )
                 );
             }
