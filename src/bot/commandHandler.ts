@@ -45,7 +45,7 @@ export async function registerCommands(dir: string) {
 }
 
 export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
-    sendError(channel, '`' + settings.prefix + syntax + '`', 'SYNTAX ERROR');
+    sendError(channel, '`' + settings.prefix + syntax + '`', 'Syntax Error');
 }
 
 export function hasPermissions(message: Message, command: Command): boolean {

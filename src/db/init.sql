@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS "punishment";
 CREATE TABLE "punishment" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) NOT NULL,
-    type TEXT NOT NULL, -- ban, tban, mute
+    type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
     reason TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
@@ -71,7 +71,7 @@ DROP TABLE IF EXISTS "past_punishment";
 CREATE TABLE "past_punishment" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) NOT NULL,
-    type TEXT NOT NULL, -- ban, tban, mute, kick
+    type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
     reason TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,

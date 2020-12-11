@@ -7,7 +7,6 @@ import { unban } from './banUser.js';
 export const typeAsString: {
     [key: string]: string;
 } = {
-    tban: 'Temporary Ban',
     kick: 'Kick',
     ban: 'Ban',
     mute: 'Mute',
@@ -31,14 +30,14 @@ export async function loadTimeouts() {
         await db.query(/*sql*/ `
             SELECT user_id::TEXT, "type", mod_id::TEXT, expire_timestamp::TEXT 
             FROM punishment 
-            WHERE ("type" = 'tban' OR "type" = 'mute') AND expire_timestamp <= NOW() + INTERVAL '1 day 5 minutes';`)
+            WHERE (("type" = 'ban' AND expire_timestamp IS NOT NULL) OR "type" = 'mute') AND expire_timestamp <= NOW() + INTERVAL '1 day 5 minutes';`)
     ).rows;
 
     for (const punishment of expiringPunishments) {
         const ms = new Date(punishment.expire_timestamp).getTime() - new Date().getTime();
 
         if (ms <= 5000) {
-            if (punishment.type === 'tban') {
+            if (punishment.type === 'ban') {
                 unban(punishment.user_id);
             } else {
                 const member = await client.guilds.cache
@@ -49,7 +48,7 @@ export async function loadTimeouts() {
                 else log(`System could not unmute <@${punishment.user_id}>: member not found.`);
             }
         } else {
-            if (punishment.type === 'tban') {
+            if (punishment.type === 'ban') {
                 const timeout = setTimeout(() => {
                     unban(punishment.user_id);
                 }, ms);

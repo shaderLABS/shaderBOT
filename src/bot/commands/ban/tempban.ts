@@ -30,13 +30,13 @@ export const command: Command = {
         const time = stringToSeconds(splitString(args[1]));
 
         if (isNaN(time) || time < 10) {
-            sendError(channel, "You can't temp-ban someone for less than 10 seconds.");
+            sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
             return;
         }
 
         if (user instanceof GuildMember) {
             if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
-                return sendError(channel, "You can't temp-ban a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+                return sendError(channel, "You can't temporarily ban a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
 
             if (!user.bannable) return sendError(channel, 'This user is not bannable.');
 
@@ -53,6 +53,6 @@ export const command: Command = {
             }
         }
 
-        sendSuccess(channel, `<@${user.id}> has been temp-banned:\n\`${reason || 'No reason provided.'}\``);
+        sendSuccess(channel, `<@${user.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\``);
     },
 };

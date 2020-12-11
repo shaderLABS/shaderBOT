@@ -31,7 +31,7 @@ export const command: Command = {
 
             const noteQuery = db.query(
                 /*sql*/ `
-                SELECT * FROM note WHERE user_id = $1;`,
+                SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`,
                 [user.id]
             );
 
@@ -82,12 +82,12 @@ export const command: Command = {
                     'Punishments',
                     queries[1].rows.map(
                         (row) =>
-                            `\n**Severity:** ${typeAsString[row.type]} 
+                            `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
                             **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expiring At:** ${new Date(row.expire_timestamp).toLocaleString()}${
+                            **Expiring At:** ${row.expire_timestamp ? new Date(row.expire_timestamp).toLocaleString() : 'Permanent'}${
                                 row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
                             }`
                     )
@@ -113,7 +113,7 @@ export const command: Command = {
                 pageCategory(
                     'Past Punishments',
                     queries[3].rows.map((row) => {
-                        let content = `\n**Severity:** ${typeAsString[row.type]} 
+                        let content = `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 

@@ -1,8 +1,12 @@
-import { User } from 'discord.js';
+import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { store } from './punishments.js';
 import log from './log.js';
+
+/*******
+ * BAN *
+ *******/
 
 export async function tempban(user: User, duration: number, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false): Promise<Date> {
     const guild = client.guilds.cache.first();
@@ -12,35 +16,72 @@ export async function tempban(user: User, duration: number, modID: string | null
     const expire = new Date(timestamp.getTime() + duration * 1000);
 
     try {
-        await db.query(
-            /*sql*/ `
-            INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp) 
-            VALUES ($1, 'tban', $2, $3, $4, $5);`,
-            [user.id, modID, reason, expire, timestamp]
-            // ON CONFLICT (user_id) DO UPDATE
-            // SET "type" = 'ban', mod_id = $2, reason = $3, expire_timestamp = $4, timestamp = $5
+        const overwrittenPunishment = (
+            await db.query(
+                /*sql*/ `
+                WITH moved_rows AS (
+                    DELETE FROM punishment 
+                    WHERE "type" = 'ban' AND user_id = $1
+                    RETURNING id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+                ), inserted_rows AS (
+                    INSERT INTO past_punishment
+                    SELECT id, user_id, type, mod_id, reason, timestamp, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows
+                )
+                SELECT * FROM moved_rows;`,
+                [user.id, modID, new Date()]
+            )
+        ).rows[0];
+
+        if (overwrittenPunishment) {
+            const timeout = store.tempbans.get(user.id);
+            if (timeout) {
+                clearTimeout(timeout);
+                store.tempbans.delete(user.id);
+            }
+        }
+
+        const tempban = (
+            await db.query(
+                /*sql*/ `
+                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp) 
+                VALUES ($1, 'ban', $2, $3, $4, $5)
+                RETURNING id;`,
+                [user.id, modID, reason, expire, timestamp]
+            )
+        ).rows[0];
+
+        await user
+            .send(
+                new MessageEmbed({
+                    author: { name: 'You have been banned from shaderLABS.' },
+                    description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
+                    color: '#006fff',
+                })
+            )
+            .catch(() => undefined);
+
+        guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
+        log(
+            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${
+                reason || 'No reason provided.'
+            }\`${overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''}`,
+            'Temporary Ban'
         );
+
+        if (timestamp.getDate() === expire.getDate() && timestamp.getMonth() === expire.getMonth()) {
+            const timeout = setTimeout(() => {
+                unban(user.id);
+            }, duration * 1000);
+
+            const previousTimeout = store.tempbans.get(user.id);
+            if (previousTimeout) clearTimeout(previousTimeout);
+
+            store.tempbans.set(user.id, timeout);
+        }
     } catch (error) {
-        console.error(error);
-        log(`Failed to temp-ban <@${user.id}> for ${duration} seconds: an error occurred while accessing the database.`);
-        return Promise.reject('Error while accessing the database.');
-    }
-
-    guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
-    log(
-        `${modID ? `<@${modID}>` : 'System'} temp-banned <@${user.id}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\``,
-        'Temporary Ban'
-    );
-
-    if (timestamp.getDate() === expire.getDate() && timestamp.getMonth() === expire.getMonth()) {
-        const timeout = setTimeout(() => {
-            unban(user.id);
-        }, duration * 1000);
-
-        const previousTimeout = store.tempbans.get(user.id);
-        if (previousTimeout) clearTimeout(previousTimeout);
-
-        store.tempbans.set(user.id, timeout);
+        console.log(error);
+        log(`Failed to temporarily ban <@${user.id}> for ${duration} seconds.`);
+        return Promise.reject(`Failed to temporarily ban <@${user.id}> for ${duration} seconds.`);
     }
 
     return expire;
@@ -52,23 +93,75 @@ export async function ban(user: User, modID: string | null = null, reason: strin
     if (!guild) return Promise.reject('No guild found.');
 
     try {
-        await db.query(
-            /*sql*/ `
-            INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp) 
-            VALUES ($1, 'ban', $2, $3, $4);`,
-            [user.id, modID, reason, timestamp]
-            // ON CONFLICT (user_id) DO UPDATE
-            // SET "type" = 'ban', mod_id = $2, reason = $3, timestamp = $4
+        const overwrittenPunishment = (
+            await db.query(
+                /*sql*/ `
+                WITH moved_rows AS (
+                    DELETE FROM punishment 
+                    WHERE "type" = 'ban' AND user_id = $1
+                    RETURNING id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+                ), inserted_rows AS (
+                    INSERT INTO past_punishment
+                    SELECT id, user_id, type, mod_id, reason, timestamp, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows
+                )
+                SELECT * FROM moved_rows;`,
+                [user.id, modID, new Date()]
+            )
+        ).rows[0];
+
+        if (overwrittenPunishment) {
+            const timeout = store.tempbans.get(user.id);
+            if (timeout) {
+                clearTimeout(timeout);
+                store.tempbans.delete(user.id);
+            }
+        }
+
+        const ban = (
+            await db.query(
+                /*sql*/ `
+                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp) 
+                VALUES ($1, 'ban', $2, $3, $4)
+                RETURNING id;`,
+                [user.id, modID, reason, timestamp]
+            )
+        ).rows[0];
+
+        await user
+            .send(
+                new MessageEmbed({
+                    author: { name: 'You have been banned from shaderLABS.' },
+                    description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                    color: '#006fff',
+                })
+            )
+            .catch(() => undefined);
+
+        guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
+        log(
+            `${modID ? `<@${modID}>` : 'System'} permanently banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${
+                overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+            }`,
+            'Ban'
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to ban <@${user.id}>: an error occurred while accessing the database.`);
+        log(`Failed to ban <@${user.id}>.`);
         return Promise.reject('Error while accessing the database.');
     }
-
-    guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
-    log(`${modID ? `<@${modID}>` : 'System'} banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\``, 'Ban');
 }
+
+function punishmentToString(punishment: any) {
+    return `**Reason:** ${punishment.reason || 'No reason provided.'} 
+    **Moderator:** <@${punishment.mod_id}> 
+    **ID:** ${punishment.id} 
+    **Created At:** ${new Date(punishment.timestamp).toLocaleString()} 
+    **Expiring At:** ${punishment.expire_timestamp ? new Date(punishment.expire_timestamp).toLocaleString() : 'Permanent'}`;
+}
+
+/*********
+ * UNBAN *
+ *********/
 
 export async function unban(userID: string, modID?: string) {
     const guild = client.guilds.cache.first();
@@ -80,7 +173,7 @@ export async function unban(userID: string, modID?: string) {
                 /*sql*/ `
                 WITH moved_rows AS (
                     DELETE FROM punishment 
-                    WHERE ("type" = 'ban' OR "type" = 'tban') AND user_id = $1
+                    WHERE "type" = 'ban' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, timestamp
                 )
                 INSERT INTO past_punishment

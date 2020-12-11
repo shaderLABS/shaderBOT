@@ -1,5 +1,5 @@
-import { db } from '../../db/postgres.js';
-import log from './log.js';
+import { db } from '../../../db/postgres.js';
+import log from '../log.js';
 
 export async function editWarnReason(reason: string, id: string, modID: string) {
     const warning = (

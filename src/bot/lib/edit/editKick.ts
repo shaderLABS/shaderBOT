@@ -1,5 +1,5 @@
-import { db } from '../../db/postgres.js';
-import log from './log.js';
+import { db } from '../../../db/postgres.js';
+import log from '../log.js';
 
 export async function editKick(uuid: string, reason: string, modID: string) {
     const result = (

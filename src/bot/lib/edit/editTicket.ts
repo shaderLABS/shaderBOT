@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { db } from '../../db/postgres.js';
+import { db } from '../../../db/postgres.js';
 
 export async function editComment(commentID: string, message: Message, newContent: string) {
     const embed = message.embeds[0];

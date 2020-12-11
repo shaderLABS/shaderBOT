@@ -3,7 +3,7 @@ import { sendError, sendSuccess } from '../../lib/embeds.js';
 import uuid from 'uuid-random';
 import { getUser } from '../../lib/searchMessage.js';
 import { db } from '../../../db/postgres.js';
-import { editKick } from '../../lib/editKick.js';
+import { editKick } from '../../lib/edit/editKick.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 

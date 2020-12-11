@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
-import { editNote } from '../../lib/editNote.js';
+import { editNote } from '../../lib/edit/editNote.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { db } from '../../../db/postgres.js';
 
