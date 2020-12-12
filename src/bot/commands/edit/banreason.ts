@@ -29,7 +29,7 @@ export const command: Command = {
             } else {
                 const user = await getUser(message, args[0]);
 
-                const latestNoteID = (
+                const latestBanID = (
                     await db.query(
                         /*sql*/ `
                         WITH entries AS (
@@ -41,10 +41,10 @@ export const command: Command = {
                         [user.id]
                     )
                 ).rows[0];
-                if (!latestNoteID) return sendError(channel, 'The specified user does not have any bans.');
+                if (!latestBanID) return sendError(channel, 'The specified user does not have any bans.');
 
-                await editBanReason(latestNoteID.id, content, author.id, latestNoteID.db === 'pp');
-                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s ban (${latestNoteID.id}).`);
+                await editBanReason(latestBanID.id, content, author.id, latestBanID.db === 'pp');
+                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s ban (${latestBanID.id}).`);
             }
         } catch (error) {
             sendError(channel, error);

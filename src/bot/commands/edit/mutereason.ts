@@ -29,7 +29,7 @@ export const command: Command = {
             } else {
                 const user = await getUser(message, args[0]);
 
-                const latestNoteID = (
+                const latestMuteID = (
                     await db.query(
                         /*sql*/ `
                         WITH entries AS (
@@ -41,10 +41,10 @@ export const command: Command = {
                         [user.id]
                     )
                 ).rows[0];
-                if (!latestNoteID) return sendError(channel, 'The specified user does not have any mutes.');
+                if (!latestMuteID) return sendError(channel, 'The specified user does not have any mutes.');
 
-                await editMuteReason(latestNoteID.id, content, author.id, latestNoteID.db === 'pp');
-                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s mute (${latestNoteID.id}).`);
+                await editMuteReason(latestMuteID.id, content, author.id, latestMuteID.db === 'pp');
+                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s mute (${latestMuteID.id}).`);
             }
         } catch (error) {
             sendError(channel, error);

@@ -74,7 +74,7 @@ export async function mute(member: GuildMember, duration: number, modID: string 
 
     member.roles.add(role);
 
-    if (timestamp.getDate() === expire.getDate() && timestamp.getMonth() === expire.getMonth()) {
+    if (expire.getTime() < timestamp.setHours(23, 55, 0, 0)) {
         const timeout = setTimeout(() => {
             unmute(member);
         }, duration * 1000);

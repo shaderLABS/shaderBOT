@@ -28,13 +28,13 @@ export const command: Command = {
             } else {
                 const user = await getUser(message, args[0]);
 
-                const latestNoteID = (
+                const latestKickID = (
                     await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])
                 ).rows[0];
-                if (!latestNoteID) return sendError(channel, 'The specified user does not have any kicks.');
+                if (!latestKickID) return sendError(channel, 'The specified user does not have any kicks.');
 
-                await editKick(latestNoteID.id, content, author.id);
-                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s kick (${latestNoteID.id}).`);
+                await editKick(latestKickID.id, content, author.id);
+                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s kick (${latestKickID.id}).`);
             }
         } catch (error) {
             sendError(channel, error);
