@@ -8,7 +8,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 export const command: Command = {
     commands: ['warnreason', 'wr'],
     superCommands: ['edit'],
-    help: 'Edit the reason of a specific warning.',
+    help: 'Edit the reason of a warning.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,

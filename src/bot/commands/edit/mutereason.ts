@@ -10,7 +10,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 export const command: Command = {
     commands: ['mutereason', 'mr'],
     superCommands: ['edit'],
-    help: 'Edit the reason of a specified mute or the most recent mute of a user.',
+    help: 'Edit the reason of a mute.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,

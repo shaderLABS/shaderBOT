@@ -11,7 +11,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 export const command: Command = {
     commands: ['note', 'n'],
     superCommands: ['edit'],
-    help: 'Edit a specified note or the latest note of a user.',
+    help: 'Edit a note.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,

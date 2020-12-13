@@ -8,7 +8,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <"normal"|"severe">';
 export const command: Command = {
     commands: ['warnseverity', 'ws'],
     superCommands: ['edit'],
-    help: 'Edit the severity of a specific warning.',
+    help: 'Edit the severity of a warning.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,

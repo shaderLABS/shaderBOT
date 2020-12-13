@@ -11,7 +11,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <time>';
 export const command: Command = {
     commands: ['muteduration', 'md'],
     superCommands: ['edit'],
-    help: 'Edit the duration of a specified mute or the most recent mute of a user.',
+    help: 'Edit the duration of a mute.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,
@@ -21,10 +21,8 @@ export const command: Command = {
 
         const time = stringToSeconds(splitString(args[1]));
 
-        if (isNaN(time) || time < 10) {
-            sendError(channel, "You can't mute someone for less than 10 seconds.");
-            return;
-        }
+        if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
+        if (time < 10) return sendError(channel, "You can't mute someone for less than 10 seconds.");
 
         try {
             if (uuid.test(args[0])) {

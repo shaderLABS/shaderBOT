@@ -29,10 +29,8 @@ export const command: Command = {
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
         const time = stringToSeconds(splitString(args[1]));
 
-        if (isNaN(time) || time < 10) {
-            sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
-            return;
-        }
+        if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
+        if (time < 10) return sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
 
         if (user instanceof GuildMember) {
             if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)

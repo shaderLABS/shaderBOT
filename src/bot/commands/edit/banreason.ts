@@ -10,7 +10,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 export const command: Command = {
     commands: ['banreason', 'br'],
     superCommands: ['edit'],
-    help: 'Edit the reason of a specified ban or the most recent ban of a user.',
+    help: 'Edit the reason of a ban.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,

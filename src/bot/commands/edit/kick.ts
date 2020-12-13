@@ -10,7 +10,7 @@ const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 export const command: Command = {
     commands: ['kick', 'k'],
     superCommands: ['edit'],
-    help: 'Edit the reason of a specified kick or the most recent kick of a user.',
+    help: 'Edit the reason of a kick.',
     minArgs: 2,
     maxArgs: null,
     expectedArgs,
