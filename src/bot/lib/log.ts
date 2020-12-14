@@ -1,8 +1,9 @@
-import { client, settings } from '../bot.js';
+import { settings } from '../bot.js';
 import { TextChannel, MessageEmbed } from 'discord.js';
+import { getGuild } from './misc.js';
 
 export default function (content: string | MessageEmbed, title?: string) {
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return;
 
     const logChannel = guild.channels.cache.get(settings.logging.channelID);

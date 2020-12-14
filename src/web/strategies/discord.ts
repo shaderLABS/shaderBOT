@@ -1,7 +1,6 @@
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
-// import { db } from '../../db/postgres.js';
-import { client } from '../../bot/bot.js';
+import { getGuild } from '../../bot/lib/misc.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.id);
@@ -9,14 +8,12 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (user_id: string, done) => {
     try {
-        const member = await client.guilds.cache
-            .first()
+        const member = await getGuild()
             ?.members.fetch(user_id)
             .catch(() => undefined);
         if (!member) return done(null);
 
         const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
-        if (roles.size === 0) return done(null);
 
         const user = {
             id: member.id,
@@ -45,14 +42,12 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
-            const member = await client.guilds.cache
-                .first()
+            const member = await getGuild()
                 ?.members.fetch(profile.id)
                 .catch(() => undefined);
             if (!member) return done(undefined, undefined, { error: 0 });
 
             const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
-            if (roles.size === 0) return done(undefined, undefined, { error: 1 });
 
             try {
                 const user = {

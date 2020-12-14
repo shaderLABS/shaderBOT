@@ -145,7 +145,7 @@ export const command: Command = {
                 );
             }
 
-            const embedMessage = await sendInfo(channel, pages[0], 'Moderation Logs');
+            const embedMessage = await sendInfo(channel, pages[0], `Moderation Logs - ${user.username}#${user.discriminator}`);
             embedPages(embedMessage, message.author, pages);
         } catch (error) {
             sendError(channel, error);

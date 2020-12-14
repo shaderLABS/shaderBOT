@@ -1,9 +1,9 @@
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { client } from '../../bot.js';
 import { tempban } from '../../lib/banUser.js';
 import { GuildMember } from 'discord.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
+import { getMember, getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID> <time> ["delete"] [reason]';
 
@@ -18,10 +18,12 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        const user =
-            message.mentions.members?.first() ||
-            (await member.guild.members.fetch(args[0]).catch(() => undefined)) ||
-            (await client.users.fetch(args[0]).catch(() => undefined));
+        // const user =
+        //     message.mentions.members?.first() ||
+        //     (await member.guild.members.fetch(args[0]).catch(() => undefined)) ||
+        //     (await client.users.fetch(args[0]).catch(() => undefined));
+
+        const user = (await getMember(message, args[0]).catch(() => undefined)) || (await getUser(message, args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';

@@ -1,3 +1,9 @@
+import { client, settings } from '../bot.js';
+
+export function getGuild() {
+    return client.guilds.cache.get(settings.guildID);
+}
+
 export function similarityLevenshtein(s1: string, s2: string) {
     let longer = s1;
     let shorter = s2;

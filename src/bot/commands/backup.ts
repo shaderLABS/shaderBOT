@@ -19,8 +19,9 @@ export const command: Command = {
         const backupMessages = await channel.messages.fetch({ limit: limit });
 
         let backupContent = '';
-        backupMessages.each((backupMessage) => {
-            backupContent += `${backupMessage.author.username}#${backupMessage.author.discriminator}: ${backupMessage.content}\n`;
+        backupMessages.each(({ author, content, embeds }) => {
+            backupContent += `${author.username}#${author.discriminator}: ${content}\n`;
+            if (embeds[0]) backupContent += `EMBED: ${embeds[0].description}\n`;
         });
 
         const res = await axios.post('https://hastebin.com/documents', `BACKUP OF #${channel.name} (${backupMessages.size} MESSAGES)\n\n${backupContent}`);

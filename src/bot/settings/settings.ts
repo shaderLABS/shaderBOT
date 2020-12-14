@@ -16,6 +16,7 @@ export type Settings = {
     };
     mediaChannelIDs: string[];
     muteRoleID: string;
+    guildID: string;
 };
 
 export function write(data: Object) {

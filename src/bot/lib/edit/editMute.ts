@@ -1,6 +1,6 @@
 import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
 import log from '../log.js';
+import { getGuild } from '../misc.js';
 import { unmute } from '../muteUser.js';
 import { store } from '../punishments.js';
 
@@ -42,22 +42,18 @@ export async function editMuteDuration(uuid: string, time: number, modID: string
 
     if (!result) return Promise.reject('There is no active mute with the specified UUID.');
 
-    const member =
-        client.guilds.cache.first()?.members.cache.get(result.user_id) ||
-        (await client.guilds.cache
-            .first()
-            ?.members.fetch(result.user_id)
-            .catch(() => undefined));
+    const guild = getGuild();
+    const member = guild?.members.cache.get(result.user_id) || (await guild?.members.fetch(result.user_id).catch(() => undefined));
 
     const expireTime = new Date(result.expire_timestamp).getTime();
     const editTime = editTimestamp.getTime();
 
     if (member) {
         if (expireTime < editTime) {
-            unmute(member).catch(() => undefined);
+            unmute(member.id, undefined, member).catch(() => undefined);
         } else if (expireTime < editTimestamp.setHours(23, 55, 0, 0)) {
             const timeout = setTimeout(() => {
-                unmute(member);
+                unmute(member.id, undefined, member);
             }, expireTime - editTime);
 
             const previousTimeout = store.mutes.get(member.id);

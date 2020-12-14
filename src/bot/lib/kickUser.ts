@@ -1,10 +1,10 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { client } from '../bot.js';
 import log from './log.js';
+import { getGuild } from './misc.js';
 
 export async function kick(user: GuildMember, modID: string | null = null, reason: string | null = null) {
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
     if (!user.kickable) return Promise.reject('The specified user is not kickable.');
 
@@ -39,7 +39,7 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
     }
 
     await user.kick(reason || 'No reason provided.');
-    log(`${modID ? `<@${modID}>` : 'System'} kicked <@${user.id}>:\n\`${reason || 'No reason provided.'}\``);
+    log(`${modID ? `<@${modID}>` : 'System'} kicked <@${user.id}>:\n\`${reason || 'No reason provided.'}\``, 'Kick');
 }
 
 function punishmentToString(punishment: any) {

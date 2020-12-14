@@ -2,9 +2,10 @@ import { Event } from '../eventHandler.js';
 import { CategoryChannel, Channel, TextChannel } from 'discord.js';
 import axios from 'axios';
 import log from '../lib/log.js';
-import { settings, client } from '../bot.js';
+import { settings } from '../bot.js';
 import { db } from '../../db/postgres.js';
 import { update } from '../settings/settings.js';
+import { getGuild } from '../lib/misc.js';
 
 export const event: Event = {
     name: 'channelDelete',
@@ -30,7 +31,7 @@ export const event: Event = {
                 if (!ticket) return;
 
                 if (ticket.subscription_message_id) {
-                    const guild = client.guilds.cache.first();
+                    const guild = getGuild();
                     if (!guild) return;
                     const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
                     if (!(subscriptionChannel instanceof TextChannel)) return;

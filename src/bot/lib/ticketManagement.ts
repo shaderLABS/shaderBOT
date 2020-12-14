@@ -3,6 +3,7 @@ import { settings, client } from '../bot.js';
 import { db } from '../../db/postgres.js';
 import uuid from 'uuid-random';
 import { update } from '../settings/settings.js';
+import { getGuild } from './misc.js';
 
 export async function cacheAttachments(message: Message): Promise<string[]> {
     let fileUploadLimit = 8388119;
@@ -61,7 +62,7 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     return { title: ticket.title, author: ticket.author_id };
 }
 
-export async function openTicketLib(ticket: any, guild: Guild | undefined = client.guilds.cache.first()) {
+export async function openTicketLib(ticket: any, guild: Guild | undefined = getGuild()) {
     if (!guild) return Promise.reject('No guild.');
 
     const ticketChannel = await guild.channels.create(ticket.title, {
@@ -190,7 +191,7 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     return { title: ticket.title, author: ticket.author_id };
 }
 
-export async function closeTicketLib(ticket: any, guild: Guild | undefined = client.guilds.cache.first()) {
+export async function closeTicketLib(ticket: any, guild: Guild | undefined = getGuild()) {
     if (!guild) return Promise.reject('No guild.');
 
     if (ticket.subscription_message_id) {

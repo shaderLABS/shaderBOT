@@ -1,11 +1,11 @@
 import { MessageEmbed, Permissions, TextChannel } from 'discord.js';
 import tgq from 'type-graphql';
 import gq from 'graphql';
-import { client } from '../../bot/bot.js';
 import { db } from '../postgres.js';
 import { Comment } from '../typedefinitions/Comment.js';
 import { fetchUser } from './UserResolver.js';
 import log from '../../bot/lib/log.js';
+import { getGuild } from '../../bot/lib/misc.js';
 
 @tgq.Resolver(() => Comment)
 export class CommentResolver {
@@ -32,7 +32,7 @@ export class CommentResolver {
         if (deleted.rowCount === 0) return new gq.GraphQLError('Unauthorized or no message was found');
 
         if (deleted.rows[0].message_id && deleted.rows[0].channel_id) {
-            const commentChannel = client.guilds.cache.first()?.channels.cache.get(deleted.rows[0].channel_id);
+            const commentChannel = getGuild()?.channels.cache.get(deleted.rows[0].channel_id);
             if (commentChannel && commentChannel instanceof TextChannel) {
                 (await commentChannel.messages.fetch(deleted.rows[0].message_id)).delete();
             }
@@ -44,11 +44,7 @@ export class CommentResolver {
     }
 
     @tgq.Mutation(() => Boolean)
-    async createComment(
-        @tgq.Arg('ticket_id', () => String) ticket_id: string,
-        @tgq.Arg('content', () => String) content: string,
-        @tgq.Ctx() ctx: any
-    ) {
+    async createComment(@tgq.Arg('ticket_id', () => String) ticket_id: string, @tgq.Arg('content', () => String) content: string, @tgq.Ctx() ctx: any) {
         const user = ctx.req.user;
         if (!user) return new gq.GraphQLError('You must be logged in to send comments.');
 
@@ -68,7 +64,7 @@ export class CommentResolver {
 
         if (!ticket) return new gq.GraphQLError('The ticket does not exist or is closed.');
 
-        const channel = client.guilds.cache.first()?.channels.cache.get(ticket.channel_id);
+        const channel = getGuild()?.channels.cache.get(ticket.channel_id);
         if (!channel || !(channel instanceof TextChannel)) return new gq.GraphQLError('Ticket channel not found.');
 
         const timestamp = new Date();
@@ -92,11 +88,7 @@ export class CommentResolver {
     }
 
     @tgq.Mutation(() => Boolean)
-    async editComment(
-        @tgq.Arg('comment_id', () => String) comment_id: string,
-        @tgq.Arg('content', () => String) content: string,
-        @tgq.Ctx() ctx: any
-    ) {
+    async editComment(@tgq.Arg('comment_id', () => String) comment_id: string, @tgq.Arg('content', () => String) content: string, @tgq.Ctx() ctx: any) {
         const user = ctx.req.user;
         if (!user) return new gq.GraphQLError('You must be logged in to edit comments.');
 
@@ -115,7 +107,7 @@ export class CommentResolver {
 
         if (!comment) return new gq.GraphQLError('The comment does not exist or you have no permission to edit it.');
 
-        const guild = client.guilds.cache.first();
+        const guild = getGuild();
         if (!guild) return new gq.GraphQLError('No guild found.');
 
         const editedAt = new Date();

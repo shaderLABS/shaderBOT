@@ -3,6 +3,7 @@ import { client } from '../bot.js';
 import log from './log.js';
 import { unmute } from './muteUser.js';
 import { unban } from './banUser.js';
+import { getGuild } from './misc.js';
 
 export const typeAsString: {
     [key: string]: string;
@@ -40,11 +41,10 @@ export async function loadTimeouts() {
             if (punishment.type === 'ban') {
                 unban(punishment.user_id);
             } else {
-                const member = await client.guilds.cache
-                    .first()
+                const member = await getGuild()
                     ?.members.fetch(punishment.user_id)
                     .catch(() => undefined);
-                if (member) unmute(member);
+                if (member) unmute(member.id, undefined, member);
                 else log(`System could not unmute <@${punishment.user_id}>: member not found.`);
             }
         } else {
@@ -59,11 +59,10 @@ export async function loadTimeouts() {
                 store.tempbans.set(punishment.user_id, timeout);
             } else {
                 const timeout = setTimeout(async () => {
-                    const member = await client.guilds.cache
-                        .first()
+                    const member = await getGuild()
                         ?.members.fetch(punishment.user_id)
                         .catch(() => undefined);
-                    if (member) unmute(member);
+                    if (member) unmute(member.id, undefined, member);
                     else log(`System could not unmute <@${punishment.user_id}>: member not found.`);
                 }, ms);
 

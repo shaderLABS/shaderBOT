@@ -9,10 +9,10 @@ router.get('/login', passport.authenticate('discord'));
 router.get('/redirect', (req, res, next) => {
     passport.authenticate('discord', (_error, user, info) => {
         if (info && info.error) return res.redirect(URL + '/?error=' + info.error);
-        if (!user) return res.redirect(URL + '/?error=2');
+        if (!user) return res.redirect(URL + '/?error=1');
 
         req.logIn(user, (err) => {
-            if (err) return res.redirect(URL + '/?error=3');
+            if (err) return res.redirect(URL + '/?error=2');
             return res.redirect(URL);
         });
     })(req, res, next);

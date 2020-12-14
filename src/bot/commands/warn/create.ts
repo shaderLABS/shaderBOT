@@ -2,7 +2,7 @@ import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { getMember, getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<"normal"|"severe"> <@user|userID> [reason]';
 
@@ -25,7 +25,7 @@ export const command: Command = {
         if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);
         const severity = severityArg === 'NORMAL' ? 0 : 1;
 
-        const targetMember = message.mentions.members?.first() || (await member.guild.members.fetch(args[1]).catch(() => undefined));
+        const targetMember = await getMember(message, args[0]).catch(() => undefined);
         const user = targetMember?.user || (await getUser(message, args[1]).catch(() => undefined));
         if (!user) return syntaxError(channel, expectedArgs);
 

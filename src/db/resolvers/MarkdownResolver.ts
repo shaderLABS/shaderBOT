@@ -1,5 +1,5 @@
 import tgq from 'type-graphql';
-import { client } from '../../bot/bot.js';
+import { getGuild } from '../../bot/lib/misc.js';
 import { Channel } from '../typedefinitions/Project.js';
 import { Role } from '../typedefinitions/User.js';
 
@@ -7,7 +7,7 @@ import { Role } from '../typedefinitions/User.js';
 export class ChannelResolver {
     @tgq.Query(() => Channel)
     channel(@tgq.Arg('id', () => String) id: string) {
-        return client.guilds.cache.first()?.channels.cache.get(id);
+        return getGuild()?.channels.cache.get(id);
     }
 }
 
@@ -15,6 +15,6 @@ export class ChannelResolver {
 export class RoleResolver {
     @tgq.Query(() => Role)
     async role(@tgq.Arg('id', () => String) id: string) {
-        return await client.guilds.cache.first()?.roles.fetch(id);
+        return await getGuild()?.roles.fetch(id);
     }
 }

@@ -2,9 +2,10 @@ import tgq from 'type-graphql';
 import { client } from '../../bot/bot.js';
 import { User } from '../typedefinitions/User.js';
 import { db } from '../postgres.js';
+import { getGuild } from '../../bot/lib/misc.js';
 
 export async function fetchUser(id: string) {
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return Promise.reject("The bot isn't in any guilds.");
 
     const member = await guild.members.fetch(id).catch(() => undefined);

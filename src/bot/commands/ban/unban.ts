@@ -2,6 +2,7 @@ import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { client } from '../../bot.js';
 import { unban } from '../../lib/banUser.js';
+import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<username|userID>';
 
@@ -16,7 +17,7 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        const user = (await member.guild.fetchBans()).find((ban) => ban.user.username === text)?.user || (await client.users.fetch(args[0]).catch(() => undefined));
+        const user = await getUser(message, text).catch(() => undefined);
         if (!user) return syntaxError(channel, 'unban ' + expectedArgs);
 
         try {

@@ -1,15 +1,15 @@
 import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { client } from '../bot.js';
 import { store } from './punishments.js';
 import log from './log.js';
+import { getGuild } from './misc.js';
 
 /*******
  * BAN *
  *******/
 
 export async function tempban(user: User, duration: number, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false): Promise<Date> {
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
     const timestamp = new Date();
@@ -89,7 +89,7 @@ export async function tempban(user: User, duration: number, modID: string | null
 
 export async function ban(user: User, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false) {
     const timestamp = new Date();
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
     try {
@@ -151,7 +151,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
     }
 }
 
-function punishmentToString(punishment: any) {
+export function punishmentToString(punishment: any) {
     return `**Reason:** ${punishment.reason || 'No reason provided.'} 
     **Moderator:** <@${punishment.mod_id}> 
     **ID:** ${punishment.id} 
@@ -164,7 +164,7 @@ function punishmentToString(punishment: any) {
  *********/
 
 export async function unban(userID: string, modID?: string) {
-    const guild = client.guilds.cache.first();
+    const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
     try {

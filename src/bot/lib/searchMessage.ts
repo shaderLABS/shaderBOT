@@ -1,23 +1,40 @@
-import { User, Message } from 'discord.js';
+import { User, Message, GuildMember } from 'discord.js';
 import { client } from '../bot.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
+import { getGuild } from './misc.js';
 
 export async function getUser(message: Message, potentialUser: string): Promise<User> {
     let user = message.mentions.users.first();
+
     if (!user) {
-        user = client.users.cache.find((user) => user.username === potentialUser);
-        if (!user) {
-            try {
-                if (!isNaN(Number(potentialUser))) user = await client.users.fetch(potentialUser);
-                if (!user) return Promise.reject('Specified user not found.');
-            } catch (error) {
-                return Promise.reject('Specified user not found.');
-            }
+        try {
+            if (!isNaN(+potentialUser)) user = await client.users.fetch(potentialUser).catch(() => undefined);
+            if (!user) user = (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user;
+        } catch {
+            return Promise.reject('Specified user not found.');
         }
     }
 
+    if (!user) return Promise.reject('Specified user not found.');
     return user;
+}
+
+export async function getMember(message: Message, potentialUser: string): Promise<GuildMember> {
+    const guild = getGuild();
+    let member = message.mentions.members?.first();
+
+    try {
+        if (!member) {
+            if (!isNaN(+potentialUser)) member = await guild?.members.fetch(potentialUser).catch(() => undefined);
+            if (!member) member = (await guild?.members.fetch({ query: potentialUser, limit: 1 }))?.first();
+        }
+    } catch {
+        return Promise.reject('Specified user not found.');
+    }
+
+    if (!member) return Promise.reject('Specified user not found.');
+    return member;
 }
 
 export async function getWarnUUID(message: Message, argument: string): Promise<string> {

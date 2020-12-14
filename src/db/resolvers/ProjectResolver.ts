@@ -1,11 +1,11 @@
 import tgq from 'type-graphql';
-import { client } from '../../bot/bot.js';
+import { getGuild } from '../../bot/lib/misc.js';
 import { db } from '../postgres.js';
 import { Project } from '../typedefinitions/Project.js';
 import { fetchUser } from './UserResolver.js';
 
 export function fetchChannel(id: string) {
-    return client.guilds.cache.first()?.channels.cache.find((channel) => channel.id === id);
+    return getGuild()?.channels.cache.find((channel) => channel.id === id);
 }
 
 @tgq.Resolver(() => Project)

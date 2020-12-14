@@ -1,10 +1,11 @@
 import { Event } from '../../eventHandler.js';
 import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
-import { settings, client } from '../../bot.js';
+import { settings } from '../../bot.js';
 import log from '../../lib/log.js';
 import { sendInfo } from '../../lib/embeds.js';
 import { db } from '../../../db/postgres.js';
 import { editComment } from '../../lib/edit/editTicket.js';
+import { getGuild } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -12,7 +13,7 @@ export const event: Event = {
         const channel = reaction.message.channel;
         if (!(channel instanceof TextChannel) || user.bot || !channel.parentID || !settings.ticket.categoryIDs.includes(channel.parentID)) return;
 
-        const guild = client.guilds.cache.first();
+        const guild = getGuild();
         if (!guild) return;
 
         const member = await guild.members.fetch(user).catch(() => undefined);
