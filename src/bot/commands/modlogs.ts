@@ -1,8 +1,8 @@
+import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
-import { getUser } from '../lib/searchMessage.js';
-import { db } from '../../db/postgres.js';
 import { typeAsString } from '../lib/punishments.js';
+import { getUser } from '../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['modlogs', 'mlogs', 'logs'],

@@ -1,8 +1,9 @@
 import { Command, syntaxError } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import { kick } from '../lib/kickUser.js';
+import { getMember } from '../lib/searchMessage.js';
 
-const expectedArgs = '<@user|userID> [reason]';
+const expectedArgs = '<@user|userID|username> [reason]';
 
 export const command: Command = {
     commands: ['kick'],
@@ -15,7 +16,7 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        const user = message.mentions.members?.first() || (await member.guild.members.fetch(args[0]).catch(() => undefined));
+        const user = await getMember(message, args[0]).catch(() => undefined);
         if (!user) return syntaxError(channel, 'kick ' + expectedArgs);
 
         const reason = args.slice(1).join(' ');

@@ -1,7 +1,7 @@
-import { Command, hasPermissions } from '../commandHandler.js';
-import { sendInfo, embedPages } from '../lib/embeds.js';
-import { settings, commands } from '../bot.js';
 import { Collection } from 'discord.js';
+import { commands, settings } from '../bot.js';
+import { Command, hasPermissions } from '../commandHandler.js';
+import { embedPages, sendInfo } from '../lib/embeds.js';
 
 export const command: Command = {
     commands: ['help'],

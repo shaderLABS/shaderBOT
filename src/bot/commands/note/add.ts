@@ -1,9 +1,9 @@
+import { MessageEmbed } from 'discord.js';
+import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
-import { getUser } from '../../lib/searchMessage.js';
-import { db } from '../../../db/postgres.js';
-import { MessageEmbed } from 'discord.js';
 import log from '../../lib/log.js';
+import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> <content>';
 

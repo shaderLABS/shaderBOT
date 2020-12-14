@@ -1,8 +1,8 @@
 import tgq from 'type-graphql';
 import { client } from '../../bot/bot.js';
-import { User } from '../typedefinitions/User.js';
-import { db } from '../postgres.js';
 import { getGuild } from '../../bot/lib/misc.js';
+import { db } from '../postgres.js';
+import { User } from '../typedefinitions/User.js';
 
 export async function fetchUser(id: string) {
     const guild = getGuild();

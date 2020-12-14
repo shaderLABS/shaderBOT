@@ -1,10 +1,10 @@
-import { Event } from '../../eventHandler.js';
-import { Message, TextChannel, MessageEmbed } from 'discord.js';
+import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { db } from '../../../db/postgres.js';
 import { commands, settings } from '../../bot.js';
 import { runCommand } from '../../commandHandler.js';
-import { cacheAttachments } from '../../lib/ticketManagement.js';
+import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
-import { db } from '../../../db/postgres.js';
+import { cacheAttachments } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
     name: 'message',

@@ -1,10 +1,10 @@
-import { Command } from '../../commandHandler.js';
-import { sendError } from '../../lib/embeds.js';
 import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
-import { editNote } from '../../lib/edit/editNote.js';
-import { getUser } from '../../lib/searchMessage.js';
 import { db } from '../../../db/postgres.js';
+import { Command } from '../../commandHandler.js';
+import { editNote } from '../../lib/edit/editNote.js';
+import { sendError } from '../../lib/embeds.js';
+import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 

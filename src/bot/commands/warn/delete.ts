@@ -1,7 +1,7 @@
+import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import uuid from 'uuid-random';
 import log from '../../lib/log.js';
 
 const expectedArgs = '<uuid|reason>';

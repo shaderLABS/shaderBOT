@@ -1,5 +1,5 @@
-import { Event } from '../eventHandler.js';
 import { client } from '../bot.js';
+import { Event } from '../eventHandler.js';
 import { loadTimeouts } from '../lib/punishments.js';
 
 export const event: Event = {

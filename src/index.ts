@@ -1,7 +1,7 @@
 import 'reflect-metadata';
-import { startWebserver } from './web/server.js';
 import { startBot } from './bot/bot.js';
 import { connectPostgreSQL, db } from './db/postgres.js';
+import { startWebserver } from './web/server.js';
 
 export function shutdown() {
     console.log('Shutting down...');

@@ -1,6 +1,6 @@
+import { client } from '../bot.js';
 import { Command } from '../commandHandler.js';
 import { sendInfo } from '../lib/embeds.js';
-import { client } from '../bot.js';
 
 export const command: Command = {
     commands: ['latency'],

@@ -1,11 +1,11 @@
-import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { tempban } from '../../lib/banUser.js';
 import { GuildMember } from 'discord.js';
-import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { tempban } from '../../lib/banUser.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getMember, getUser } from '../../lib/searchMessage.js';
+import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
-const expectedArgs = '<@user|userID> <time> ["delete"] [reason]';
+const expectedArgs = '<@user|userID|username> <time> ["delete"] [reason]';
 
 export const command: Command = {
     commands: ['tempban'],
@@ -17,11 +17,6 @@ export const command: Command = {
     callback: async (message, args) => {
         const { member, channel } = message;
         if (!member) return;
-
-        // const user =
-        //     message.mentions.members?.first() ||
-        //     (await member.guild.members.fetch(args[0]).catch(() => undefined)) ||
-        //     (await client.users.fetch(args[0]).catch(() => undefined));
 
         const user = (await getMember(message, args[0]).catch(() => undefined)) || (await getUser(message, args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);

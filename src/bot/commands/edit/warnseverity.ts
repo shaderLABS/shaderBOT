@@ -1,6 +1,6 @@
 import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { editWarnSeverity } from '../../lib/edit/editWarning.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getWarnUUID } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <"normal"|"severe">';

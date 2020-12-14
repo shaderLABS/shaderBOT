@@ -1,7 +1,7 @@
-import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
-import { sendSuccess, sendError } from '../../lib/embeds.js';
+import { Command } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { closeTicket } from '../../lib/ticketManagement.js';
 

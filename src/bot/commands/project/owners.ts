@@ -1,13 +1,14 @@
-import { Command, syntaxError } from '../../commandHandler.js';
-import { Message, TextChannel, GuildMember } from 'discord.js';
-import log from '../../lib/log.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { GuildMember, Message, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
+import { getMember } from '../../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['owners'],
     help: 'Change the owner(s) of the project linked to the current channel.',
-    expectedArgs: '<@user|userID> <...>',
+    expectedArgs: '<@user|userID|username> <...>',
     minArgs: 1,
     maxArgs: null,
     superCommands: ['project'],
@@ -16,19 +17,16 @@ export const command: Command = {
         const { channel, guild } = message;
         if (!guild || !(channel instanceof TextChannel)) return;
 
-        let owners: GuildMember[] = [];
-
-        const mentionedMembers = message.mentions.members;
-        if (mentionedMembers) owners = owners.concat(mentionedMembers.array());
+        let owners: Set<GuildMember> = new Set();
 
         for (const potentialID of args) {
             if (!isNaN(Number(potentialID))) {
-                const user = await guild.members.fetch(potentialID).catch(() => undefined);
-                if (user) owners.push(user);
+                const user = await getMember(message, potentialID).catch(() => undefined);
+                if (user) owners.add(user);
             }
         }
 
-        if (owners.length === 0) return syntaxError(channel, 'project owners <@user|userID> <...>');
+        if (owners.size === 0) return syntaxError(channel, 'project owners <@user|userID> <...>');
 
         const project = await db.query(
             /*sql*/ `
@@ -38,7 +36,7 @@ export const command: Command = {
             WHERE project.id = old_project.id 
                 AND project.channel_id = $2 
             RETURNING old_project.owners::TEXT[] AS old_owners`,
-            [owners.map((owner) => owner.id), channel.id]
+            [[...owners].map((owner) => owner.id), channel.id]
         );
 
         if (project.rowCount === 0) return sendError(channel, 'This channel is not linked to a project.');
@@ -60,7 +58,7 @@ export const command: Command = {
             });
         }
 
-        sendSuccess(channel, `Updated the channel owners from <@${oldOwners.join('>, <@')}> to ${owners.join(', ')}.`);
-        log(`<@${message.author.id}> updated the channel owners from <@${oldOwners.join('>, <@')}> to ${owners.join(', ')} in <#${channel.id}>.`);
+        sendSuccess(channel, `Updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')}.`);
+        log(`<@${message.author.id}> updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')} in <#${channel.id}>.`);
     },
 };

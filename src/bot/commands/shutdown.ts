@@ -1,5 +1,5 @@
-import { Command } from '../commandHandler.js';
 import { shutdown } from '../../index.js';
+import { Command } from '../commandHandler.js';
 import log from '../lib/log.js';
 
 export const command: Command = {

@@ -1,7 +1,7 @@
-import { Command } from '../commandHandler.js';
-import log from '../lib/log.js';
 import { TextChannel } from 'discord.js';
+import { Command } from '../commandHandler.js';
 import { sendError } from '../lib/embeds.js';
+import log from '../lib/log.js';
 
 export const command: Command = {
     commands: ['purge'],

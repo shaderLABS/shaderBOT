@@ -1,6 +1,6 @@
-import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { Command } from '../../commandHandler.js';
 
 export const command: Command = {
     commands: ['ping'],

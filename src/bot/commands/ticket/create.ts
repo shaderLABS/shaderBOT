@@ -1,11 +1,11 @@
-import { Command } from '../../commandHandler.js';
+import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel } from 'discord.js';
 import uuid from 'uuid-random';
-import { TextChannel, DMChannel, NewsChannel, MessageEmbed, Message } from 'discord.js';
+import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
+import { Command } from '../../commandHandler.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { cacheAttachments, getCategoryChannel } from '../../lib/ticketManagement.js';
-import { db } from '../../../db/postgres.js';
 
 export const command: Command = {
     commands: ['create'],

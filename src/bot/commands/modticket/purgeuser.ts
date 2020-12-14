@@ -1,8 +1,8 @@
-import { Command } from '../../commandHandler.js';
 import { Message } from 'discord.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { getUser } from '../../lib/searchMessage.js';
 import { purgeAllTickets } from '../../lib/ticketManagement.js';
 
 export const command: Command = {

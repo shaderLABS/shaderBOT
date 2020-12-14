@@ -1,8 +1,8 @@
 import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { store } from './punishments.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
+import { store } from './punishments.js';
 
 /*******
  * BAN *

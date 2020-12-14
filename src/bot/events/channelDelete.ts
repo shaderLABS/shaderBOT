@@ -1,11 +1,11 @@
-import { Event } from '../eventHandler.js';
-import { CategoryChannel, Channel, TextChannel } from 'discord.js';
 import axios from 'axios';
-import log from '../lib/log.js';
-import { settings } from '../bot.js';
+import { CategoryChannel, Channel, TextChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { update } from '../settings/settings.js';
+import { settings } from '../bot.js';
+import { Event } from '../eventHandler.js';
+import log from '../lib/log.js';
 import { getGuild } from '../lib/misc.js';
+import { update } from '../settings/settings.js';
 
 export const event: Event = {
     name: 'channelDelete',

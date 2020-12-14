@@ -1,9 +1,9 @@
-import { Command } from '../../commandHandler.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
 import uuid from 'uuid-random';
-import { getUser } from '../../lib/searchMessage.js';
 import { db } from '../../../db/postgres.js';
+import { Command } from '../../commandHandler.js';
 import { editBanDuration } from '../../lib/edit/editBan.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { getUser } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <time>';

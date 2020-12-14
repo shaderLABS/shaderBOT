@@ -1,5 +1,5 @@
+import { MessageEmbed, TextChannel } from 'discord.js';
 import { settings } from '../bot.js';
-import { TextChannel, MessageEmbed } from 'discord.js';
 import { getGuild } from './misc.js';
 
 export default function (content: string | MessageEmbed, title?: string) {

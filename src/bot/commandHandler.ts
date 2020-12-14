@@ -1,8 +1,7 @@
-import { settings } from './bot.js';
-import { BitFieldResolvable, PermissionString, Message, TextChannel, DMChannel, NewsChannel, Collection } from 'discord.js';
-import { commands } from './bot.js';
+import { BitFieldResolvable, Collection, DMChannel, Message, NewsChannel, PermissionString, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { commands, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
 
 export type Command = {

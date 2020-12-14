@@ -1,11 +1,11 @@
 import { MessageEmbed, Permissions, TextChannel } from 'discord.js';
-import tgq from 'type-graphql';
 import gq from 'graphql';
+import tgq from 'type-graphql';
+import log from '../../bot/lib/log.js';
+import { getGuild } from '../../bot/lib/misc.js';
 import { db } from '../postgres.js';
 import { Comment } from '../typedefinitions/Comment.js';
 import { fetchUser } from './UserResolver.js';
-import log from '../../bot/lib/log.js';
-import { getGuild } from '../../bot/lib/misc.js';
 
 @tgq.Resolver(() => Comment)
 export class CommentResolver {

@@ -1,9 +1,9 @@
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
-import log from './log.js';
-import { unmute } from './muteUser.js';
 import { unban } from './banUser.js';
+import log from './log.js';
 import { getGuild } from './misc.js';
+import { unmute } from './muteUser.js';
 
 export const typeAsString: {
     [key: string]: string;

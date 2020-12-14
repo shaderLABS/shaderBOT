@@ -1,8 +1,8 @@
+import uuid from 'uuid-random';
+import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
-import { db } from '../../../db/postgres.js';
 import { getUser } from '../../lib/searchMessage.js';
-import uuid from 'uuid-random';
 
 export const command: Command = {
     commands: ['list'],

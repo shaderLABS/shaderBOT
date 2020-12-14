@@ -1,7 +1,6 @@
 import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { client } from '../../bot.js';
 import { unban } from '../../lib/banUser.js';
+import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<username|userID>';

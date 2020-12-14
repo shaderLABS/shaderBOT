@@ -1,6 +1,6 @@
-import { Command } from '../commandHandler.js';
-import { TextChannel } from 'discord.js';
 import axios from 'axios';
+import { TextChannel } from 'discord.js';
+import { Command } from '../commandHandler.js';
 import { sendSuccess } from '../lib/embeds.js';
 
 export const command: Command = {

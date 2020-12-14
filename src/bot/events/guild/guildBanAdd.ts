@@ -1,9 +1,9 @@
-import { Event } from '../../eventHandler.js';
 import { Guild, User } from 'discord.js';
-import log from '../../lib/log.js';
 import { db } from '../../../db/postgres.js';
-import { store } from '../../lib/punishments.js';
+import { Event } from '../../eventHandler.js';
 import { punishmentToString } from '../../lib/banUser.js';
+import log from '../../lib/log.js';
+import { store } from '../../lib/punishments.js';
 
 export const event: Event = {
     name: 'guildBanAdd',

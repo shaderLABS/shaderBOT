@@ -1,10 +1,10 @@
-import { Event } from '../../eventHandler.js';
-import { MessageReaction, User, TextChannel, GuildMember, Guild } from 'discord.js';
-import { settings } from '../../bot.js';
-import log from '../../lib/log.js';
-import { sendInfo } from '../../lib/embeds.js';
+import { Guild, GuildMember, MessageReaction, TextChannel, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { settings } from '../../bot.js';
+import { Event } from '../../eventHandler.js';
 import { editComment } from '../../lib/edit/editTicket.js';
+import { sendInfo } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
 import { getGuild } from '../../lib/misc.js';
 
 export const event: Event = {

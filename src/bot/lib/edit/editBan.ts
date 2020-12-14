@@ -1,5 +1,4 @@
 import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
 import { unban } from '../banUser.js';
 import log from '../log.js';
 import { store } from '../punishments.js';

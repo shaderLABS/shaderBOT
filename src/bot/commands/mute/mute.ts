@@ -5,7 +5,7 @@ import { mute } from '../../lib/muteUser.js';
 import { getMember, getUser } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
-const expectedArgs = '<@user|userID> <time> [reason]';
+const expectedArgs = '<@user|userID|username> <time> [reason]';
 
 export const command: Command = {
     commands: ['mute'],

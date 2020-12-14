@@ -1,7 +1,7 @@
-import { Message, TextChannel, Guild, MessageEmbed, GuildMember, User, CategoryChannel } from 'discord.js';
-import { settings, client } from '../bot.js';
-import { db } from '../../db/postgres.js';
+import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, TextChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
+import { db } from '../../db/postgres.js';
+import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
 import { getGuild } from './misc.js';
 

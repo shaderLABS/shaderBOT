@@ -1,8 +1,8 @@
-import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError } from '../../lib/embeds.js';
+import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
-import { MessageEmbed } from 'discord.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 
 const expectedArgs = '<uuid>';

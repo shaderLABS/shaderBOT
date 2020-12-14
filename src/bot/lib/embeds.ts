@@ -1,4 +1,4 @@
-import { TextChannel, MessageEmbed, DMChannel, NewsChannel, Message, User } from 'discord.js';
+import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel, User } from 'discord.js';
 
 export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()

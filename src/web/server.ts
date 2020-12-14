@@ -1,14 +1,13 @@
-import express from 'express';
-import helmet from 'helmet';
-import passport from 'passport';
-import routes from './routes/main.js';
-import session from 'express-session';
+import apollo from 'apollo-server-express';
 import store from 'connect-pg-simple';
 import cors from 'cors';
-import apollo from 'apollo-server-express';
+import express from 'express';
+import session from 'express-session';
+import helmet from 'helmet';
+import passport from 'passport';
+import path from 'path';
 import ssr from 'tossr';
 import typegraphql from 'type-graphql';
-import path from 'path';
 import { db } from '../db/postgres.js';
 import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
@@ -16,6 +15,7 @@ import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { ChannelResolver, RoleResolver } from '../db/resolvers/MarkdownResolver.js';
 import { authChecker } from './gqlAuth.js';
+import routes from './routes/main.js';
 import './strategies/discord.js';
 
 const pg_store = store(session);

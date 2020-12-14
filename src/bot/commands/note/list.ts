@@ -1,9 +1,9 @@
+import { MessageEmbed } from 'discord.js';
+import uuid from 'uuid-random';
+import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError } from '../../lib/embeds.js';
 import { getUser } from '../../lib/searchMessage.js';
-import { db } from '../../../db/postgres.js';
-import { MessageEmbed } from 'discord.js';
-import uuid from 'uuid-random';
 
 const expectedArgs = '<@user|userID|username|uuid>';
 

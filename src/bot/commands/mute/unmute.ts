@@ -17,7 +17,6 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        // const user = message.mentions.members?.first() || (await member.guild.members.fetch(args[0]).catch(() => undefined));
         const user = (await getMember(message, args[0]).catch(() => undefined)) || (await getUser(message, args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'unmute ' + expectedArgs);
 

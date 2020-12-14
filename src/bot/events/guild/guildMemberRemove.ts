@@ -1,7 +1,7 @@
-import { Event } from '../../eventHandler.js';
 import { GuildMember, User } from 'discord.js';
-import log from '../../lib/log.js';
 import { db } from '../../../db/postgres.js';
+import { Event } from '../../eventHandler.js';
+import log from '../../lib/log.js';
 import { getGuild } from '../../lib/misc.js';
 
 export const event: Event = {

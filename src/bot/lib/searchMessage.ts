@@ -1,7 +1,7 @@
-import { User, Message, GuildMember } from 'discord.js';
-import { client } from '../bot.js';
+import { GuildMember, Message, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
+import { client } from '../bot.js';
 import { getGuild } from './misc.js';
 
 export async function getUser(message: Message, potentialUser: string): Promise<User> {

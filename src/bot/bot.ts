@@ -1,10 +1,10 @@
 import { Client, Collection } from 'discord.js';
+import cron from 'node-cron';
+import { db } from '../db/postgres.js';
 import { Command, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { loadTimeouts } from './lib/punishments.js';
-import cron from 'node-cron';
 import * as settingsFile from './settings/settings.js';
-import { db } from '../db/postgres.js';
 
 export let client: Client;
 export let commands: Collection<string, Command | Collection<string, Command>>;

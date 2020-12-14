@@ -1,13 +1,14 @@
-import { Command, syntaxError } from '../../commandHandler.js';
-import { Message, TextChannel, MessageEmbed, GuildMember } from 'discord.js';
-import log from '../../lib/log.js';
-import { sendError } from '../../lib/embeds.js';
+import { GuildMember, Message, MessageEmbed, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { Command, syntaxError } from '../../commandHandler.js';
+import { sendError } from '../../lib/embeds.js';
+import log from '../../lib/log.js';
+import { getMember } from '../../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['setup'],
     help: 'Setup a project linked to the current channel.',
-    expectedArgs: '<@user|userID> <...>',
+    expectedArgs: '<@user|userID|username> <...>',
     minArgs: 1,
     maxArgs: null,
     superCommands: ['project'],
@@ -19,19 +20,16 @@ export const command: Command = {
         if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [channel.id])).rows[0].exists)
             return sendError(channel, 'This channel is already linked to a project.');
 
-        let owners: GuildMember[] = [];
-
-        const mentionedMembers = message.mentions.members;
-        if (mentionedMembers) owners = owners.concat(mentionedMembers.array());
+        let owners: Set<GuildMember> = new Set();
 
         for (const potentialID of args) {
             if (!isNaN(Number(potentialID))) {
-                const user = await guild.members.fetch(potentialID).catch(() => undefined);
-                if (user) owners.push(user);
+                const user = await getMember(message, potentialID).catch(() => undefined);
+                if (user) owners.add(user);
             }
         }
 
-        if (owners.length === 0) return syntaxError(channel, 'project setup <@user|userID> <...>');
+        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID> <...>');
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {
@@ -61,7 +59,7 @@ export const command: Command = {
             INSERT INTO project (channel_id, owners, role_id) 
             VALUES ($1, $2, $3) 
             RETURNING id;`,
-            [channel.id, owners.map((owner) => owner.id), role.id]
+            [channel.id, [...owners].map((owner) => owner.id), role.id]
         );
         const projectID = insert.rows[0].id;
 
@@ -72,8 +70,8 @@ export const command: Command = {
                 .setColor('#00ff11')
                 .addFields([
                     {
-                        name: owners.length > 1 ? 'Owners' : 'Owner',
-                        value: owners.map((owner) => owner.user.username).join(', '),
+                        name: owners.size > 1 ? 'Owners' : 'Owner',
+                        value: [...owners].map((owner) => owner.user.username).join(', '),
                     },
                     {
                         name: 'Notification Role',
