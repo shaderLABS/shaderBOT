@@ -23,13 +23,11 @@ export const command: Command = {
         let owners: Set<GuildMember> = new Set();
 
         for (const potentialID of args) {
-            if (!isNaN(Number(potentialID))) {
-                const user = await getMember(message, potentialID).catch(() => undefined);
-                if (user) owners.add(user);
-            }
+            const user = await getMember(message, potentialID).catch(() => undefined);
+            if (user) owners.add(user);
         }
 
-        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID> <...>');
+        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID|username> <...>');
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {
