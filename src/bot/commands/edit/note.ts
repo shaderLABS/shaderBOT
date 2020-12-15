@@ -34,7 +34,7 @@ export const command: Command = {
                         .setFooter('ID: ' + args[0])
                 );
             } else {
-                const user = await getUser(message, args[0]);
+                const user = await getUser(args[0], message.mentions);
 
                 const latestNoteID = (await db.query(/*sql*/ `SELECT id FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
                 if (!latestNoteID) return sendError(channel, 'The specified user does not have any notes.');

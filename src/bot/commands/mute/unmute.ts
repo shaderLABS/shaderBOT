@@ -17,7 +17,7 @@ export const command: Command = {
         const { member, channel } = message;
         if (!member) return;
 
-        const user = (await getMember(message, args[0]).catch(() => undefined)) || (await getUser(message, args[0]).catch(() => undefined));
+        const user = (await getMember(args[0], message.mentions).catch(() => undefined)) || (await getUser(args[0], message.mentions).catch(() => undefined));
         if (!user) return syntaxError(channel, 'unmute ' + expectedArgs);
 
         if (user instanceof GuildMember && member.roles.highest.comparePositionTo(user.roles.highest) <= 0)

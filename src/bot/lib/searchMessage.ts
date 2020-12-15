@@ -1,11 +1,11 @@
-import { GuildMember, Message, User } from 'discord.js';
+import { GuildMember, Message, MessageMentions, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { getGuild } from './misc.js';
 
-export async function getUser(message: Message, potentialUser: string): Promise<User> {
-    let user = message.mentions.users.first();
+export async function getUser(potentialUser: string, mentions?: MessageMentions): Promise<User> {
+    let user = mentions?.users?.first();
 
     if (!user) {
         try {
@@ -20,9 +20,9 @@ export async function getUser(message: Message, potentialUser: string): Promise<
     return user;
 }
 
-export async function getMember(message: Message, potentialUser: string): Promise<GuildMember> {
+export async function getMember(potentialUser: string, mentions?: MessageMentions): Promise<GuildMember> {
     const guild = getGuild();
-    let member = message.mentions.members?.first();
+    let member = mentions?.members?.first();
 
     try {
         if (!member) {
@@ -41,7 +41,7 @@ export async function getWarnUUID(message: Message, argument: string): Promise<s
     if (uuid.test(argument)) {
         return argument;
     } else {
-        const { id } = await getUser(message, argument);
+        const { id } = await getUser(argument, message.mentions);
         const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [id])).rows[0];
 
         if (!latestWarnID) return Promise.reject('The specified user does not have any warnings.');

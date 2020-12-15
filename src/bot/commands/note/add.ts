@@ -19,7 +19,7 @@ export const command: Command = {
         const { channel, author } = message;
 
         try {
-            const user = await getUser(message, args[0]);
+            const user = await getUser(args[0], message.mentions);
             const content = text.slice(args[0].length).trim();
             if (content.length < 1 || content.length > 500) return sendError(channel, 'The content must be between 1 and 500 characters long.');
 

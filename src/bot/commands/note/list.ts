@@ -48,7 +48,7 @@ export const command: Command = {
             } else {
                 // <@user|userID|username>
 
-                const user = await getUser(message, text);
+                const user = await getUser(text, message.mentions);
 
                 const notes = (
                     await db.query(

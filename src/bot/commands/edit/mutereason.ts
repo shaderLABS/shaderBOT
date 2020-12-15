@@ -27,7 +27,7 @@ export const command: Command = {
                 const { user_id } = await editMuteReason(args[0], content, author.id, past_table);
                 sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s mute (${args[0]}).`);
             } else {
-                const user = await getUser(message, args[0]);
+                const user = await getUser(args[0], message.mentions);
 
                 const latestMuteID = (
                     await db.query(

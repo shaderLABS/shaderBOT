@@ -27,7 +27,7 @@ export const command: Command = {
                 const { user_id } = await editBanReason(args[0], content, author.id, past_table);
                 sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s ban (${args[0]}).`);
             } else {
-                const user = await getUser(message, args[0]);
+                const user = await getUser(args[0], message.mentions);
 
                 const latestBanID = (
                     await db.query(

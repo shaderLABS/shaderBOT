@@ -18,7 +18,7 @@ export const command: Command = {
         if (!guild) return;
 
         try {
-            const user = await getUser(message, args[0]);
+            const user = await getUser(args[0], message.mentions);
             const ticket = await purgeAllTickets(user, guild);
 
             sendSuccess(channel, 'Purged all tickets.');

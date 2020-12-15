@@ -34,7 +34,7 @@ export const command: Command = {
                     ).toLocaleString()}.`
                 );
             } else {
-                const user = await getUser(message, args[0]);
+                const user = await getUser(args[0], message.mentions);
 
                 const latestMuteID = (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id]))
                     .rows[0];

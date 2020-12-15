@@ -12,11 +12,11 @@ export const command: Command = {
     maxArgs: null,
     expectedArgs,
     requiredPermissions: ['BAN_MEMBERS'],
-    callback: async (message, args, text) => {
+    callback: async (message, _, text) => {
         const { member, channel } = message;
         if (!member) return;
 
-        const user = await getUser(message, text).catch(() => undefined);
+        const user = await getUser(text, message.mentions).catch(() => undefined);
         if (!user) return syntaxError(channel, 'unban ' + expectedArgs);
 
         try {
