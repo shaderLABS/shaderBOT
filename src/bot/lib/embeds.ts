@@ -29,7 +29,7 @@ export async function embedPages(message: Message, author: User, pages: string[]
     if (!embed || pages.length <= 1) return;
 
     message.react('➡️');
-    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 60000, time: 240000 });
+    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 300000, time: 600000 });
 
     let index = 0;
     collector.on('collect', async (reaction) => {
@@ -55,7 +55,7 @@ export async function embedFields(message: Message, author: User, fields: { name
     if (!embed || fields.length <= 1) return;
 
     message.react('➡️');
-    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 60000, time: 240000 });
+    const collector = message.createReactionCollector((reaction, user) => ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 300000, time: 600000 });
 
     let index = 0;
     collector.on('collect', async (reaction) => {
