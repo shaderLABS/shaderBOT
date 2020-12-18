@@ -25,7 +25,7 @@ export const command: Command = {
         if (!user) return syntaxError(channel, 'mute ' + expectedArgs);
 
         if (user instanceof GuildMember && member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
-            return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+            return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         const time = stringToSeconds(splitString(args[1]));
 

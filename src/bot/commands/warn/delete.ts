@@ -81,7 +81,7 @@ export const command: Command = {
 
         const userMember = await message.guild?.members.fetch(warn.user_id).catch(() => undefined);
         if (userMember && member.roles.highest.comparePositionTo(userMember.roles.highest) <= 0)
-            return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+            return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         const content = `**User:** <@${warn.user_id}>\n**Severity:** ${warn.severity === 0 ? 'Normal' : 'Severe'}\n**Reason:** ${
             warn.reason || 'No reason provided.'

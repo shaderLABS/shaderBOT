@@ -30,7 +30,7 @@ export const command: Command = {
         if (!user) return syntaxError(channel, expectedArgs);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
-            return sendError(channel, "You can't warn a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+            return sendError(channel, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         const userWarnings = await db.query(
             /*sql*/ `

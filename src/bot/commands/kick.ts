@@ -22,7 +22,7 @@ export const command: Command = {
         const reason = args.slice(1).join(' ');
 
         if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
-            return sendError(channel, "You can't kick a user with a role higher than or equal to yours.", 'INSUFFICIENT PERMISSIONS');
+            return sendError(channel, "You can't kick a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         if (!user.kickable) return sendError(channel, 'This user is not kickable.');
 

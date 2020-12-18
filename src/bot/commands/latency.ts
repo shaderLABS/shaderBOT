@@ -9,7 +9,7 @@ export const command: Command = {
     maxArgs: 0,
     callback: async (message) => {
         const { channel } = message;
-        const pinging = await sendInfo(channel, 'Pinging...', 'LATENCY');
+        const pinging = await sendInfo(channel, 'Pinging...', 'Latency');
         const latency = pinging.createdTimestamp - message.createdTimestamp;
         const uptime = new Date(process.uptime() * 1000).toISOString().substr(11, 8);
 

@@ -40,6 +40,6 @@ export const command: Command = {
         }
 
         if (helpContent.length !== 0) pages.push(helpContent);
-        embedPages(await sendInfo(message.channel, pages[0], 'HELP'), message.author, pages);
+        embedPages(await sendInfo(message.channel, pages[0], 'Help'), message.author, pages);
     },
 };
