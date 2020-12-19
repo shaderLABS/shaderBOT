@@ -37,9 +37,10 @@ function mediaOnly(message: Message) {
 
 async function ticketComment(message: Message) {
     const { channel, member, content } = message;
-    if (message.partial || !(channel instanceof TextChannel) || !channel.topic || !member) return;
+    if (message.partial || !(channel instanceof TextChannel) || !member) return;
 
-    const id = channel.topic.split(' | ')[0];
+    const id = (await db.query(/*sql*/ `SELECT id FROM ticket WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.id;
+    if (!id) return;
     const timestamp = new Date();
 
     const commentEmbed = new MessageEmbed()

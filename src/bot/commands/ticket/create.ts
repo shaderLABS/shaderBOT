@@ -5,7 +5,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { cacheAttachments, getCategoryChannel } from '../../lib/ticketManagement.js';
+import { cacheAttachments, cutDescription, getCategoryChannel } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['create'],
@@ -70,7 +70,7 @@ export const command: Command = {
             const ticketChannel = await guild.channels.create(title.content, {
                 type: 'text',
                 parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
-                topic: `${ticketID} | <#${projectChannel.id}>`,
+                topic: `${ticketID} | <#${projectChannel.id}> | ${cutDescription(description.content)}`,
                 rateLimitPerUser: 10,
                 // position: 0, // new - old
             });

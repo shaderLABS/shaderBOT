@@ -68,7 +68,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
         parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
-        topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'}`,
+        topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'} | ${cutDescription(ticket.description)}`,
         rateLimitPerUser: 10,
         permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
     });
@@ -299,4 +299,9 @@ export async function getCategoryChannel(categoryIDs: string[], guild: Guild): P
     update();
 
     return newCategory;
+}
+
+export function cutDescription(str: string) {
+    if (str.length <= 950) return str;
+    return str.substr(0, str.lastIndexOf(' ', 950));
 }
