@@ -2,73 +2,61 @@
 
 ## Install Packages
 
-```
-npm install --save-dev
+```properties
+npm install
 ```
 
 ## Configuration
 
-Create a file called `.env` in the root directory containing the following environment variables:
+First of all, configure [`settings.json`](src/bot/settings/settings.json). Especially IDs should be updated to match the setup on your server.
 
-```
-TOKEN=
-APPLICATION_CLIENT_ID=
-APPLICATION_CLIENT_SECRET=
-SESSION_SECRET=
-PORT=
+### Environment Variables
 
-PG_USER=
-PG_PASSWORD=
-PG_HOST=
-PG_PORT=
-PG_DATABASE=
-```
-
--   `TOKEN` is the discord bot token which you can find under the "Bot" tab of your [bot application](https://discord.com/developers/applications).
--   `APPLICATION_CLIENT_ID` is the discord application client id which you can find under the "General Information" tab of your [bot application](https://discord.com/developers/applications).
--   `APPLICATION_CLIENT_SECRET` is the discord application client secret which you can find under the "General Information" tab of your [bot application](https://discord.com/developers/applications).
--   `SESSION_SECRET` is any random string for encrypting cookies used for storing sessions.
--   `PORT` is the port the server will run on. If not specified, the server will run on port 3001.
-
-`PG_USER` (DEFAULT: postgres), `PG_PASSWORD` (DEFAULT: postgres), `PG_HOST` (DEFAULT: localhost), `PG_PORT` (DEFAULT: 5432) and `PG_DATABASE` (DEFAULT: shaderBOT) are the variables used for connecting to the PostgreSQL server.
-
-After that, configure `cfg.json`. Especially IDs should be updated to match the setup on your development server.
-
-In order to (re-)create all of the needed tables, run the queries in `/src/db/init.sql`.
+| Name                        |   Default   | Description                                                                                                                                          |
+| --------------------------- | :---------: | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TOKEN`                     |    NONE     | The token which you can find under the "Bot" tab of your [discord application](https://discord.com/developers/applications).                         |
+| `APPLICATION_CLIENT_ID`     |    NONE     | The client ID which you can find under the "General Information" tab of your [discord application](https://discord.com/developers/applications).     |
+| `APPLICATION_CLIENT_SECRET` |    NONE     | The client secret which you can find under the "General Information" tab of your [discord application](https://discord.com/developers/applications). |
+| `SESSION_SECRET`            |  `SECRET`   | The secret key used for signing session cookies. You should NOT use the default value!                                                               |
+| `PORT`                      |   `3001`    | The port that the web server will run on.                                                                                                            |
+| `PG_USER`                   | `postgres`  | The name used for accessing the PostgreSQL database.                                                                                                 |
+| `PG_PASSWORD`               | `postgres`  | The password used for accessing the PostgreSQL database.                                                                                             |
+| `PG_HOST`                   | `localhost` | The hostname used for connecting to the PostgreSQL server.                                                                                           |
+| `PG_PORT`                   |   `5432`    | The port which the PostgreSQL server is running on.                                                                                                  |
+| `PG_DATABASE`               | `shaderBOT` | The name of the PostgreSQL database which is **already populated** using the [init.sql](src/db/init.sql) file.                                       |
 
 ## Running the Application
 
-To start the project, run:
-
-```
+```properties
 npm run dev
 ```
 
-This will transpile the TypeScript files and run the Node.js server.
+This will transpile the TypeScript files and run the server using [nodemon](https://www.npmjs.com/package/nodemon).
 
-## Recommended VSCode Settings and Extensions
+## Recommended Visual Studio Code Settings and Extensions
 
 ### Settings
 
-Adding the following options to your `settings.json` is highly recommended:
+Adding the following options to your `settings.json` file is highly recommended:
 
-```
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/CVS": true,
-        "**/.DS_Store": true,
+```json
+"files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
 
-        "**/*.js": { "when": "$(basename).ts" },
-        "**/*.js.map": true
-    }
+    "**/*.js": { "when": "$(basename).ts" },
+    "**/*.js.map": true
+}
 ```
 
 This will hide the transpiled JavaScript files if there are corresponding TypeScript files.
 
 ### Extensions
 
--   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL Syntax Hightlighting inside of TypeScript
+-   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL Syntax Highlighting inside of TypeScript
 
-## Made with [<img src="https://cdn.discordapp.com/emojis/758513218770567188.gif" width="40" height="40"/>](https://files.catbox.moe/3nyc47.mp3) by [Niemand](https://github.com/Kneemund)
+\
+_Made with [<img src="https://cdn.discordapp.com/emojis/758513218770567188.gif" width="20" height="20"/>](https://files.catbox.moe/3nyc47.mp3) by [Niemand](https://github.com/Kneemund)_
