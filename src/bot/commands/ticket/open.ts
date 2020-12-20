@@ -7,11 +7,11 @@ import { openTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['open'],
+    superCommands: ['ticket'],
     help: 'Open any of your closed tickets.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['ticket'],
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, channel, member } = message;
         if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;

@@ -10,7 +10,7 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     requiredPermissions: ['MANAGE_GUILD'],
-    callback: async (message: Message) => {
+    callback: (message: Message) => {
         sendInfo(message.channel, '```json\n' + JSON.stringify(settings, null, 2) + '```', 'Configuration');
     },
 };

@@ -7,11 +7,11 @@ import { getMember } from '../../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['setup'],
+    superCommands: ['project'],
     help: 'Setup a project linked to the current channel.',
     expectedArgs: '<@user|userID|username> <...>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['project'],
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;

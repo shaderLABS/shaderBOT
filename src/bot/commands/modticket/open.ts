@@ -6,11 +6,11 @@ import { openTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['open'],
+    superCommands: ['modticket', 'mticket'],
     help: 'Open any closed ticket.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, channel, member } = message;

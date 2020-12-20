@@ -7,11 +7,11 @@ import { purgeAllTickets } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['purgeuser'],
+    superCommands: ['modticket', 'mticket'],
     help: 'Purge all tickets by a specific user.',
     expectedArgs: '<@user|userID|username>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[]) => {
         const { channel, guild } = message;

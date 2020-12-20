@@ -13,11 +13,9 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: 1,
     expectedArgs,
-    requiredPermissions: ['MANAGE_CHANNELS'],
-    permissionOverwrites: true,
     callback: async (message: Message) => {
         const { guild, channel, member } = message;
-        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;
+        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) throw new Error('Test Error');
 
         const projectChannel = message.mentions.channels.first();
         if (!projectChannel || !(projectChannel instanceof TextChannel)) return syntaxError(channel, 'project notify ' + expectedArgs);

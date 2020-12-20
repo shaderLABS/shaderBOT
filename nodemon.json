@@ -2,5 +2,5 @@
     "watch": ["src"],
     "ext": "ts",
     "ignore": ["src/**/*.spec.ts"],
-    "exec": "tsc && node --trace-warnings -r dotenv/config src/index.js"
+    "exec": "npx tsc && node --trace-warnings -r dotenv/config src/index.js"
 }

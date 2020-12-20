@@ -6,11 +6,11 @@ import { deleteTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
     commands: ['delete'],
+    superCommands: ['modticket', 'mticket'],
     help: 'Delete any ticket.',
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
-    superCommands: ['modticket', 'mticket'],
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message: Message, args: string[], text: string) => {
         const { channel, guild } = message;

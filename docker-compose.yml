@@ -1,20 +1,23 @@
 version: '3.8'
 services:
     db:
-        image: postgres
+        restart: always
+        image: postgres:13-alpine
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: postgres
             POSTGRES_DB: shaderBOT
         volumes:
+            - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
             - ./pgdata:/var/lib/postgresql/data
         ports:
             - '5432:5432'
-    web:
-        image: niemandtv/shaderbot:0.0.1
+    server:
+        restart: always
+        image: kneemund/shaderbot
         environment:
             PG_HOST: 'db'
         depends_on:
             - db
-        ports:
-            - '80:80'
+        # ports:
+        #     - '80:80'

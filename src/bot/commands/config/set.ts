@@ -13,7 +13,7 @@ export const command: Command = {
     minArgs: 2,
     maxArgs: null,
     requiredPermissions: ['MANAGE_GUILD'],
-    callback: async (message: Message, args: string[], text: string) => {
+    callback: (message: Message, args: string[], text: string) => {
         const { channel } = message;
 
         try {

@@ -9,10 +9,10 @@ import { cacheAttachments, cutDescription, getCategoryChannel } from '../../lib/
 
 export const command: Command = {
     commands: ['create'],
+    superCommands: ['ticket'],
     help: 'Create a new ticket.',
     minArgs: 0,
     maxArgs: 0,
-    superCommands: ['ticket'],
     callback: async (message: Message) => {
         const { channel, author, guild } = message;
         if (!guild || channel.id !== settings.ticket.managementChannelID) return;

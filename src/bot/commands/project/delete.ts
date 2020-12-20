@@ -6,10 +6,10 @@ import log from '../../lib/log.js';
 
 export const command: Command = {
     commands: ['delete'],
+    superCommands: ['project'],
     help: 'Delete the project linked to the current channel.',
     minArgs: 0,
     maxArgs: 0,
-    superCommands: ['project'],
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message: Message) => {
         const { channel } = message;
