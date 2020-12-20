@@ -20,12 +20,12 @@ export type Settings = {
 };
 
 export function write(data: Object) {
-    fs.writeFile(settingsFile, JSON.stringify(data), 'utf-8');
+    fs.writeFile(settingsFile, JSON.stringify(data, null, 2), 'utf-8');
 }
 
 export async function update() {
     const { settings } = await import('../bot.js');
-    fs.writeFile(settingsFile, JSON.stringify(settings), 'utf-8');
+    fs.writeFile(settingsFile, JSON.stringify(settings, null, 2), 'utf-8');
 }
 
 export async function read() {
