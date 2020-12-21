@@ -4,6 +4,7 @@ import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { formatTimeDate } from '../../lib/misc.js';
 
 const expectedArgs = '<uuid>';
 
@@ -35,19 +36,17 @@ export const command: Command = {
                 .setAuthor('Deleted Note', 'https://img.icons8.com/color/48/000000/note.png')
                 .setColor('#ffc107')
                 .setDescription(
-                    `**User:** <@${result.user_id}>\n**Moderator:** <@${result.mod_id}>\n**Content:** ${result.content}\n**Created At:** ${new Date(
-                        result.timestamp
-                    ).toLocaleString()}${
-                        result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${new Date(result.edited_timestamp).toLocaleString()})*` : ''
-                    }`
+                    `**User:** <@${result.user_id}>\n**Moderator:** <@${result.mod_id}>\n**Content:** ${result.content}\n**Created At:** ${formatTimeDate(
+                        new Date(result.timestamp)
+                    )}${result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${formatTimeDate(new Date(result.edited_timestamp))})*` : ''}`
                 )
                 .setFooter('ID: ' + args[0])
         );
 
         log(
-            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${new Date(
-                result.timestamp
-            ).toLocaleString()}\n**ID:** ${args[0]}`,
+            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${formatTimeDate(
+                new Date(result.timestamp)
+            )}\n**ID:** ${args[0]}`,
             'Deleted Note'
         );
     },

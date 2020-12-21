@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editBanDuration } from '../../lib/edit/editBan.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
@@ -29,9 +30,9 @@ export const command: Command = {
                 const { user_id, expire_timestamp } = await editBanDuration(args[0], time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of <@${user_id}'s ban (${args[0]}) to ${time} seconds. They will be unbanned at ${new Date(
-                        expire_timestamp
-                    ).toLocaleString()}.`
+                    `Successfully edited the duration of <@${user_id}'s ban (${args[0]}) to ${time} seconds. They will be unbanned at ${formatTimeDate(
+                        new Date(expire_timestamp)
+                    )}.`
                 );
             } else {
                 const user = await getUser(args[0], message.mentions);
@@ -43,9 +44,9 @@ export const command: Command = {
                 const { expire_timestamp } = await editBanDuration(latestBanID.id, time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of <@${user.id}>'s ban (${latestBanID.id}) to ${time} seconds. They will be unbanned at ${new Date(
-                        expire_timestamp
-                    ).toLocaleString()}.`
+                    `Successfully edited the duration of <@${user.id}>'s ban (${latestBanID.id}) to ${time} seconds. They will be unbanned at ${formatTimeDate(
+                        new Date(expire_timestamp)
+                    )}.`
                 );
             }
         } catch (error) {

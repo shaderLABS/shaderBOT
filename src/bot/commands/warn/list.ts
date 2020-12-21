@@ -2,6 +2,7 @@ import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
+import { formatDate, formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -34,7 +35,7 @@ export const command: Command = {
             if (!warning) return sendError(channel, 'There is no warning with this UUID.');
 
             const days = warning.expired
-                ? new Date(new Date(warning.timestamp).getTime() + warning.expire_days * 86400000).toLocaleDateString()
+                ? formatDate(new Date(new Date(warning.timestamp).getTime() + warning.expire_days * 86400000))
                 : Math.ceil((new Date(warning.timestamp).getTime() + warning.expire_days * 86400000 - new Date().getTime()) / 86400000);
 
             sendInfo(
@@ -44,9 +45,9 @@ export const command: Command = {
                 **Reason:** ${warning.reason || 'No reason provided.'} 
                 **Moderator:** <@${warning.mod_id}> 
                 **ID:** ${args[0]} 
-                **Created At:** ${new Date(warning.timestamp).toLocaleString()} 
+                **Created At:** ${formatTimeDate(new Date(warning.timestamp))} 
                 **${warning.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
-                ${warning.edited_timestamp ? `*(last edited by <@${warning.edited_mod_id}> at ${new Date(warning.edited_timestamp).toLocaleString()})*` : ''}`,
+                ${warning.edited_timestamp ? `*(last edited by <@${warning.edited_mod_id}> at ${formatTimeDate(new Date(warning.edited_timestamp))})*` : ''}`,
                 'Warning'
             );
         } else {
@@ -86,7 +87,7 @@ export const command: Command = {
             const pages: string[] = [];
             warnings.rows.reduce((prev, curr, i, { length }) => {
                 const days = curr.expired
-                    ? new Date(new Date(curr.timestamp).getTime() + curr.expire_days * 86400000).toLocaleDateString()
+                    ? formatDate(new Date(new Date(curr.timestamp).getTime() + curr.expire_days * 86400000))
                     : Math.ceil((new Date(curr.timestamp).getTime() + curr.expire_days * 86400000 - new Date().getTime()) / 86400000);
 
                 const page = `**User:** <@${userID}>
@@ -94,9 +95,9 @@ export const command: Command = {
                     **Reason:** ${curr.reason || 'No reason provided.'} 
                     **Moderator:** <@${curr.mod_id}> 
                     **ID:** ${curr.id} 
-                    **Created At:** ${new Date(curr.timestamp).toLocaleString()} 
+                    **Created At:** ${formatTimeDate(new Date(curr.timestamp))} 
                     **${curr.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
-                    ${curr.edited_timestamp ? `*(last edited by <@${curr.edited_mod_id}> at ${new Date(curr.edited_timestamp).toLocaleString()})*` : ''}`;
+                    ${curr.edited_timestamp ? `*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : ''}`;
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {
                     pages.push(prev + '\n\n' + page);

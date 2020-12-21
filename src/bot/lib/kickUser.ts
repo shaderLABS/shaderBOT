@@ -1,7 +1,7 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { formatTimeDate, getGuild } from './misc.js';
 
 export async function kick(user: GuildMember, modID: string | null = null, reason: string | null = null) {
     const guild = getGuild();
@@ -46,5 +46,5 @@ function punishmentToString(punishment: any) {
     return `**Reason:** ${punishment.reason || 'No reason provided.'} 
     **Moderator:** <@${punishment.mod_id}> 
     **ID:** ${punishment.id} 
-    **Created At:** ${new Date(punishment.timestamp).toLocaleString()}`;
+    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`;
 }

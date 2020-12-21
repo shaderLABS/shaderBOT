@@ -5,7 +5,7 @@ import { Event } from '../../eventHandler.js';
 import { editComment } from '../../lib/edit/editTicket.js';
 import { sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { getGuild } from '../../lib/misc.js';
+import { formatTimeDate, getGuild } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -159,7 +159,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             return;
         }
 
-        if (embed.footer && embed.footer.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${editedAt.toLocaleString()}`);
+        if (embed.footer && embed.footer.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedAt)}`);
 
         await originalMessage.edit(embed);
         if (subscriptionMessage) subscriptionMessage.edit(embed);

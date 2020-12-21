@@ -3,7 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
-import { getGuild } from './misc.js';
+import { formatTimeDate, getGuild } from './misc.js';
 
 export async function cacheAttachments(message: Message): Promise<string[]> {
     let fileUploadLimit = 8388119;
@@ -76,7 +76,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     const ticketAuthor = await client.users.fetch(ticket.author_id);
 
     let ticketFooter = `ID: ${ticket.id}`;
-    if (ticket.edited) ticketFooter += ` | edited at ${new Date(ticket.edited).toLocaleString()}`;
+    if (ticket.edited) ticketFooter += ` | edited at ${formatTimeDate(new Date(ticket.edited))}`;
 
     const ticketEmbed = new MessageEmbed()
         .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
@@ -137,7 +137,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
             const commentEmbed = new MessageEmbed()
                 .setColor(author?.displayHexColor || '#212121')
                 .setAuthor(author?.user.username + '#' + author?.user.discriminator, author?.user.displayAvatarURL() || undefined)
-                .setFooter(comment.edited ? `edited at ${new Date(comment.edited).toLocaleString()}` : '')
+                .setFooter(comment.edited ? `edited at ${formatTimeDate(new Date(comment.edited))}` : '')
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);
 

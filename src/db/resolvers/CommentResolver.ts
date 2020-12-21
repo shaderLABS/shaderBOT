@@ -2,7 +2,7 @@ import { MessageEmbed, Permissions, TextChannel } from 'discord.js';
 import gq from 'graphql';
 import tgq from 'type-graphql';
 import log from '../../bot/lib/log.js';
-import { getGuild } from '../../bot/lib/misc.js';
+import { formatTimeDate, getGuild } from '../../bot/lib/misc.js';
 import { db } from '../postgres.js';
 import { Comment } from '../typedefinitions/Comment.js';
 import { fetchUser } from './UserResolver.js';
@@ -118,7 +118,7 @@ export class CommentResolver {
             if (originalMessage) {
                 const embed = originalMessage.embeds[0];
                 if (embed) {
-                    embed.setFooter(`edited at ${editedAt.toLocaleString()}`);
+                    embed.setFooter(`edited at ${formatTimeDate(editedAt)}`);
                     embed.setDescription(content);
 
                     await originalMessage.edit(embed);

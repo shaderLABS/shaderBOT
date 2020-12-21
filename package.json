@@ -10,7 +10,10 @@
         "serve": "node src/index.js",
         "dev": "nodemon"
     },
-    "author": "shaderLABS",
+    "author": {
+        "name": "Niemand",
+        "url": "https://github.com/Kneemund"
+    },
     "type": "module",
     "license": "MIT",
     "dependencies": {

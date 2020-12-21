@@ -3,6 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError } from '../../lib/embeds.js';
+import { formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username|uuid>';
@@ -37,11 +38,9 @@ export const command: Command = {
                         .setAuthor('Note', 'https://img.icons8.com/color/48/000000/note.png')
                         .setColor('#ffc107')
                         .setDescription(
-                            `**User:** <@${note.user_id}>\n**Moderator:** <@${note.mod_id}>\n**Content:** ${note.content}\n**Created At:** ${new Date(
-                                note.timestamp
-                            ).toLocaleString()}${
-                                note.edited_timestamp ? `\n*(last edited by <@${note.edited_mod_id}> at ${new Date(note.edited_timestamp).toLocaleString()})*` : ''
-                            }`
+                            `**User:** <@${note.user_id}>\n**Moderator:** <@${note.mod_id}>\n**Content:** ${note.content}\n**Created At:** ${formatTimeDate(
+                                new Date(note.timestamp)
+                            )}${note.edited_timestamp ? `\n*(last edited by <@${note.edited_mod_id}> at ${formatTimeDate(new Date(note.edited_timestamp))})*` : ''}`
                         )
                         .setFooter('ID: ' + args[0])
                 );
@@ -61,9 +60,11 @@ export const command: Command = {
 
                 const pages: string[] = [];
                 notes.reduce((prev, curr, i, { length }) => {
-                    const page = `**User:** <@${curr.user_id}>\n**Content:** ${curr.content}\n**Moderator:** <@${curr.mod_id}>\n**ID:** ${curr.id}\n**Created At:** ${new Date(
-                        curr.timestamp
-                    ).toLocaleString()}${curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${new Date(curr.edited_timestamp).toLocaleString()})*` : ''}`;
+                    const page = `**User:** <@${curr.user_id}>\n**Content:** ${curr.content}\n**Moderator:** <@${curr.mod_id}>\n**ID:** ${
+                        curr.id
+                    }\n**Created At:** ${formatTimeDate(new Date(curr.timestamp))}${
+                        curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : ''
+                    }`;
 
                     if ((i + 1) % 3 === 0 || i === length - 1) {
                         pages.push(prev + '\n\n' + page);

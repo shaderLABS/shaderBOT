@@ -2,7 +2,7 @@ import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { formatTimeDate, getGuild } from './misc.js';
 import { store } from './punishments.js';
 
 export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember): Promise<Date> {
@@ -63,7 +63,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
         }
 
         log(
-            `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${userID}>'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }`
         );
@@ -170,6 +170,6 @@ function punishmentToString(punishment: any) {
     return `**Reason:** ${punishment.reason || 'No reason provided.'} 
     **Moderator:** <@${punishment.mod_id}> 
     **ID:** ${punishment.id} 
-    **Created At:** ${new Date(punishment.timestamp).toLocaleString()} 
-    **Expiring At:** ${punishment.expire_timestamp ? new Date(punishment.expire_timestamp).toLocaleString() : 'Permanent'}`;
+    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))} 
+    **Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
 }

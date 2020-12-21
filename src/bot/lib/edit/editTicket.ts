@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { formatTimeDate } from '../misc.js';
 
 export async function editComment(commentID: string, message: Message, newContent: string) {
     const embed = message.embeds[0];
@@ -7,7 +8,7 @@ export async function editComment(commentID: string, message: Message, newConten
 
     const editedAt = new Date();
 
-    embed.setFooter(`edited at ${editedAt.toLocaleString()}`);
+    embed.setFooter(`edited at ${formatTimeDate(editedAt)}`);
     embed.setDescription(newContent);
 
     await message.edit(embed);

@@ -1,6 +1,7 @@
 import { GuildMember } from 'discord.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { formatTimeDate } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
 import { getMember, getUser } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
@@ -33,6 +34,6 @@ export const command: Command = {
         if (time < 10) return sendError(channel, "You can't mute someone for less than 10 seconds.");
 
         const expire = user instanceof GuildMember ? await mute(user.id, time, member.id, reason, user) : await mute(user.id, time, member.id, reason);
-        sendSuccess(channel, `<@${user.id}> has been muted for ${time} seconds (until ${expire.toLocaleString()}):\n\`${reason || 'No reason provided.'}\``);
+        sendSuccess(channel, `<@${user.id}> has been muted for ${time} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\``);
     },
 };

@@ -1,6 +1,6 @@
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
-import { getGuild } from '../misc.js';
+import { formatTimeDate, getGuild } from '../misc.js';
 import { unmute } from '../muteUser.js';
 import { store } from '../punishments.js';
 
@@ -64,9 +64,9 @@ export async function editMuteDuration(uuid: string, time: number, modID: string
     }
 
     log(
-        `<@${modID}> edited the expiry date of <@${result.user_id}>'s mute (${uuid}) from ${new Date(result.old_expire_timestamp).toLocaleString()} to ${new Date(
-            result.expire_timestamp
-        ).toLocaleString()}.`
+        `<@${modID}> edited the expiry date of <@${result.user_id}>'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
+            new Date(result.expire_timestamp)
+        )}.`
     );
     return result;
 }

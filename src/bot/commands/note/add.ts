@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> <content>';
@@ -40,12 +41,12 @@ export const command: Command = {
                 new MessageEmbed()
                     .setAuthor('Added Note', 'https://img.icons8.com/color/48/000000/note.png')
                     .setColor('#ffc107')
-                    .setDescription(`**User:** <@${user.id}>\n**Moderator:** <@${author.id}>\n**Content:** ${content}\n**Created At:** ${timestamp.toLocaleString()}`)
+                    .setDescription(`**User:** <@${user.id}>\n**Moderator:** <@${author.id}>\n**Content:** ${content}\n**Created At:** ${formatTimeDate(timestamp)}`)
                     .setFooter('ID: ' + result.id)
             );
 
             log(
-                `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${timestamp.toLocaleString()}\n**ID:** ${result.id}`,
+                `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}\n**ID:** ${result.id}`,
                 'Added Note'
             );
         } catch (error) {

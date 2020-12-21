@@ -1,6 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
+import { formatDate, formatTimeDate } from '../lib/misc.js';
 import { typeAsString } from '../lib/punishments.js';
 import { getUser } from '../lib/searchMessage.js';
 
@@ -69,9 +70,9 @@ export const command: Command = {
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()} 
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
                             **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days${
-                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : ''
                             }`
                     )
                 );
@@ -86,9 +87,9 @@ export const command: Command = {
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expiring At:** ${row.expire_timestamp ? new Date(row.expire_timestamp).toLocaleString() : 'Permanent'}${
-                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
+                            **Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}${
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : ''
                             }`
                     )
                 );
@@ -102,8 +103,8 @@ export const command: Command = {
                             `\n**Content:** ${row.content}
                             **Moderator:** <@${row.mod_id}>
                             **ID:** ${row.id}
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()}${
-                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*` : ''
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))}${
+                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : ''
                             }`
                     )
                 );
@@ -117,11 +118,11 @@ export const command: Command = {
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()}`;
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
 
-                        if (row.lifted_timestamp) content += `\n**Lifted At:** ${new Date(row.lifted_timestamp).toLocaleString()}`;
+                        if (row.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(row.lifted_timestamp))}`;
                         if (row.lifted_mod_id) content += `\n**Lifted By:** <@${row.lifted_mod_id}>`;
-                        if (row.edited_timestamp) content += `\n*(last edited by <@${row.edited_mod_id}> at ${new Date(row.edited_timestamp).toLocaleString()})*`;
+                        if (row.edited_timestamp) content += `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*`;
 
                         return content;
                     })
@@ -139,13 +140,13 @@ export const command: Command = {
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
-                            **Created At:** ${new Date(row.timestamp).toLocaleString()} 
-                            **Expired At:** ${new Date(new Date(row.timestamp).getTime() + row.expire_days * 86400000).toLocaleDateString()}`
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
+                            **Expired At:** ${formatDate(new Date(new Date(row.timestamp).getTime() + row.expire_days * 86400000))}`
                     )
                 );
             }
 
-            const embedMessage = await sendInfo(channel, pages[0], `Moderation Logs - ${user.username}#${user.discriminator}`);
+            const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.username}#${user.discriminator}`);
             embedPages(embedMessage, message.author, pages);
         } catch (error) {
             sendError(channel, error);

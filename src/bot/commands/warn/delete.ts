@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { formatTimeDate } from '../../lib/misc.js';
 
 const expectedArgs = '<uuid|reason>';
 
@@ -34,7 +35,7 @@ export const command: Command = {
                     `The specified reason is ambiguous. Please use the UUID from one of the following results instead:\n${warnings.rows
                         .map(
                             (row: any) =>
-                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${new Date(row.timestamp).toLocaleString()} | ${
+                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${
                                     row.id
                                 }\n`
                         )
@@ -69,7 +70,7 @@ export const command: Command = {
                     similarResults.rows
                         .map(
                             (row: any) =>
-                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${new Date(row.timestamp).toLocaleString()} | ${
+                                `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${
                                     row.id
                                 }\n`
                         )

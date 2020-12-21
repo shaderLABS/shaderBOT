@@ -1,7 +1,7 @@
 import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { formatTimeDate, getGuild } from './misc.js';
 import { store } from './punishments.js';
 
 /*******
@@ -62,7 +62,7 @@ export async function tempban(user: User, duration: number, modID: string | null
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${expire.toLocaleString()}):\n\`${
+            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${
                 reason || 'No reason provided.'
             }\`${overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''}`,
             'Temporary Ban'
@@ -155,8 +155,8 @@ export function punishmentToString(punishment: any) {
     return `**Reason:** ${punishment.reason || 'No reason provided.'} 
     **Moderator:** <@${punishment.mod_id}> 
     **ID:** ${punishment.id} 
-    **Created At:** ${new Date(punishment.timestamp).toLocaleString()} 
-    **Expiring At:** ${punishment.expire_timestamp ? new Date(punishment.expire_timestamp).toLocaleString() : 'Permanent'}`;
+    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))} 
+    **Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
 }
 
 /*********

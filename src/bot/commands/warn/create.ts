@@ -4,7 +4,7 @@ import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getMember, getUser } from '../../lib/searchMessage.js';
 
-const expectedArgs = '<"normal"|"severe"> <@user|userID> [reason]';
+const expectedArgs = '<"normal"|"severe"> <@user|userID|username> [reason]';
 
 export const command: Command = {
     commands: ['create'],
@@ -25,7 +25,7 @@ export const command: Command = {
         if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);
         const severity = severityArg === 'NORMAL' ? 0 : 1;
 
-        const targetMember = await getMember(args[0], message.mentions).catch(() => undefined);
+        const targetMember = await getMember(args[1], message.mentions).catch(() => undefined);
         const user = targetMember?.user || (await getUser(args[1], message.mentions).catch(() => undefined));
         if (!user) return syntaxError(channel, expectedArgs);
 
