@@ -20,6 +20,7 @@ You must enable the "Server Members Intent" switch (below "Privileged Gateway In
 | `APPLICATION_CLIENT_SECRET` |    NONE     | The client secret which you can find under the "General Information" tab of your [Discord application](https://discord.com/developers/applications). |
 | `SESSION_SECRET`            |  `SECRET`   | The secret key used for signing session cookies. You should NOT use the default value!                                                               |
 | `PORT`                      |   `3001`    | The port that the web server will run on.                                                                                                            |
+| `BOT_ONLY`                  |   `FALSE`   | Run the server in bot-only mode, which disables the Polka and Apollo/GraphQL server.                                                                 |
 | `PG_USER`                   | `postgres`  | The name used for accessing the PostgreSQL database.                                                                                                 |
 | `PG_PASSWORD`               | `postgres`  | The password used for accessing the PostgreSQL database.                                                                                             |
 | `PG_HOST`                   | `localhost` | The hostname used for connecting to the PostgreSQL server.                                                                                           |
