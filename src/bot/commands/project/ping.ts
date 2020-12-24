@@ -8,8 +8,9 @@ export const command: Command = {
     help: 'Ping all users that are subscribed to the project of this channel.',
     minArgs: 0,
     maxArgs: 0,
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['MANAGE_ROLES', 'MANAGE_WEBHOOKS'],
     permissionOverwrites: true,
+    cooldownDuration: 15000,
     callback: async (message: Message) => {
         const { channel } = message;
 

@@ -12,6 +12,7 @@ export const command: Command = {
     expectedArgs: '<ticketID|ticketTitle>',
     minArgs: 1,
     maxArgs: null,
+    cooldownDuration: 10000,
     callback: async (message: Message, args: string[], text: string) => {
         const { guild, channel, member } = message;
         if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;

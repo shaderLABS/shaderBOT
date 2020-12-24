@@ -13,6 +13,7 @@ export const command: Command = {
     help: 'Create a new ticket.',
     minArgs: 0,
     maxArgs: 0,
+    cooldownDuration: 20000,
     callback: async (message: Message) => {
         const { channel, author, guild } = message;
         if (!guild || channel.id !== settings.ticket.managementChannelID) return;

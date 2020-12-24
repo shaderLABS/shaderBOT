@@ -15,6 +15,7 @@ export type Command = {
     permissionOverwrites?: boolean | undefined;
     permissionError?: string | undefined;
     superCommands?: string[] | undefined;
+    cooldownDuration?: number;
     callback: (message: Message, args: string[], text: string) => void;
 };
 
@@ -52,28 +53,33 @@ export function hasPermissions(message: Message, command: Command): boolean {
 
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
-            for (const permission of command.requiredPermissions) {
-                if (!member?.permissionsIn(channel).has(permission)) return false;
-            }
+            if (!command.requiredPermissions.every((permission) => member?.permissionsIn(channel).has(permission))) return false;
         } else {
-            for (const permission of command.requiredPermissions) {
-                if (!member?.hasPermission(permission)) return false;
-            }
+            if (!command.requiredPermissions.every((permission) => member?.hasPermission(permission))) return false;
         }
     }
 
     if (command.requiredRoles) {
-        for (const requiredRole of command.requiredRoles) {
-            const role = guild?.roles.cache.find((role) => role.name === requiredRole);
-            if (!role || !member?.roles.cache.has(role.id)) return false;
-        }
+        if (
+            !command.requiredRoles.every((potentialRole) => {
+                const role = guild?.roles.cache.find((role) => role.name === potentialRole);
+                return member?.roles.cache.has(role ? role.id : potentialRole);
+            })
+        )
+            return false;
     }
 
     return true;
 }
 
+const cooldowns: Map<string, boolean> = new Map();
+
 export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
     const { content, channel, mentions } = message;
+
+    /****************
+     * SUB-COMMANDS *
+     ****************/
 
     if (command instanceof Collection) {
         if (args.length === 0)
@@ -99,9 +105,29 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         args.shift();
     }
 
+    /******************
+     * CHECK COOLDOWN *
+     ******************/
+
+    const cooldownID = `${message.author.id}:${command.commands[0]}`;
+    const currentCooldown = cooldowns.get(cooldownID);
+    if (currentCooldown !== undefined) {
+        if (!currentCooldown) {
+            sendError(channel, 'Please wait a few seconds.').then((msg) => {
+                setTimeout(() => msg.delete(), 5000);
+                cooldowns.set(cooldownID, true);
+            });
+        }
+        return;
+    }
+
+    /************************************
+     * VALIDATE COMMAND AND PERMISSIONS *
+     ************************************/
+
     if (mentions.members && mentions.members.size > 1) return sendError(channel, "You can't mention more than one member at a time.");
 
-    let { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', callback } = command;
+    let { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, callback } = command;
 
     if (!hasPermissions(message, command)) return sendError(channel, permissionError);
 
@@ -110,6 +136,16 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         return;
     }
 
+    /****************
+     * SET COOLDOWN *
+     ****************/
+
+    setTimeout(() => cooldowns.delete(cooldownID), cooldownDuration);
+    cooldowns.set(cooldownID, false);
+
+    /*******
+     * RUN *
+     *******/
+
     callback(message, args, content.slice(settings.prefix.length + invoke.length).trim());
-    return;
 }
