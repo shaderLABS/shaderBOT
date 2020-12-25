@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
@@ -12,9 +11,8 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message: Message, args: string[], text: string) => {
+    callback: async (message, args, text) => {
         const { channel, guild } = message;
-        if (!guild) return;
 
         try {
             const ticket = await deleteTicket(args, text, guild);

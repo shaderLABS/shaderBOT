@@ -1,4 +1,4 @@
-import { GuildMember, Message, TextChannel } from 'discord.js';
+import { GuildMember } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
@@ -13,9 +13,8 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_CHANNELS'],
-    callback: async (message: Message, args: string[]) => {
-        const { channel, guild } = message;
-        if (!guild || !(channel instanceof TextChannel)) return;
+    callback: async (message, args) => {
+        const { channel } = message;
 
         let owners: Set<GuildMember> = new Set();
         message.mentions.members?.forEach((member) => owners.add(member));

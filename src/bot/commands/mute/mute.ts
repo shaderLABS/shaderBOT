@@ -17,7 +17,6 @@ export const command: Command = {
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (message, args) => {
         const { member, channel } = message;
-        if (!member) return;
 
         const reason = args.slice(2).join(' ');
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');

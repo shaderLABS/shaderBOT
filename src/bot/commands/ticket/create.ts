@@ -1,4 +1,4 @@
-import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel } from 'discord.js';
+import { DMChannel, MessageEmbed, NewsChannel, TextChannel } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
@@ -14,9 +14,9 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     cooldownDuration: 20000,
-    callback: async (message: Message) => {
+    callback: async (message) => {
         const { channel, author, guild } = message;
-        if (!guild || channel.id !== settings.ticket.managementChannelID) return;
+        if (channel.id !== settings.ticket.managementChannelID) return;
 
         const ticketEmbed = new MessageEmbed()
             .setTitle('CREATE TICKET')

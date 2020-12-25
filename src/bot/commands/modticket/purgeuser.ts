@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
@@ -13,9 +12,8 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message: Message, args: string[]) => {
+    callback: async (message, args) => {
         const { channel, guild } = message;
-        if (!guild) return;
 
         try {
             const user = await getUser(args[0], message.mentions);

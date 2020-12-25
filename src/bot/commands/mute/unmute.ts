@@ -15,7 +15,6 @@ export const command: Command = {
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (message, args) => {
         const { member, channel } = message;
-        if (!member) return;
 
         const user = (await getMember(args[0], message.mentions).catch(() => undefined)) || (await getUser(args[0], message.mentions).catch(() => undefined));
         if (!user) return syntaxError(channel, 'unmute ' + expectedArgs);

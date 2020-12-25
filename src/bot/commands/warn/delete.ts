@@ -17,7 +17,6 @@ export const command: Command = {
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (message, args, text) => {
         const { member, channel } = message;
-        if (!member) return;
         const isUUID = uuid.test(args[0]);
 
         if (!isUUID) {
@@ -80,7 +79,7 @@ export const command: Command = {
 
         const warn = response.rows[0];
 
-        const userMember = await message.guild?.members.fetch(warn.user_id).catch(() => undefined);
+        const userMember = await message.guild.members.fetch(warn.user_id).catch(() => undefined);
         if (userMember && member.roles.highest.comparePositionTo(userMember.roles.highest) <= 0)
             return sendError(channel, "You can't delete warnings from users with a role higher than or equal to yours.", 'Insufficient Permissions');
 

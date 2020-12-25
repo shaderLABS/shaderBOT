@@ -1,4 +1,3 @@
-import { Message, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
@@ -13,12 +12,12 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: 1,
     expectedArgs,
-    callback: async (message: Message) => {
+    callback: async (message) => {
         const { guild, channel, member } = message;
-        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) throw new Error('Test Error');
+        if (channel.id !== settings.ticket.managementChannelID) return;
 
         const projectChannel = message.mentions.channels.first();
-        if (!projectChannel || !(projectChannel instanceof TextChannel)) return syntaxError(channel, 'project notify ' + expectedArgs);
+        if (!projectChannel) return syntaxError(channel, 'project notify ' + expectedArgs);
 
         const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
         if (!project) return sendError(channel, `<#${projectChannel.id}> is not a project channel.`);

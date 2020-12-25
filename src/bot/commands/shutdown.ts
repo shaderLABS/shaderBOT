@@ -8,8 +8,8 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     requiredPermissions: ['ADMINISTRATOR'],
-    callback: (message) => {
-        log(`The bot has been stopped by <@${message.author.id}>.`);
+    callback: async (message) => {
+        await log(`The bot has been stopped by <@${message.author.id}>.`);
         shutdown();
     },
 };

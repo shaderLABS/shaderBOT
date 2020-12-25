@@ -14,7 +14,6 @@ export const command: Command = {
     expectedArgs: '<uuid | <@user|userID|username> ["expired"]>',
     callback: async (message, args, text) => {
         const { channel, member } = message;
-        if (!member) return;
 
         if (args[0] && uuid.test(args[0])) {
             /**************************

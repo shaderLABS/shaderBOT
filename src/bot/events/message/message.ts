@@ -1,7 +1,7 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { commands, settings } from '../../bot.js';
-import { runCommand } from '../../commandHandler.js';
+import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import { cacheAttachments } from '../../lib/ticketManagement.js';
@@ -9,9 +9,9 @@ import { cacheAttachments } from '../../lib/ticketManagement.js';
 export const event: Event = {
     name: 'message',
     callback: (message: Message) => {
-        const { content, channel } = message;
+        if (!isGuildMessage(message) || message.author.bot) return;
 
-        if (!(channel instanceof TextChannel) || message.author.bot) return;
+        const { content, channel } = message;
         if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) return ticketComment(message);
         if (mediaOnly(message)) return;
         if (!content.startsWith(settings.prefix)) return;
@@ -22,7 +22,7 @@ export const event: Event = {
     },
 };
 
-function mediaOnly(message: Message) {
+function mediaOnly(message: GuildMessage) {
     if (
         !settings.mediaChannelIDs.includes(message.channel.id) ||
         message.attachments.size !== 0 ||
@@ -35,7 +35,7 @@ function mediaOnly(message: Message) {
     return true;
 }
 
-async function ticketComment(message: Message) {
+async function ticketComment(message: GuildMessage) {
     const { channel, member, content } = message;
     if (message.partial || !(channel instanceof TextChannel) || !member) return;
 

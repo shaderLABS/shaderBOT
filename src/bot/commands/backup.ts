@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { TextChannel } from 'discord.js';
 import { Command } from '../commandHandler.js';
 import { sendSuccess } from '../lib/embeds.js';
 
@@ -13,7 +12,6 @@ export const command: Command = {
     callback: async (message, args) => {
         const mentionedChannel = message.mentions.channels.first();
         const channel = mentionedChannel || message.channel;
-        if (!(channel instanceof TextChannel)) return;
 
         const limit = +(mentionedChannel ? args[1] : args[0]) || undefined;
         const backupMessages = await channel.messages.fetch({ limit: limit });

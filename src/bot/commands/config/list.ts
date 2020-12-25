@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendInfo } from '../../lib/embeds.js';
@@ -10,7 +9,7 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     requiredPermissions: ['MANAGE_GUILD'],
-    callback: (message: Message) => {
+    callback: (message) => {
         sendInfo(message.channel, '```json\n' + JSON.stringify(settings, null, 2) + '```', 'Configuration');
     },
 };

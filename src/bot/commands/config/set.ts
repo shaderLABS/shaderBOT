@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
@@ -13,7 +12,7 @@ export const command: Command = {
     minArgs: 2,
     maxArgs: null,
     requiredPermissions: ['MANAGE_GUILD'],
-    callback: (message: Message, args: string[], text: string) => {
+    callback: (message, args, text) => {
         const { channel } = message;
 
         try {

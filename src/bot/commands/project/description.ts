@@ -1,4 +1,3 @@
-import { Message, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
@@ -12,9 +11,8 @@ export const command: Command = {
     maxArgs: null,
     requiredPermissions: ['MANAGE_ROLES', 'MANAGE_WEBHOOKS'],
     permissionOverwrites: true,
-    callback: async (message: Message, _, text: string) => {
+    callback: async (message, _, text) => {
         const { channel, author } = message;
-        if (!(channel instanceof TextChannel)) return;
 
         const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');

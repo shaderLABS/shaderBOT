@@ -1,8 +1,14 @@
-import { BitFieldResolvable, Collection, DMChannel, Message, NewsChannel, PermissionString, TextChannel } from 'discord.js';
+import { BitFieldResolvable, Collection, DMChannel, Guild, GuildMember, Message, NewsChannel, PermissionString, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { commands, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
+
+export type GuildMessage = Message & { channel: TextChannel; guild: Guild; member: GuildMember };
+
+export function isGuildMessage(message: Message): message is GuildMessage {
+    return message.channel instanceof TextChannel && !!message.guild && !!message.member;
+}
 
 export type Command = {
     commands: string[];
@@ -16,7 +22,7 @@ export type Command = {
     permissionError?: string | undefined;
     superCommands?: string[] | undefined;
     cooldownDuration?: number;
-    callback: (message: Message, args: string[], text: string) => void;
+    callback: (message: GuildMessage, args: string[], text: string) => void;
 };
 
 export async function registerCommands(dir: string) {
@@ -74,7 +80,7 @@ export function hasPermissions(message: Message, command: Command): boolean {
 
 const cooldowns: Map<string, boolean> = new Map();
 
-export function runCommand(command: Command | Collection<string, Command>, message: Message, invoke: string, args: string[]) {
+export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]) {
     const { content, channel, mentions } = message;
 
     /****************

@@ -1,4 +1,4 @@
-import { GuildMember, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
@@ -13,9 +13,8 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_CHANNELS'],
-    callback: async (message: Message, args: string[]) => {
+    callback: async (message, args) => {
         const { channel, guild } = message;
-        if (!guild || !(channel instanceof TextChannel)) return;
 
         if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [channel.id])).rows[0].exists)
             return sendError(channel, 'This channel is already linked to a project.');

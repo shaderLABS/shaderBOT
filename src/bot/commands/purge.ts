@@ -1,4 +1,3 @@
-import { TextChannel } from 'discord.js';
 import { Command } from '../commandHandler.js';
 import { sendError } from '../lib/embeds.js';
 import log from '../lib/log.js';
@@ -11,8 +10,7 @@ export const command: Command = {
     expectedArgs: '<amount>',
     requiredPermissions: ['MANAGE_MESSAGES'],
     callback: async (message, args) => {
-        const { channel, member } = message;
-        if (!(channel instanceof TextChannel)) return;
+        const { channel } = message;
 
         const count = +args[0];
 
@@ -23,6 +21,6 @@ export const command: Command = {
 
         await message.delete();
         const deleted = await channel.bulkDelete(count);
-        log(`<@${member?.id}> deleted ${deleted.size} (out of ${count}) message(s) in <#${channel.id}>.`);
+        log(`<@${message.member.id}> deleted ${deleted.size} (out of ${count}) message(s) in <#${channel.id}>.`);
     },
 };

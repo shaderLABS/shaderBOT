@@ -1,4 +1,3 @@
-import { Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
@@ -13,9 +12,9 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     cooldownDuration: 10000,
-    callback: async (message: Message, args: string[], text: string) => {
-        const { guild, channel, member } = message;
-        if (!guild || !member || channel.id !== settings.ticket.managementChannelID) return;
+    callback: async (message, args, text) => {
+        const { channel, member } = message;
+        if (channel.id !== settings.ticket.managementChannelID) return;
 
         const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 
