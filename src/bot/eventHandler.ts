@@ -1,6 +1,7 @@
 import { ClientEvents } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
+import url from 'url';
 import { client, events } from './bot.js';
 
 export type Event = {
@@ -16,8 +17,8 @@ export async function registerEvents(dir: string) {
         if (stat.isDirectory()) {
             registerEvents(path.join(dir, file));
         } else if (file.endsWith('.js')) {
-            const { event }: { event: Event } = await import(process.platform === 'win32' ? path.join('file://', filePath, file) : path.join(filePath, file));
-            console.log(`Registering event "${file}"...`);
+            const { event }: { event: Event } = await import(url.pathToFileURL(path.join(filePath, file)).href);
+            console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registering event "${file}"...`);
 
             events.set(event.name, event);
 

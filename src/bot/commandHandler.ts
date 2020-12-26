@@ -1,13 +1,14 @@
 import { BitFieldResolvable, Collection, DMChannel, Guild, GuildMember, Message, NewsChannel, PermissionString, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
+import url from 'url';
 import { commands, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
 
 export type GuildMessage = Message & { channel: TextChannel; guild: Guild; member: GuildMember };
 
 export function isGuildMessage(message: Message): message is GuildMessage {
-    return message.channel instanceof TextChannel && !!message.guild && !!message.member;
+    return message.channel.type === 'text' && !!message.guild && !!message.member;
 }
 
 export type Command = {
@@ -33,18 +34,18 @@ export async function registerCommands(dir: string) {
         if (stat.isDirectory()) {
             registerCommands(path.join(dir, file));
         } else if (file.endsWith('.js')) {
-            const { command }: { command: Command } = await import(process.platform === 'win32' ? path.join('file://', filePath, file) : path.join(filePath, file));
+            const { command }: { command: Command } = await import(url.pathToFileURL(path.join(filePath, file)).href);
 
             if (!command.superCommands) {
                 commands.set(JSON.stringify(command.commands), command);
-                console.log(`Registered command "${file}".`);
+                console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registered command "${file}".`);
             } else {
                 const superCmd = commands.get(JSON.stringify(command.superCommands)) || new Collection<string, Command>();
                 if (!(superCmd instanceof Collection)) return;
 
                 superCmd.set(JSON.stringify(command.commands), command);
                 commands.set(JSON.stringify(command.superCommands), superCmd);
-                console.log(`Registered command "${file}" (subcommand of "${command.superCommands.join('/')}").`);
+                console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registered command "${file}" (subcommand of "${command.superCommands.join('/')}").`);
             }
         }
     }
@@ -54,22 +55,22 @@ export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, synt
     sendError(channel, '`' + settings.prefix + syntax + '`', 'Syntax Error');
 }
 
-export function hasPermissions(message: Message, command: Command): boolean {
-    const { member, channel, guild } = message;
+export function hasPermissions(message: GuildMessage, command: Command): boolean {
+    const { member } = message;
 
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
-            if (!command.requiredPermissions.every((permission) => member?.permissionsIn(channel).has(permission))) return false;
+            if (!command.requiredPermissions.every((permission) => member.permissionsIn(message.channel).has(permission))) return false;
         } else {
-            if (!command.requiredPermissions.every((permission) => member?.hasPermission(permission))) return false;
+            if (!command.requiredPermissions.every((permission) => member.hasPermission(permission))) return false;
         }
     }
 
     if (command.requiredRoles) {
         if (
             !command.requiredRoles.every((potentialRole) => {
-                const role = guild?.roles.cache.find((role) => role.name === potentialRole);
-                return member?.roles.cache.has(role ? role.id : potentialRole);
+                const role = message.guild.roles.cache.find((role) => role.name === potentialRole);
+                return member.roles.cache.has(role ? role.id : potentialRole);
             })
         )
             return false;
@@ -80,7 +81,7 @@ export function hasPermissions(message: Message, command: Command): boolean {
 
 const cooldowns: Map<string, boolean> = new Map();
 
-export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]) {
+export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]): void {
     const { content, channel, mentions } = message;
 
     /****************
@@ -106,9 +107,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
                     .join('|')}>`
             );
 
-        command = subCommand;
-        invoke += ' ' + args[0];
-        args.shift();
+        return runCommand(subCommand, message, invoke + ' ' + args.shift(), args);
     }
 
     /******************
@@ -120,7 +119,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
     if (currentCooldown !== undefined) {
         if (!currentCooldown) {
             sendError(channel, 'Please wait a few seconds.').then((msg) => {
-                setTimeout(() => msg.delete(), 5000);
+                setTimeout(() => msg.delete(), 7500);
                 cooldowns.set(cooldownID, true);
             });
         }
@@ -131,16 +130,19 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
 
-    if (mentions.members && mentions.members.size > 1) return sendError(channel, "You can't mention more than one member at a time.");
-
-    let { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, callback } = command;
-
-    if (!hasPermissions(message, command)) return sendError(channel, permissionError);
-
-    if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) {
-        syntaxError(channel, `${invoke} ${expectedArgs}`);
+    if (mentions.members && mentions.members.size > 1) {
+        sendError(channel, "You can't mention more than one member at a time.");
         return;
     }
+
+    const { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, callback } = command;
+
+    if (!hasPermissions(message, command)) {
+        sendError(channel, permissionError);
+        return;
+    }
+
+    if (args.length < minArgs || (maxArgs !== null && args.length > maxArgs)) return syntaxError(channel, `${invoke} ${expectedArgs}`);
 
     /****************
      * SET COOLDOWN *

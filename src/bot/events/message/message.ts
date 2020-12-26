@@ -27,7 +27,7 @@ function mediaOnly(message: GuildMessage) {
         !settings.mediaChannelIDs.includes(message.channel.id) ||
         message.attachments.size !== 0 ||
         new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?').test(message.content) ||
-        message.member?.permissions.has('MANAGE_MESSAGES')
+        message.member.permissions.has('MANAGE_MESSAGES')
     )
         return false;
 
@@ -58,7 +58,7 @@ async function ticketComment(message: GuildMessage) {
         }
     } catch (error) {
         const errorMessage = await sendError(channel, error);
-        setTimeout(() => errorMessage.delete(), 10000);
+        setTimeout(() => errorMessage.delete(), 7500);
     }
 
     await message.delete();
