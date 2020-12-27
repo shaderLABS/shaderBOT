@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { formatTimeDate } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> <content>';
 
@@ -21,7 +21,7 @@ export const command: Command = {
 
         try {
             const user = await getUser(args[0], message.mentions);
-            const content = text.slice(args[0].length).trim();
+            const content = removeArgumentsFromText(text, args[0]);
             if (content.length < 1 || content.length > 500) return sendError(channel, 'The content must be between 1 and 500 characters long.');
 
             const timestamp = new Date();

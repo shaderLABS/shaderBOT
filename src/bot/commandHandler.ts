@@ -5,13 +5,17 @@ import url from 'url';
 import { commands, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
 
-export type GuildMessage = Message & { channel: TextChannel; guild: Guild; member: GuildMember };
+export interface GuildMessage extends Message {
+    channel: TextChannel;
+    guild: Guild;
+    member: GuildMember;
+}
 
 export function isGuildMessage(message: Message): message is GuildMessage {
     return message.channel.type === 'text' && !!message.guild && !!message.member;
 }
 
-export type Command = {
+export interface Command {
     commands: string[];
     help: string;
     expectedArgs?: string | undefined;
@@ -24,7 +28,7 @@ export type Command = {
     superCommands?: string[] | undefined;
     cooldownDuration?: number;
     callback: (message: GuildMessage, args: string[], text: string) => void;
-};
+}
 
 export async function registerCommands(dir: string) {
     const filePath = path.join(path.resolve(), dir);
@@ -155,5 +159,12 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      * RUN *
      *******/
 
-    callback(message, args, content.slice(settings.prefix.length + invoke.length).trim());
+    callback(
+        message,
+        args,
+        content
+            .slice(settings.prefix.length + invoke.length)
+            .replaceAll(/(?<!\\)"/g, '')
+            .trim()
+    );
 }

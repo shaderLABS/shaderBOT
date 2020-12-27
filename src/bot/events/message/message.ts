@@ -16,7 +16,10 @@ export const event: Event = {
         if (mediaOnly(message)) return;
         if (!content.startsWith(settings.prefix)) return;
 
-        const [invoke, ...args] = content.slice(settings.prefix.length).trim().split(/[ ]+/);
+        const parse = parseContent(content);
+        if (!parse) return;
+        const [invoke, ...args] = parse;
+
         const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
         if (command) runCommand(command, message, invoke, args);
     },
@@ -33,6 +36,22 @@ function mediaOnly(message: GuildMessage) {
 
     message.delete();
     return true;
+}
+
+function parseContent(content: string) {
+    return content
+        .slice(settings.prefix.length)
+        .trim()
+        .match(/\\?.|^$/g)
+        ?.reduce(
+            (prev, curr) => {
+                if (curr === '"') prev.quote ^= 1;
+                else if (!prev.quote && curr === ' ') prev.args.push('');
+                else prev.args[prev.args.length - 1] += curr.replace(/\\(.)/, '$1');
+                return prev;
+            },
+            { args: [''], quote: 0 }
+        ).args;
 }
 
 async function ticketComment(message: GuildMessage) {

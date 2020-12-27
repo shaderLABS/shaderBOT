@@ -3,7 +3,7 @@ import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { formatTimeDate } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
-import { getMember, getUser } from '../../lib/searchMessage.js';
+import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
 const expectedArgs = '<@user|userID|username> <time> [reason]';
@@ -15,10 +15,10 @@ export const command: Command = {
     maxArgs: null,
     expectedArgs,
     requiredPermissions: ['KICK_MEMBERS'],
-    callback: async (message, args) => {
+    callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const reason = args.slice(2).join(' ');
+        const reason = removeArgumentsFromText(text, args[1]);
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
         const user = (await getMember(args[0], message.mentions).catch(() => undefined)) || (await getUser(args[0], message.mentions).catch(() => undefined));

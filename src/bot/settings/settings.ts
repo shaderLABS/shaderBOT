@@ -3,7 +3,7 @@ import path from 'path';
 
 const settingsFile = path.join(path.resolve(), '/src/bot/settings/settings.json');
 
-export type Settings = {
+export interface Settings {
     prefix: string;
     logging: {
         channelID: string;
@@ -17,7 +17,7 @@ export type Settings = {
     mediaChannelIDs: string[];
     muteRoleID: string;
     guildID: string;
-};
+}
 
 export function write(data: Object) {
     fs.writeFile(settingsFile, JSON.stringify(data, null, 2), 'utf-8');

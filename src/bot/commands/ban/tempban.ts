@@ -2,7 +2,7 @@ import { GuildMember } from 'discord.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { getMember, getUser } from '../../lib/searchMessage.js';
+import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
 
 const expectedArgs = '<@user|userID|username> <time> ["delete"] [reason]';
@@ -14,14 +14,14 @@ export const command: Command = {
     maxArgs: null,
     expectedArgs,
     requiredPermissions: ['BAN_MEMBERS'],
-    callback: async (message, args) => {
+    callback: async (message, args, text) => {
         const { member, channel } = message;
 
         const user = (await getMember(args[0], message.mentions).catch(() => undefined)) || (await getUser(args[0], message.mentions).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
-        const reason = args.slice(deleteMessages ? 3 : 2).join(' ');
+        const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
         const time = stringToSeconds(splitString(args[1]));
 

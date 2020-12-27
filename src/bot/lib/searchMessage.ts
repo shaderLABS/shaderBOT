@@ -48,3 +48,7 @@ export async function getWarnUUID(message: Message, argument: string): Promise<s
         return latestWarnID.id;
     }
 }
+
+export function removeArgumentsFromText(text: string, lastArgument: string) {
+    return text.substring(text.indexOf(lastArgument) + lastArgument.length).trim();
+}

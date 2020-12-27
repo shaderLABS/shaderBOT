@@ -2,6 +2,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { update } from '../../settings/settings.js';
 
 export const command: Command = {
@@ -17,7 +18,7 @@ export const command: Command = {
 
         try {
             const path = args[0].split('.');
-            const value = JSON.parse(text.slice(args[0].length).trim());
+            const value = JSON.parse(removeArgumentsFromText(text, args[0]));
 
             const oldValue = setValue(settings, path, value);
             if (!oldValue) return sendError(channel, 'The specified path does not exist.');

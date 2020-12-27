@@ -2,7 +2,7 @@ import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { getMember, getUser } from '../../lib/searchMessage.js';
+import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<"normal"|"severe"> <@user|userID|username> [reason]';
 
@@ -17,7 +17,7 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const reason = text.substring(text.indexOf(args[1]) + args[1].length).trim();
+        const reason = removeArgumentsFromText(text, args[1]);
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
         const severityArg = args[0].toUpperCase();

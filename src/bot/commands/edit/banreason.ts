@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editBanReason } from '../../lib/edit/editBan.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 
@@ -18,7 +18,7 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { channel, author } = message;
 
-        const content = text.slice(args[0].length).trim();
+        const content = removeArgumentsFromText(text, args[0]);
         if (content.length < 1 || content.length > 500) return sendError(channel, 'The content must be between 1 and 500 characters long.');
 
         try {

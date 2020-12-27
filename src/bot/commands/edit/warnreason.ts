@@ -1,7 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { editWarnReason } from '../../lib/edit/editWarning.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { getWarnUUID } from '../../lib/searchMessage.js';
+import { getWarnUUID, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 
@@ -19,7 +19,7 @@ export const command: Command = {
         try {
             const warnUUID = await getWarnUUID(message, args[0]);
 
-            const reason = text.substring(text.indexOf(args[0]) + args[0].length).trim();
+            const reason = removeArgumentsFromText(text, args[0]);
             if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
             try {
