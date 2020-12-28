@@ -15,7 +15,7 @@ export const command: Command = {
     callback: async (message, _, text) => {
         const { member, channel } = message;
 
-        const user = await getUser(text, message.mentions).catch(() => undefined);
+        const user = await getUser(text).catch(() => undefined);
         if (!user) return syntaxError(channel, 'unban ' + expectedArgs);
 
         try {

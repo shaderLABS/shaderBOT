@@ -16,7 +16,7 @@ export const command: Command = {
         const { channel } = message;
 
         try {
-            const user = await getUser(text, message.mentions);
+            const user = await getUser(text);
 
             const warnQuery = db.query(
                 /*sql*/ `

@@ -17,7 +17,7 @@ export const command: Command = {
         const { author, channel } = message;
 
         try {
-            const warnUUID = await getWarnUUID(message, args[0]);
+            const warnUUID = await getWarnUUID(args[0]);
 
             const reason = removeArgumentsFromText(text, args[0]);
             if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');

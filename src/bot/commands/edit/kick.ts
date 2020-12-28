@@ -26,7 +26,7 @@ export const command: Command = {
                 const { user_id } = await editKick(args[0], content, author.id);
                 sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s kick (${args[0]}).`);
             } else {
-                const user = await getUser(args[0], message.mentions);
+                const user = await getUser(args[0]);
 
                 const latestKickID = (
                     await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])

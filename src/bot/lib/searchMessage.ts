@@ -1,59 +1,48 @@
-import { GuildMember, Message, MessageMentions, User } from 'discord.js';
+import { GuildMember, MessageMentions, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { getGuild } from './misc.js';
 
-// remove global flag because it affects the regex state
-const USERS_PATTERN = new RegExp(MessageMentions.USERS_PATTERN, '');
-
-export async function getUser(potentialUser: string, mentions?: MessageMentions): Promise<User> {
+export async function getUser(potentialUser: string): Promise<User> {
     try {
-        if (USERS_PATTERN.test(potentialUser)) {
-            const userMention = mentions?.users?.first();
-            if (userMention) return userMention;
+        const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
+        if (mention) potentialUser = mention[0].replace(/\D/g, '');
+
+        if (!isNaN(+potentialUser) && potentialUser.length >= 17 && potentialUser.length <= 19) {
+            const user = await client.users.fetch(potentialUser).catch(() => undefined);
+            if (user) return user;
         }
 
-        return (
-            (!isNaN(+potentialUser)
-                ? await client.users.fetch(potentialUser).catch(() => undefined)
-                : (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user) || Promise.reject('Specified user not found.')
-        );
+        return (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user || Promise.reject('Specified user not found.');
     } catch {
         return Promise.reject('Specified user not found.');
     }
 }
 
-export async function getMember(potentialMember: string, mentions?: MessageMentions): Promise<GuildMember> {
+export async function getMember(potentialMember: string): Promise<GuildMember> {
     const guild = getGuild();
 
     try {
-        if (USERS_PATTERN.test(potentialMember)) {
-            const memberMention = mentions?.members?.first();
-            if (memberMention) return memberMention;
+        const mention = potentialMember.match(MessageMentions.USERS_PATTERN);
+        if (mention) potentialMember = mention[0].replace(/\D/g, '');
 
-            const userMention = mentions?.users?.first();
-            if (userMention) {
-                const member = await guild?.members.fetch(userMention).catch(() => undefined);
-                if (member) return member;
-            }
+        if (!isNaN(+potentialMember) && potentialMember.length >= 17 && potentialMember.length <= 19) {
+            const member = await guild?.members.fetch(potentialMember).catch(() => undefined);
+            if (member) return member;
         }
 
-        return (
-            (!isNaN(+potentialMember)
-                ? await guild?.members.fetch(potentialMember).catch(() => undefined)
-                : (await guild?.members.fetch({ query: potentialMember, limit: 1 }))?.first()) || Promise.reject('Specified user not found.')
-        );
+        return (await guild?.members.fetch({ query: potentialMember, limit: 1 }))?.first() || Promise.reject('Specified member not found.');
     } catch {
-        return Promise.reject('Specified user not found.');
+        return Promise.reject('Specified member not found.');
     }
 }
 
-export async function getWarnUUID(message: Message, argument: string): Promise<string> {
+export async function getWarnUUID(argument: string): Promise<string> {
     if (uuid.test(argument)) {
         return argument;
     } else {
-        const { id } = await getUser(argument, message.mentions);
+        const { id } = await getUser(argument);
         const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [id])).rows[0];
 
         if (!latestWarnID) return Promise.reject('The specified user does not have any warnings.');

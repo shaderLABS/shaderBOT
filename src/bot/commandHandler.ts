@@ -86,7 +86,7 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
 const cooldowns: Map<string, boolean> = new Map();
 
 export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]): void {
-    const { content, channel, mentions } = message;
+    const { content, channel } = message;
 
     /****************
      * SUB-COMMANDS *
@@ -133,11 +133,6 @@ export function runCommand(command: Command | Collection<string, Command>, messa
     /************************************
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
-
-    if (mentions.members && mentions.members.size > 1) {
-        sendError(channel, "You can't mention more than one member at a time.");
-        return;
-    }
 
     const { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, callback } = command;
 

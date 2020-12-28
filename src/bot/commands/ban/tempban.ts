@@ -17,7 +17,7 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const user = (await getMember(args[0], message.mentions).catch(() => undefined)) || (await getUser(args[0], message.mentions).catch(() => undefined));
+        const user = (await getMember(args[0]).catch(() => undefined)) || (await getUser(args[0]).catch(() => undefined));
         if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';

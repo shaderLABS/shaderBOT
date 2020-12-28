@@ -15,7 +15,7 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const user = await getMember(args[0], message.mentions).catch(() => undefined);
+        const user = await getMember(args[0]).catch(() => undefined);
         if (!user) return syntaxError(channel, 'kick ' + expectedArgs);
 
         const reason = removeArgumentsFromText(text, args[0]);

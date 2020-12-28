@@ -20,7 +20,7 @@ export const command: Command = {
             return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: Set<GuildMember> = new Set();
-        message.mentions.members?.forEach((member) => owners.add(member));
+        // message.mentions.members?.forEach((member) => owners.add(member));
 
         for (const potentialID of args) {
             const user = await getMember(potentialID).catch(() => undefined);

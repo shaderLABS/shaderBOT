@@ -17,7 +17,7 @@ export const command: Command = {
         const { author, channel } = message;
 
         try {
-            const warnUUID = await getWarnUUID(message, args[0]);
+            const warnUUID = await getWarnUUID(args[0]);
 
             const severityArg = args[1].toUpperCase();
             if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);

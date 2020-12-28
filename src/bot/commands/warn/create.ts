@@ -24,8 +24,8 @@ export const command: Command = {
         if (!['NORMAL', 'SEVERE'].includes(severityArg)) return syntaxError(channel, expectedArgs);
         const severity = severityArg === 'NORMAL' ? 0 : 1;
 
-        const targetMember = await getMember(args[1], message.mentions).catch(() => undefined);
-        const user = targetMember?.user || (await getUser(args[1], message.mentions).catch(() => undefined));
+        const targetMember = await getMember(args[1]).catch(() => undefined);
+        const user = targetMember?.user || (await getUser(args[1]).catch(() => undefined));
         if (!user) return syntaxError(channel, expectedArgs);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
