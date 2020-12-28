@@ -2,13 +2,13 @@ import { GuildMember, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { getGuild } from '../../lib/misc.js';
+import { getGuild, sleep } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'guildMemberRemove',
     callback: async (member: GuildMember) => {
         // wait 1 second because discord api sucks
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000);
 
         const guild = member.partial ? getGuild() : member.guild;
         if (!guild) return;

@@ -6,6 +6,7 @@ import { editComment } from '../../lib/edit/editTicket.js';
 import { sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { formatTimeDate, getGuild } from '../../lib/misc.js';
+import { cutDescription } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -50,7 +51,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket.id || ticket.author_id !== user.id)
             return reaction.remove();
 
-        const originalFieldValues = [embed.fields[0].value.slice(0), embed.fields[2].value.slice(0)];
+        const originalFieldValues = [embed.title, embed.fields[1].value];
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
@@ -98,7 +99,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 return;
             }
 
-            embed.fields[0].value = newTitle.content;
+            embed.setTitle(newTitle.content);
 
             if (ticket.channel_id) {
                 const ticketChannel = guild.channels.cache.get(ticket.channel_id);
@@ -142,7 +143,22 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 return;
             }
 
-            embed.fields[2].value = newDescription.content;
+            embed.fields[1].value = newDescription.content;
+
+            if (ticket.channel_id) {
+                const ticketChannel = guild.channels.cache.get(ticket.channel_id);
+                if (ticketChannel instanceof TextChannel && ticketChannel.topic) {
+                    const lastSection = ticketChannel.topic.lastIndexOf('|');
+                    if (lastSection > -1) {
+                        ticketChannel.edit(
+                            {
+                                topic: ticketChannel.topic.substring(0, lastSection + 2) + (cutDescription(newDescription.content) || 'NO DESCRIPTION'),
+                            },
+                            'the ticket description has been changed'
+                        );
+                    }
+                }
+            }
 
             await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE id = $3`, [newDescription.content, editedAt, ticket.id]);
 

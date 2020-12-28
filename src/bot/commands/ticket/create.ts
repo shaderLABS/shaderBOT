@@ -34,9 +34,9 @@ export const command: Command = {
             title.delete();
 
             if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
-            ticketMessage.edit(ticketEmbed.addField('Title', title.content));
+            ticketMessage.edit(ticketEmbed.setTitle(title.content));
 
-            if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM ticket WHERE title=$1) AS "exists";`, [title.content])).rows[0].exists)
+            if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [title.content])).rows[0])
                 return sendError(channel, 'A ticket with this name already exists.');
 
             const projectQuestion = await sendInfo(channel, 'Please mention the project:');
@@ -49,7 +49,7 @@ export const command: Command = {
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
             ticketMessage.edit(ticketEmbed.addField('Project', project.content));
 
-            if (!(await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [projectChannel.id])).rows[0].exists)
+            if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0])
                 return sendError(channel, 'The mentioned text channel is not a valid project.');
 
             const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
@@ -63,7 +63,7 @@ export const command: Command = {
             if ((!attachments || attachments.length === 0) && (!description.content || description.content === '')) {
                 return sendError(channel, 'The description may not be empty.');
             }
-            ticketMessage.edit(ticketEmbed.addField('Description', description.content || 'EMPTY').setFooter(`ID: ${ticketID}`));
+            ticketMessage.edit(ticketEmbed.addField('Description', description.content || 'NO DESCRIPTION').setFooter(`ID: ${ticketID}`));
 
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
             if (!(subscriptionChannel instanceof TextChannel)) return;

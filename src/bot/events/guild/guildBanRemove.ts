@@ -2,13 +2,14 @@ import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
+import { sleep } from '../../lib/misc.js';
 import { store } from '../../lib/punishments.js';
 
 export const event: Event = {
     name: 'guildBanRemove',
     callback: async (guild: Guild, user: User) => {
         // wait 1 second because discord api sucks
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000);
 
         const auditLog = (
             await guild.fetchAuditLogs({

@@ -4,37 +4,49 @@ import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { getGuild } from './misc.js';
 
+// remove global flag because it affects the regex state
+const USERS_PATTERN = new RegExp(MessageMentions.USERS_PATTERN, '');
+
 export async function getUser(potentialUser: string, mentions?: MessageMentions): Promise<User> {
-    let user = mentions?.users?.first();
-
-    if (!user) {
-        try {
-            if (!isNaN(+potentialUser)) user = await client.users.fetch(potentialUser).catch(() => undefined);
-            if (!user) user = (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user;
-        } catch {
-            return Promise.reject('Specified user not found.');
-        }
-    }
-
-    if (!user) return Promise.reject('Specified user not found.');
-    return user;
-}
-
-export async function getMember(potentialUser: string, mentions?: MessageMentions): Promise<GuildMember> {
-    const guild = getGuild();
-    let member = mentions?.members?.first();
-
     try {
-        if (!member) {
-            if (!isNaN(+potentialUser)) member = await guild?.members.fetch(potentialUser).catch(() => undefined);
-            if (!member) member = (await guild?.members.fetch({ query: potentialUser, limit: 1 }))?.first();
+        if (USERS_PATTERN.test(potentialUser)) {
+            const userMention = mentions?.users?.first();
+            if (userMention) return userMention;
         }
+
+        return (
+            (!isNaN(+potentialUser)
+                ? await client.users.fetch(potentialUser).catch(() => undefined)
+                : (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user) || Promise.reject('Specified user not found.')
+        );
     } catch {
         return Promise.reject('Specified user not found.');
     }
+}
 
-    if (!member) return Promise.reject('Specified user not found.');
-    return member;
+export async function getMember(potentialMember: string, mentions?: MessageMentions): Promise<GuildMember> {
+    const guild = getGuild();
+
+    try {
+        if (USERS_PATTERN.test(potentialMember)) {
+            const memberMention = mentions?.members?.first();
+            if (memberMention) return memberMention;
+
+            const userMention = mentions?.users?.first();
+            if (userMention) {
+                const member = await guild?.members.fetch(userMention).catch(() => undefined);
+                if (member) return member;
+            }
+        }
+
+        return (
+            (!isNaN(+potentialMember)
+                ? await guild?.members.fetch(potentialMember).catch(() => undefined)
+                : (await guild?.members.fetch({ query: potentialMember, limit: 1 }))?.first()) || Promise.reject('Specified user not found.')
+        );
+    } catch {
+        return Promise.reject('Specified user not found.');
+    }
 }
 
 export async function getWarnUUID(message: Message, argument: string): Promise<string> {

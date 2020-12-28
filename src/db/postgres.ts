@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { sleep } from '../bot/lib/misc.js';
 
 export const db = new pg.Pool({
     user: process.env.PG_USER || 'postgres',
@@ -18,9 +19,9 @@ export async function connectPostgreSQL() {
             break;
         } catch (error) {
             console.error(error);
-            retries -= 1;
+            retries--;
             console.log(`Retrying ${retries} more times...`);
-            await new Promise((res) => setTimeout(res, 5000));
+            await sleep(5000);
         }
     }
 }

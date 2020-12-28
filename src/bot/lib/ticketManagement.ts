@@ -68,7 +68,9 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
         parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
-        topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'} | ${cutDescription(ticket.description)}`,
+        topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'} | ${
+            cutDescription(ticket.description) || 'NO DESCRIPTION'
+        }`,
         rateLimitPerUser: 10,
         permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
     });
@@ -80,20 +82,17 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
 
     const ticketEmbed = new MessageEmbed()
         .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
+        .setTitle(ticket.title)
         .setColor('#006fff')
         .setFooter(ticketFooter)
         .addFields([
-            {
-                name: 'Title',
-                value: ticket.title,
-            },
             {
                 name: 'Project',
                 value: ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT',
             },
             {
                 name: 'Description',
-                value: ticket.description,
+                value: ticket.description || 'NO DESCRIPTION',
             },
         ])
         .setTimestamp(new Date(ticket.timestamp));

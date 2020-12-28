@@ -1,8 +1,11 @@
+import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
 export function getGuild() {
     return client.guilds.cache.get(settings.guildID);
 }
+
+export const sleep = promisify(setTimeout);
 
 export function formatTimeDate(date: Date) {
     return date.toLocaleString('en-US', {
