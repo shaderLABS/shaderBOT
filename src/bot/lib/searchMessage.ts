@@ -1,6 +1,4 @@
 import { GuildMember, MessageMentions, User } from 'discord.js';
-import uuid from 'uuid-random';
-import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { getGuild } from './misc.js';
 
@@ -35,18 +33,6 @@ export async function getMember(potentialMember: string): Promise<GuildMember> {
         return (await guild?.members.fetch({ query: potentialMember, limit: 1 }))?.first() || Promise.reject('Specified member not found.');
     } catch {
         return Promise.reject('Specified member not found.');
-    }
-}
-
-export async function getWarnUUID(argument: string): Promise<string> {
-    if (uuid.test(argument)) {
-        return argument;
-    } else {
-        const { id } = await getUser(argument);
-        const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [id])).rows[0];
-
-        if (!latestWarnID) return Promise.reject('The specified user does not have any warnings.');
-        return latestWarnID.id;
     }
 }
 

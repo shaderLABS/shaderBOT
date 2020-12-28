@@ -2,11 +2,10 @@ import { Guild, GuildMember, MessageReaction, TextChannel, User } from 'discord.
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
-import { editComment } from '../../lib/edit/editTicket.js';
+import { editComment, editTicketDescription, editTicketTitle } from '../../lib/edit/editTicket.js';
 import { sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { formatTimeDate, getGuild } from '../../lib/misc.js';
-import { cutDescription } from '../../lib/ticketManagement.js';
+import { getGuild } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -40,147 +39,95 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
 
-        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-
         let subscriptionMessage;
+        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
         if (subscriptionChannel instanceof TextChannel && ticket.subscription_message_id) {
             subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscription_message_id);
         }
 
         const embed = originalMessage.embeds[0];
-        if (!embed || !embed.footer || !embed.footer.text || embed.footer.text.split(' | ')[0].substring(4) != ticket.id || ticket.author_id !== user.id)
-            return reaction.remove();
-
-        const originalFieldValues = [embed.title, embed.fields[1].value];
+        if (!embed?.footer?.text?.includes(ticket.id) || ticket.author_id !== user.id) return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
-        if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
+        if (!(managementChannel instanceof TextChannel)) return;
+
         const editPartQuestion = await sendInfo(
             managementChannel,
-            'Please enter the part of the ticket which you want to edit (`title` or `description`):',
+            'Please enter the part of the ticket which you want to edit (`title` or `description`).',
             undefined,
             `<@${user.id}>`
         );
 
-        const editPart = (
+        const editPartAnswer = (
             await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
                 time: 60000,
                 max: 1,
             })
         ).first();
 
-        if (!editPart) {
+        if (!editPartAnswer || !['TITLE', 'DESCRIPTION'].includes(editPartAnswer.content.toUpperCase())) {
             reaction.remove();
             editPartQuestion.delete();
             return;
         }
 
-        const editedAt = new Date();
-
-        if (editPart.content.toLowerCase() === 'title') {
+        if (editPartAnswer.content.toUpperCase() === 'TITLE') {
             /*********************
              * EDIT TICKET TITLE *
              *********************/
 
-            const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title:', undefined, `<@${user.id}>`);
+            const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title.');
 
-            const newTitle = (
+            const titleAnswer = (
                 await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
                     time: 60000,
                     max: 1,
                 })
             ).first();
 
-            if (!newTitle) {
+            if (!titleAnswer) {
                 reaction.remove();
                 editPartQuestion.delete();
-                editPart.delete();
+                editPartAnswer.delete();
                 titleQuestion.delete();
                 return;
             }
 
-            embed.setTitle(newTitle.content);
+            editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage, subscriptionMessage);
 
-            if (ticket.channel_id) {
-                const ticketChannel = guild.channels.cache.get(ticket.channel_id);
-                if (ticketChannel instanceof TextChannel) {
-                    ticketChannel.edit(
-                        {
-                            name: newTitle.content,
-                        },
-                        'the ticket title has been changed'
-                    );
-                }
-            }
-
-            await db.query(/*sql*/ `UPDATE ticket SET title = $1, edited = $2 WHERE id = $3`, [newTitle.content, editedAt, ticket.id]);
-
-            editPartQuestion.delete();
-            editPart.delete();
             titleQuestion.delete();
-            newTitle.delete();
-
-            log(`<@${user.id}> edited their ticket title from:\n\n${originalFieldValues[0] || '<empty comment>'}\n\nto:\n\n${newTitle.content}`);
-        } else if (editPart.content.toLowerCase() === 'description') {
+            titleAnswer.delete();
+        } else {
             /***************************
              * EDIT TICKET DESCRIPTION *
              ***************************/
 
-            const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description:', undefined, `<@${user.id}>`);
+            const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description.');
 
-            const newDescription = (
+            const descriptionAnswer = (
                 await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
                     time: 60000,
                     max: 1,
                 })
             ).first();
 
-            if (!newDescription) {
+            if (!descriptionAnswer) {
                 reaction.remove();
                 editPartQuestion.delete();
-                editPart.delete();
+                editPartAnswer.delete();
                 descriptionQuestion.delete();
                 return;
             }
 
-            embed.fields[1].value = newDescription.content;
+            editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage, subscriptionMessage);
 
-            if (ticket.channel_id) {
-                const ticketChannel = guild.channels.cache.get(ticket.channel_id);
-                if (ticketChannel instanceof TextChannel && ticketChannel.topic) {
-                    const lastSection = ticketChannel.topic.lastIndexOf('|');
-                    if (lastSection > -1) {
-                        ticketChannel.edit(
-                            {
-                                topic: ticketChannel.topic.substring(0, lastSection + 2) + (cutDescription(newDescription.content) || 'NO DESCRIPTION'),
-                            },
-                            'the ticket description has been changed'
-                        );
-                    }
-                }
-            }
-
-            await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE id = $3`, [newDescription.content, editedAt, ticket.id]);
-
-            editPartQuestion.delete();
-            editPart.delete();
             descriptionQuestion.delete();
-            newDescription.delete();
-
-            log(`<@${user.id}> edited their ticket description from:\n\n${originalFieldValues[1]}\n\nto:\n\n${newDescription.content}`);
-        } else {
-            reaction.remove();
-            editPartQuestion.delete();
-            editPart.delete();
-            return;
+            descriptionAnswer.delete();
         }
 
-        if (embed.footer && embed.footer.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedAt)}`);
-
-        await originalMessage.edit(embed);
-        if (subscriptionMessage) subscriptionMessage.edit(embed);
-
         reaction.remove();
+        editPartQuestion.delete();
+        editPartAnswer.delete();
     } else {
         /****************
          * EDIT COMMENT *
@@ -190,16 +137,16 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
-        const question = await sendInfo(managementChannel, 'Please enter the new message:', undefined, `<@${user.id}>`);
+        const question = await sendInfo(managementChannel, 'Please enter the new message.', undefined, `<@${user.id}>`);
 
-        const newMessage = (
+        const answer = (
             await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
                 time: 60000,
                 max: 1,
             })
         ).first();
 
-        if (!newMessage) {
+        if (!answer) {
             await question.delete();
             return;
         }
@@ -207,13 +154,11 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
 
-        editComment(comment.id, originalMessage, newMessage.content);
+        editComment(comment, originalMessage, answer.content, user);
 
         reaction.remove();
         question.delete();
-        newMessage.delete();
-
-        log(`<@${user.id}> edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${newMessage.content}`);
+        answer.delete();
     }
 }
 

@@ -1,7 +1,7 @@
 import { Command } from '../../commandHandler.js';
-import { editWarnReason } from '../../lib/edit/editWarning.js';
+import { editWarnReason, getWarnUUID } from '../../lib/edit/editWarning.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { getWarnUUID, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 
