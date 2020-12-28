@@ -16,7 +16,7 @@ export const command: Command = {
     callback: async (message, args) => {
         const { channel, guild } = message;
 
-        if ((await db.query(/*sql*/ `SELECT EXISTS (SELECT 1 FROM project WHERE channel_id=$1) AS "exists";`, [channel.id])).rows[0].exists)
+        if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0])
             return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: Set<GuildMember> = new Set();

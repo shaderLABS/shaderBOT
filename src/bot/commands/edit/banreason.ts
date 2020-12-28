@@ -23,7 +23,7 @@ export const command: Command = {
 
         try {
             if (uuid.test(args[0])) {
-                const past_table = (await db.query(/*sql*/ `SELECT EXISTS(SELECT 1 FROM past_punishment WHERE id = $1) AS "exists"`, [args[0]])).rows[0]?.exists;
+                const past_table = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [args[0]])).rows[0];
                 const { user_id } = await editBanReason(args[0], content, author.id, past_table);
                 sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s ban (${args[0]}).`);
             } else {
