@@ -16,11 +16,12 @@ export async function sendError(channel: TextChannel | DMChannel | NewsChannel, 
     return await channel.send(embed);
 }
 
-export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string) {
+export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? 'https://img.icons8.com/color/48/000000/info--v1.png' : undefined)
         .setDescription(description)
-        .setColor('#006fff');
+        .setColor('#006fff')
+        .setFooter(footer || '');
     return await channel.send(message, embed);
 }
 

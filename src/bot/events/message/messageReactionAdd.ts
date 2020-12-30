@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { editComment, editTicketDescription, editTicketTitle } from '../../lib/edit/editTicket.js';
-import { sendInfo } from '../../lib/embeds.js';
+import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getGuild } from '../../lib/misc.js';
 
@@ -55,15 +55,13 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             managementChannel,
             'Please enter the part of the ticket which you want to edit (`title` or `description`).',
             undefined,
-            `<@${user.id}>`
+            `<@${user.id}>`,
+            `Type '${settings.prefix}cancel' to stop.`
         );
 
-        const editPartAnswer = (
-            await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                time: 60000,
-                max: 1,
-            })
-        ).first();
+        const editPartAnswer = await awaitResponse(managementChannel, user.id).catch((error) => {
+            sendError(managementChannel, error);
+        });
 
         if (!editPartAnswer || !['TITLE', 'DESCRIPTION'].includes(editPartAnswer.content.toUpperCase())) {
             reaction.remove();
@@ -76,58 +74,40 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
              * EDIT TICKET TITLE *
              *********************/
 
-            const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title.');
+            const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
 
-            const titleAnswer = (
-                await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                    time: 60000,
-                    max: 1,
-                })
-            ).first();
-
-            if (!titleAnswer) {
+            try {
+                const titleAnswer = await awaitResponse(managementChannel, user.id);
+                editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage, subscriptionMessage);
+                titleAnswer.delete();
+            } catch (error) {
+                sendError(managementChannel, error);
+            } finally {
                 reaction.remove();
                 editPartQuestion.delete();
                 editPartAnswer.delete();
                 titleQuestion.delete();
-                return;
             }
-
-            editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage, subscriptionMessage);
-
-            titleQuestion.delete();
-            titleAnswer.delete();
         } else {
             /***************************
              * EDIT TICKET DESCRIPTION *
              ***************************/
 
-            const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description.');
+            const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
 
-            const descriptionAnswer = (
-                await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                    time: 60000,
-                    max: 1,
-                })
-            ).first();
-
-            if (!descriptionAnswer) {
+            try {
+                const descriptionAnswer = await awaitResponse(managementChannel, user.id);
+                editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage, subscriptionMessage);
+                descriptionAnswer.delete();
+            } catch (error) {
+                sendError(managementChannel, error);
+            } finally {
                 reaction.remove();
                 editPartQuestion.delete();
                 editPartAnswer.delete();
                 descriptionQuestion.delete();
-                return;
             }
-
-            editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage, subscriptionMessage);
-
-            descriptionQuestion.delete();
-            descriptionAnswer.delete();
         }
-
-        reaction.remove();
-        editPartQuestion.delete();
-        editPartAnswer.delete();
     } else {
         /****************
          * EDIT COMMENT *
@@ -136,30 +116,39 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         if (comment.author_id !== user.id) return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
-        if (!managementChannel || !(managementChannel instanceof TextChannel)) return;
-        const question = await sendInfo(managementChannel, 'Please enter the new message.', undefined, `<@${user.id}>`);
+        if (!(managementChannel instanceof TextChannel)) return;
 
-        const answer = (
-            await managementChannel.awaitMessages((msg) => msg.author.id === user.id, {
-                time: 60000,
-                max: 1,
-            })
-        ).first();
+        const question = await sendInfo(managementChannel, 'Please enter the new message.', undefined, `<@${user.id}>`, `Type '${settings.prefix}cancel' to stop.`);
 
-        if (!answer) {
-            await question.delete();
-            return;
+        try {
+            const answer = await awaitResponse(managementChannel, user.id);
+
+            const originalMessage = await channel.messages.fetch(reaction.message.id);
+            if (!originalMessage) return;
+
+            editComment(comment, originalMessage, answer.content, user);
+            answer.delete();
+        } catch (error) {
+            sendError(managementChannel, error);
+        } finally {
+            reaction.remove();
+            question.delete();
         }
-
-        const originalMessage = await channel.messages.fetch(reaction.message.id);
-        if (!originalMessage) return;
-
-        editComment(comment, originalMessage, answer.content, user);
-
-        reaction.remove();
-        question.delete();
-        answer.delete();
     }
+}
+
+async function awaitResponse(channel: TextChannel, authorID: string) {
+    const response = (
+        await channel.awaitMessages((msg) => msg.author.id === authorID, {
+            time: 60000,
+            max: 1,
+        })
+    ).first();
+
+    if (!response) return Promise.reject('Stopped editing because there was no response.');
+    if (response.content === `${settings.prefix}cancel`) return Promise.reject('The editing was canceled.');
+
+    return response;
 }
 
 async function deleteComment(reaction: MessageReaction, member: GuildMember, channel: TextChannel) {

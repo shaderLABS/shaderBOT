@@ -302,5 +302,5 @@ export async function getCategoryChannel(categoryIDs: string[], guild: Guild): P
 
 export function cutDescription(str: string) {
     if (str.length <= 950) return str;
-    return str.substr(0, str.lastIndexOf(' ', 950));
+    return str.substr(0, str.lastIndexOf(' ', 950)) + '...';
 }

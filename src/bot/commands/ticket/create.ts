@@ -18,84 +18,86 @@ export const command: Command = {
         const { channel, author, guild } = message;
         if (channel.id !== settings.ticket.managementChannelID) return;
 
-        const ticketEmbed = new MessageEmbed()
-            .setTitle('CREATE TICKET')
-            .setAuthor(author.username + '#' + author.discriminator, author.displayAvatarURL() || undefined)
-            .setColor('#006fff')
-            .setFooter(`HINT: Type "${settings.prefix}cancel" to stop.`)
-            .setTimestamp(Date.now());
+        const ticketEmbed = new MessageEmbed().setAuthor('CREATE TICKET').setColor('#006fff').setFooter(`Type '${settings.prefix}cancel' to stop.`).setTimestamp(Date.now());
         const ticketMessage = await channel.send(ticketEmbed);
 
         try {
-            const titleQuestion = await sendInfo(channel, 'Please enter the title:');
-            const title = await awaitResponse(channel, author.id);
+            /*********
+             * TITLE *
+             *********/
+
+            const titleQuestion = await sendInfo(channel, 'Please enter the title.');
+            const titleAnswer = await awaitResponse(channel, author.id);
+            let attachments = await cacheAttachments(titleAnswer);
             titleQuestion.delete();
-            let attachments = await cacheAttachments(title);
-            title.delete();
+            titleAnswer.delete();
 
-            if (title.content.length > 32 || title.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
-            ticketMessage.edit(ticketEmbed.setTitle(title.content));
+            // VALIDATION
+            if (titleAnswer.content.length > 32 || titleAnswer.content.length < 2) return sendError(channel, 'The title must be between 2 and 32 characters long.');
+            if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [titleAnswer.content])).rows[0]) return sendError(channel, 'A ticket with this name already exists.');
+            ticketMessage.edit(ticketEmbed.setTitle(titleAnswer.content));
 
-            if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [title.content])).rows[0])
-                return sendError(channel, 'A ticket with this name already exists.');
+            /***********
+             * PROJECT *
+             ***********/
 
-            const projectQuestion = await sendInfo(channel, 'Please mention the project:');
-            const project = await awaitResponse(channel, author.id);
+            const projectQuestion = await sendInfo(channel, 'Please mention the project.');
+            const projectAnswer = await awaitResponse(channel, author.id);
+            attachments = [...attachments, ...(await cacheAttachments(projectAnswer))];
             projectQuestion.delete();
-            attachments = [...attachments, ...(await cacheAttachments(project))];
-            project.delete();
+            projectAnswer.delete();
 
-            const projectChannel = project.mentions.channels.first();
+            // VALIDATION
+            const projectChannel = projectAnswer.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
-            ticketMessage.edit(ticketEmbed.addField('Project', project.content));
+            if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0]) return sendError(channel, 'The mentioned text channel is not a valid project.');
+            ticketMessage.edit(ticketEmbed.addField('Project', projectAnswer.content));
 
-            if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0])
-                return sendError(channel, 'The mentioned text channel is not a valid project.');
+            /***************
+             * DESCRIPTION *
+             ***************/
 
-            const descriptionQuestion = await sendInfo(channel, 'Please enter the description:');
-            const description = await awaitResponse(channel, author.id);
+            const descriptionQuestion = await sendInfo(channel, 'Please enter the description.');
+            const descriptionAnswer = await awaitResponse(channel, author.id);
+            attachments = [...attachments, ...(await cacheAttachments(descriptionAnswer))];
             descriptionQuestion.delete();
-            attachments = [...attachments, ...(await cacheAttachments(description))];
-            description.delete();
-            if (description.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
-            const ticketID = uuid();
+            descriptionAnswer.delete();
 
-            if ((!attachments || attachments.length === 0) && (!description.content || description.content === '')) {
-                return sendError(channel, 'The description may not be empty.');
-            }
-            ticketMessage.edit(ticketEmbed.addField('Description', description.content || 'NO DESCRIPTION').setFooter(`ID: ${ticketID}`));
+            // VALIDATION
+            if (descriptionAnswer.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
+            if ((!attachments || attachments.length === 0) && !descriptionAnswer.content) return sendError(channel, 'The description may not be empty.');
+            const ticketID = uuid();
+            ticketMessage.edit(ticketEmbed.addField('Description', descriptionAnswer.content || 'NO DESCRIPTION').setFooter(`ID: ${ticketID}`));
 
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
             if (!(subscriptionChannel instanceof TextChannel)) return;
 
-            const ticketChannel = await guild.channels.create(title.content, {
+            const ticketChannel = await guild.channels.create(titleAnswer.content, {
                 type: 'text',
                 parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
-                topic: `${ticketID} | <#${projectChannel.id}> | ${cutDescription(description.content)}`,
+                topic: `${ticketID} | <#${projectChannel.id}> | ${cutDescription(descriptionAnswer.content)}`,
                 rateLimitPerUser: 10,
                 // position: 0, // new - old
             });
 
-            ticketEmbed.setTitle('');
-            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+            ticketEmbed.setAuthor(author.username + '#' + author.discriminator, author.displayAvatarURL() || undefined);
 
+            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
             ticketEmbed.attachFiles(attachments);
 
-            await ticketMessage.delete();
-            channel.send(ticketEmbed);
+            ticketMessage.edit(ticketEmbed);
             ticketChannel.send(ticketEmbed);
 
             await db.query(
                 /*sql*/ `
                 INSERT INTO ticket (id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-                [ticketID, title.content, projectChannel.id, description.content, attachments, author.id, new Date(), ticketChannel.id, subscriptionMessage.id]
+                [ticketID, titleAnswer.content, projectChannel.id, descriptionAnswer.content, attachments, author.id, new Date(), ticketChannel.id, subscriptionMessage.id]
             );
 
-            log(`<@${message.author.id}> created a ticket ("${title.content}").`);
+            log(`<@${message.author.id}> created a ticket ("${titleAnswer.content}").`);
         } catch (error) {
-            if (error) sendError(channel, error);
-            return;
+            return sendError(channel, error);
         }
     },
 };
@@ -103,7 +105,7 @@ export const command: Command = {
 async function awaitResponse(channel: TextChannel | DMChannel | NewsChannel, authorID: string) {
     const response = (
         await channel.awaitMessages((msg) => msg.author.id === authorID, {
-            time: 30000,
+            time: 60000,
             max: 1,
         })
     ).first();

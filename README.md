@@ -51,14 +51,22 @@ Adding the following options to your `settings.json` file is highly recommended:
 
     "**/*.js": { "when": "$(basename).ts" },
     "**/*.js.map": true
-}
+},
+"[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    }
+},
 ```
 
-This will hide the transpiled JavaScript files if there are corresponding TypeScript files.
+This will hide the transpiled JavaScript files if there are corresponding TypeScript files and automatically format when saving.
 
 ### Extensions
 
--   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL Syntax Highlighting inside of TypeScript
+-   [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) - Used for auto-formatting to improve consistency. It will use the existing configuration file ([`.prettierrc`](.prettierrc)).
+-   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL syntax highlighting.
 
 \
 _Made with [<img src="https://cdn.discordapp.com/emojis/758513218770567188.gif" width="20" height="20"/>](https://files.catbox.moe/3nyc47.mp3) by [Niemand](https://github.com/Kneemund)_

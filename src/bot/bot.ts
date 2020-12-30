@@ -17,7 +17,7 @@ cron.schedule('55 23 * * *', () => {
 });
 
 export async function startBot() {
-    client = new Client({ disableMentions: 'everyone', partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'] });
+    client = new Client({ disableMentions: 'everyone', partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'], messageEditHistoryMaxSize: 0 });
     commands = new Collection<string, Command>();
     events = new Collection<string, Event>();
     settings = await settingsFile.read();

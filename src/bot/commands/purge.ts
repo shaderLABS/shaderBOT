@@ -20,7 +20,7 @@ export const command: Command = {
         }
 
         await message.delete();
-        const deleted = await channel.bulkDelete(count);
-        log(`<@${message.member.id}> deleted ${deleted.size} (out of ${count}) message(s) in <#${channel.id}>.`);
+        const { size } = await channel.bulkDelete(count);
+        log(`<@${message.member.id}> deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`);
     },
 };
