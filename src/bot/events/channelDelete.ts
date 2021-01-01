@@ -50,7 +50,6 @@ export const event: Event = {
             });
 
             let projectLog = '';
-            // const deleteProject = await Project.findOne({ channel: channel.id });
             const deleteProject = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
             if (deleteProject) {
                 const role = await channel.guild.roles.fetch(deleteProject.role_id);
@@ -64,9 +63,7 @@ export const event: Event = {
 
             const res = await axios.post('https://hastebin.com/documents', `CACHED MESSAGES OF #${channel.name}\n\n${content}`);
 
-            log(
-                `The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`
-            );
+            log(`The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`);
         }
     },
 };

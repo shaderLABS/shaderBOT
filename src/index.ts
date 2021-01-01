@@ -1,20 +1,22 @@
 import 'reflect-metadata';
-import { startBot } from './bot/bot.js';
+import { client, startBot } from './bot/bot.js';
 import log from './bot/lib/log.js';
-import { sleep } from './bot/lib/misc.js';
 import { connectPostgreSQL, db } from './db/postgres.js';
-import { startWebserver } from './web/server.js';
+import { startWebserver, stopWebserver } from './web/server.js';
 
 export function hardShutdown() {
     console.log('Shutting down...');
+    if (process.env.BOT_ONLY !== 'TRUE') stopWebserver();
     db.end();
+    client.destroy();
     process.exit(1);
 }
 
 export async function shutdown(code: number = 0) {
-    console.log('Shutting down...');
-    await sleep(500);
-    db.end();
+    console.log('Shutting down gracefully...');
+    if (process.env.BOT_ONLY !== 'TRUE') stopWebserver();
+    await db.end();
+    client.destroy();
     process.exit(code);
 }
 
@@ -24,17 +26,13 @@ process.on('SIGUSR1', hardShutdown);
 process.on('SIGUSR2', hardShutdown);
 
 process.on('uncaughtException', async (error) => {
-    console.error('\x1b[31m%s\x1b[0m', 'Uncaught Exception');
-    console.error(error);
-    await log('```' + error + '```', 'Uncaught Exception :(');
-
+    console.error('\x1b[31m%s\x1b[0m', 'Uncaught Exception', '\n', error);
+    if (client.user) await log('```' + error + '```', 'Uncaught Exception :(')?.catch(() => undefined);
     shutdown(1);
 });
 process.on('unhandledRejection', async (reason, promise) => {
-    console.error('\x1b[31m%s\x1b[0m', 'Unhandled Rejection');
-    console.error(promise, reason);
-    await log('```' + reason + '```', 'Unhandled Rejection :(');
-
+    console.error('\x1b[31m%s\x1b[0m', 'Unhandled Rejection', '\n', promise, reason);
+    if (client.user) await log('```' + reason + '```', 'Unhandled Rejection :(')?.catch(() => undefined);
     shutdown(1);
 });
 

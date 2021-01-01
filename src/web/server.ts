@@ -127,3 +127,8 @@ server.applyMiddleware({ app, cors: corsConfig });
 export function startWebserver() {
     app.listen(PORT, () => console.log(`Started web server on port ${PORT}.`));
 }
+
+export function stopWebserver() {
+    // @ts-ignore
+    app.server.close(() => console.log('Stopped web server.'));
+}

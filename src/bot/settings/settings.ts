@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
-import path from 'path';
 
-const settingsFile = path.join(path.resolve(), '/src/bot/settings/settings.json');
+const settingsFile = './src/bot/settings/settings.json';
 
 export interface Settings {
     prefix: string;

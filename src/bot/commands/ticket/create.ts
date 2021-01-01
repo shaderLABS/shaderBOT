@@ -1,4 +1,4 @@
-import { DMChannel, MessageEmbed, NewsChannel, TextChannel } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
@@ -18,7 +18,7 @@ export const command: Command = {
         const { channel, author, guild } = message;
         if (channel.id !== settings.ticket.managementChannelID) return;
 
-        const ticketEmbed = new MessageEmbed().setAuthor('CREATE TICKET').setColor('#006fff').setFooter(`Type '${settings.prefix}cancel' to stop.`).setTimestamp(Date.now());
+        const ticketEmbed = new MessageEmbed().setAuthor('Create Ticket').setColor('#006fff').setFooter(`Type '${settings.prefix}cancel' to stop.`).setTimestamp(Date.now());
         const ticketMessage = await channel.send(ticketEmbed);
 
         try {
@@ -97,12 +97,12 @@ export const command: Command = {
 
             log(`<@${message.author.id}> created a ticket ("${titleAnswer.content}").`);
         } catch (error) {
-            return sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };
 
-async function awaitResponse(channel: TextChannel | DMChannel | NewsChannel, authorID: string) {
+async function awaitResponse(channel: TextChannel, authorID: string) {
     const response = (
         await channel.awaitMessages((msg) => msg.author.id === authorID, {
             time: 60000,
@@ -110,8 +110,15 @@ async function awaitResponse(channel: TextChannel | DMChannel | NewsChannel, aut
         })
     ).first();
 
-    if (!response) return Promise.reject('Stopped ticket creation because there was no response.');
-    if (response.content === `${settings.prefix}cancel`) return Promise.reject('The ticket creation was canceled.');
+    if (!response) {
+        sendInfo(channel, 'Stopped ticket creation because there was no response.');
+        return Promise.reject();
+    }
+
+    if (response.content === `${settings.prefix}cancel`) {
+        sendInfo(channel, 'The ticket creation was canceled.');
+        return Promise.reject();
+    }
 
     return response;
 }

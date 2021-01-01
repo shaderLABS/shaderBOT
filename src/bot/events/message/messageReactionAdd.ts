@@ -39,14 +39,14 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const originalMessage = await channel.messages.fetch(reaction.message.id);
         if (!originalMessage) return;
 
+        const embed = originalMessage.embeds[0];
+        if (!embed?.footer?.text?.includes(ticket.id) || ticket.author_id !== user.id) return;
+
         let subscriptionMessage;
         const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
         if (subscriptionChannel instanceof TextChannel && ticket.subscription_message_id) {
             subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscription_message_id);
         }
-
-        const embed = originalMessage.embeds[0];
-        if (!embed?.footer?.text?.includes(ticket.id) || ticket.author_id !== user.id) return reaction.remove();
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!(managementChannel instanceof TextChannel)) return;
@@ -60,11 +60,11 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         );
 
         const editPartAnswer = await awaitResponse(managementChannel, user.id).catch((error) => {
-            sendError(managementChannel, error);
+            if (error) sendError(managementChannel, error);
         });
 
         if (!editPartAnswer || !['TITLE', 'DESCRIPTION'].includes(editPartAnswer.content.toUpperCase())) {
-            reaction.remove();
+            reaction.users.remove(user);
             editPartQuestion.delete();
             return;
         }
@@ -81,9 +81,9 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage, subscriptionMessage);
                 titleAnswer.delete();
             } catch (error) {
-                sendError(managementChannel, error);
+                if (error) sendError(managementChannel, error);
             } finally {
-                reaction.remove();
+                reaction.users.remove(user);
                 editPartQuestion.delete();
                 editPartAnswer.delete();
                 titleQuestion.delete();
@@ -100,9 +100,9 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
                 editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage, subscriptionMessage);
                 descriptionAnswer.delete();
             } catch (error) {
-                sendError(managementChannel, error);
+                if (error) sendError(managementChannel, error);
             } finally {
-                reaction.remove();
+                reaction.users.remove(user);
                 editPartQuestion.delete();
                 editPartAnswer.delete();
                 descriptionQuestion.delete();
@@ -113,7 +113,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
          * EDIT COMMENT *
          ****************/
 
-        if (comment.author_id !== user.id) return reaction.remove();
+        if (comment.author_id !== user.id) return reaction.users.remove(user);
 
         const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
         if (!(managementChannel instanceof TextChannel)) return;
@@ -129,9 +129,9 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             editComment(comment, originalMessage, answer.content, user);
             answer.delete();
         } catch (error) {
-            sendError(managementChannel, error);
+            if (error) sendError(managementChannel, error);
         } finally {
-            reaction.remove();
+            reaction.users.remove(user);
             question.delete();
         }
     }
@@ -145,8 +145,15 @@ async function awaitResponse(channel: TextChannel, authorID: string) {
         })
     ).first();
 
-    if (!response) return Promise.reject('Stopped editing because there was no response.');
-    if (response.content === `${settings.prefix}cancel`) return Promise.reject('The editing was canceled.');
+    if (!response) {
+        sendInfo(channel, 'Stopped editing because there was no response.');
+        return Promise.reject();
+    }
+
+    if (response.content === `${settings.prefix}cancel`) {
+        sendInfo(channel, 'The editing was canceled.');
+        return Promise.reject();
+    }
 
     return response;
 }
@@ -167,9 +174,9 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
         )
     ).rows[0];
 
-    if (!comment) return reaction.remove();
+    if (!comment) return;
 
-    if (!reaction.partial && reaction.message.deletable === true) reaction.message.delete();
+    if (!reaction.partial && reaction.message.deletable) reaction.message.delete();
     else (await channel.messages.fetch(reaction.message.id)).delete();
 
     log(`<@${member.id}> deleted ${member.id === comment.author_id ? 'their' : `<@${comment.author_id}>`} ticket comment from <#${channel.id}>:\n\n${comment.content}`);
