@@ -27,6 +27,10 @@ export async function editComment(comment: any, message: Message, newContent: st
 }
 
 export async function editTicketTitle(ticket: any, newTitle: string, user: User, guild: Guild, originalMessage: Message, subscriptionMessage?: Message) {
+    // VALIDATION
+    if (newTitle.length > 32 || newTitle.length < 2) return Promise.reject('The title must be between 2 and 32 characters long.');
+    if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [newTitle])).rows[0]) return Promise.reject('A ticket with this name already exists.');
+
     const embed = originalMessage.embeds[0];
     const originalTitle = embed.title;
     embed.setTitle(newTitle);
@@ -54,6 +58,10 @@ export async function editTicketTitle(ticket: any, newTitle: string, user: User,
 }
 
 export async function editTicketDescription(ticket: any, newDescription: string, user: User, guild: Guild, originalMessage: Message, subscriptionMessage?: Message) {
+    // VALIDATION
+    if (newDescription.length > 1024) return Promise.reject('The description may not be longer than 1024 characters.');
+    if ((!originalMessage.attachments || originalMessage.attachments.size === 0) && !newDescription) return Promise.reject('The description may not be empty.');
+
     const embed = originalMessage.embeds[0];
     const originalDescription = embed.fields[1].value;
     embed.fields[1].value = newDescription;
