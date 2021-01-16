@@ -16,8 +16,7 @@ export const command: Command = {
     callback: async (message, args) => {
         const { channel, guild } = message;
 
-        if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0])
-            return sendError(channel, 'This channel is already linked to a project.');
+        if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0]) return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: Set<GuildMember> = new Set();
         // message.mentions.members?.forEach((member) => owners.add(member));
@@ -31,8 +30,7 @@ export const command: Command = {
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {
-                MANAGE_CHANNELS: true,
-                MANAGE_ROLES: true,
+                // MANAGE_ROLES: true,
                 MANAGE_WEBHOOKS: true,
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true,

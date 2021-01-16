@@ -13,11 +13,7 @@ export const command: Command = {
         const { channel } = message;
 
         const count = +args[0];
-
-        if (isNaN(count) || count < 0 || count > 100) {
-            sendError(channel, 'Please use a number between 0 and 100 as the first argument.');
-            return;
-        }
+        if (isNaN(count) || count < 0 || count > 100) return sendError(channel, 'Please use a number between 0 and 100 as the first argument.');
 
         await message.delete();
         const { size } = await channel.bulkDelete(count);

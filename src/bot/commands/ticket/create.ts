@@ -51,7 +51,7 @@ export const command: Command = {
             const projectChannel = projectAnswer.mentions.channels.first();
             if (!projectChannel) return sendError(channel, 'The message does not contain a mentioned text channel.');
             if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0]) return sendError(channel, 'The mentioned text channel is not a valid project.');
-            ticketMessage.edit(ticketEmbed.addField('Project', projectAnswer.content));
+            ticketMessage.edit(ticketEmbed.addField('Project', projectChannel.toString()));
 
             /***************
              * DESCRIPTION *
@@ -66,6 +66,8 @@ export const command: Command = {
             // VALIDATION
             if (descriptionAnswer.content.length > 1024) return sendError(channel, 'The description may not be longer than 1024 characters.');
             if ((!attachments || attachments.length === 0) && !descriptionAnswer.content) return sendError(channel, 'The description may not be empty.');
+            if (attachments.length > 3) return sendError(channel, 'The ticket may not contain more than 3 attachments');
+
             const ticketID = uuid();
             ticketMessage.edit(ticketEmbed.addField('Description', descriptionAnswer.content || 'NO DESCRIPTION').setFooter(`ID: ${ticketID}`));
 

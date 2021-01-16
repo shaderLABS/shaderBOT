@@ -7,9 +7,10 @@ export const command: Command = {
     commands: ['description'],
     superCommands: ['project'],
     help: 'Change the description of your project channel.',
+    expectedArgs: '<description>',
     minArgs: 0,
     maxArgs: null,
-    requiredPermissions: ['MANAGE_ROLES', 'MANAGE_WEBHOOKS'],
+    requiredPermissions: ['MANAGE_WEBHOOKS'],
     permissionOverwrites: true,
     callback: async (message, _, text) => {
         const { channel, author } = message;
@@ -17,9 +18,7 @@ export const command: Command = {
         const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
 
-        log(
-            `<@${author.id}> edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`
-        );
+        log(`<@${author.id}> edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`);
         channel.edit({ topic: text });
         sendSuccess(channel, 'Successfully edited the description of this channel.');
     },
