@@ -12,10 +12,9 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: 1,
     expectedArgs,
+    channelWhitelist: [settings.ticket.managementChannelID],
     callback: async (message) => {
         const { guild, channel, member } = message;
-        if (channel.id !== settings.ticket.managementChannelID) return;
-
         const projectChannel = message.mentions.channels.first();
         if (!projectChannel) return syntaxError(channel, 'project notify ' + expectedArgs);
 

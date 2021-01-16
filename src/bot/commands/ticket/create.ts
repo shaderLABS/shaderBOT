@@ -14,9 +14,9 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     cooldownDuration: 20000,
+    channelWhitelist: [settings.ticket.managementChannelID],
     callback: async (message) => {
         const { channel, author, guild } = message;
-        if (channel.id !== settings.ticket.managementChannelID) return;
 
         const ticketEmbed = new MessageEmbed().setAuthor('Create Ticket').setColor('#006fff').setFooter(`Type '${settings.prefix}cancel' to stop.`).setTimestamp(Date.now());
         const ticketMessage = await channel.send(ticketEmbed);

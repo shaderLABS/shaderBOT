@@ -12,9 +12,9 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     cooldownDuration: 10000,
+    channelWhitelist: [settings.ticket.managementChannelID],
     callback: async (message, args, text) => {
         const { channel, member } = message;
-        if (channel.id !== settings.ticket.managementChannelID) return;
 
         const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 

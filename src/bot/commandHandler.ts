@@ -26,6 +26,7 @@ export interface Command {
     permissionOverwrites?: boolean | undefined;
     permissionError?: string | undefined;
     superCommands?: string[] | undefined;
+    channelWhitelist?: string[] | undefined;
     cooldownDuration?: number;
     callback: (message: GuildMessage, args: string[], text: string) => void;
 }
@@ -134,7 +135,12 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
 
-    const { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, callback } = command;
+    const { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, channelWhitelist, callback } = command;
+
+    if (channelWhitelist && !channelWhitelist.includes(channel.id)) {
+        sendError(channel, `This command is only usable in <#${channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
+        return;
+    }
 
     if (!hasPermissions(message, command)) {
         sendError(channel, permissionError);
