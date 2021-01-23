@@ -28,9 +28,7 @@ export const command: Command = {
             } else {
                 const user = await getUser(args[0]);
 
-                const latestKickID = (
-                    await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])
-                ).rows[0];
+                const latestKickID = (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
                 if (!latestKickID) return sendError(channel, 'The specified user does not have any kicks.');
 
                 await editKick(latestKickID.id, content, author.id);

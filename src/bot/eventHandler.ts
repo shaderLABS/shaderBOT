@@ -18,7 +18,7 @@ export async function registerEvents(dir: string) {
             registerEvents(path.join(dir, file));
         } else if (file.endsWith('.js')) {
             const { event }: { event: Event } = await import(url.pathToFileURL(path.join(filePath, file)).href);
-            console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registering event "${file}"...`);
+            console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering event "${file}"...`);
 
             events.set(event.name, event);
 

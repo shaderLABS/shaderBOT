@@ -12,6 +12,7 @@ export const command: Command = {
     maxArgs: null,
     requiredPermissions: ['MANAGE_WEBHOOKS'],
     permissionOverwrites: true,
+    cooldownDuration: 20000,
     callback: async (message, _, text) => {
         const { channel, author } = message;
 

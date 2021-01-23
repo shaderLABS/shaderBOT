@@ -45,10 +45,7 @@ export const command: Command = {
                     .setFooter('ID: ' + result.id)
             );
 
-            log(
-                `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}\n**ID:** ${result.id}`,
-                'Added Note'
-            );
+            log(`**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}\n**ID:** ${result.id}`, 'Added Note');
         } catch (error) {
             sendError(channel, error);
         }

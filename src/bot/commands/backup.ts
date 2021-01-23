@@ -23,11 +23,6 @@ export const command: Command = {
         });
 
         const res = await axios.post('https://hastebin.com/documents', `BACKUP OF #${channel.name} (${backupMessages.size} MESSAGES)\n\n${backupContent}`);
-
-        sendSuccess(
-            message.channel,
-            `Backup of <#${channel.id}> created. ${backupMessages.size} messages have been [uploaded](https://www.hastebin.com/${res.data.key}).`,
-            'BACKUP'
-        );
+        sendSuccess(message.channel, `Backup of <#${channel.id}> created. ${backupMessages.size} messages have been [uploaded](https://www.hastebin.com/${res.data.key}).`, 'Backup');
     },
 };

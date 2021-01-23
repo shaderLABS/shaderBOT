@@ -28,25 +28,17 @@ export const command: Command = {
         try {
             if (uuid.test(args[0])) {
                 const { user_id, expire_timestamp } = await editBanDuration(args[0], time, author.id);
-                sendSuccess(
-                    channel,
-                    `Successfully edited the duration of <@${user_id}'s ban (${args[0]}) to ${time} seconds. They will be unbanned at ${formatTimeDate(
-                        new Date(expire_timestamp)
-                    )}.`
-                );
+                sendSuccess(channel, `Successfully edited the duration of <@${user_id}'s ban (${args[0]}) to ${time} seconds. They will be unbanned at ${formatTimeDate(new Date(expire_timestamp))}.`);
             } else {
                 const user = await getUser(args[0]);
 
-                const latestBanID = (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'ban' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id]))
-                    .rows[0];
+                const latestBanID = (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'ban' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
                 if (!latestBanID) return sendError(channel, 'The specified user does not have any active bans.');
 
                 const { expire_timestamp } = await editBanDuration(latestBanID.id, time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of <@${user.id}>'s ban (${latestBanID.id}) to ${time} seconds. They will be unbanned at ${formatTimeDate(
-                        new Date(expire_timestamp)
-                    )}.`
+                    `Successfully edited the duration of <@${user.id}>'s ban (${latestBanID.id}) to ${time} seconds. They will be unbanned at ${formatTimeDate(new Date(expire_timestamp))}.`
                 );
             }
         } catch (error) {

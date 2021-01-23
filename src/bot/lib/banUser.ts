@@ -62,9 +62,9 @@ export async function tempban(user: User, duration: number, modID: string | null
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${
-                reason || 'No reason provided.'
-            }\`${overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''}`,
+            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+                overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+            }`,
             'Temporary Ban'
         );
 

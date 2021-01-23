@@ -26,9 +26,7 @@ export const command: Command = {
                 const { expired, expires_in, user_id } = await editWarnSeverity(severity, warnUUID, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the severity of <@${user_id}>'s warning (${warnUUID}). ${
-                        expired ? 'The warning is expired.' : `The warning will expire in ${expires_in} days.`
-                    }`
+                    `Successfully edited the severity of <@${user_id}>'s warning (${warnUUID}). ${expired ? 'The warning is expired.' : `The warning will expire in ${expires_in} days.`}`
                 );
             } catch (error) {
                 return sendError(channel, error);

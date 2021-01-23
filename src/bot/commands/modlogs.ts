@@ -43,10 +43,7 @@ export const command: Command = {
             );
 
             const queries = await Promise.all([warnQuery, punishmentQuery, noteQuery, pastPunishmentQuery]);
-            const warns: [any[], any[]] = queries[0].rows.reduce(([nonexp, exp], val) => (val.expired === false ? [[...nonexp, val], exp] : [nonexp, [...exp, val]]), [
-                [],
-                [],
-            ]);
+            const warns: [any[], any[]] = queries[0].rows.reduce(([nonexp, exp], val) => (val.expired === false ? [[...nonexp, val], exp] : [nonexp, [...exp, val]]), [[], []]);
 
             let pages: string[] = [];
             function pageCategory(title: string, content: string[]) {

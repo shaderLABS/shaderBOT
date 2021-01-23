@@ -42,15 +42,15 @@ export async function registerCommands(dir: string) {
             const { command }: { command: Command } = await import(url.pathToFileURL(path.join(filePath, file)).href);
 
             if (!command.superCommands) {
+                console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering command "${file}"...`);
                 commands.set(JSON.stringify(command.commands), command);
-                console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registered command "${file}".`);
             } else {
                 const superCmd = commands.get(JSON.stringify(command.superCommands)) || new Collection<string, Command>();
                 if (!(superCmd instanceof Collection)) return;
 
+                console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering command "${file}" (sub-command of "${command.superCommands.join('/')}")...`);
                 superCmd.set(JSON.stringify(command.commands), command);
                 commands.set(JSON.stringify(command.superCommands), superCmd);
-                console.log('\x1b[30m\x1b[1m%s\x1b[0m', `Registered command "${file}" (subcommand of "${command.superCommands.join('/')}").`);
             }
         }
     }
@@ -65,9 +65,9 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
 
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
-            if (!command.requiredPermissions.every((permission) => member.permissionsIn(message.channel).has(permission))) return false;
+            if (command.requiredPermissions.some((permission) => !member.permissionsIn(message.channel).has(permission))) return false;
         } else {
-            if (!command.requiredPermissions.every((permission) => member.hasPermission(permission))) return false;
+            if (command.requiredPermissions.some((permission) => !member.hasPermission(permission))) return false;
         }
     }
 
