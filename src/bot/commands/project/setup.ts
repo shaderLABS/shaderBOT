@@ -9,7 +9,7 @@ export const command: Command = {
     commands: ['setup'],
     superCommands: ['project'],
     help: 'Setup a project linked to the current channel.',
-    expectedArgs: '<@user|userID|username> <...>',
+    expectedArgs: '<@user|userID|username> [...]',
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_CHANNELS'],
@@ -26,7 +26,7 @@ export const command: Command = {
             if (user) owners.add(user);
         }
 
-        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID|username> <...>');
+        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID|username> [...]');
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {
