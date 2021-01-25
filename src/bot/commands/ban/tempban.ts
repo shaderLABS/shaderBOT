@@ -23,30 +23,27 @@ export const command: Command = {
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
         const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
-        const time = stringToSeconds(splitString(args[1]));
 
-        if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
-        if (time < 10) return sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
+        try {
+            const time = stringToSeconds(splitString(args[1]));
 
-        if (user instanceof GuildMember) {
-            if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
-                return sendError(channel, "You can't temporarily ban a user with a role higher than or equal to yours.", 'Insufficient Permissions');
+            if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
+            if (time < 10) return sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
 
-            if (!user.bannable) return sendError(channel, 'This user is not bannable.');
+            if (user instanceof GuildMember) {
+                if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
+                    return sendError(channel, "You can't temporarily ban a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
-            try {
+                if (!user.bannable) return sendError(channel, 'This user is not bannable.');
+
                 await tempban(user.user, time, member.id, reason, deleteMessages);
-            } catch (error) {
-                return sendError(channel, error);
-            }
-        } else {
-            try {
+            } else {
                 await tempban(user, time, member.id, reason, deleteMessages);
-            } catch (error) {
-                return sendError(channel, error);
             }
-        }
 
-        sendSuccess(channel, `<@${user.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\``);
+            sendSuccess(channel, `<@${user.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\``);
+        } catch (error) {
+            sendError(channel, error);
+        }
     },
 };

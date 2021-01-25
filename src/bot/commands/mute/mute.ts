@@ -27,12 +27,16 @@ export const command: Command = {
         if (user instanceof GuildMember && member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
             return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
-        const time = stringToSeconds(splitString(args[1]));
+        try {
+            const time = stringToSeconds(splitString(args[1]));
 
-        if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
-        if (time < 10) return sendError(channel, "You can't mute someone for less than 10 seconds.");
+            if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
+            if (time < 10) return sendError(channel, "You can't mute someone for less than 10 seconds.");
 
-        const expire = user instanceof GuildMember ? await mute(user.id, time, member.id, reason, user) : await mute(user.id, time, member.id, reason);
-        sendSuccess(channel, `<@${user.id}> has been muted for ${time} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\``);
+            const expire = user instanceof GuildMember ? await mute(user.id, time, member.id, reason, user) : await mute(user.id, time, member.id, reason);
+            sendSuccess(channel, `<@${user.id}> has been muted for ${time} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\``);
+        } catch (error) {
+            sendError(channel, error);
+        }
     },
 };

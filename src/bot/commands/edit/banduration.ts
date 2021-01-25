@@ -20,12 +20,12 @@ export const command: Command = {
     callback: async (message, args) => {
         const { channel, author } = message;
 
-        const time = stringToSeconds(splitString(args[1]));
-
-        if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
-        if (time < 10) return sendError(channel, "You can't ban someone for less than 10 seconds.");
-
         try {
+            const time = stringToSeconds(splitString(args[1]));
+
+            if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
+            if (time < 10) return sendError(channel, "You can't ban someone for less than 10 seconds.");
+
             if (uuid.test(args[0])) {
                 const { user_id, expire_timestamp } = await editBanDuration(args[0], time, author.id);
                 sendSuccess(channel, `Successfully edited the duration of <@${user_id}'s ban (${args[0]}) to ${time} seconds. They will be unbanned at ${formatTimeDate(new Date(expire_timestamp))}.`);

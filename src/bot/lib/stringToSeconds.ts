@@ -1,9 +1,12 @@
 function getSeconds(time: string) {
-    switch (time.replace(/[^A-Za-z]/g, '')) {
+    switch (time.replace(/[^a-z]/g, '')) {
         case 'a':
+        case 'y':
             return +time.slice(0, -1) * 31556952;
         case 'mo':
             return +time.slice(0, -2) * 2592000;
+        case 'w':
+            return +time.slice(0, -1) * 604800;
         case 'd':
             return +time.slice(0, -1) * 86400;
         case 'h':
@@ -17,8 +20,43 @@ function getSeconds(time: string) {
     }
 }
 
+const validUnits = [
+    'a',
+    'y',
+    'year',
+    'years',
+    'mo',
+    'month',
+    'months',
+    'w',
+    'week',
+    'weeks',
+    'd',
+    'day',
+    'days',
+    'h',
+    'hour',
+    'hours',
+    'min',
+    'mins',
+    'minute',
+    'minutes',
+    's',
+    'sec',
+    'secs',
+    'second',
+    'seconds',
+];
+
 export function splitString(str: string): string[] {
-    return str.match(/\d*(a|mo|d|h|min|s)/g) || [];
+    const cleanedString = str.replaceAll(' ', '').toLowerCase();
+
+    const units = cleanedString.split(/[0-9]/).filter(Boolean);
+    if (units.length === 0 || units.some((unit) => !validUnits.includes(unit))) throw 'At least one of the time units is invalid.';
+
+    const splitString = cleanedString.match(/\d+(a|y|mo|w|d|h|min|s)/g);
+    if (!splitString || splitString.length !== units.length) throw 'You can not use units without specifying their quantity.';
+    return splitString;
 }
 
 export default function (str: string[]) {
