@@ -6,21 +6,17 @@ import { startWebserver, stopWebserver } from './web/server.js';
 
 export function hardShutdown() {
     console.log('Shutting down...');
-    if (process.env.BOT_ONLY !== 'TRUE') stopWebserver();
-    db.end();
-    client.destroy();
     process.exit(1);
 }
 
 export async function shutdown(code: number = 0) {
     console.log('Shutting down gracefully...');
     if (process.env.BOT_ONLY !== 'TRUE') stopWebserver();
-    await db.end();
+    await db.end().catch(() => undefined);
     client.destroy();
     process.exit(code);
 }
 
-process.stdin.resume();
 process.on('SIGINT', hardShutdown);
 process.on('SIGUSR1', hardShutdown);
 process.on('SIGUSR2', hardShutdown);
