@@ -26,13 +26,8 @@ export const event: Event = {
 };
 
 function mediaOnly(message: GuildMessage) {
-    if (
-        !settings.mediaChannelIDs.includes(message.channel.id) ||
-        message.attachments.size !== 0 ||
-        new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?').test(message.content) ||
-        message.member.permissions.has('MANAGE_MESSAGES')
-    )
-        return false;
+    if (!settings.mediaChannelIDs.includes(message.channel.id) || message.attachments.size !== 0 || message.member.permissions.has('MANAGE_MESSAGES')) return false;
+    if (new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?').test(message.content)) return true;
 
     message.delete();
     return true;

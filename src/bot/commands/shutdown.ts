@@ -7,7 +7,7 @@ export const command: Command = {
     help: 'Stop the bot.',
     minArgs: 0,
     maxArgs: 0,
-    requiredPermissions: ['ADMINISTRATOR'],
+    requiredPermissions: ['BAN_MEMBERS'],
     callback: async (message) => {
         await log(`The bot has been stopped by <@${message.author.id}>.`);
         shutdown();

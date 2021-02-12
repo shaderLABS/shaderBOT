@@ -86,6 +86,15 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
 
 const cooldowns: Map<string, boolean> = new Map();
 
+function getSubcommandSyntax(invoke: string, subcommands: Collection<string, Command>): string {
+    const commands = subcommands
+        .keyArray()
+        .map((cmd) => JSON.parse(cmd).join('|'))
+        .join('|');
+
+    return commands ? `${invoke} <${commands}>` : invoke;
+}
+
 export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]): void {
     const { content, channel } = message;
 
@@ -94,23 +103,10 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      ****************/
 
     if (command instanceof Collection) {
-        if (args.length === 0)
-            return syntaxError(
-                channel,
-                `${invoke} <${command
-                    .keyArray()
-                    .map((value) => JSON.parse(value).join('|'))
-                    .join('|')}>`
-            );
+        if (args.length === 0) return syntaxError(channel, getSubcommandSyntax(invoke, command));
+
         const subCommand = command.find((_value, key) => key.includes(args[0].toLowerCase()));
-        if (!subCommand)
-            return syntaxError(
-                channel,
-                `${invoke} <${command
-                    .keyArray()
-                    .map((value) => JSON.parse(value).join('|'))
-                    .join('|')}>`
-            );
+        if (!subCommand) return syntaxError(channel, getSubcommandSyntax(invoke, command));
 
         return runCommand(subCommand, message, invoke + ' ' + args.shift(), args);
     }
