@@ -1,17 +1,42 @@
 # shaderBOT Server
 
-## Install Packages
+## Install Dependencies
 
 ```properties
 npm install
 ```
 
-## Configuration
+## Configuration (required)
 
-First of all, configure [`settings.json`](src/bot/settings/settings.json). Especially IDs should be updated to match the setup on your server.
+### Discord Application
+
 You must enable the "Server Members Intent" switch (below "Privileged Gateway Intents") under the "Bot" tab of your [Discord application](https://discord.com/developers/applications) in order for some features to work.
 
+### Bot Settings
+
+The file `src/bot/settings/settings.json` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. The content should not include any sensitive information, since it may be publicly displayed while configuring the bot through commands (depending on where you run it).
+
+```json
+{
+    "prefix": "",
+    "logging": {
+        "channelID": ""
+    },
+    "ticket": {
+        "categoryIDs": [""],
+        "managementChannelID": "",
+        "subscriptionChannelID": "",
+        "attachmentCacheChannelID": ""
+    },
+    "mediaChannelIDs": [""],
+    "muteRoleID": "",
+    "guildID": ""
+}
+```
+
 ### Environment Variables
+
+Environment variables are read from `.env` and specifiy sensitive information like private keys that shouldn't ever be publicly visible.
 
 | Name                        |   Default   | Description                                                                                                                                          |
 | --------------------------- | :---------: | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,7 +64,7 @@ This will transpile the TypeScript files and run the server using [nodemon](http
 
 ### Settings
 
-Adding the following options to your `settings.json` file is highly recommended:
+Adding the following options to your VS Code configuration file is highly recommended:
 
 ```json
 "files.exclude": {
