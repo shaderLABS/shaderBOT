@@ -3,27 +3,27 @@ import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
+import log from './log.js';
 import { formatTimeDate, getGuild } from './misc.js';
 
-export async function cacheAttachments(message: Message): Promise<string[]> {
+export async function cacheAttachment(message: Message): Promise<string | undefined> {
     let fileUploadLimit = 8388119;
     if (message.guild?.premiumTier === 2) fileUploadLimit = 52428308;
     else if (message.guild?.premiumTier === 3) fileUploadLimit = 104856616;
 
-    const attachmentURLs: string[] = [];
+    if (message.attachments.size > 1) return Promise.reject('You may not send more than one attachment in one message.');
+    const attachment = message.attachments.first();
 
-    if (message.attachments) {
+    if (attachment) {
         const attachmentStorage = message.guild?.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return attachmentURLs;
+        if (!attachmentStorage || !(attachmentStorage instanceof TextChannel)) return;
 
-        for (const attachment of message.attachments) {
-            if (attachment[1].size > fileUploadLimit) return Promise.reject('The attachment is too large.');
-            const storedAttachment = (await attachmentStorage.send(attachment)).attachments.first();
-            if (storedAttachment) attachmentURLs.push(storedAttachment.url);
-        }
+        if (attachment.size > fileUploadLimit) return Promise.reject('The attachment is too large.');
+
+        const attachmentMessage = await attachmentStorage.send(attachment);
+        const storedAttachment = attachmentMessage.attachments.first();
+        if (storedAttachment) return storedAttachment.url + '|' + attachmentMessage.id;
     }
-
-    return attachmentURLs;
 }
 
 export async function openTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
@@ -32,12 +32,12 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     const response = await db.query(
         /*sql*/ `
         SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
-            FROM ticket 
-            ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
-            WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'} 
-                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
-                AND closed = TRUE 
-            LIMIT 1`,
+        FROM ticket 
+        ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
+        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'} 
+            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            AND closed = TRUE 
+        LIMIT 1`,
         moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
     );
 
@@ -95,7 +95,8 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         ])
         .setTimestamp(new Date(ticket.timestamp));
 
-    if (ticket.attachments) ticketEmbed.attachFiles(ticket.attachments);
+    const attachments = ticket.attachments?.filter(Boolean);
+    if (attachments) ticketEmbed.attachFiles(attachments.map((attachment: any) => attachment.split('|')[0]));
 
     await ticketChannel.send(ticketEmbed);
 
@@ -114,7 +115,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
 
     const comments = await db.query(
         /*sql*/ `
-        SELECT id, author_id, edited, timestamp, content, attachments
+        SELECT id, author_id, edited, timestamp, content, attachment
         FROM comment
         WHERE ticket_id = $1
         ORDER BY timestamp ASC`,
@@ -138,7 +139,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);
 
-            if (comment.attachments) commentEmbed.attachFiles(comment.attachments);
+            if (comment.attachment) commentEmbed.attachFiles([comment.attachment.split('|')[0]]);
             const commentMessage = await ticketChannel.send(commentEmbed);
             commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
         }
@@ -146,7 +147,8 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         await db.query(commentMessageQuery);
     }
 
-    ticketChannel.overwritePermissions([]);
+    // ticketChannel.overwritePermissions([]);
+    ticketChannel.lockPermissions();
 
     ticket.closed = false;
     return ticket;
@@ -204,11 +206,18 @@ export async function closeTicketLib(ticket: any, guild: Guild | undefined = get
 }
 
 export async function deleteTicket(args: string[], text: string, guild: Guild) {
+    // const response = await db.query(
+    //     /*sql*/ `
+    //     DELETE FROM ticket
+    //     WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'}
+    //     RETURNING subscription_message_id, channel_id, title, author_id, closed, id;`,
+    //     [uuid.test(args[0]) ? args[0] : text]
+    // );
+
     const response = await db.query(
         /*sql*/ `
-        DELETE FROM ticket
-        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'} 
-        RETURNING subscription_message_id, channel_id, title, author_id;`,
+        SELECT id FROM ticket
+        WHERE ${uuid.test(args[0]) ? 'id = $1' : 'title = $1'};`,
         [uuid.test(args[0]) ? args[0] : text]
     );
 
@@ -227,37 +236,42 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
         return Promise.reject(errorMessage);
     }
 
-    const ticket = response.rows[0];
+    const ticketID = response.rows[0].id;
 
-    if (ticket.subscription_message_id) {
-        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-        if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
-        (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
-    }
+    (await db.query(/*sql*/ `DELETE FROM comment WHERE ticket_id = $1 RETURNING message_id, attachment;`, [ticketID])).rows.forEach((comment) => {
+        if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, guild);
+    });
 
-    if (ticket.channel_id) {
-        const ticketChannel = guild.channels.cache.get(ticket.channel_id);
-        if (ticketChannel) ticketChannel.delete();
-    }
+    const ticket = (await db.query(/*sql*/ `DELETE FROM ticket WHERE id = $1 RETURNING subscription_message_id, channel_id, title, author_id, closed, attachments;`, [ticketID])).rows[0];
+    deleteTicketFromDiscord(ticket, guild);
 
     return { title: ticket.title, author: ticket.author_id };
 }
 
-export async function purgeAllTickets(user: User, guild: Guild) {
-    const response = await db.query(
-        /*sql*/ `
-        DELETE FROM ticket
-        WHERE ticket.author_id = $1 
-        RETURNING subscription_message_id, channel_id, title;`,
-        [user.id]
-    );
+export async function deleteAttachmentFromDiscord(attachment: string, guild: Guild) {
+    const messageID = attachment.split('|')[1];
 
-    if (response.rowCount === 0) {
-        return Promise.reject(`<@${user.id}> does not have any tickets.`);
-    }
+    const attachmentCache = guild.channels.cache.get(settings.ticket.attachmentCacheChannelID);
+    if (!attachmentCache || !(attachmentCache instanceof TextChannel)) return log('Failed to delete comment attachment `' + attachment + '`!');
 
-    const titles: string[] = [];
-    for (const ticket of response.rows) {
+    (await attachmentCache.messages.fetch(messageID)).delete();
+}
+
+// export async function deleteCommentFromDiscord(comment: { message_id?: string; attachment?: string }, channel: TextChannel, guild: Guild) {
+//     if (!comment.message_id) return;
+
+//     const message = await channel.messages.fetch(comment.message_id);
+//     if (!message.embeds[0]) return;
+//     message.edit(message.embeds[0].setDescription('[deleted]'));
+
+//     if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, guild);
+// }
+
+export async function deleteTicketFromDiscord(ticket: { subscription_message_id?: string; channel_id?: string; attachments?: string[]; closed: boolean }, guild: Guild) {
+    const attachments = ticket.attachments?.filter(Boolean);
+    if (attachments) attachments.forEach((attachment) => deleteAttachmentFromDiscord(attachment, guild));
+
+    if (ticket.closed === false) {
         if (ticket.subscription_message_id) {
             const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
             if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
@@ -268,11 +282,34 @@ export async function purgeAllTickets(user: User, guild: Guild) {
             const ticketChannel = guild.channels.cache.get(ticket.channel_id);
             if (ticketChannel) ticketChannel.delete();
         }
+    }
+}
+
+export async function purgeAllTickets(user: User, guild: Guild) {
+    const ticketIDs = await db.query(
+        /*sql*/ `
+        SELECT id FROM ticket
+        WHERE ticket.author_id = $1;`,
+        [user.id]
+    );
+
+    if (ticketIDs.rowCount === 0) {
+        return Promise.reject(`<@${user.id}> does not have any tickets.`);
+    }
+
+    const titles: string[] = [];
+    for (const ticketID of ticketIDs.rows) {
+        (await db.query(/*sql*/ `DELETE FROM comment WHERE ticket_id = $1 RETURNING attachment;`, [ticketID.id])).rows.forEach((comment) => {
+            if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, guild);
+        });
+
+        const ticket = (await db.query(/*sql*/ `DELETE FROM ticket WHERE id = $1 RETURNING subscription_message_id, channel_id, title, closed, attachments;`, [ticketID.id])).rows[0];
+        deleteTicketFromDiscord(ticket, guild);
 
         titles.push(ticket.title);
     }
 
-    return { titles: titles, amount: response.rowCount };
+    return { titles, amount: ticketIDs.rowCount };
 }
 
 export async function getCategoryChannel(categoryIDs: string[], guild: Guild): Promise<CategoryChannel> {

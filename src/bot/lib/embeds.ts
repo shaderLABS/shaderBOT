@@ -5,7 +5,7 @@ export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel
         .setAuthor(title || 'Success', 'https://img.icons8.com/color/48/000000/ok--v1.png')
         .setDescription(description)
         .setColor('#00ff11');
-    return await channel.send(embed);
+    return channel.send(embed);
 }
 
 export async function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
@@ -13,7 +13,7 @@ export async function sendError(channel: TextChannel | DMChannel | NewsChannel, 
         .setAuthor(title || 'Error', 'https://img.icons8.com/color/48/000000/cancel--v1.png')
         .setDescription(description)
         .setColor('#ff1100');
-    return await channel.send(embed);
+    return channel.send(embed);
 }
 
 export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
@@ -22,7 +22,7 @@ export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, d
         .setDescription(description)
         .setColor('#006fff')
         .setFooter(footer || '');
-    return await channel.send(message, embed);
+    return channel.send(message, embed);
 }
 
 export async function embedPages(message: Message, author: User, pages: string[]) {

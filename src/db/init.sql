@@ -35,7 +35,7 @@ CREATE TABLE "comment" (
     author_id NUMERIC(20) NOT NULL,
     message_id NUMERIC(20) UNIQUE,
     content TEXT,
-    attachments TEXT[],
+    attachment TEXT,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     edited TIMESTAMP WITH TIME ZONE
 );

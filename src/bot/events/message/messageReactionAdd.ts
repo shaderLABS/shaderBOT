@@ -6,6 +6,7 @@ import { editComment, editTicketDescription, editTicketTitle } from '../../lib/e
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getGuild } from '../../lib/misc.js';
+import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
     name: 'messageReactionAdd',
@@ -169,7 +170,7 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
             /*sql*/ `
             DELETE FROM comment 
             WHERE ticket_id = $1 AND message_id = $2 ${managePerm ? '' : 'AND author_id = $3'}
-            RETURNING content, author_id`,
+            RETURNING content, author_id, attachment`,
             managePerm ? [id, reaction.message.id] : [id, reaction.message.id, member.id]
         )
     ).rows[0];
@@ -178,6 +179,8 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
 
     if (!reaction.partial && reaction.message.deletable) reaction.message.delete();
     else (await channel.messages.fetch(reaction.message.id)).delete();
+
+    if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, member.guild);
 
     log(`<@${member.id}> deleted ${member.id === comment.author_id ? 'their' : `<@${comment.author_id}>`} ticket comment from <#${channel.id}>:\n\n${comment.content}`);
 }

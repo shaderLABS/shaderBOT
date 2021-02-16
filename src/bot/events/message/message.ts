@@ -4,7 +4,7 @@ import { commands, settings } from '../../bot.js';
 import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
-import { cacheAttachments } from '../../lib/ticketManagement.js';
+import { cacheAttachment } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
     name: 'message',
@@ -13,12 +13,11 @@ export const event: Event = {
 
         const { content, channel } = message;
         if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) return ticketComment(message);
-        if (mediaOnly(message)) return;
-        if (!content.startsWith(settings.prefix)) return;
+        if (mediaOnly(message) || !content.startsWith(settings.prefix)) return;
 
-        const parse = parseContent(content);
-        if (!parse) return;
-        const [invoke, ...args] = parse;
+        const args = parseContent(content);
+        const invoke = args?.shift()?.toLowerCase();
+        if (!invoke || !args) return;
 
         const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
         if (command) runCommand(command, message, invoke, args);
@@ -63,12 +62,12 @@ async function ticketComment(message: GuildMessage) {
         .setTimestamp(timestamp)
         .setDescription(content);
 
-    let attachments;
+    let attachment: string | undefined;
     try {
-        const attachmentURLs = await cacheAttachments(message);
-        if (attachmentURLs.length !== 0) {
-            commentEmbed.attachFiles(attachmentURLs);
-            attachments = attachmentURLs;
+        const messageAttachment = await cacheAttachment(message);
+        if (messageAttachment) {
+            commentEmbed.attachFiles([messageAttachment.split('|')[0]]);
+            attachment = messageAttachment;
         }
     } catch (error) {
         const errorMessage = await sendError(channel, error);
@@ -77,14 +76,13 @@ async function ticketComment(message: GuildMessage) {
 
     await message.delete();
 
-    if ((!attachments || attachments.length === 0) && (!content || content === '')) return;
-
+    if (!attachment && (!content || content === '')) return;
     const commentMessage = await channel.send(commentEmbed);
 
     db.query(
         /*sql*/ `
-        INSERT INTO comment (ticket_id, author_id, message_id, content, attachments, timestamp)
+        INSERT INTO comment (ticket_id, author_id, message_id, content, attachment, timestamp)
         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [id, member.user.id, commentMessage.id, content, attachments, timestamp]
+        [id, member.user.id, commentMessage.id, content, attachment, timestamp]
     );
 }
