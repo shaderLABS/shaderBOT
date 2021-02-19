@@ -1,9 +1,7 @@
 # shaderBOT Server
-![GitHub issues](https://img.shields.io/github/issues-raw/Shader-Labs/shaderBOT-server?style=for-the-badge)
-![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/Shader-Labs/shaderBOT-server?style=for-the-badge)
-![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/Shader-Labs/shaderBOT-server?style=for-the-badge)
-![GitHub](https://img.shields.io/github/license/Shader-Labs/shaderBOT-server?style=for-the-badge) \
-[![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS%20Discord&style=for-the-badge)](https://discord.gg/RpzWN9S)
+![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/Shader-Labs/shaderBOT-server?style=flat-square)
+![GitHub](https://img.shields.io/github/license/Shader-Labs/shaderBOT-server?style=flat-square)
+[![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
 ## Install Dependencies
 
