@@ -11,7 +11,7 @@ export const command: Command = {
     help: "Display your or another user's warns.",
     minArgs: 0,
     maxArgs: null,
-    expectedArgs: '<uuid | <@user|userID|username> ["expired"]>',
+    expectedArgs: '<uuid | <@user|userID|username>>',
     callback: async (message, args, text) => {
         const { channel, member } = message;
 
@@ -23,7 +23,7 @@ export const command: Command = {
             const warning = (
                 await db.query(
                     /*sql*/ `
-                    SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired, edited_timestamp::TEXT, edited_mod_id::TEXT
+                    SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, edited_timestamp::TEXT, edited_mod_id::TEXT
                     FROM warn 
                     WHERE id = $1
                     LIMIT 1;`,
@@ -33,19 +33,14 @@ export const command: Command = {
 
             if (!warning) return sendError(channel, 'There is no warning with this UUID.');
 
-            const days = warning.expired
-                ? formatDate(new Date(new Date(warning.timestamp).getTime() + warning.expire_days * 86400000))
-                : Math.ceil((new Date(warning.timestamp).getTime() + warning.expire_days * 86400000 - new Date().getTime()) / 86400000);
-
             sendInfo(
                 channel,
                 `**User:** <@${warning.user_id}>
-                **Severity:** ${warning.severity === 0 ? 'Normal' : 'Severe'}
+                **Severity:** ${warning.severity}
                 **Reason:** ${warning.reason || 'No reason provided.'} 
                 **Moderator:** <@${warning.mod_id}> 
                 **ID:** ${args[0]} 
                 **Created At:** ${formatTimeDate(new Date(warning.timestamp))} 
-                **${warning.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
                 ${warning.edited_timestamp ? `*(last edited by <@${warning.edited_mod_id}> at ${formatTimeDate(new Date(warning.edited_timestamp))})*` : ''}`,
                 'Warning'
             );
@@ -54,17 +49,13 @@ export const command: Command = {
              * LIST ALL WARNINGS OF USER *
              *****************************/
 
-            const showExpired = args[args.length - 1]?.toLowerCase() === 'expired';
-
             let userID: string;
-            if (args.length === 0 || (args.length === 1 && showExpired)) {
+            if (args.length === 0) {
                 userID = member.id;
             } else {
                 try {
                     const user = await getUser(text);
-
                     if (user.id !== member.id && !member.hasPermission('KICK_MEMBERS')) return sendError(channel, 'You do not have permission to view the warnings of other users.');
-
                     userID = user.id;
                 } catch (error) {
                     return sendError(channel, error);
@@ -73,10 +64,10 @@ export const command: Command = {
 
             const warnings = await db.query(
                 /*sql*/ `
-                SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, expire_days, expired, edited_timestamp::TEXT, edited_mod_id::TEXT
+                SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp, edited_timestamp::TEXT, edited_mod_id::TEXT
                 FROM warn 
-                WHERE user_id = $1 ${showExpired ? '' : 'AND expired = FALSE'}
-                ORDER BY expired ASC, severity DESC, timestamp DESC;`,
+                WHERE user_id = $1
+                ORDER BY timestamp DESC;`,
                 [userID]
             );
 
@@ -84,17 +75,12 @@ export const command: Command = {
 
             const pages: string[] = [];
             warnings.rows.reduce((prev, curr, i, { length }) => {
-                const days = curr.expired
-                    ? formatDate(new Date(new Date(curr.timestamp).getTime() + curr.expire_days * 86400000))
-                    : Math.ceil((new Date(curr.timestamp).getTime() + curr.expire_days * 86400000 - new Date().getTime()) / 86400000);
-
                 const page = `**User:** <@${userID}>
-                    **Severity:** ${curr.severity === 0 ? 'Normal' : 'Severe'}
+                    **Severity:** ${curr.severity}
                     **Reason:** ${curr.reason || 'No reason provided.'} 
                     **Moderator:** <@${curr.mod_id}> 
                     **ID:** ${curr.id} 
                     **Created At:** ${formatTimeDate(new Date(curr.timestamp))} 
-                    **${curr.expired ? 'Expired At' : 'Expiring In'}:** ${days} days
                     ${curr.edited_timestamp ? `*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : ''}`;
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {

@@ -49,8 +49,6 @@ CREATE TABLE "warn" (
     reason TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
     edited_mod_id NUMERIC(20),
-    expired BOOLEAN NOT NULL DEFAULT FALSE,
-    expire_days SMALLINT NOT NULL,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
@@ -91,15 +89,6 @@ CREATE TABLE "note" (
     edited_mod_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
-
--- FUNCTIONS
-
-DROP FUNCTION IF EXISTS "expire_warns";
-CREATE FUNCTION expire_warns() RETURNS VOID AS $$
-	BEGIN
-		UPDATE warn SET expired = TRUE WHERE expired = FALSE AND (timestamp + INTERVAL '1 day' * expire_days) < (NOW() + INTERVAL '10 minutes');
-	END;
-$$ LANGUAGE plpgsql;
 
 -- SESSION
 

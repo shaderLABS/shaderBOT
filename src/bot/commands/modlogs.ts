@@ -20,7 +20,7 @@ export const command: Command = {
 
             const warnQuery = db.query(
                 /*sql*/ `
-                SELECT * FROM warn WHERE user_id = $1 ORDER BY expired ASC, severity DESC, timestamp DESC;`,
+                SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC;`,
                 [user.id]
             );
 
@@ -58,19 +58,16 @@ export const command: Command = {
                 }, `**${title}**`);
             }
 
-            if (warns[0]) {
+            if (queries[0].rowCount !== 0) {
                 pageCategory(
                     'Warnings',
-                    warns[0].map(
+                    queries[0].rows.map(
                         (row) =>
-                            `\n**Severity:** ${row.severity === 0 ? 'Normal' : 'Severe'}
+                            `\n**Severity:** ${row.severity}
                             **Reason:** ${row.reason || 'No reason provided.'} 
                             **Moderator:** <@${row.mod_id}> 
                             **ID:** ${row.id} 
-                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
-                            **Expiring In:** ${Math.ceil((new Date(row.timestamp).getTime() + row.expire_days * 86400000 - new Date().getTime()) / 86400000)} days${
-                                row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : ''
-                            }`
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))}`
                     )
                 );
             }
@@ -126,21 +123,6 @@ export const command: Command = {
                 );
 
                 // .match(/[\s\S]{1,2000}(?!\S)/g);
-            }
-
-            if (warns[1]) {
-                pageCategory(
-                    'Expired Warnings',
-                    warns[1].map(
-                        (row) =>
-                            `\n**Severity:** ${row.severity === 0 ? 'Normal' : 'Severe'} 
-                            **Reason:** ${row.reason || 'No reason provided.'} 
-                            **Moderator:** <@${row.mod_id}> 
-                            **ID:** ${row.id} 
-                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
-                            **Expired At:** ${formatDate(new Date(new Date(row.timestamp).getTime() + row.expire_days * 86400000))}`
-                    )
-                );
             }
 
             const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.username}#${user.discriminator}`);
