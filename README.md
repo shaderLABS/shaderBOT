@@ -21,7 +21,7 @@ You must enable the "Server Members Intent" switch (below "Privileged Gateway In
 The file `src/bot/settings/settings.json` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. The content should not include any sensitive information, since it may be publicly displayed while configuring the bot through commands (depending on where you run it). \
 **Important**: The comments only exist for documentation purposes, they must be removed because the used parser does not support them.
 
-```json
+```jsonc
 {
     "prefix": "",
     "logging": {
