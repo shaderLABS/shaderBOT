@@ -1,4 +1,4 @@
-import { Command, syntaxError } from '../../commandHandler.js';
+import { Command } from '../../commandHandler.js';
 import { editWarnSeverity, getWarnUUID } from '../../lib/edit/editWarning.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 

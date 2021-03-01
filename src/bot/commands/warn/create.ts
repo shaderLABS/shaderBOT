@@ -26,7 +26,7 @@ export const command: Command = {
 
         const targetMember = await getMember(args[1]).catch(() => undefined);
         const user = targetMember?.user || (await getUser(args[1]).catch(() => undefined));
-        if (!user) return syntaxError(channel, expectedArgs);
+        if (!user) return syntaxError(channel, 'warn create ' + expectedArgs);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return sendError(channel, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');

@@ -18,7 +18,7 @@ export const command: Command = {
         const { member, channel } = message;
 
         const user = (await getMember(args[0]).catch(() => undefined)) || (await getUser(args[0]).catch(() => undefined));
-        if (!user) return syntaxError(channel, 'ban ' + expectedArgs);
+        if (!user) return syntaxError(channel, 'tempban ' + expectedArgs);
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
         const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);

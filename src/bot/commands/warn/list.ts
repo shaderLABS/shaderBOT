@@ -1,8 +1,8 @@
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
-import { formatDate, formatTimeDate } from '../../lib/misc.js';
+import { embedPages, sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
+import { formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -91,8 +91,20 @@ export const command: Command = {
                 return prev + '\n\n' + page;
             }, '');
 
-            const warningEmbed = await sendInfo(channel, pages[0], 'Warnings');
-            embedPages(warningEmbed, member.user, pages);
+            if (member.id === userID) {
+                // DM
+                try {
+                    const warningEmbed = await sendInfo(await member.createDM(), pages[0], 'Warnings');
+                    embedPages(warningEmbed, member.user, pages);
+                    sendSuccess(channel, 'Successfully sent you your warnings in a DM.');
+                } catch {
+                    sendError(channel, "Failed to send you a DM. Please make sure that they're open and try again.");
+                }
+            } else {
+                // public
+                const warningEmbed = await sendInfo(channel, pages[0], 'Warnings');
+                embedPages(warningEmbed, member.user, pages);
+            }
         }
     },
 };

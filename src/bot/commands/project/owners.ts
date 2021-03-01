@@ -5,11 +5,13 @@ import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getMember } from '../../lib/searchMessage.js';
 
+const expectedArgs = '<@user|userID|username> [...]';
+
 export const command: Command = {
     commands: ['owners'],
     superCommands: ['project'],
     help: 'Change the owner(s) of the project linked to the current channel.',
-    expectedArgs: '<@user|userID|username> [...]',
+    expectedArgs,
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_CHANNELS'],
@@ -24,7 +26,7 @@ export const command: Command = {
             if (user) owners.add(user);
         }
 
-        if (owners.size === 0) return syntaxError(channel, 'project owners <@user|userID|username> [...]');
+        if (owners.size === 0) return syntaxError(channel, 'project owners ' + expectedArgs);
 
         const project = await db.query(
             /*sql*/ `
