@@ -17,7 +17,14 @@ export interface Settings {
     muteRoleID: string;
     guildID: string;
     warnings: {
-        halflives: number[];
+        decay: number[];
+        punishment: {
+            muteRange: number[];
+            muteValues: number[];
+            tempbanRange: number[];
+            tempbanValues: number[];
+            ban: number;
+        };
     };
 }
 

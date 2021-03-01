@@ -4,11 +4,12 @@ import { settings } from '../bot.js';
 import log from './log.js';
 import { formatTimeDate, getGuild } from './misc.js';
 import { store } from './punishments.js';
+import { secondsToString } from './time.js';
 
 export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember): Promise<Date> {
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
-        log(`Failed to mute <@${userID}> for ${duration} seconds: mute role not found.`);
+        log(`Failed to mute <@${userID}> for ${secondsToString(duration)}: mute role not found.`);
         return Promise.reject('Mute role not found.');
     }
 
@@ -22,13 +23,13 @@ export async function mute(userID: string, duration: number, modID: string | nul
                 WITH moved_rows AS (
                     DELETE FROM punishment 
                     WHERE "type" = 'mute' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
                     INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, timestamp, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows
+                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
-                [userID, modID, new Date()]
+                [userID, timestamp, modID]
             )
         ).rows[0];
 
@@ -63,13 +64,13 @@ export async function mute(userID: string, duration: number, modID: string | nul
         }
 
         log(
-            `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${userID}>'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }`
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to mute <@${userID}> for ${duration} seconds: an error occurred while accessing the database.`);
+        log(`Failed to mute <@${userID}> for ${secondsToString(duration)}: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -103,11 +104,11 @@ export async function unmute(userID: string, modID?: string, member?: GuildMembe
                 WITH moved_rows AS (
                     DELETE FROM punishment 
                     WHERE "type" = 'mute' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
                 )
-                INSERT INTO past_punishment (id, user_id, type, mod_id, reason, timestamp, lifted_mod_id, lifted_timestamp)
-                SELECT *, $2::NUMERIC, $3::TIMESTAMP FROM moved_rows;`,
-                [userID, modID || null, new Date()]
+                INSERT INTO past_punishment
+                SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+                [userID, new Date(), modID || null]
             )
         ).rowCount;
         if (deleted === 0) return Promise.reject(`The user <@${userID}> is not muted.`);
@@ -167,9 +168,7 @@ export async function checkMuteEvasion(member: GuildMember) {
 }
 
 function punishmentToString(punishment: any) {
-    return `**Reason:** ${punishment.reason || 'No reason provided.'} 
-    **Moderator:** <@${punishment.mod_id}> 
-    **ID:** ${punishment.id} 
-    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))} 
-    **Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
+    return `**Reason:** ${punishment.reason || 'No reason provided.'}\n**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n**ID:** ${
+        punishment.id
+    }\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
 }

@@ -1,7 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
-import { formatDate, formatTimeDate } from '../lib/misc.js';
+import { formatTimeDate } from '../lib/misc.js';
 import { typeAsString } from '../lib/punishments.js';
 import { getUser } from '../lib/searchMessage.js';
 
@@ -79,7 +79,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **Moderator:** <@${row.mod_id}> 
+                            **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
                             **ID:** ${row.id} 
                             **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
                             **Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}${
@@ -110,7 +110,7 @@ export const command: Command = {
                     queries[3].rows.map((row) => {
                         let content = `\n**Type:** ${typeAsString[row.type]} 
                             **Reason:** ${row.reason || 'No reason provided.'} 
-                            **Moderator:** <@${row.mod_id}> 
+                            **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
                             **ID:** ${row.id} 
                             **Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
 

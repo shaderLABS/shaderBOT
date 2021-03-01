@@ -2,7 +2,7 @@ function getSeconds(time: string) {
     switch (time.replace(/[^a-z]/g, '')) {
         case 'a':
         case 'y':
-            return +time.slice(0, -1) * 31556952;
+            return +time.slice(0, -1) * 31536000;
         case 'mo':
             return +time.slice(0, -2) * 2592000;
         case 'w':
@@ -59,9 +59,41 @@ export function splitString(str: string): string[] {
     return splitString;
 }
 
-export default function (str: string[]) {
+export function stringToSeconds(str: string[]) {
     const MAX_SECONDS = 8639999999000 - new Date().getTime() / 1000;
     const seconds = str.reduce((a, b) => a + getSeconds(b), 0);
 
     return seconds > MAX_SECONDS ? NaN : seconds;
+}
+
+export function secondsToString(seconds: number) {
+    const units: string[] = [];
+
+    const years = Math.floor(seconds / 31536000);
+    if (years) units.push(years + 'a');
+    seconds -= years * 31536000;
+
+    const months = Math.floor(seconds / 2592000);
+    if (months) units.push(months + 'mo');
+    seconds -= months * 2592000;
+
+    const weeks = Math.floor(seconds / 604800);
+    if (weeks) units.push(weeks + 'w');
+    seconds -= weeks * 604800;
+
+    const days = Math.floor(seconds / 86400);
+    if (days) units.push(days + 'd');
+    seconds -= days * 86400;
+
+    const hours = Math.floor(seconds / 3600);
+    if (hours) units.push(hours + 'h');
+    seconds -= hours * 3600;
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes) units.push(minutes + 'min');
+    seconds -= minutes * 60;
+
+    if (seconds) units.push(seconds + 's');
+
+    return units.join(' ');
 }

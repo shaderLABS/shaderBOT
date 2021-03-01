@@ -3,6 +3,7 @@ import { db } from '../../db/postgres.js';
 import log from './log.js';
 import { formatTimeDate, getGuild } from './misc.js';
 import { store } from './punishments.js';
+import { secondsToString } from './time.js';
 
 /*******
  * BAN *
@@ -22,13 +23,13 @@ export async function tempban(user: User, duration: number, modID: string | null
                 WITH moved_rows AS (
                     DELETE FROM punishment 
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
                     INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, timestamp, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows
+                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
-                [user.id, modID, new Date()]
+                [user.id, timestamp, modID]
             )
         ).rows[0];
 
@@ -62,7 +63,7 @@ export async function tempban(user: User, duration: number, modID: string | null
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${duration} seconds (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }`,
             'Temporary Ban'
@@ -80,8 +81,8 @@ export async function tempban(user: User, duration: number, modID: string | null
         }
     } catch (error) {
         console.log(error);
-        log(`Failed to temporarily ban <@${user.id}> for ${duration} seconds.`);
-        return Promise.reject(`Failed to temporarily ban <@${user.id}> for ${duration} seconds.`);
+        log(`Failed to temporarily ban <@${user.id}> for ${secondsToString(duration)}.`);
+        return Promise.reject(`Failed to temporarily ban <@${user.id}> for ${secondsToString(duration)}.`);
     }
 
     return expire;
@@ -99,13 +100,13 @@ export async function ban(user: User, modID: string | null = null, reason: strin
                 WITH moved_rows AS (
                     DELETE FROM punishment 
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
                     INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, timestamp, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows
+                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
-                [user.id, modID, new Date()]
+                [user.id, timestamp, modID]
             )
         ).rows[0];
 
@@ -152,11 +153,9 @@ export async function ban(user: User, modID: string | null = null, reason: strin
 }
 
 export function punishmentToString(punishment: any) {
-    return `**Reason:** ${punishment.reason || 'No reason provided.'} 
-    **Moderator:** <@${punishment.mod_id}> 
-    **ID:** ${punishment.id} 
-    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))} 
-    **Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
+    return `**Reason:** ${punishment.reason || 'No reason provided.'}\n**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}` : 'System'}>\n**ID:** ${
+        punishment.id
+    }\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
 }
 
 /*********
@@ -174,11 +173,11 @@ export async function unban(userID: string, modID?: string) {
                 WITH moved_rows AS (
                     DELETE FROM punishment 
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
                 )
                 INSERT INTO past_punishment
-                SELECT DISTINCT *, $2::NUMERIC AS lifted_mod_id, $3::TIMESTAMP AS lifted_timestamp FROM moved_rows;`,
-                [userID, modID || null, new Date()]
+                SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+                [userID, new Date(), modID || null]
             )
         ).rowCount;
         if (deleted === 0) return Promise.reject(`The user <@${userID}> is not banned.`);

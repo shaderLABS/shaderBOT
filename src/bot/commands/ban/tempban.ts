@@ -3,7 +3,7 @@ import { Command, syntaxError } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
-import stringToSeconds, { splitString } from '../../lib/stringToSeconds.js';
+import { splitString, stringToSeconds } from '../../lib/time.js';
 
 const expectedArgs = '<@user|userID|username> <time> ["delete"] [reason]';
 

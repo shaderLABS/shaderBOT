@@ -57,7 +57,7 @@ export async function registerCommands(dir: string) {
 }
 
 export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
-    sendError(channel, '`' + settings.prefix + syntax + '`', 'Syntax Error');
+    sendError(channel, `\`${settings.prefix}${syntax.trimEnd()}\``, 'Syntax Error');
 }
 
 export function hasPermissions(message: GuildMessage, command: Command): boolean {
@@ -92,7 +92,7 @@ function getSubcommandSyntax(invoke: string, subcommands: Collection<string, Com
         .map((cmd) => JSON.parse(cmd).join('|'))
         .join('|');
 
-    return commands ? `${invoke} <${commands}>` : invoke;
+    return `${invoke} <${commands}>`;
 }
 
 export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]): void {

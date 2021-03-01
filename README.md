@@ -1,4 +1,5 @@
 # shaderBOT Server
+
 ![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/Shader-Labs/shaderBOT-server?style=flat-square)
 ![GitHub](https://img.shields.io/github/license/Shader-Labs/shaderBOT-server?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
@@ -17,7 +18,8 @@ You must enable the "Server Members Intent" switch (below "Privileged Gateway In
 
 ### Bot Settings
 
-The file `src/bot/settings/settings.json` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. The content should not include any sensitive information, since it may be publicly displayed while configuring the bot through commands (depending on where you run it).
+The file `src/bot/settings/settings.json` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. The content should not include any sensitive information, since it may be publicly displayed while configuring the bot through commands (depending on where you run it). \
+**Important**: The comments only exist for documentation purposes, they must be removed because the used parser does not support them.
 
 ```json
 {
@@ -33,7 +35,17 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     },
     "mediaChannelIDs": [""],
     "muteRoleID": "",
-    "guildID": ""
+    "guildID": "",
+    "warnings": {
+        "decay": [0, 0, 0], // days, severity 1-3
+        "punishment": {
+            "muteRange": [0, 0], // min - max threshold
+            "muteValues": [0, 0], // min - max values in seconds
+            "tempbanRange": [0, 0], // min - max threshold
+            "tempbanValues": [0, 0], // min - max values in seconds
+            "ban": 0 // min threshold
+        }
+    }
 }
 ```
 

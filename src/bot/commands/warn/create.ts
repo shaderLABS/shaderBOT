@@ -46,6 +46,6 @@ export const command: Command = {
         sendSuccess(channel, content, 'Added Warning');
         log(content, 'Added Warning');
 
-        automaticPunishment(user);
+        automaticPunishment(user, targetMember);
     },
 };
