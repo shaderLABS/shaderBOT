@@ -16,19 +16,19 @@ export function isGuildMessage(message: Message): message is GuildMessage {
 }
 
 export interface Command {
-    commands: string[];
-    help: string;
-    expectedArgs?: string | undefined;
-    minArgs?: number | undefined;
-    maxArgs?: number | null | undefined;
-    requiredRoles?: string[] | undefined;
-    requiredPermissions?: BitFieldResolvable<PermissionString>[] | undefined;
-    permissionOverwrites?: boolean | undefined;
-    permissionError?: string | undefined;
-    superCommands?: string[] | undefined;
-    channelWhitelist?: string[] | undefined;
-    cooldownDuration?: number;
-    callback: (message: GuildMessage, args: string[], text: string) => void;
+    readonly commands: string[];
+    readonly help: string;
+    readonly expectedArgs?: string;
+    readonly minArgs?: number;
+    readonly maxArgs?: number | null;
+    readonly requiredRoles?: string[];
+    readonly requiredPermissions?: BitFieldResolvable<PermissionString>[];
+    readonly permissionOverwrites?: boolean;
+    readonly permissionError?: string;
+    readonly superCommands?: string[];
+    readonly channelWhitelist?: string[];
+    readonly cooldownDuration?: number;
+    readonly callback: (message: GuildMessage, args: string[], text: string) => void;
 }
 
 export async function registerCommands(dir: string) {

@@ -5,8 +5,8 @@ import url from 'url';
 import { client, events } from './bot.js';
 
 export interface Event {
-    name: keyof ClientEvents;
-    callback: Function;
+    readonly name: keyof ClientEvents;
+    readonly callback: Function;
 }
 
 export async function registerEvents(dir: string) {
