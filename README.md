@@ -4,6 +4,8 @@
 ![GitHub](https://img.shields.io/github/license/Shader-Labs/shaderBOT-server?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
+The following information is for developers and contributors. If you're a user, please go to [the wiki](https://github.com/shaderLABS/shaderBOT-server/wiki) instead.
+
 ## Install Dependencies
 
 ```properties
