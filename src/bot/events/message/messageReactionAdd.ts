@@ -168,7 +168,7 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
     const comment = (
         await db.query(
             /*sql*/ `
-            DELETE FROM comment 
+            DELETE FROM comment
             WHERE ticket_id = $1 AND message_id = $2 ${managePerm ? '' : 'AND author_id = $3'}
             RETURNING content, author_id, attachment`,
             managePerm ? [id, reaction.message.id] : [id, reaction.message.id, member.id]

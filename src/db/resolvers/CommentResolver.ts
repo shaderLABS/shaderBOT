@@ -54,7 +54,7 @@ export class CommentResolver {
         const ticket = (
             await db.query(
                 /*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
+                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
                 FROM ticket
                 WHERE id = $1 AND closed = FALSE
                 LIMIT 1;`,
@@ -128,8 +128,8 @@ export class CommentResolver {
 
         await db.query(
             /*sql*/ `
-            UPDATE comment 
-            SET content = $1, edited = $2 
+            UPDATE comment
+            SET content = $1, edited = $2
             WHERE id = $3`,
             [content, editedAt, comment_id]
         );

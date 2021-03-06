@@ -25,7 +25,7 @@ export const event: Event = {
             await db.query(
                 /*sql*/ `
                     WITH moved_rows AS (
-                        DELETE FROM punishment 
+                        DELETE FROM punishment
                         WHERE "type" = 'ban' AND user_id = $1
                         RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
                     )

@@ -19,7 +19,6 @@ export const command: Command = {
         if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0]) return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: Set<GuildMember> = new Set();
-        // message.mentions.members?.forEach((member) => owners.add(member));
 
         for (const potentialID of args) {
             const user = await getMember(potentialID).catch(() => undefined);
@@ -52,8 +51,8 @@ export const command: Command = {
 
         const insert = await db.query(
             /*sql*/ `
-            INSERT INTO project (channel_id, owners, role_id) 
-            VALUES ($1, $2, $3) 
+            INSERT INTO project (channel_id, owners, role_id)
+            VALUES ($1, $2, $3)
             RETURNING id;`,
             [channel.id, [...owners].map((owner) => owner.id), role.id]
         );

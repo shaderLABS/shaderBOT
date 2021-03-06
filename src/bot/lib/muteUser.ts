@@ -21,7 +21,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
             await db.query(
                 /*sql*/ `
                 WITH moved_rows AS (
-                    DELETE FROM punishment 
+                    DELETE FROM punishment
                     WHERE "type" = 'mute' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
@@ -44,7 +44,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
         const mute = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp) 
+                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp)
                 VALUES ($1, 'mute', $2, $3, $4, $5)
                 RETURNING id;`,
                 [userID, modID, reason, expire, timestamp]
@@ -102,7 +102,7 @@ export async function unmute(userID: string, modID?: string, member?: GuildMembe
             await db.query(
                 /*sql*/ `
                 WITH moved_rows AS (
-                    DELETE FROM punishment 
+                    DELETE FROM punishment
                     WHERE "type" = 'mute' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
                 )
@@ -137,7 +137,7 @@ export async function checkMuteEvasion(member: GuildMember) {
         await db.query(
             /*sql*/ `
             SELECT id, user_id, type, mod_id, reason, timestamp, expire_timestamp
-            FROM punishment 
+            FROM punishment
             WHERE "type" = 'mute' AND user_id = $1
             LIMIT 1`,
             [member.id]
@@ -148,7 +148,7 @@ export async function checkMuteEvasion(member: GuildMember) {
 
     member.roles.add(role);
     const expireTime = new Date(mute.expire_timestamp).getTime();
-    const checkTime = new Date().getTime();
+    const checkTime = Date.now();
 
     if (expireTime < checkTime) {
         unmute(member.id, undefined, member).catch(() => undefined);

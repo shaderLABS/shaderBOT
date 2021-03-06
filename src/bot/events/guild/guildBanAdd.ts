@@ -30,7 +30,7 @@ export const event: Event = {
                 await db.query(
                     /*sql*/ `
                     WITH moved_rows AS (
-                        DELETE FROM punishment 
+                        DELETE FROM punishment
                         WHERE "type" = 'ban' AND user_id = $1
                         RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                     ), inserted_rows AS (
@@ -52,7 +52,7 @@ export const event: Event = {
 
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp) 
+                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp)
                 VALUES ($1, 'ban', $2, $3, $4)
                 RETURNING id;`,
                 [user.id, executor.id, reason, createdAt]

@@ -34,7 +34,7 @@ export const command: Command = {
         const id = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO warn (user_id, mod_id, reason, severity, timestamp) 
+                INSERT INTO warn (user_id, mod_id, reason, severity, timestamp)
                 VALUES ($1, $2, $3, $4::SMALLINT, $5)
                 RETURNING id;`,
                 [user.id, member.id, reason.length !== 0 ? reason : null, severity, new Date()]

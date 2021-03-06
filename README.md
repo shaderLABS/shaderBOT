@@ -109,4 +109,4 @@ This will hide the transpiled JavaScript files if there are corresponding TypeSc
 -   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL syntax highlighting.
 
 \
-_Made with [<img src="https://cdn.discordapp.com/emojis/758513218770567188.gif" width="20" height="20"/>](https://files.catbox.moe/3nyc47.mp3) by [Niemand](https://github.com/Kneemund)_
+_Coded by [Niemand](https://github.com/Kneemund)_

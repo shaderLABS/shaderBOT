@@ -7,8 +7,7 @@
     "scripts": {
         "build": "npx tsc",
         "start": "node -r dotenv/config src/index.js",
-        "serve": "node src/index.js",
-        "dev": "nodemon"
+        "dev": "nodemon -w src -e ts,json -i src/**/*.spec.ts -x \"npx tsc && node --trace-warnings -r dotenv/config src/index.js\""
     },
     "author": {
         "name": "Niemand",

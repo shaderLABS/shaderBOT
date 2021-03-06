@@ -14,7 +14,7 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
         const kick = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp) 
+                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp)
                 VALUES ($1, 'kick', $2, $3, $4)
                 RETURNING id;`,
                 [user.id, modID, reason, timestamp]
@@ -43,8 +43,7 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
 }
 
 function punishmentToString(punishment: any) {
-    return `**Reason:** ${punishment.reason || 'No reason provided.'} 
-    **Moderator:** <@${punishment.mod_id}> 
-    **ID:** ${punishment.id} 
-    **Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`;
+    return `**Reason:** ${punishment.reason || 'No reason provided.'}\n**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n**ID:** ${
+        punishment.id
+    }\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`;
 }

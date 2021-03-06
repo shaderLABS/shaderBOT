@@ -26,7 +26,7 @@ export const event: Event = {
         try {
             await db.query(
                 /*sql*/ `
-                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp) 
+                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp)
                 VALUES ($1, 'kick', $2, $3, $4)
                 RETURNING id;`,
                 [member.id, executor.id, reason, createdAt]

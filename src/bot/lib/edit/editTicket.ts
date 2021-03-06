@@ -17,8 +17,8 @@ export async function editComment(comment: any, message: Message, newContent: st
 
     db.query(
         /*sql*/ `
-        UPDATE comment 
-        SET content = $1, edited = $2 
+        UPDATE comment
+        SET content = $1, edited = $2
         WHERE id = $3`,
         [newContent, editedAt, comment.id]
     );

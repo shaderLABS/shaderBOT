@@ -22,8 +22,8 @@ export const command: Command = {
         if (!isUUID) {
             const warnings = await db.query(
                 /*sql*/ `
-                SELECT id::TEXT, user_id::TEXT, mod_id::TEXT, reason, timestamp::TEXT 
-                FROM warn 
+                SELECT id::TEXT, user_id::TEXT, mod_id::TEXT, reason, timestamp::TEXT
+                FROM warn
                 WHERE reason = $1;`,
                 [text]
             );
@@ -40,7 +40,7 @@ export const command: Command = {
 
         const response = await db.query(
             /*sql*/ `
-            DELETE FROM warn 
+            DELETE FROM warn
             WHERE ${isUUID ? 'id = $1' : 'reason = $1'}
             RETURNING id::TEXT, user_id::TEXT, mod_id::TEXT, severity, reason`,
             [isUUID ? args[0] : text]
@@ -49,7 +49,7 @@ export const command: Command = {
         if (response.rowCount === 0) {
             const similarResults = await db.query(
                 /*sql*/ `
-                SELECT id::TEXT, user_id::TEXT, mod_id::TEXT, reason, timestamp::TEXT 
+                SELECT id::TEXT, user_id::TEXT, mod_id::TEXT, reason, timestamp::TEXT
                 FROM warn
                 WHERE reason IS NOT NULL
                 ORDER BY SIMILARITY(reason, $1) DESC

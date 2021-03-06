@@ -21,9 +21,9 @@ export const event: Event = {
                 const ticket = (
                     await db.query(
                         /*sql*/ `
-                        UPDATE ticket 
-                        SET closed = TRUE 
-                        WHERE channel_id = $1 AND closed = FALSE 
+                        UPDATE ticket
+                        SET closed = TRUE
+                        WHERE channel_id = $1 AND closed = FALSE
                         RETURNING subscription_message_id`,
                         [channel.id]
                     )

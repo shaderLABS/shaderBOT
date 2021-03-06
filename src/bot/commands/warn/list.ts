@@ -24,7 +24,7 @@ export const command: Command = {
                 await db.query(
                     /*sql*/ `
                     SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, edited_timestamp::TEXT, edited_mod_id::TEXT
-                    FROM warn 
+                    FROM warn
                     WHERE id = $1
                     LIMIT 1;`,
                     [args[0]]
@@ -37,10 +37,10 @@ export const command: Command = {
                 channel,
                 `**User:** <@${warning.user_id}>
                 **Severity:** ${warning.severity}
-                **Reason:** ${warning.reason || 'No reason provided.'} 
-                **Moderator:** <@${warning.mod_id}> 
-                **ID:** ${args[0]} 
-                **Created At:** ${formatTimeDate(new Date(warning.timestamp))} 
+                **Reason:** ${warning.reason || 'No reason provided.'}
+                **Moderator:** <@${warning.mod_id}>
+                **ID:** ${args[0]}
+                **Created At:** ${formatTimeDate(new Date(warning.timestamp))}
                 ${warning.edited_timestamp ? `*(last edited by <@${warning.edited_mod_id}> at ${formatTimeDate(new Date(warning.edited_timestamp))})*` : ''}`,
                 'Warning'
             );
@@ -65,7 +65,7 @@ export const command: Command = {
             const warnings = await db.query(
                 /*sql*/ `
                 SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp, edited_timestamp::TEXT, edited_mod_id::TEXT
-                FROM warn 
+                FROM warn
                 WHERE user_id = $1
                 ORDER BY timestamp DESC;`,
                 [userID]
@@ -77,10 +77,10 @@ export const command: Command = {
             warnings.rows.reduce((prev, curr, i, { length }) => {
                 const page = `**User:** <@${userID}>
                     **Severity:** ${curr.severity}
-                    **Reason:** ${curr.reason || 'No reason provided.'} 
-                    **Moderator:** <@${curr.mod_id}> 
-                    **ID:** ${curr.id} 
-                    **Created At:** ${formatTimeDate(new Date(curr.timestamp))} 
+                    **Reason:** ${curr.reason || 'No reason provided.'}
+                    **Moderator:** <@${curr.mod_id}>
+                    **ID:** ${curr.id}
+                    **Created At:** ${formatTimeDate(new Date(curr.timestamp))}
                     ${curr.edited_timestamp ? `*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : ''}`;
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {

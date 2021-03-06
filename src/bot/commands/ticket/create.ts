@@ -114,7 +114,7 @@ export const command: Command = {
 
             await db.query(
                 /*sql*/ `
-                INSERT INTO ticket (id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id) 
+                INSERT INTO ticket (id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
                 [ticketID, titleAnswer.content, projectChannel.id, descriptionAnswer.content, attachments, author.id, date, ticketChannel.id, subscriptionMessage.id]
             );

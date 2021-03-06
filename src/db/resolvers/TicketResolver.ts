@@ -61,7 +61,7 @@ export class TicketResolver {
         return (
             await db.query(
                 /*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
+                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
                 FROM ticket
                 WHERE id = $1
                 LIMIT 1;`,
@@ -75,7 +75,7 @@ export class TicketResolver {
         return (
             await db.query(
                 /*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
+                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
                 FROM ticket
                 WHERE author_id = $1
                 ORDER BY timestamp ASC;`,
@@ -89,7 +89,7 @@ export class TicketResolver {
         return (
             await db.query(
                 /*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed 
+                SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
                 FROM ticket
                 WHERE project_channel_id = $1
                 ORDER BY timestamp ASC;`,
@@ -106,12 +106,12 @@ export class TicketResolver {
 
         const ticket = await db.query(
             /*sql*/ `
-            SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
-                FROM ticket 
+            SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp
+                FROM ticket
                 ${bypassAuthor ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
                 WHERE ticket.id = $1
                     AND closed = TRUE
-                    ${bypassAuthor ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+                    ${bypassAuthor ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
                 LIMIT 1`,
             bypassAuthor ? [id] : [id, ctx.req.user.id]
         );
@@ -134,11 +134,11 @@ export class TicketResolver {
         const response = await db.query(
             /*sql*/ `
             UPDATE ticket
-            SET closed = TRUE 
+            SET closed = TRUE
             ${bypassAuthor ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
-            WHERE ticket.id = $1 
-                AND ticket.closed = FALSE 
-                ${bypassAuthor ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            WHERE ticket.id = $1
+                AND ticket.closed = FALSE
+                ${bypassAuthor ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
             RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title, ticket.author_id, ticket.id, ticket.closed;`,
             bypassAuthor ? [id] : [id, ctx.req.user.id]
         );

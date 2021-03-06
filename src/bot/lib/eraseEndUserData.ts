@@ -10,8 +10,8 @@ export default async function (userID: string) {
 
     const erasedTickets = await db.query(
         /*sql*/ `
-        SELECT id 
-        FROM ticket 
+        SELECT id
+        FROM ticket
         WHERE author_id = $1;`,
         [userID]
     );
@@ -27,7 +27,7 @@ export default async function (userID: string) {
 
     const erasedComments = await db.query(
         /*sql*/ `
-        DELETE FROM comment 
+        DELETE FROM comment
         USING ticket
         WHERE comment.author_id = $1 AND comment.ticket_id = ticket.id
         RETURNING comment.message_id, ticket.channel_id, ticket.closed, comment.attachment;`,

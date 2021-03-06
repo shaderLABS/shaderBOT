@@ -21,7 +21,7 @@ export async function tempban(user: User, duration: number, modID: string | null
             await db.query(
                 /*sql*/ `
                 WITH moved_rows AS (
-                    DELETE FROM punishment 
+                    DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
@@ -44,7 +44,7 @@ export async function tempban(user: User, duration: number, modID: string | null
         const tempban = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp) 
+                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp)
                 VALUES ($1, 'ban', $2, $3, $4, $5)
                 RETURNING id;`,
                 [user.id, modID, reason, expire, timestamp]
@@ -98,7 +98,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
             await db.query(
                 /*sql*/ `
                 WITH moved_rows AS (
-                    DELETE FROM punishment 
+                    DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
@@ -121,7 +121,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
         const ban = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp) 
+                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp)
                 VALUES ($1, 'ban', $2, $3, $4)
                 RETURNING id;`,
                 [user.id, modID, reason, timestamp]
@@ -171,7 +171,7 @@ export async function unban(userID: string, modID?: string) {
             await db.query(
                 /*sql*/ `
                 WITH moved_rows AS (
-                    DELETE FROM punishment 
+                    DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
                     RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
                 )

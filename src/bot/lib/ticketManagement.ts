@@ -31,12 +31,12 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
 
     const response = await db.query(
         /*sql*/ `
-        SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp 
-        FROM ticket 
+        SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp
+        FROM ticket
         ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
-        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'} 
-            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
-            AND closed = TRUE 
+        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'}
+            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
+            AND closed = TRUE
         LIMIT 1`,
         moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
     );
@@ -44,10 +44,10 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT ticket.id, title 
+            SELECT ticket.id, title
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = TRUE
-                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
             ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,
             moderate ? [text] : [text, member.id]
@@ -108,7 +108,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     await db.query(
         /*sql*/ `
         UPDATE ticket
-        SET closed = FALSE, channel_id = $1, subscription_message_id = $2  
+        SET closed = FALSE, channel_id = $1, subscription_message_id = $2
         WHERE id = $3;`,
         [ticketChannel.id, subscriptionMessage.id, ticket.id]
     );
@@ -158,11 +158,11 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     const response = await db.query(
         /*sql*/ `
         UPDATE ticket
-        SET closed = TRUE 
+        SET closed = TRUE
         ${moderate ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
-        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'} 
+        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'}
             AND ticket.closed = FALSE
-            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+            ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
         RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title, ticket.author_id;`,
         moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
     );
@@ -170,10 +170,10 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT ticket.id, title 
+            SELECT ticket.id, title
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = FALSE
-                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'} 
+                ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
             ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,
             moderate ? [text] : [text, member.id]
@@ -224,7 +224,7 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
     if (response.rowCount === 0) {
         const similarResults = await db.query(
             /*sql*/ `
-            SELECT id, title 
+            SELECT id, title
             FROM ticket
             ORDER BY SIMILARITY(title, $1) DESC
             LIMIT 3`,

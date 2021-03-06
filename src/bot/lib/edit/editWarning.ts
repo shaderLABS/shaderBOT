@@ -19,7 +19,7 @@ export async function editWarnReason(reason: string, id: string, modID: string) 
     const warning = (
         await db.query(
             /*sql*/ `
-            UPDATE warn 
+            UPDATE warn
             SET reason = $1, edited_mod_id = $2, edited_timestamp = $3
             FROM warn old_warn
             WHERE warn.id = $4 AND old_warn.id = warn.id

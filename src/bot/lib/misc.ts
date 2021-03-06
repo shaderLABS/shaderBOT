@@ -39,10 +39,8 @@ export function similarityLevenshtein(s1: string, s2: string) {
         shorter = s1;
     }
 
-    const longerLength = longer.length;
-    if (longerLength === 0) return 1.0;
-
-    return (longerLength - levenshteinDist(longer, shorter)) / longerLength;
+    if (longer.length === 0.0) return 1.0;
+    return (longer.length - levenshteinDist(longer, shorter)) / longer.length;
 }
 
 function levenshteinDist(s: string, t: string) {

@@ -30,11 +30,11 @@ export const command: Command = {
 
         const project = await db.query(
             /*sql*/ `
-            UPDATE project 
-            SET owners = $1 
-            FROM project old_project 
-            WHERE project.id = old_project.id 
-                AND project.channel_id = $2 
+            UPDATE project
+            SET owners = $1
+            FROM project old_project
+            WHERE project.id = old_project.id
+                AND project.channel_id = $2
             RETURNING old_project.owners::TEXT[] AS old_owners`,
             [[...owners].map((owner) => owner.id), channel.id]
         );

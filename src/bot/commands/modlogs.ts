@@ -64,9 +64,9 @@ export const command: Command = {
                     queries[0].rows.map(
                         (row) =>
                             `\n**Severity:** ${row.severity}
-                            **Reason:** ${row.reason || 'No reason provided.'} 
-                            **Moderator:** <@${row.mod_id}> 
-                            **ID:** ${row.id} 
+                            **Reason:** ${row.reason || 'No reason provided.'}
+                            **Moderator:** <@${row.mod_id}>
+                            **ID:** ${row.id}
                             **Created At:** ${formatTimeDate(new Date(row.timestamp))}`
                     )
                 );
@@ -77,11 +77,11 @@ export const command: Command = {
                     'Punishments',
                     queries[1].rows.map(
                         (row) =>
-                            `\n**Type:** ${typeAsString[row.type]} 
-                            **Reason:** ${row.reason || 'No reason provided.'} 
+                            `\n**Type:** ${typeAsString[row.type]}
+                            **Reason:** ${row.reason || 'No reason provided.'}
                             **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
-                            **ID:** ${row.id} 
-                            **Created At:** ${formatTimeDate(new Date(row.timestamp))} 
+                            **ID:** ${row.id}
+                            **Created At:** ${formatTimeDate(new Date(row.timestamp))}
                             **Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}${
                                 row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : ''
                             }`
@@ -108,10 +108,10 @@ export const command: Command = {
                 pageCategory(
                     'Past Punishments',
                     queries[3].rows.map((row) => {
-                        let content = `\n**Type:** ${typeAsString[row.type]} 
-                            **Reason:** ${row.reason || 'No reason provided.'} 
+                        let content = `\n**Type:** ${typeAsString[row.type]}
+                            **Reason:** ${row.reason || 'No reason provided.'}
                             **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
-                            **ID:** ${row.id} 
+                            **ID:** ${row.id}
                             **Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
 
                         if (row.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(row.lifted_timestamp))}`;

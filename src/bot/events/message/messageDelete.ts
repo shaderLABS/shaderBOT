@@ -22,7 +22,7 @@ export const event: Event = {
         const comment = (
             await db.query(
                 /*sql*/ `
-                DELETE FROM comment 
+                DELETE FROM comment
                 USING ticket
                 WHERE ticket.id = comment.ticket_id AND ticket.channel_id = $1 AND comment.message_id = $2
                 RETURNING comment.content, comment.author_id, comment.attachment`,
