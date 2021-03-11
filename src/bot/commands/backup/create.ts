@@ -7,7 +7,7 @@ const expectedArgs = '[text_channel] [limit]';
 export const command: Command = {
     commands: ['create'],
     superCommands: ['backup'],
-    help: 'Backup messages sent in the current channel.',
+    help: 'Create a local and encrypted backup of messages sent in the current or specified channel.',
     expectedArgs,
     minArgs: 0,
     maxArgs: 2,

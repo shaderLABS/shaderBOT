@@ -5,13 +5,11 @@ import { Command } from '../../commandHandler.js';
 import { backupPath, readBackup } from '../../lib/backup.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 
-const expectedArgs = '[index]';
-
 export const command: Command = {
     commands: ['list'],
     superCommands: ['backup'],
-    help: 'List all available backups or decrypt & send a specific one.',
-    expectedArgs,
+    help: 'List all local backups or decrypt & send a specific one.',
+    expectedArgs: '[index]',
     minArgs: 0,
     maxArgs: 1,
     requiredPermissions: ['MANAGE_MESSAGES'],
