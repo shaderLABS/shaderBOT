@@ -1,3 +1,4 @@
+import { MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import automaticPunishment from '../../lib/automaticPunishment.js';
@@ -43,6 +44,7 @@ export const command: Command = {
 
         const content = `**User:** <@${user.id}>\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${member.id}>\n**ID:** ${id}`;
 
+        user.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: '#006fff' })).catch(() => undefined);
         sendSuccess(channel, content, 'Added Warning');
         log(content, 'Added Warning');
 

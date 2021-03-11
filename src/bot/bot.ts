@@ -2,6 +2,7 @@ import { Client, Collection } from 'discord.js';
 import cron from 'node-cron';
 import { Command, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
+import { cleanBackups } from './lib/backup.js';
 import { loadTimeouts } from './lib/punishments.js';
 import * as settingsFile from './settings/settings.js';
 
@@ -10,7 +11,10 @@ export let commands: Collection<string, Command | Collection<string, Command>>;
 export let events: Collection<string, Event>;
 export let settings: settingsFile.Settings;
 
-cron.schedule('55 23 * * *', loadTimeouts);
+cron.schedule('55 23 * * *', () => {
+    loadTimeouts();
+    cleanBackups();
+});
 
 export async function startBot() {
     client = new Client({ disableMentions: 'everyone', partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'], messageEditHistoryMaxSize: 0 });

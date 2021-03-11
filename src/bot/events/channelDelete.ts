@@ -1,8 +1,8 @@
-import axios from 'axios';
 import { CategoryChannel, Channel, TextChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
+import { createBackup } from '../lib/backup.js';
 import log from '../lib/log.js';
 import { getGuild } from '../lib/misc.js';
 import { update } from '../settings/settings.js';
@@ -42,28 +42,21 @@ export const event: Event = {
                 return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
             }
 
-            const messages = channel.messages.cache;
+            let logContent = `The channel #${channel.name} has been deleted. `;
 
-            let content = '';
-            messages.each((message) => {
-                content += `${message.author.username}#${message.author.discriminator}: ${message.content}\n`;
-            });
-
-            let projectLog = '';
-            const deleteProject = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
-            if (deleteProject) {
-                const role = await channel.guild.roles.fetch(deleteProject.role_id);
+            const deletedProject = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
+            if (deletedProject) {
+                const role = await channel.guild.roles.fetch(deletedProject.role_id);
                 if (role) {
                     role.delete();
-                    projectLog = 'The role and project that were linked to this channel have been removed.';
+                    logContent += 'The role and project that were linked to this channel have been removed. ';
                 }
             }
 
-            if (content === '') return log(`The channel #${channel.name} has been deleted. There were no cached messages to upload. ${projectLog}`);
+            const backupSize = await createBackup(channel).catch(() => undefined);
+            logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved.` : 'There were no cached messages to save.';
 
-            const res = await axios.post('https://hastebin.com/documents', `CACHED MESSAGES OF #${channel.name}\n\n${content}`);
-
-            log(`The channel #${channel.name} has been deleted. [${messages.size} cached messages](https://www.hastebin.com/${res.data.key}) have been uploaded. ${projectLog}`);
+            log(logContent);
         }
     },
 };
