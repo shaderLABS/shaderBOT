@@ -20,7 +20,7 @@ export const command: Command = {
         const backups = (
             await Promise.all(
                 (await fs.readdir(backupPath)).map(async (name) => {
-                    return { name, createdAt: (await fs.lstat(path.join(backupPath, name))).birthtime.getTime() };
+                    return { name, createdAt: (await fs.stat(path.join(backupPath, name))).birthtime.getTime() };
                 })
             )
         ).sort((a, b) => b.createdAt - a.createdAt);

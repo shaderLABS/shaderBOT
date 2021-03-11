@@ -11,7 +11,7 @@ export function hardShutdown() {
 
 export async function shutdown(code: number = 0) {
     console.log('Shutting down gracefully...');
-    if (process.env.BOT_ONLY !== 'TRUE') stopWebserver();
+    if (process.env.BOT_ONLY !== 'true') stopWebserver();
     await db.end().catch(() => undefined);
     client.destroy();
     process.exit(code);
@@ -34,4 +34,4 @@ process.on('unhandledRejection', async (reason, promise) => {
 
 await connectPostgreSQL();
 startBot();
-if (process.env.BOT_ONLY !== 'TRUE') startWebserver();
+if (process.env.BOT_ONLY !== 'true') startWebserver();

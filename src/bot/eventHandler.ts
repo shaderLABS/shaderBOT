@@ -13,7 +13,7 @@ export async function registerEvents(dir: string) {
     const filePath = path.join(path.resolve(), dir);
     const files = await fs.readdir(filePath);
     for (const file of files) {
-        const stat = await fs.lstat(path.join(filePath, file));
+        const stat = await fs.stat(path.join(filePath, file));
         if (stat.isDirectory()) {
             registerEvents(path.join(dir, file));
         } else if (file.endsWith('.js')) {
