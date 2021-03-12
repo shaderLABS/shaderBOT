@@ -1,8 +1,8 @@
 import { db } from '../../../db/postgres.js';
 import { unban } from '../banUser.js';
 import log from '../log.js';
-import { formatTimeDate } from '../misc.js';
 import { store } from '../punishments.js';
+import { formatTimeDate } from '../time.js';
 
 export async function editBanReason(uuid: string, reason: string, modID: string, past_table: boolean) {
     const table = past_table ? 'past_punishment' : 'punishment';

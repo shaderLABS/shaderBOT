@@ -4,7 +4,8 @@ import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
 import log from './log.js';
-import { formatTimeDate, getGuild } from './misc.js';
+import { getGuild } from './misc.js';
+import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
     let fileUploadLimit = 8388119;

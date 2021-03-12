@@ -1,8 +1,9 @@
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
-import { formatTimeDate, getGuild } from '../misc.js';
+import { getGuild } from '../misc.js';
 import { unmute } from '../muteUser.js';
 import { store } from '../punishments.js';
+import { formatTimeDate } from '../time.js';
 
 export async function editMuteReason(uuid: string, reason: string, modID: string, past_table: boolean) {
     const table = past_table ? 'past_punishment' : 'punishment';

@@ -7,30 +7,6 @@ export function getGuild() {
 
 export const sleep = promisify(setTimeout);
 
-export function formatTimeDate(date: Date) {
-    return date.toLocaleString('en-US', {
-        timeZoneName: 'short',
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        // @ts-ignore
-        hourCycle: 'h23',
-    });
-}
-
-export function formatDate(date: Date) {
-    return date
-        .toLocaleDateString('en-US', {
-            timeZoneName: 'short',
-            year: '2-digit',
-            month: '2-digit',
-            day: '2-digit',
-        })
-        .replace(',', '');
-}
-
 export function similarityLevenshtein(s1: string, s2: string) {
     let longer = s1;
     let shorter = s2;

@@ -97,3 +97,26 @@ export function secondsToString(seconds: number) {
 
     return units.join(' ');
 }
+
+export function formatTimeDate(date: Date) {
+    return date.toLocaleString('en-US', {
+        timeZoneName: 'short',
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    });
+}
+
+export function formatDate(date: Date) {
+    return date
+        .toLocaleDateString('en-US', {
+            timeZoneName: 'short',
+            year: '2-digit',
+            month: '2-digit',
+            day: '2-digit',
+        })
+        .replace(',', '');
+}

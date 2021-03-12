@@ -3,8 +3,8 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { formatTimeDate } from '../../lib/misc.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { formatTimeDate } from '../../lib/time.js';
 
 const expectedArgs = '<@user|userID|username> <content>';
 

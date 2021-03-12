@@ -1,10 +1,9 @@
 import { GuildMember } from 'discord.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { formatTimeDate } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
-import { secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
+import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 
 const expectedArgs = '<@user|userID|username> <time> [reason]';
 

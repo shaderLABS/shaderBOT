@@ -4,7 +4,7 @@ import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { formatTimeDate } from '../../lib/misc.js';
+import { formatTimeDate } from '../../lib/time.js';
 
 const expectedArgs = '<uuid>';
 

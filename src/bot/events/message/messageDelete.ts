@@ -9,7 +9,6 @@ import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 export const event: Event = {
     name: 'messageDelete',
     callback: async (message: Message) => {
-        const guild = getGuild();
         const { channel } = message;
         if (
             !(channel instanceof TextChannel) ||
@@ -31,6 +30,8 @@ export const event: Event = {
         ).rows[0];
 
         if (!comment) return;
+
+        const guild = getGuild();
         if (comment.attachment && guild) deleteAttachmentFromDiscord(comment.attachment, guild);
         log(`<@${comment.author_id}>'s ticket comment has been deleted from <#${channel.id}>:\n\n${comment.content}`);
     },

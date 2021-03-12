@@ -1,8 +1,8 @@
 import { Guild, Message, TextChannel, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
-import { formatTimeDate } from '../misc.js';
 import { cutDescription } from '../ticketManagement.js';
+import { formatTimeDate } from '../time.js';
 
 export async function editComment(comment: any, message: Message, newContent: string, user: User) {
     const embed = message.embeds[0];

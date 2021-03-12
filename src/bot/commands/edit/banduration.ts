@@ -3,9 +3,8 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editBanDuration } from '../../lib/edit/editBan.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
-import { formatTimeDate } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
-import { secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
+import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <time>';
 

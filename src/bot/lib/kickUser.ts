@@ -1,7 +1,8 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import log from './log.js';
-import { formatTimeDate, getGuild } from './misc.js';
+import { getGuild } from './misc.js';
+import { formatTimeDate } from './time.js';
 
 export async function kick(user: GuildMember, modID: string | null = null, reason: string | null = null) {
     const guild = getGuild();

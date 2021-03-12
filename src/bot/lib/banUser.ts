@@ -1,9 +1,9 @@
 import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import log from './log.js';
-import { formatTimeDate, getGuild } from './misc.js';
+import { getGuild } from './misc.js';
 import { store } from './punishments.js';
-import { secondsToString } from './time.js';
+import { formatTimeDate, secondsToString } from './time.js';
 
 /*******
  * BAN *

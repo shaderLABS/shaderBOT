@@ -2,9 +2,9 @@ import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import log from './log.js';
-import { formatTimeDate, getGuild } from './misc.js';
+import { getGuild } from './misc.js';
 import { store } from './punishments.js';
-import { secondsToString } from './time.js';
+import { formatTimeDate, secondsToString } from './time.js';
 
 export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember): Promise<Date> {
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
