@@ -1,6 +1,6 @@
 import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel, User } from 'discord.js';
 
-export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
+export function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Success', 'https://img.icons8.com/color/48/000000/ok--v1.png')
         .setDescription(description)
@@ -8,7 +8,7 @@ export async function sendSuccess(channel: TextChannel | DMChannel | NewsChannel
     return channel.send(embed);
 }
 
-export async function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
+export function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Error', 'https://img.icons8.com/color/48/000000/cancel--v1.png')
         .setDescription(description)
@@ -16,7 +16,7 @@ export async function sendError(channel: TextChannel | DMChannel | NewsChannel, 
     return channel.send(embed);
 }
 
-export async function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? 'https://img.icons8.com/color/48/000000/info--v1.png' : undefined)
         .setDescription(description)

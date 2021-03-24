@@ -70,7 +70,7 @@ export async function startWebserver() {
     app.use(
         session({
             secret: process.env.SESSION_SECRET,
-            cookie: { maxAge: 60000 * 60 * 24 },
+            cookie: { maxAge: 86400000 }, // 1 day
             resave: false,
             saveUninitialized: false,
             store: new pg_store({ pool: db }),

@@ -24,13 +24,13 @@ export const event: Event = {
         try {
             await db.query(
                 /*sql*/ `
-                    WITH moved_rows AS (
-                        DELETE FROM punishment
-                        WHERE "type" = 'ban' AND user_id = $1
-                        RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
-                    )
-                    INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+                WITH moved_rows AS (
+                    DELETE FROM punishment
+                    WHERE "type" = 'ban' AND user_id = $1
+                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
+                )
+                INSERT INTO past_punishment
+                SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
                 [user.id, createdAt, executor.id]
             );
         } catch (error) {

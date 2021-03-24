@@ -21,16 +21,19 @@ process.on('SIGINT', hardShutdown);
 process.on('SIGUSR1', hardShutdown);
 process.on('SIGUSR2', hardShutdown);
 
-process.on('uncaughtException', async (error) => {
-    console.error('\x1b[31m%s\x1b[0m', 'Uncaught Exception', '\n', error);
-    if (client.user) await log('```' + error + '```', 'Uncaught Exception :(')?.catch(() => undefined);
-    shutdown(1);
-});
-process.on('unhandledRejection', async (reason, promise) => {
-    console.error('\x1b[31m%s\x1b[0m', 'Unhandled Rejection', '\n', promise, reason);
-    if (client.user) await log('```' + reason + '```', 'Unhandled Rejection :(')?.catch(() => undefined);
-    shutdown(1);
-});
+if (process.env.NODE_ENV === 'development') {
+    process.on('uncaughtException', async (error) => {
+        console.error('\x1b[31m%s\x1b[0m', 'Uncaught Exception', '\n', error);
+        if (client.user) await log('```' + error + '```', 'Uncaught Exception :(')?.catch(() => undefined);
+        shutdown(1);
+    });
+
+    process.on('unhandledRejection', async (reason, promise) => {
+        console.error('\x1b[31m%s\x1b[0m', 'Unhandled Rejection', '\n', promise, reason);
+        if (client.user) await log('```' + reason + '```', 'Unhandled Rejection :(')?.catch(() => undefined);
+        shutdown(1);
+    });
+}
 
 await connectPostgreSQL();
 startBot();
