@@ -72,11 +72,23 @@ Environment variables are read from `.env` and specifiy sensitive information li
 
 ## Running the Application
 
+### npm (development)
+
 ```properties
 npm run dev
 ```
 
 This will transpile the TypeScript files and run the server using [nodemon](https://www.npmjs.com/package/nodemon).
+You can also manually transpile the TypeScript files with `npm run build` and then run the server using `npm run start`.
+
+### pm2 (production)
+
+```properties
+npm run build
+pm2 start ecosystem.config.cjs
+```
+
+This will daemonize and run the server with [PM2](https://pm2.keymetrics.io/) using the [`ecosystem.config.cjs`](ecosystem.config.cjs) configuration file.
 
 ## Recommended Visual Studio Code Settings and Extensions
 
