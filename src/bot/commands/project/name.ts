@@ -19,6 +19,8 @@ export const command: Command = {
         const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
 
+        if (text.length < 2 || text.length > 32) return sendError(channel, 'Channel names must be between 2 and 32 characters long.');
+
         const oldName = channel.name;
 
         try {
