@@ -23,7 +23,7 @@ export const command: Command = {
             return sendError(channel, "You can't unmute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         try {
-            await unmute(user.id, member.id);
+            await unmute(user.id, member.id, user instanceof GuildMember ? user : undefined);
         } catch (error) {
             return sendError(channel, error);
         }
