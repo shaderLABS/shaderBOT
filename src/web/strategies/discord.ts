@@ -58,7 +58,6 @@ passport.use(
                     roleColor: member.displayHexColor,
                     permissions: member.permissions.bitfield,
                     allRoles: roles.map(({ id, hexColor, name }) => ({ id, hexColor, name })),
-                    // role_ids: roles,
                 };
 
                 done(undefined, user);

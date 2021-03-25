@@ -138,18 +138,4 @@ export class CommentResolver {
         log(`<@${user.id}> edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${content}`);
         return true;
     }
-
-    // @tgq.FieldResolver({ name: 'ticket', nullable: true })
-    // async ticket(@tgq.Root() comment: Comment) {
-    //     return (
-    //         await db.query(
-    //             /*sql*/ `
-    //             SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
-    //             FROM ticket
-    //             WHERE id = $1
-    //             LIMIT 1`,
-    //             [comment.ticket_id]
-    //         )
-    //     ).rows[0];
-    // }
 }

@@ -41,21 +41,6 @@ export class TicketResolver {
         ).rows;
     }
 
-    // @tgq.Mutation(() => Boolean)
-    // createTicket(@tgq.Arg('title', () => String) title: string, @tgq.Arg('project', () => String) project: string, @tgq.Arg('description', () => String) description: string) {
-    //     console.log(title, project, description);
-    //     return true;
-    // }
-
-    // @tgq.Query(() => [Ticket])
-    // async tickets() {
-    //     return (
-    //         await db.query(/*sql*/ `
-    //             SELECT id, title, project_channel_id::TEXT, channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
-    //             FROM ticket;`)
-    //     ).rows;
-    // }
-
     @tgq.Query(() => Ticket, { nullable: true })
     async ticketByID(@tgq.Arg('id', () => String) id: string) {
         return (

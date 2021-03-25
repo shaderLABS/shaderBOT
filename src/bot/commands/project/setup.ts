@@ -29,7 +29,6 @@ export const command: Command = {
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {
-                // MANAGE_ROLES: true,
                 MANAGE_WEBHOOKS: true,
                 VIEW_CHANNEL: true,
                 SEND_MESSAGES: true,
@@ -38,6 +37,8 @@ export const command: Command = {
                 EMBED_LINKS: true,
                 ATTACH_FILES: true,
                 READ_MESSAGE_HISTORY: true,
+                USE_EXTERNAL_EMOJIS: true,
+                ADD_REACTIONS: true,
             });
         }
 

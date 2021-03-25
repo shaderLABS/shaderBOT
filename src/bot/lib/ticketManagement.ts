@@ -148,7 +148,6 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         await db.query(commentMessageQuery);
     }
 
-    // ticketChannel.overwritePermissions([]);
     ticketChannel.lockPermissions();
 
     ticket.closed = false;
@@ -207,14 +206,6 @@ export async function closeTicketLib(ticket: any, guild: Guild | undefined = get
 }
 
 export async function deleteTicket(args: string[], text: string, guild: Guild) {
-    // const response = await db.query(
-    //     /*sql*/ `
-    //     DELETE FROM ticket
-    //     WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'}
-    //     RETURNING subscription_message_id, channel_id, title, author_id, closed, id;`,
-    //     [uuid.test(args[0]) ? args[0] : text]
-    // );
-
     const response = await db.query(
         /*sql*/ `
         SELECT id FROM ticket
@@ -257,16 +248,6 @@ export async function deleteAttachmentFromDiscord(attachment: string, guild: Gui
 
     (await attachmentCache.messages.fetch(messageID)).delete();
 }
-
-// export async function deleteCommentFromDiscord(comment: { message_id?: string; attachment?: string }, channel: TextChannel, guild: Guild) {
-//     if (!comment.message_id) return;
-
-//     const message = await channel.messages.fetch(comment.message_id);
-//     if (!message.embeds[0]) return;
-//     message.edit(message.embeds[0].setDescription('[deleted]'));
-
-//     if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, guild);
-// }
 
 export async function deleteTicketFromDiscord(ticket: { subscription_message_id?: string; channel_id?: string; attachments?: string[]; closed: boolean }, guild: Guild) {
     const attachments = ticket.attachments?.filter(Boolean);
