@@ -129,12 +129,12 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         for (let i = 0; i < comments.rowCount; i++) {
             const comment = comments.rows[i];
             const author = (await guild.members.fetch(comment.author_id).catch(() => undefined)) || {
-                displayHexColor: '#707070',
+                displayHexColor: '#000000',
                 user: await client.users.fetch(comment.author_id),
             };
 
             const commentEmbed = new MessageEmbed()
-                .setColor(author?.displayHexColor || '#212121')
+                .setColor(author?.displayHexColor === '#000000' ? '#212121' : author.displayHexColor)
                 .setAuthor(author?.user.username + '#' + author?.user.discriminator, author?.user.displayAvatarURL() || undefined)
                 .setFooter(comment.edited ? `edited at ${formatTimeDate(new Date(comment.edited))}` : '')
                 .setTimestamp(new Date(comment.timestamp))

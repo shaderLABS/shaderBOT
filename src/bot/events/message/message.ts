@@ -57,7 +57,7 @@ async function ticketComment(message: GuildMessage) {
     const timestamp = new Date();
 
     const commentEmbed = new MessageEmbed()
-        .setColor(message.member?.displayHexColor || '#212121')
+        .setColor(message.member.displayHexColor === '#000000' ? '#212121' : message.member.displayHexColor)
         .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.displayAvatarURL() || undefined)
         .setTimestamp(timestamp)
         .setDescription(content);
