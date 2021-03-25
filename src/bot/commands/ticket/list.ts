@@ -22,7 +22,7 @@ export const command: Command = {
                 [member.id]
             );
 
-            if (tickets.rowCount === 0) sendError(channel, 'You do not have any tickets.');
+            if (tickets.rowCount === 0) return sendError(channel, 'You do not have any tickets.');
 
             const content = tickets.rows.map((ticket) => {
                 return `**Title:** ${ticket.closed ? ticket.title : `<#${ticket.channel_id}>`}
