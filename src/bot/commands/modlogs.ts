@@ -1,7 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
-import { typeAsString } from '../lib/punishments.js';
+import { punishmentTypeAsString } from '../lib/punishments.js';
 import { getUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
 
@@ -76,7 +76,7 @@ export const command: Command = {
                     'Punishments',
                     queries[1].rows.map(
                         (row) =>
-                            `\n**Type:** ${typeAsString[row.type]}
+                            `\n**Type:** ${punishmentTypeAsString[row.type]}
                             **Reason:** ${row.reason || 'No reason provided.'}
                             **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
                             **ID:** ${row.id}
@@ -107,7 +107,7 @@ export const command: Command = {
                 pageCategory(
                     'Past Punishments',
                     queries[3].rows.map((row) => {
-                        let content = `\n**Type:** ${typeAsString[row.type]}
+                        let content = `\n**Type:** ${punishmentTypeAsString[row.type]}
                             **Reason:** ${row.reason || 'No reason provided.'}
                             **Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}
                             **ID:** ${row.id}

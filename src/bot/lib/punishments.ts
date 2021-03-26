@@ -5,7 +5,7 @@ import log from './log.js';
 import { getGuild } from './misc.js';
 import { unmute } from './muteUser.js';
 
-export const typeAsString: {
+export const punishmentTypeAsString: {
     [key: string]: string;
 } = {
     kick: 'Kick',
