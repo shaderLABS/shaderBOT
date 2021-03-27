@@ -30,12 +30,13 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "channelID": ""
     },
     "ticket": {
-        "categoryIDs": [""],
-        "managementChannelID": "",
-        "subscriptionChannelID": "",
-        "attachmentCacheChannelID": ""
+        "categoryIDs": [""], // categories which will be filled with open tickets
+        "managementChannelID": "", // channel used for managing tickets and notifications
+        "subscriptionChannelID": "", // read-only channel in which all open tickets will be listed
+        "attachmentCacheChannelID": "", // private channel in which attachments will be cached
+        "openCategoryID": "" // private/muted category in which tickets will be opened
     },
-    "mediaChannelIDs": [""],
+    "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "muteRoleID": "",
     "guildID": "",
     "warnings": {
