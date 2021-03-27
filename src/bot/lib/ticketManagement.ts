@@ -68,10 +68,9 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
 
     const ticketChannel = await guild.channels.create(ticket.title, {
         type: 'text',
-        parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
+        parent: settings.ticket.openCategoryID,
         topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'} | ${cutDescription(ticket.description) || 'NO DESCRIPTION'}`,
         rateLimitPerUser: 10,
-        permissionOverwrites: [{ id: guild.roles.everyone, deny: 'SEND_MESSAGES' }],
     });
 
     const ticketAuthor = await client.users.fetch(ticket.author_id);
@@ -148,7 +147,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         await db.query(commentMessageQuery);
     }
 
-    ticketChannel.lockPermissions();
+    ticketChannel.setParent(await getCategoryChannel(settings.ticket.categoryIDs, guild), { lockPermissions: true });
 
     ticket.closed = false;
     return ticket;

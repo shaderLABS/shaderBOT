@@ -12,6 +12,7 @@ export interface Settings {
         managementChannelID: string;
         subscriptionChannelID: string;
         attachmentCacheChannelID: string;
+        openCategoryID: string;
     };
     mediaChannelIDs: string[];
     muteRoleID: string;
