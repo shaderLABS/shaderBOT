@@ -11,7 +11,7 @@ export const command: Command = {
     help: "Display your or another user's warns.",
     minArgs: 0,
     maxArgs: null,
-    expectedArgs: '<uuid | <@user|userID|username>>',
+    expectedArgs: '[uuid | <@user|userID|username>]',
     callback: async (message, args, text) => {
         const { channel, member } = message;
 
