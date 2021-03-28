@@ -8,6 +8,8 @@ import { store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
 export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember): Promise<Date> {
+    if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
+
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
         log(`Failed to mute <@${userID}> for ${secondsToString(duration)}: mute role not found.`);
@@ -92,6 +94,8 @@ export async function mute(userID: string, duration: number, modID: string | nul
 }
 
 export async function unmute(userID: string, modID?: string, member?: GuildMember) {
+    if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
+
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
         log(`Failed to unmute <@${userID}>: mute role not found.`);
