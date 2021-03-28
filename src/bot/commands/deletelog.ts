@@ -37,7 +37,7 @@ export const command: Command = {
                 `**Type:** ${punishmentTypeAsString[deletedEntry.type]}\n` +
                 `**Reason:** ${deletedEntry.reason || 'No reason provided.'}\n` +
                 `**Moderator:** ${deletedEntry.mod_id ? `<@${deletedEntry.mod_id}>` : 'System'}\n` +
-                `**ID:** ${text}\n` +
+                `**ID:** ${id}\n` +
                 `**Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
 
             if (deletedEntry.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(deletedEntry.lifted_timestamp))}`;
