@@ -1,5 +1,6 @@
 import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { client } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { punishmentToString } from '../../lib/banUser.js';
 import log from '../../lib/log.js';
@@ -19,10 +20,11 @@ export const event: Event = {
             })
         ).entries.first();
 
-        if (!auditLog || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || auditLog.executor.bot)
+        if (!auditLog || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || (auditLog.executor.bot && client.user?.id !== auditLog.executor.id))
             return log(
-                `Someone banned <@${user.id}>, but the moderator could not be retrieved. Please check the audit logs, ban <@${user.id}> again using the command and refrain from banning people using the Discord feature!`
+                `Someone banned <@${user.id}>, but the moderator could not be retrieved. Please check the audit logs, ban <@${user.id}> again using the command and refrain from banning people using other bots or the Discord feature!`
             );
+
         const { createdAt, executor, reason } = auditLog;
 
         try {
