@@ -44,7 +44,10 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
 }
 
 function punishmentToString(punishment: any) {
-    return `**Reason:** ${punishment.reason || 'No reason provided.'}\n**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n**ID:** ${
-        punishment.id
-    }\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`;
+    return (
+        `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
+        `**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n` +
+        `**ID:** ${punishment.id}\n` +
+        `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`
+    );
 }

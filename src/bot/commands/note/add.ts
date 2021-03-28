@@ -37,15 +37,17 @@ export const command: Command = {
             ).rows[0];
             if (!result || !result.id) return sendError(channel, 'Failed to insert note into the database.');
 
+            const messageContent = `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}`;
+
             channel.send(
                 new MessageEmbed()
                     .setAuthor('Added Note', 'https://img.icons8.com/color/48/000000/note.png')
                     .setColor('#ffc107')
-                    .setDescription(`**User:** <@${user.id}>\n**Moderator:** <@${author.id}>\n**Content:** ${content}\n**Created At:** ${formatTimeDate(timestamp)}`)
+                    .setDescription(messageContent)
                     .setFooter('ID: ' + result.id)
             );
 
-            log(`**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}\n**ID:** ${result.id}`, 'Added Note');
+            log(`${messageContent}\n**ID:** ${result.id}`, 'Added Note');
         } catch (error) {
             sendError(channel, error);
         }

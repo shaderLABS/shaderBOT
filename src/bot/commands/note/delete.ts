@@ -31,21 +31,19 @@ export const command: Command = {
         ).rows[0];
         if (!result) return sendError(channel, 'There is no note with this ID.');
 
+        const messageContent = [
+            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${formatTimeDate(new Date(result.timestamp))}`,
+            result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${formatTimeDate(new Date(result.edited_timestamp))})*` : '',
+        ];
+
         channel.send(
             new MessageEmbed()
                 .setAuthor('Deleted Note', 'https://img.icons8.com/color/48/000000/note.png')
                 .setColor('#ffc107')
-                .setDescription(
-                    `**User:** <@${result.user_id}>\n**Moderator:** <@${result.mod_id}>\n**Content:** ${result.content}\n**Created At:** ${formatTimeDate(new Date(result.timestamp))}${
-                        result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${formatTimeDate(new Date(result.edited_timestamp))})*` : ''
-                    }`
-                )
+                .setDescription(messageContent.join(''))
                 .setFooter('ID: ' + args[0])
         );
 
-        log(
-            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${formatTimeDate(new Date(result.timestamp))}\n**ID:** ${args[0]}`,
-            'Deleted Note'
-        );
+        log(messageContent.join(`\n**ID:** ${args[0]}`), 'Deleted Note');
     },
 };

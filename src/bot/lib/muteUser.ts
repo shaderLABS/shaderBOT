@@ -168,7 +168,11 @@ export async function checkMuteEvasion(member: GuildMember) {
 }
 
 function punishmentToString(punishment: any) {
-    return `**Reason:** ${punishment.reason || 'No reason provided.'}\n**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n**ID:** ${
-        punishment.id
-    }\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`;
+    return (
+        `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
+        `**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n` +
+        `**ID:** ${punishment.id}\n` +
+        `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
+        `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`
+    );
 }

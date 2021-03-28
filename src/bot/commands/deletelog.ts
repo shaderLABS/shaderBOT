@@ -32,12 +32,13 @@ export const command: Command = {
             ).rows[0];
             if (!deletedEntry) return sendError(channel, 'The specified log entry could not be resolved.');
 
-            let content = `**User:** <@${deletedEntry.user_id}>
-                **Type:** ${punishmentTypeAsString[deletedEntry.type]}
-                **Reason:** ${deletedEntry.reason || 'No reason provided.'}
-                **Moderator:** ${deletedEntry.mod_id ? `<@${deletedEntry.mod_id}>` : 'System'}
-                **ID:** ${text}
-                **Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
+            let content =
+                `**User:** <@${deletedEntry.user_id}>\n` +
+                `**Type:** ${punishmentTypeAsString[deletedEntry.type]}\n` +
+                `**Reason:** ${deletedEntry.reason || 'No reason provided.'}\n` +
+                `**Moderator:** ${deletedEntry.mod_id ? `<@${deletedEntry.mod_id}>` : 'System'}\n` +
+                `**ID:** ${text}\n` +
+                `**Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
 
             if (deletedEntry.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(deletedEntry.lifted_timestamp))}`;
             if (deletedEntry.lifted_mod_id) content += `\n**Lifted By:** <@${deletedEntry.lifted_mod_id}>`;

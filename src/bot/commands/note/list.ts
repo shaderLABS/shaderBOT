@@ -33,15 +33,20 @@ export const command: Command = {
 
                 if (!note) return sendError(channel, 'There is no note with this ID.');
 
+                const messageContent =
+                    `**User:** <@${note.user_id}>\n` +
+                    `**Content:** ${note.content}\n` +
+                    `**Moderator:** <@${note.mod_id}>\n` +
+                    `**Created At:** ${formatTimeDate(new Date(note.timestamp))}` +
+                    note.edited_timestamp
+                        ? `\n*(last edited by <@${note.edited_mod_id}> at ${formatTimeDate(new Date(note.edited_timestamp))})*`
+                        : '';
+
                 channel.send(
                     new MessageEmbed()
                         .setAuthor('Note', 'https://img.icons8.com/color/48/000000/note.png')
                         .setColor('#ffc107')
-                        .setDescription(
-                            `**User:** <@${note.user_id}>\n**Moderator:** <@${note.mod_id}>\n**Content:** ${note.content}\n**Created At:** ${formatTimeDate(new Date(note.timestamp))}${
-                                note.edited_timestamp ? `\n*(last edited by <@${note.edited_mod_id}> at ${formatTimeDate(new Date(note.edited_timestamp))})*` : ''
-                            }`
-                        )
+                        .setDescription(messageContent)
                         .setFooter('ID: ' + args[0])
                 );
             } else {
@@ -60,9 +65,15 @@ export const command: Command = {
 
                 const pages: string[] = [];
                 notes.reduce((prev, curr, i, { length }) => {
-                    const page = `**User:** <@${curr.user_id}>\n**Content:** ${curr.content}\n**Moderator:** <@${curr.mod_id}>\n**ID:** ${curr.id}\n**Created At:** ${formatTimeDate(
-                        new Date(curr.timestamp)
-                    )}${curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : ''}`;
+                    const page =
+                        `**User:** <@${curr.user_id}>\n` +
+                        `**Content:** ${curr.content}\n` +
+                        `**Moderator:** <@${curr.mod_id}>\n` +
+                        `**Created At:** ${formatTimeDate(new Date(curr.timestamp))}\n` +
+                        `**ID:** ${curr.id}` +
+                        curr.edited_timestamp
+                            ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*`
+                            : '';
 
                     if ((i + 1) % 3 === 0 || i === length - 1) {
                         pages.push(prev + '\n\n' + page);
