@@ -3,13 +3,13 @@ import { Command } from '../commandHandler.js';
 import log from '../lib/log.js';
 
 export const command: Command = {
-    commands: ['shutdown', 'stop'],
-    help: 'Stop the bot.',
+    commands: ['restart'],
+    help: 'Restart the bot.',
     minArgs: 0,
     maxArgs: 0,
     requiredPermissions: ['BAN_MEMBERS'],
     callback: async (message) => {
-        await log(`The bot has been stopped by <@${message.author.id}>.`);
+        await log(`The bot has been restarted by <@${message.author.id}>.`);
         shutdown();
     },
 };

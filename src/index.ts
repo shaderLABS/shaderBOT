@@ -4,22 +4,13 @@ import log from './bot/lib/log.js';
 import { connectPostgreSQL, db } from './db/postgres.js';
 import { startWebserver, stopWebserver } from './web/server.js';
 
-export function hardShutdown() {
+export function shutdown(code: number = 0) {
     console.log('Shutting down...');
-    process.exit(1);
-}
-
-export async function shutdown(code: number = 0) {
-    console.log('Shutting down gracefully...');
     if (process.env.BOT_ONLY !== 'true') stopWebserver();
-    await db.end().catch(() => undefined);
+    db.end().catch(() => undefined);
     client.destroy();
     process.exit(code);
 }
-
-process.on('SIGINT', hardShutdown);
-process.on('SIGUSR1', hardShutdown);
-process.on('SIGUSR2', hardShutdown);
 
 if (process.env.NODE_ENV === 'development') {
     process.on('uncaughtException', async (error) => {
