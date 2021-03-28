@@ -1,6 +1,7 @@
 import { client } from '../bot.js';
 import { Command } from '../commandHandler.js';
 import { sendInfo } from '../lib/embeds.js';
+import { secondsToString } from '../lib/time.js';
 
 export const command: Command = {
     commands: ['latency'],
@@ -10,7 +11,7 @@ export const command: Command = {
     callback: async (message) => {
         const pinging = await sendInfo(message.channel, 'Pinging...', 'Latency');
         const latency = pinging.createdTimestamp - message.createdTimestamp;
-        const uptime = new Date(process.uptime() * 1000).toISOString().substr(11, 8);
+        const uptime = secondsToString(Math.floor(process.uptime()));
 
         pinging.edit(
             pinging.embeds[0].setDescription('').addFields([
