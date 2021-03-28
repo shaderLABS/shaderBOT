@@ -1,6 +1,7 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
+import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
 import { store } from './punishments.js';
@@ -57,7 +58,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
                     new MessageEmbed({
                         author: { name: 'You have been muted on shaderLABS.' },
                         description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
-                        color: '#006fff',
+                        color: embedColor.blue,
                     })
                 )
                 .catch(() => undefined);

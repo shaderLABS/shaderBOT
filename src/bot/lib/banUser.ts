@@ -1,5 +1,6 @@
 import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
+import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
 import { store } from './punishments.js';
@@ -56,7 +57,7 @@ export async function tempban(user: User, duration: number, modID: string | null
                 new MessageEmbed({
                     author: { name: 'You have been banned from shaderLABS.' },
                     description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
-                    color: '#006fff',
+                    color: embedColor.blue,
                 })
             )
             .catch(() => undefined);
@@ -133,7 +134,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
                 new MessageEmbed({
                     author: { name: 'You have been banned from shaderLABS.' },
                     description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
-                    color: '#006fff',
+                    color: embedColor.blue,
                 })
             )
             .catch(() => undefined);

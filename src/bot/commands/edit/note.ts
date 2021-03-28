@@ -3,7 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editNote } from '../../lib/edit/editNote.js';
-import { sendError } from '../../lib/embeds.js';
+import { embedIcon, sendError } from '../../lib/embeds.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
@@ -28,7 +28,7 @@ export const command: Command = {
 
                 channel.send(
                     new MessageEmbed()
-                        .setAuthor('Edited Note', 'https://img.icons8.com/color/48/000000/note.png')
+                        .setAuthor('Edited Note', embedIcon.note)
                         .setColor('#ffc107')
                         .setDescription(`Successfully edited the content of <@${user_id}>'s note.`)
                         .setFooter('ID: ' + args[0])
@@ -43,7 +43,7 @@ export const command: Command = {
 
                 channel.send(
                     new MessageEmbed()
-                        .setAuthor('Edited Note', 'https://img.icons8.com/color/48/000000/note.png')
+                        .setAuthor('Edited Note', embedIcon.note)
                         .setColor('#ffc107')
                         .setDescription(`Successfully edited the content of <@${user.id}>'s note.`)
                         .setFooter('ID: ' + latestNoteID.id)

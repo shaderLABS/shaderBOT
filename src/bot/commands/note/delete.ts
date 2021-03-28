@@ -2,7 +2,7 @@ import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError } from '../../lib/embeds.js';
+import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -38,7 +38,7 @@ export const command: Command = {
 
         channel.send(
             new MessageEmbed()
-                .setAuthor('Deleted Note', 'https://img.icons8.com/color/48/000000/note.png')
+                .setAuthor('Deleted Note', embedIcon.note)
                 .setColor('#ffc107')
                 .setDescription(messageContent.join(''))
                 .setFooter('ID: ' + args[0])

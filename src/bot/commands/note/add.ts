@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { sendError } from '../../lib/embeds.js';
+import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
@@ -41,7 +41,7 @@ export const command: Command = {
 
             channel.send(
                 new MessageEmbed()
-                    .setAuthor('Added Note', 'https://img.icons8.com/color/48/000000/note.png')
+                    .setAuthor('Added Note', embedIcon.note)
                     .setColor('#ffc107')
                     .setDescription(messageContent)
                     .setFooter('ID: ' + result.id)

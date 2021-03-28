@@ -1,5 +1,6 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
+import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
 import { formatTimeDate } from './time.js';
@@ -28,7 +29,7 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
                     new MessageEmbed({
                         author: { name: 'You have been kicked from shaderLABS.' },
                         description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
-                        color: '#006fff',
+                        color: embedColor.blue,
                     })
                 )
                 .catch(() => undefined);

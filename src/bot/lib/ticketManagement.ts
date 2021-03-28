@@ -3,6 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
+import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
 import { formatTimeDate } from './time.js';
@@ -81,7 +82,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     const ticketEmbed = new MessageEmbed()
         .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
         .setTitle(ticket.title)
-        .setColor('#006fff')
+        .setColor(embedColor.blue)
         .setFooter(ticketFooter)
         .addFields([
             {

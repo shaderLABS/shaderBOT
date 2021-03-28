@@ -1,7 +1,7 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError } from '../../lib/embeds.js';
+import { embedColor, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getMember } from '../../lib/searchMessage.js';
 
@@ -63,7 +63,7 @@ export const command: Command = {
             new MessageEmbed()
                 .setAuthor(channel.name)
                 .setFooter('ID: ' + projectID)
-                .setColor('#00ff11')
+                .setColor(embedColor.green)
                 .addFields([
                     {
                         name: owners.size > 1 ? 'Owners' : 'Owner',

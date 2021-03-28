@@ -2,7 +2,7 @@ import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { embedPages, sendError } from '../../lib/embeds.js';
+import { embedIcon, embedPages, sendError } from '../../lib/embeds.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -44,7 +44,7 @@ export const command: Command = {
 
                 channel.send(
                     new MessageEmbed()
-                        .setAuthor('Note', 'https://img.icons8.com/color/48/000000/note.png')
+                        .setAuthor('Note', embedIcon.note)
                         .setColor('#ffc107')
                         .setDescription(messageContent)
                         .setFooter('ID: ' + args[0])
@@ -85,7 +85,7 @@ export const command: Command = {
 
                 const embed = await channel.send(
                     new MessageEmbed()
-                        .setAuthor(notes.length > 1 ? 'Notes' : 'Note', 'https://img.icons8.com/color/48/000000/note.png')
+                        .setAuthor(notes.length > 1 ? 'Notes' : 'Note', embedIcon.note)
                         .setColor('#ffc107')
                         .setDescription(pages[0])
                 );

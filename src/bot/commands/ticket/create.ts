@@ -3,7 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
-import { sendError, sendInfo } from '../../lib/embeds.js';
+import { embedColor, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { cacheAttachment, cutDescription, deleteAttachmentFromDiscord, getCategoryChannel } from '../../lib/ticketManagement.js';
 
@@ -83,7 +83,7 @@ export const command: Command = {
             });
 
             const ticketEmbed = new MessageEmbed({
-                color: '#006fff',
+                color: embedColor.blue,
                 author: {
                     name: author.username + '#' + author.discriminator,
                     iconURL: author.displayAvatarURL() || undefined,

@@ -1,26 +1,40 @@
 import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel, User } from 'discord.js';
 
+export const embedColor = {
+    green: '#00ff11',
+    red: '#ff1100',
+    blue: '#006fff',
+};
+
+export const embedIcon = {
+    success: 'https://img.icons8.com/color/48/000000/ok--v1.png',
+    error: 'https://img.icons8.com/color/48/000000/cancel--v1.png',
+    info: 'https://img.icons8.com/color/48/000000/info--v1.png',
+    log: 'https://img.icons8.com/officexs/48/000000/clock.png',
+    note: 'https://img.icons8.com/color/48/000000/note.png',
+};
+
 export function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Success', 'https://img.icons8.com/color/48/000000/ok--v1.png')
+        .setAuthor(title || 'Success', embedIcon.success)
         .setDescription(description)
-        .setColor('#00ff11');
+        .setColor(embedColor.green);
     return channel.send(embed);
 }
 
 export function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Error', 'https://img.icons8.com/color/48/000000/cancel--v1.png')
+        .setAuthor(title || 'Error', embedIcon.error)
         .setDescription(description)
-        .setColor('#ff1100');
+        .setColor(embedColor.red);
     return channel.send(embed);
 }
 
 export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || '', title ? 'https://img.icons8.com/color/48/000000/info--v1.png' : undefined)
+        .setAuthor(title || '', title ? embedIcon.info : undefined)
         .setDescription(description)
-        .setColor('#006fff')
+        .setColor(embedColor.blue)
         .setFooter(footer || '');
     return channel.send(message, embed);
 }
