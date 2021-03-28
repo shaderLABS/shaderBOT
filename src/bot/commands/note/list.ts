@@ -38,9 +38,7 @@ export const command: Command = {
                     `**Content:** ${note.content}\n` +
                     `**Moderator:** <@${note.mod_id}>\n` +
                     `**Created At:** ${formatTimeDate(new Date(note.timestamp))}` +
-                    note.edited_timestamp
-                        ? `\n*(last edited by <@${note.edited_mod_id}> at ${formatTimeDate(new Date(note.edited_timestamp))})*`
-                        : '';
+                    (note.edited_timestamp ? `\n*(last edited by <@${note.edited_mod_id}> at ${formatTimeDate(new Date(note.edited_timestamp))})*` : '');
 
                 channel.send(
                     new MessageEmbed()
@@ -71,9 +69,7 @@ export const command: Command = {
                         `**Moderator:** <@${curr.mod_id}>\n` +
                         `**Created At:** ${formatTimeDate(new Date(curr.timestamp))}\n` +
                         `**ID:** ${curr.id}` +
-                        curr.edited_timestamp
-                            ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*`
-                            : '';
+                        (curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : '');
 
                     if ((i + 1) % 3 === 0 || i === length - 1) {
                         pages.push(prev + '\n\n' + page);

@@ -74,16 +74,15 @@ export const command: Command = {
             if (queries[1].rowCount !== 0) {
                 pageCategory(
                     'Punishments',
-                    queries[1].rows.map((row) =>
-                        `\n**Type:** ${punishmentTypeAsString[row.type]}` +
-                        `\n**Reason:** ${row.reason || 'No reason provided.'}` +
-                        `\n**Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
-                        `\n**Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}` +
-                        row.edited_timestamp
-                            ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*`
-                            : ''
+                    queries[1].rows.map(
+                        (row) =>
+                            `\n**Type:** ${punishmentTypeAsString[row.type]}` +
+                            `\n**Reason:** ${row.reason || 'No reason provided.'}` +
+                            `\n**Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}` +
+                            `\n**ID:** ${row.id}` +
+                            `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
+                            `\n**Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}` +
+                            (row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
                     )
                 );
             }
@@ -91,14 +90,13 @@ export const command: Command = {
             if (queries[2].rowCount !== 0) {
                 pageCategory(
                     'Notes',
-                    queries[2].rows.map((row) =>
-                        `\n**Content:** ${row.content}` +
-                        `\n**Moderator:** <@${row.mod_id}>` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
-                        row.edited_timestamp
-                            ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*`
-                            : ''
+                    queries[2].rows.map(
+                        (row) =>
+                            `\n**Content:** ${row.content}` +
+                            `\n**Moderator:** <@${row.mod_id}>` +
+                            `\n**ID:** ${row.id}` +
+                            `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
+                            (row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
                     )
                 );
             }

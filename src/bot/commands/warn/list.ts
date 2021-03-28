@@ -40,9 +40,7 @@ export const command: Command = {
                 `**Moderator:** <@${warning.mod_id}>\n` +
                 `**ID:** ${args[0]}\n` +
                 `**Created At:** ${formatTimeDate(new Date(warning.timestamp))}` +
-                warning.edited_timestamp
-                    ? `\n*(last edited by <@${warning.edited_mod_id}> at ${formatTimeDate(new Date(warning.edited_timestamp))})*`
-                    : '';
+                (warning.edited_timestamp ? `\n*(last edited by <@${warning.edited_mod_id}> at ${formatTimeDate(new Date(warning.edited_timestamp))})*` : '');
 
             sendInfo(channel, content, 'Warning');
         } else {
@@ -83,9 +81,7 @@ export const command: Command = {
                     `**Moderator:** <@${curr.mod_id}>\n` +
                     `**ID:** ${curr.id}\n` +
                     `**Created At:** ${formatTimeDate(new Date(curr.timestamp))}` +
-                    curr.edited_timestamp
-                        ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*`
-                        : '';
+                    (curr.edited_timestamp ? `\n*(last edited by <@${curr.edited_mod_id}> at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : '');
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {
                     pages.push(prev + '\n\n' + page);
