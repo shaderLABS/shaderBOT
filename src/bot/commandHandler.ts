@@ -161,7 +161,8 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         args,
         content
             .slice(settings.prefix.length + invoke.length)
-            .replaceAll(/(?<!\\)"/g, '')
+            .replace(/(?<!\\)(\\\\)*"/g, '$1') // remove non-escaped double quotes
+            .replace(/\\"/g, '"') // remove escape character of escaped double quotes
             .trim()
     );
 }

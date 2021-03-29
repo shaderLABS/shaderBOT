@@ -41,7 +41,7 @@ function parseContent(content: string) {
             (prev, curr) => {
                 if (curr === '"') prev.quote ^= 1;
                 else if (!prev.quote && curr === ' ') prev.args.push('');
-                else prev.args[prev.args.length - 1] += curr;
+                else prev.args[prev.args.length - 1] += curr.replace(/\\"/g, '"');
                 return prev;
             },
             { args: [''], quote: 0 }
