@@ -11,10 +11,12 @@ export default async function (user: User, member?: GuildMember) {
             /*sql*/ `
             SELECT severity, timestamp
             FROM warn
-            WHERE user_id = $1;`,
+            WHERE severity > 0 AND user_id = $1;`,
             [user.id]
         )
     ).rows;
+
+    if (warnings.length === 0) return;
 
     const excludedTimes = await Promise.all(
         warnings.map((warning) =>
@@ -28,10 +30,7 @@ export default async function (user: User, member?: GuildMember) {
         )
     );
 
-    let punishmentPoints = 0;
-    warnings.forEach((warning, i) => {
-        if (warning.severity !== 0) punishmentPoints += warningToPoints(warning.severity, new Date(warning.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000);
-    });
+    const punishmentPoints = warnings.reduce((prev, curr, i) => prev + warningToPoints(curr.severity, new Date(curr.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000), 0);
 
     try {
         if (punishmentPoints >= settings.warnings.punishment.muteRange[0] && punishmentPoints < settings.warnings.punishment.muteRange[1]) {

@@ -26,8 +26,8 @@ export const command: Command = {
         if (severity < 0 || severity > 3) return sendError(channel, 'The severity must be an integer between 0 and 3.');
 
         const targetMember = await getMember(args[1]).catch(() => undefined);
-        const user = targetMember?.user || (await getUser(args[1]).catch(() => undefined));
-        if (!user) return syntaxError(channel, 'warn create ' + expectedArgs);
+        const targetUser = targetMember?.user || (await getUser(args[1]).catch(() => undefined));
+        if (!targetUser) return syntaxError(channel, 'warn create ' + expectedArgs);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return sendError(channel, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
@@ -38,18 +38,18 @@ export const command: Command = {
                 INSERT INTO warn (user_id, mod_id, reason, severity, timestamp)
                 VALUES ($1, $2, $3, $4::SMALLINT, $5)
                 RETURNING id;`,
-                [user.id, member.id, reason.length !== 0 ? reason : null, severity, new Date()]
+                [targetUser.id, member.id, reason.length !== 0 ? reason : null, severity, new Date()]
             )
         ).rows[0].id;
 
-        let content = `**User:** <@${user.id}>\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${member.id}>\n**ID:** ${id}`;
-        await user.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })).catch(() => {
+        let content = `**User:** <@${targetUser.id}>\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${member.id}>\n**ID:** ${id}`;
+        await targetUser.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })).catch(() => {
             content += '\n\n*The target could not be DMed.*';
         });
 
         sendSuccess(channel, content, 'Added Warning');
         log(content, 'Added Warning');
 
-        automaticPunishment(user, targetMember);
+        automaticPunishment(targetUser, targetMember);
     },
 };
