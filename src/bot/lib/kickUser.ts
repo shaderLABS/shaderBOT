@@ -11,6 +11,7 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
     if (!user.kickable) return Promise.reject('The specified user is not kickable.');
 
     const timestamp = new Date();
+    let dmed = true;
 
     try {
         const kick = (
@@ -32,7 +33,9 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
                         color: embedColor.blue,
                     })
                 )
-                .catch(() => undefined);
+                .catch(() => {
+                    dmed = false;
+                });
         }
     } catch (error) {
         console.error(error);
@@ -41,7 +44,8 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
     }
 
     await user.kick(reason || 'No reason provided.');
-    log(`${modID ? `<@${modID}>` : 'System'} kicked <@${user.id}>:\n\`${reason || 'No reason provided.'}\``, 'Kick');
+    log(`${modID ? `<@${modID}>` : 'System'} kicked <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
+    return { dmed };
 }
 
 function punishmentToString(punishment: any) {

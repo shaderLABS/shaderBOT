@@ -7,7 +7,7 @@ import { getGuild } from './misc.js';
 import { store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
-export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember): Promise<Date> {
+export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
@@ -18,6 +18,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
 
     const timestamp = new Date();
     const expire = new Date(timestamp.getTime() + duration * 1000);
+    let dmed = true;
 
     try {
         const overwrittenPunishment = (
@@ -63,13 +64,15 @@ export async function mute(userID: string, duration: number, modID: string | nul
                         color: embedColor.blue,
                     })
                 )
-                .catch(() => undefined);
+                .catch(() => {
+                    dmed = false;
+                });
         }
 
         log(
             `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${userID}>'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
-            }`
+            }${dmed ? '' : '\n\n*The target could not be DMed.*'}`
         );
     } catch (error) {
         console.error(error);
@@ -90,7 +93,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
         store.mutes.set(userID, timeout);
     }
 
-    return expire;
+    return { expire, dmed };
 }
 
 export async function unmute(userID: string, modID?: string, member?: GuildMember) {

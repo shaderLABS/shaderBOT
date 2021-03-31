@@ -1,4 +1,3 @@
-import { GuildMember } from 'discord.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
@@ -17,8 +16,9 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const user = (await getMember(args[0]).catch(() => undefined)) || (await getUser(args[0]).catch(() => undefined));
-        if (!user) return syntaxError(channel, 'tempban ' + expectedArgs);
+        const targetMember = await getMember(args[0]).catch(() => undefined);
+        const targetUser = targetMember?.user || (await getUser(args[0]).catch(() => undefined));
+        if (!targetUser) return syntaxError(channel, 'tempban ' + expectedArgs);
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
         const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
@@ -30,18 +30,16 @@ export const command: Command = {
             if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
             if (time < 10) return sendError(channel, "You can't temporarily ban someone for less than 10 seconds.");
 
-            if (user instanceof GuildMember) {
-                if (member.roles.highest.comparePositionTo(user.roles.highest) <= 0)
+            if (targetMember) {
+                if (member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
                     return sendError(channel, "You can't temporarily ban a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
-                if (!user.bannable) return sendError(channel, 'This user is not bannable.');
-
-                await tempban(user.user, time, member.id, reason, deleteMessages);
-            } else {
-                await tempban(user, time, member.id, reason, deleteMessages);
+                if (!targetMember.bannable) return sendError(channel, 'This user is not bannable.');
             }
 
-            sendSuccess(channel, `<@${user.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\``);
+            const { dmed } = await tempban(targetUser, time, member.id, reason, deleteMessages);
+
+            sendSuccess(channel, `<@${targetUser.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
         } catch (error) {
             sendError(channel, error);
         }

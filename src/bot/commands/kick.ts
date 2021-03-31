@@ -24,11 +24,10 @@ export const command: Command = {
         if (!user.kickable) return sendError(channel, 'This user is not kickable.');
 
         try {
-            await kick(user, member.id, reason);
+            const { dmed } = await kick(user, member.id, reason);
+            sendSuccess(channel, `<@${user.id}> has been kicked:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
         } catch (error) {
-            return sendError(channel, error);
+            sendError(channel, error);
         }
-
-        sendSuccess(channel, `<@${user.id}> has been kicked:\n\`${reason || 'No reason provided.'}\``);
     },
 };

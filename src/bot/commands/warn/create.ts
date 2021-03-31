@@ -42,9 +42,11 @@ export const command: Command = {
             )
         ).rows[0].id;
 
-        const content = `**User:** <@${user.id}>\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${member.id}>\n**ID:** ${id}`;
+        let content = `**User:** <@${user.id}>\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** <@${member.id}>\n**ID:** ${id}`;
+        await user.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })).catch(() => {
+            content += '\n\n*The target could not be DMed.*';
+        });
 
-        user.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })).catch(() => undefined);
         sendSuccess(channel, content, 'Added Warning');
         log(content, 'Added Warning');
 

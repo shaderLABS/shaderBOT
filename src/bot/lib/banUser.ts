@@ -10,12 +10,13 @@ import { formatTimeDate, secondsToString } from './time.js';
  * BAN *
  *******/
 
-export async function tempban(user: User, duration: number, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false): Promise<Date> {
+export async function tempban(user: User, duration: number, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
     const timestamp = new Date();
     const expire = new Date(timestamp.getTime() + duration * 1000);
+    let dmed = true;
 
     try {
         const overwrittenPunishment = (
@@ -60,13 +61,15 @@ export async function tempban(user: User, duration: number, modID: string | null
                     color: embedColor.blue,
                 })
             )
-            .catch(() => undefined);
+            .catch(() => {
+                dmed = false;
+            });
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
             `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
-            }`,
+            }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Temporary Ban'
         );
 
@@ -86,13 +89,15 @@ export async function tempban(user: User, duration: number, modID: string | null
         return Promise.reject(`Failed to temporarily ban <@${user.id}> for ${secondsToString(duration)}.`);
     }
 
-    return expire;
+    return { expire, dmed };
 }
 
 export async function ban(user: User, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false) {
-    const timestamp = new Date();
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
+
+    const timestamp = new Date();
+    let dmed = true;
 
     try {
         const overwrittenPunishment = (
@@ -137,7 +142,9 @@ export async function ban(user: User, modID: string | null = null, reason: strin
                     color: embedColor.blue,
                 })
             )
-            .catch(() => undefined);
+            .catch(() => {
+                dmed = false;
+            });
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
@@ -151,6 +158,8 @@ export async function ban(user: User, modID: string | null = null, reason: strin
         log(`Failed to ban <@${user.id}>.`);
         return Promise.reject('Error while accessing the database.');
     }
+
+    return { dmed };
 }
 
 export function punishmentToString(punishment: any) {
