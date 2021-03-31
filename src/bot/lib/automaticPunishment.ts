@@ -16,9 +16,21 @@ export default async function (user: User, member?: GuildMember) {
         )
     ).rows;
 
+    const excludedTimes = await Promise.all(
+        warnings.map((warning) =>
+            db.query(
+                /*sql*/ `
+                SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - timestamp))), 0) AS exclude
+                FROM past_punishment
+                WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND timestamp >= $1::TIMESTAMP AND user_id = $2;`,
+                [new Date(warning.timestamp), user.id]
+            )
+        )
+    );
+
     let punishmentPoints = 0;
-    warnings.forEach((warning) => {
-        if (warning.severity !== 0) punishmentPoints += warningToPoints(warning.severity, new Date(warning.timestamp));
+    warnings.forEach((warning, i) => {
+        if (warning.severity !== 0) punishmentPoints += warningToPoints(warning.severity, new Date(warning.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000);
     });
 
     try {
@@ -40,8 +52,8 @@ function interpolateTime(range: number[], values: number[], punishmentPoints: nu
     return values[0] + ((values[1] - values[0]) * (punishmentPoints - range[0])) / (range[1] - range[0]);
 }
 
-function warningToPoints(severity: number, timestamp: Date) {
-    const elapsedDays = Math.floor((Date.now() - timestamp.getTime()) / 86400000);
+function warningToPoints(severity: number, passedMS: number) {
+    const elapsedDays = Math.floor((Date.now() - passedMS) / 86400000);
     const scale = elapsedDays / settings.warnings.decay[severity - 1];
     return severity / (scale + 1.0);
 }
