@@ -1,6 +1,6 @@
+import { MessageAttachment } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
-import { sendInfo } from '../../lib/embeds.js';
 
 export const command: Command = {
     commands: ['list'],
@@ -10,6 +10,7 @@ export const command: Command = {
     maxArgs: 0,
     requiredPermissions: ['MANAGE_GUILD'],
     callback: (message) => {
-        sendInfo(message.channel, '```json\n' + JSON.stringify(settings, null, 2) + '```', 'Configuration');
+        const attachment = new MessageAttachment(Buffer.from(JSON.stringify(settings, null, 2)), 'configuration.json');
+        message.channel.send(attachment);
     },
 };
