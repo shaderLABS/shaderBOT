@@ -5,11 +5,13 @@ import { embedColor, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getMember } from '../../lib/searchMessage.js';
 
+const expectedArgs = '<@user|userID|username> [...]';
+
 export const command: Command = {
     commands: ['setup'],
-    superCommands: ['project'],
+    superCommands: ['modproject', 'mproject'],
     help: 'Setup a project linked to the current channel.',
-    expectedArgs: '<@user|userID|username> [...]',
+    expectedArgs,
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_CHANNELS'],
@@ -25,7 +27,7 @@ export const command: Command = {
             if (user) owners.add(user);
         }
 
-        if (owners.size === 0) return syntaxError(channel, 'project setup <@user|userID|username> [...]');
+        if (owners.size === 0) return syntaxError(channel, 'project setup ' + expectedArgs);
 
         for (const owner of owners) {
             channel.createOverwrite(owner, {

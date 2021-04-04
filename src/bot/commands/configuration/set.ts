@@ -7,7 +7,7 @@ import { update } from '../../settings/settings.js';
 
 export const command: Command = {
     commands: ['set'],
-    superCommands: ['config'],
+    superCommands: ['configuration', 'config'],
     help: "Edit the bot's current configuration.",
     expectedArgs: '<path> <JSONValue>',
     minArgs: 2,

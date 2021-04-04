@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 
 export const command: Command = {
     commands: ['list'],
-    superCommands: ['config'],
+    superCommands: ['configuration', 'config'],
     help: "Print the bot's current configuration.",
     minArgs: 0,
     maxArgs: 0,

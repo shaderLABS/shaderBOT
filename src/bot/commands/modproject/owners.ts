@@ -9,7 +9,7 @@ const expectedArgs = '<@user|userID|username> [...]';
 
 export const command: Command = {
     commands: ['owners'],
-    superCommands: ['project'],
+    superCommands: ['modproject', 'mproject'],
     help: 'Change the owner(s) of the project linked to the current channel.',
     expectedArgs,
     minArgs: 1,
@@ -19,7 +19,6 @@ export const command: Command = {
         const { channel } = message;
 
         let owners: Set<GuildMember> = new Set();
-        message.mentions.members?.forEach((member) => owners.add(member));
 
         for (const potentialID of args) {
             const user = await getMember(potentialID).catch(() => undefined);

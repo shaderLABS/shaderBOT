@@ -1,13 +1,12 @@
-import { db } from '../../../db/postgres.js';
-import { settings } from '../../bot.js';
-import { Command, syntaxError } from '../../commandHandler.js';
-import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { db } from '../../db/postgres.js';
+import { settings } from '../bot.js';
+import { Command, syntaxError } from '../commandHandler.js';
+import { sendError, sendSuccess } from '../lib/embeds.js';
 
 const expectedArgs = '<#project>';
 
 export const command: Command = {
     commands: ['notify'],
-    superCommands: ['project'],
     help: 'Opt in/out to receive notifications from a project.',
     minArgs: 1,
     maxArgs: 1,
