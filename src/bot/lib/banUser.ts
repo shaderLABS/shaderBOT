@@ -150,7 +150,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
         log(
             `${modID ? `<@${modID}>` : 'System'} permanently banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
-            }`,
+            }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Ban'
         );
     } catch (error) {
