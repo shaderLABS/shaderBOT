@@ -39,6 +39,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "muteRoleID": "",
     "guildID": "",
+    "archiveCategoryIDs": [""], // categories which are used for archiving projects
     "warnings": {
         "decay": [0, 0, 0], // days, severity 1-3
         "punishment": {
