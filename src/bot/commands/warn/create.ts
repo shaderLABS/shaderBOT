@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { Command, syntaxError } from '../../commandHandler.js';
+import { Command } from '../../commandHandler.js';
 import automaticPunishment from '../../lib/automaticPunishment.js';
 import { embedColor, sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
@@ -27,7 +27,7 @@ export const command: Command = {
 
         const targetMember = await getMember(args[1]).catch(() => undefined);
         const targetUser = targetMember?.user || (await getUser(args[1]).catch(() => undefined));
-        if (!targetUser) return syntaxError(channel, 'warn create ' + expectedArgs);
+        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return sendError(channel, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
