@@ -17,6 +17,7 @@ export interface Settings {
     mediaChannelIDs: string[];
     muteRoleID: string;
     guildID: string;
+    archiveCategoryIDs: string[];
     warnings: {
         decay: number[];
         punishment: {

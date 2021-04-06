@@ -1,8 +1,10 @@
 import { GuildMember } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { ownerOverwrites } from '../../lib/project.js';
 import { getMember } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> [...]';
@@ -17,6 +19,7 @@ export const command: Command = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message, args) => {
         const { channel } = message;
+        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This project is archived.');
 
         let owners: Set<GuildMember> = new Set();
 
@@ -43,17 +46,7 @@ export const command: Command = {
         channel.overwritePermissions(channel.permissionOverwrites.filter((overwrite) => overwrite.type !== 'member' || !oldOwners.includes(overwrite.id)));
 
         for (const owner of owners) {
-            channel.createOverwrite(owner, {
-                MANAGE_WEBHOOKS: true,
-                VIEW_CHANNEL: true,
-                SEND_MESSAGES: true,
-                MANAGE_MESSAGES: true,
-                EMBED_LINKS: true,
-                ATTACH_FILES: true,
-                READ_MESSAGE_HISTORY: true,
-                USE_EXTERNAL_EMOJIS: true,
-                ADD_REACTIONS: true,
-            });
+            channel.createOverwrite(owner, ownerOverwrites);
         }
 
         sendSuccess(channel, `Updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')}.`);

@@ -50,6 +50,8 @@ export const command: Command = {
             // VALIDATION
             const projectChannel = projectAnswer.mentions.channels.first();
             if (!projectChannel) return sendErrorAndDelete(channel, 'The message does not contain a mentioned text channel.', question, attachments, guild);
+            if (projectChannel.parentID && settings.archiveCategoryIDs.includes(projectChannel.parentID))
+                return sendErrorAndDelete(channel, 'The mentioned channel is archived.', question, attachments, guild);
             if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0])
                 return sendErrorAndDelete(channel, 'The mentioned text channel is not a valid project.', question, attachments, guild);
 

@@ -1,7 +1,9 @@
 import { db } from '../../../db/postgres.js';
+import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { getAlphabeticalChannelPosition } from '../../lib/misc.js';
 
 export const command: Command = {
     commands: ['name'],
@@ -15,6 +17,7 @@ export const command: Command = {
     cooldownDuration: 20000,
     callback: async (message, _, text) => {
         const { channel, author } = message;
+        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This project is archived.');
 
         const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
@@ -22,20 +25,10 @@ export const command: Command = {
         if (text.length < 2 || text.length > 32) return sendError(channel, 'Channel names must be between 2 and 32 characters long.');
 
         const oldName = channel.name;
+        channel.name = text;
 
         try {
-            await channel.edit({ name: text });
-
-            const textChannels = channel.parent?.children
-                ?.filter((channel) => channel.type === 'text')
-                .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
-
-            if (textChannels) {
-                const position = textChannels.keyArray().indexOf(channel.id);
-                if (position) {
-                    await channel.edit({ position });
-                }
-            }
+            await channel.edit({ name: text, position: getAlphabeticalChannelPosition(channel, channel.parent) });
         } catch {
             return sendError(channel, 'Failed to edit the name of this channel.');
         }

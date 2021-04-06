@@ -1,8 +1,20 @@
+import { CategoryChannel, TextChannel } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
 export function getGuild() {
     return client.guilds.cache.get(settings.guildID);
+}
+
+export function getAlphabeticalChannelPosition(channel: TextChannel, parent: CategoryChannel | null) {
+    if (!parent) return 0;
+
+    const totalChannels = parent.children
+        .filter((channel) => channel.type === 'text')
+        .set(channel.id, channel)
+        .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
+
+    return totalChannels.keyArray().indexOf(channel.id);
 }
 
 export const sleep = promisify(setTimeout);

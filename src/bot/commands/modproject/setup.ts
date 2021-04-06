@@ -1,8 +1,10 @@
 import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { embedColor, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { ownerOverwrites } from '../../lib/project.js';
 import { getMember } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> [...]';
@@ -17,6 +19,7 @@ export const command: Command = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message, args) => {
         const { channel, guild } = message;
+        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This channel is archived.');
 
         if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0]) return sendError(channel, 'This channel is already linked to a project.');
 
@@ -30,18 +33,7 @@ export const command: Command = {
         if (owners.size === 0) return syntaxError(channel, 'project setup ' + expectedArgs);
 
         for (const owner of owners) {
-            channel.createOverwrite(owner, {
-                MANAGE_WEBHOOKS: true,
-                VIEW_CHANNEL: true,
-                SEND_MESSAGES: true,
-                SEND_TTS_MESSAGES: true,
-                MANAGE_MESSAGES: true,
-                EMBED_LINKS: true,
-                ATTACH_FILES: true,
-                READ_MESSAGE_HISTORY: true,
-                USE_EXTERNAL_EMOJIS: true,
-                ADD_REACTIONS: true,
-            });
+            channel.createOverwrite(owner, ownerOverwrites);
         }
 
         const role = await guild.roles.create({
