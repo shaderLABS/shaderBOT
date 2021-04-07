@@ -1,17 +1,15 @@
-import { Command, syntaxError } from '../../commandHandler.js';
+import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { mute } from '../../lib/muteUser.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
-
-const expectedArgs = '<@user|userID|username> <time> [reason]';
 
 export const command: Command = {
     commands: ['mute'],
     help: 'Mute a user for a specified amount of time.',
     minArgs: 2,
     maxArgs: null,
-    expectedArgs,
+    expectedArgs: '<@user|userID|username> <time> [reason]',
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (message, args, text) => {
         const { member, channel } = message;
@@ -21,7 +19,7 @@ export const command: Command = {
 
         const targetMember = await getMember(args[0]).catch(() => undefined);
         const targetUser = targetMember?.user || (await getUser(args[0]).catch(() => undefined));
-        if (!targetUser) return syntaxError(channel, 'mute ' + expectedArgs);
+        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');

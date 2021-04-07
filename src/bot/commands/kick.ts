@@ -1,22 +1,20 @@
-import { Command, syntaxError } from '../commandHandler.js';
+import { Command } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import { kick } from '../lib/kickUser.js';
 import { getMember, removeArgumentsFromText } from '../lib/searchMessage.js';
-
-const expectedArgs = '<@user|userID|username> [reason]';
 
 export const command: Command = {
     commands: ['kick'],
     help: 'Kick a user.',
     minArgs: 1,
     maxArgs: null,
-    expectedArgs,
+    expectedArgs: '<@user|userID|username> [reason]',
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
         const user = await getMember(args[0]).catch(() => undefined);
-        if (!user) return syntaxError(channel, 'kick ' + expectedArgs);
+        if (!user) return sendError(channel, 'The specified user argument is not resolvable.');
 
         const reason = removeArgumentsFromText(text, args[0]);
 

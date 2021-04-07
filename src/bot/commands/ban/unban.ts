@@ -1,22 +1,20 @@
-import { Command, syntaxError } from '../../commandHandler.js';
+import { Command } from '../../commandHandler.js';
 import { unban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getUser } from '../../lib/searchMessage.js';
-
-const expectedArgs = '<username|userID>';
 
 export const command: Command = {
     commands: ['unban'],
     help: 'Unban a user.',
     minArgs: 1,
     maxArgs: null,
-    expectedArgs,
+    expectedArgs: '<username|userID>',
     requiredPermissions: ['BAN_MEMBERS'],
     callback: async (message, _, text) => {
         const { member, channel } = message;
 
         const user = await getUser(text).catch(() => undefined);
-        if (!user) return syntaxError(channel, 'unban ' + expectedArgs);
+        if (!user) return sendError(channel, 'The specified user argument is not resolvable.');
 
         try {
             await unban(user.id, member.id);

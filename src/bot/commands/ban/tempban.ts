@@ -1,24 +1,22 @@
-import { Command, syntaxError } from '../../commandHandler.js';
+import { Command } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
-
-const expectedArgs = '<@user|userID|username> <time> ["delete"] [reason]';
 
 export const command: Command = {
     commands: ['tempban'],
     help: 'Ban a user for a specific amount of time.',
     minArgs: 2,
     maxArgs: null,
-    expectedArgs,
+    expectedArgs: '<@user|userID|username> <time> ["delete"] [reason]',
     requiredPermissions: ['BAN_MEMBERS'],
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
         const targetMember = await getMember(args[0]).catch(() => undefined);
         const targetUser = targetMember?.user || (await getUser(args[0]).catch(() => undefined));
-        if (!targetUser) return syntaxError(channel, 'tempban ' + expectedArgs);
+        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
 
         const deleteMessages = args[2]?.toLowerCase() === 'delete';
         const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
