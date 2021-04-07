@@ -20,7 +20,7 @@ export async function connectPostgreSQL() {
             break;
         } catch (error) {
             console.error(error);
-            if (!--retries) return await shutdown(1);
+            if (!--retries) return shutdown(1);
 
             console.log(`Retrying ${retries} more times...`);
             await sleep(5000);

@@ -9,6 +9,7 @@ export const command: Command = {
     maxArgs: 1,
     expectedArgs: '<amount>',
     requiredPermissions: ['MANAGE_MESSAGES'],
+    ticketChannels: true,
     callback: async (message, args) => {
         const { channel } = message;
 

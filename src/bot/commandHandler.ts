@@ -28,6 +28,7 @@ export interface Command {
     readonly superCommands?: string[];
     readonly channelWhitelist?: string[];
     readonly cooldownDuration?: number;
+    readonly ticketChannels?: boolean;
     readonly callback: (message: GuildMessage, args: string[], text: string) => void;
 }
 
@@ -96,7 +97,7 @@ function getSubcommandSyntax(invoke: string, subcommands: Collection<string, Com
 }
 
 export function runCommand(command: Command | Collection<string, Command>, message: GuildMessage, invoke: string, args: string[]): void {
-    const { content, channel } = message;
+    const { channel } = message;
 
     /****************
      * SUB-COMMANDS *
@@ -131,7 +132,21 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
 
-    const { expectedArgs = '', minArgs = 0, maxArgs = null, permissionError = 'You do not have permission to run this command.', cooldownDuration = 5000, channelWhitelist, callback } = command;
+    const {
+        expectedArgs = '',
+        minArgs = 0,
+        maxArgs = null,
+        permissionError = 'You do not have permission to run this command.',
+        cooldownDuration = 5000,
+        channelWhitelist,
+        ticketChannels = false,
+        callback,
+    } = command;
+
+    if (!ticketChannels && channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+        if (message.deletable) message.delete();
+        return;
+    }
 
     if (channelWhitelist && !channelWhitelist.includes(channel.id)) {
         sendError(channel, `This command is only usable in <#${channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
@@ -156,13 +171,5 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      * RUN *
      *******/
 
-    callback(
-        message,
-        args,
-        content
-            .slice(settings.prefix.length + invoke.length)
-            .replace(/(?<!\\)(\\\\)*"/g, '$1') // remove non-escaped double quotes
-            .replace(/\\"/g, '"') // remove escape character of escaped double quotes
-            .trim()
-    );
+    callback(message, args, args.join(' '));
 }

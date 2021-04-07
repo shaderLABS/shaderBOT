@@ -12,15 +12,19 @@ export const event: Event = {
         if (!isGuildMessage(message) || message.author.bot) return;
 
         const { content, channel } = message;
-        if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) return ticketComment(message);
-        if (mediaOnly(message) || !content.startsWith(settings.prefix)) return;
+        if (mediaOnly(message)) return;
 
-        const args = parseContent(content);
-        const invoke = args?.shift()?.toLowerCase();
-        if (!invoke || !args) return;
+        if (content.startsWith(settings.prefix)) {
+            const args = parseContent(content);
+            const invoke = args?.shift()?.toLowerCase();
 
-        const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
-        if (command) runCommand(command, message, invoke, args);
+            if (invoke && args) {
+                const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
+                if (command) runCommand(command, message, invoke, args);
+            }
+        } else {
+            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) createTicketComment(message);
+        }
     },
 };
 
@@ -48,8 +52,8 @@ function parseContent(content: string) {
         ).args;
 }
 
-async function ticketComment(message: GuildMessage) {
-    const { channel, member, content } = message;
+async function createTicketComment(message: GuildMessage) {
+    const { channel, member, content, reference } = message;
     if (message.partial || !(channel instanceof TextChannel) || !member) return;
 
     const id = (await db.query(/*sql*/ `SELECT id FROM ticket WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.id;
@@ -79,10 +83,16 @@ async function ticketComment(message: GuildMessage) {
     if (!attachment && (!content || content === '')) return;
     const commentMessage = await channel.send(commentEmbed);
 
+    let referenceUUID: string | null = null;
+    if (reference) {
+        const referencedComment = (await db.query(/*sql*/ `SELECT id FROM comment WHERE message_id = $1;`, [reference.messageID])).rows[0];
+        if (referencedComment) referenceUUID = referencedComment.id;
+    }
+
     db.query(
         /*sql*/ `
-        INSERT INTO comment (ticket_id, author_id, message_id, content, attachment, timestamp)
-        VALUES ($1, $2, $3, $4, $5, $6)`,
-        [id, member.user.id, commentMessage.id, content, attachment, timestamp]
+        INSERT INTO comment (ticket_id, author_id, message_id, content, attachment, reference_id, timestamp)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [id, member.user.id, commentMessage.id, content, attachment, referenceUUID, timestamp]
     );
 }

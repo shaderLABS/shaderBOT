@@ -34,6 +34,7 @@ CREATE TABLE "comment" (
     ticket_id UUID NOT NULL REFERENCES ticket(id),
     author_id NUMERIC(20) NOT NULL,
     message_id NUMERIC(20) UNIQUE,
+    reference_id UUID,
     content TEXT,
     attachment TEXT,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
