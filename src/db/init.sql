@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS "ticket";
 CREATE TABLE "ticket" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT UNIQUE NOT NULL,
-    project_channel_id NUMERIC(20) NOT NULL REFERENCES project(channel_id),
+    project_channel_id NUMERIC(20) REFERENCES project(channel_id),
     description TEXT,
     attachments TEXT[],
     author_id NUMERIC(20) NOT NULL,

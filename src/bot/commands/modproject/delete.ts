@@ -14,6 +14,8 @@ export const command: Command = {
     callback: async (message) => {
         const { channel } = message;
 
+        await db.query(/*sql*/ `UPDATE ticket SET project_channel_id = NULL WHERE project_channel_id = $1;`, [channel.id]);
+
         const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING owners::TEXT[], role_id;`, [channel.id])).rows[0];
         if (!project) return sendError(channel, 'No project has been set up for this channel.');
 

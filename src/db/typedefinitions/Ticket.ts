@@ -11,7 +11,7 @@ export class Ticket {
     @tgq.Field(() => String)
     title!: string;
 
-    @tgq.Field(() => String)
+    @tgq.Field(() => String, { nullable: true })
     project_channel_id!: string;
 
     @tgq.Field(() => Project)

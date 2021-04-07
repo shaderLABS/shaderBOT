@@ -24,12 +24,13 @@ export const command: Command = {
 
             if (tickets.rowCount === 0) return sendError(channel, 'You do not have any tickets.');
 
-            const content = tickets.rows.map((ticket) => {
-                return `**Title:** ${ticket.closed ? ticket.title : `<#${ticket.channel_id}>`}
-                **Project:** <#${ticket.project_channel_id}>
-                **Status:** ${ticket.closed ? 'closed' : 'open'}
-                **Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`;
-            });
+            const content = tickets.rows.map(
+                (ticket) =>
+                    `**Title:** ${ticket.closed ? ticket.title : `<#${ticket.channel_id}>`}\n` +
+                    `**Project:** ${ticket.project_channel_id ? `<#${ticket.project_channel_id}>` : 'DELETED PROJECT'}\n` +
+                    `**Status:** ${ticket.closed ? 'closed' : 'open'}\n` +
+                    `**Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`
+            );
 
             const pages: string[] = [];
 
