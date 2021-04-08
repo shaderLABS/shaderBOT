@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -37,7 +38,7 @@ export const command: Command = {
             ).rows[0];
             if (!result || !result.id) return sendError(channel, 'Failed to insert note into the database.');
 
-            const messageContent = `**User:** <@${user.id}>\n**Content:** ${content}\n**Moderator:** <@${author.id}>\n**Created At:** ${formatTimeDate(timestamp)}`;
+            const messageContent = `**User:** ${parseUser(user)}\n**Content:** ${content}\n**Moderator:** ${parseUser(author)}\n**Created At:** ${formatTimeDate(timestamp)}`;
 
             channel.send(
                 new MessageEmbed()

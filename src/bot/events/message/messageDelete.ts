@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { getGuild } from '../../lib/misc.js';
+import { getGuild, parseUser } from '../../lib/misc.js';
 import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -33,6 +33,6 @@ export const event: Event = {
 
         const guild = getGuild();
         if (comment.attachment && guild) deleteAttachmentFromDiscord(comment.attachment, guild);
-        log(`<@${comment.author_id}>'s ticket comment has been deleted from <#${channel.id}>:\n\n${comment.content}`);
+        log(`${parseUser(comment.author_id)}'s ticket comment has been deleted from <#${channel.id}>:\n\n${comment.content}`);
     },
 };

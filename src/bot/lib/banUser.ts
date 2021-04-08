@@ -2,7 +2,7 @@ import { MessageEmbed, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { getGuild, parseUser } from './misc.js';
 import { store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
@@ -67,8 +67,8 @@ export async function tempban(user: User, duration: number, modID: string | null
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? `<@${modID}>` : 'System'} temporarily banned <@${user.id}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
-                overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+            `${modID ? parseUser(modID) : 'System'} temporarily banned ${parseUser(user)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+                overwrittenPunishment ? `\n\n${parseUser(user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Temporary Ban'
         );
@@ -85,8 +85,8 @@ export async function tempban(user: User, duration: number, modID: string | null
         }
     } catch (error) {
         console.log(error);
-        log(`Failed to temporarily ban <@${user.id}> for ${secondsToString(duration)}.`);
-        return Promise.reject(`Failed to temporarily ban <@${user.id}> for ${secondsToString(duration)}.`);
+        log(`Failed to temporarily ban ${parseUser(user)} for ${secondsToString(duration)}.`);
+        return Promise.reject(`Failed to temporarily ban ${parseUser(user)} for ${secondsToString(duration)}.`);
     }
 
     return { expire, dmed };
@@ -148,14 +148,14 @@ export async function ban(user: User, modID: string | null = null, reason: strin
 
         guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? `<@${modID}>` : 'System'} permanently banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${
-                overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+            `${modID ? parseUser(modID) : 'System'} permanently banned ${parseUser(user)}:\n\`${reason || 'No reason provided.'}\`${
+                overwrittenPunishment ? `\n\n${parseUser(user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Ban'
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to ban <@${user.id}>.`);
+        log(`Failed to ban ${parseUser(user)}.`);
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -165,7 +165,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
 export function punishmentToString(punishment: any) {
     return (
         `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}` : 'System'}>\n` +
+        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}>\n` +
         `**ID:** ${punishment.id}\n` +
         `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
         `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`
@@ -194,10 +194,10 @@ export async function unban(userID: string, modID?: string) {
                 [userID, new Date(), modID || null]
             )
         ).rowCount;
-        if (deleted === 0) return Promise.reject(`The user <@${userID}> is not banned.`);
+        if (deleted === 0) return Promise.reject(`The user ${parseUser(userID)} is not banned.`);
     } catch (error) {
         console.error(error);
-        log(`Failed to unban <@${userID}>: an error occurred while accessing the database.`);
+        log(`Failed to unban ${parseUser(userID)}: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -209,5 +209,5 @@ export async function unban(userID: string, modID?: string) {
         store.tempbans.delete(userID);
     }
 
-    log(`${modID ? `<@${modID}>` : 'System'} unbanned <@${userID}>.`, 'Unban');
+    log(`${modID ? parseUser(modID) : 'System'} unbanned ${parseUser(userID)}.`, 'Unban');
 }

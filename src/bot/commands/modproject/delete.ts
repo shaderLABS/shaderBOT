@@ -3,6 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 
 export const command: Command = {
     commands: ['delete'],
@@ -27,6 +28,6 @@ export const command: Command = {
         }
 
         sendSuccess(channel, 'Successfully deleted the project linked to this channel.');
-        log(`<@${message.author.id}> deleted the project linked to <#${channel.id}>.`);
+        log(`${parseUser(message.author)} deleted the project linked to <#${channel.id}>.`);
     },
 };

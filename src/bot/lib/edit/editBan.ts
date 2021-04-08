@@ -1,6 +1,7 @@
 import { db } from '../../../db/postgres.js';
 import { unban } from '../banUser.js';
 import log from '../log.js';
+import { parseUser } from '../misc.js';
 import { store } from '../punishments.js';
 import { formatTimeDate } from '../time.js';
 
@@ -21,7 +22,7 @@ export async function editBanReason(uuid: string, reason: string, modID: string,
 
     if (!result) return Promise.reject('There is no ban with the specified UUID.');
 
-    log(`<@${modID}> edited the reason of <@${result.user_id}>'s ban (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s ban (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
     return result;
 }
 
@@ -59,7 +60,7 @@ export async function editBanDuration(uuid: string, time: number, modID: string)
     }
 
     log(
-        `<@${modID}> edited the expiry date of <@${result.user_id}>'s ban (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
+        `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s ban (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
             new Date(result.expire_timestamp)
         )}.`
     );

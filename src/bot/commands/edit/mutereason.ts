@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editMuteReason } from '../../lib/edit/editMute.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
@@ -25,7 +26,7 @@ export const command: Command = {
             if (uuid.test(args[0])) {
                 const past_table = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [args[0]])).rows[0];
                 const { user_id } = await editMuteReason(args[0], content, author.id, past_table);
-                sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s mute (${args[0]}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s mute (${args[0]}).`);
             } else {
                 const user = await getUser(args[0]);
 
@@ -44,7 +45,7 @@ export const command: Command = {
                 if (!latestMuteID) return sendError(channel, 'The specified user does not have any mutes.');
 
                 await editMuteReason(latestMuteID.id, content, author.id, latestMuteID.db === 'pp');
-                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s mute (${latestMuteID.id}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s mute (${latestMuteID.id}).`);
             }
         } catch (error) {
             sendError(channel, error);

@@ -1,6 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 
@@ -37,7 +38,7 @@ export const command: Command = {
 
             const { dmed } = await tempban(targetUser, time, member.id, reason, deleteMessages);
 
-            sendSuccess(channel, `<@${targetUser.id}> has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
+            sendSuccess(channel, `${parseUser(targetUser)} has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
         } catch (error) {
             sendError(channel, error);
         }

@@ -1,6 +1,7 @@
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
+import { parseUser } from '../misc.js';
 import { getUser } from '../searchMessage.js';
 
 export async function getWarnUUID(argument: string): Promise<string> {
@@ -30,7 +31,7 @@ export async function editWarnReason(reason: string, id: string, modID: string) 
 
     if (!warning) return Promise.reject('There is no warning with the specified UUID.');
 
-    log(`<@${modID}> edited the reason of <@${warning.user_id}>'s warning (${id}) from:\n\n${warning.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(warning.user_id)}'s warning (${id}) from:\n\n${warning.old_reason}\n\nto:\n\n${reason}`);
     return warning;
 }
 
@@ -56,6 +57,6 @@ export async function editWarnSeverity(severity: number, id: string, modID: stri
         [severity, new Date(), modID, id]
     );
 
-    log(`<@${modID}> edited the severity of <@${warning.user_id}>'s warning (${id}) from ${warning.severity} to ${severity}.`);
+    log(`${parseUser(modID)} edited the severity of ${parseUser(warning.user_id)}'s warning (${id}) from ${warning.severity} to ${severity}.`);
     return warning.user_id;
 }

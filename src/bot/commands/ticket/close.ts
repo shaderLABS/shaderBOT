@@ -2,6 +2,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { closeTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -19,7 +20,7 @@ export const command: Command = {
         try {
             const { title } = await closeTicket(args, text, member);
             sendSuccess(channel, 'Ticket closed.');
-            log(`<@${message.author.id}> closed the ticket "${title}".`);
+            log(`${parseUser(message.author)} closed the ticket "${title}".`);
         } catch (error) {
             if (error) sendError(channel, error);
         }

@@ -2,6 +2,7 @@ import { Command } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import eraseEndUserData from '../lib/eraseEndUserData.js';
 import log from '../lib/log.js';
+import { parseUser } from '../lib/misc.js';
 import { getUser } from '../lib/searchMessage.js';
 
 export const command: Command = {
@@ -18,8 +19,8 @@ export const command: Command = {
             const user = await getUser(text);
             eraseEndUserData(user.id);
 
-            sendSuccess(channel, `Successfully erased all End User Data of <@${user.id}>.`);
-            log(`<@${message.author.id}> erased all End User Data of <@${user.id}>.`);
+            sendSuccess(channel, `Successfully erased all End User Data of ${parseUser(user)}.`);
+            log(`${parseUser(message.author)} erased all End User Data of ${parseUser(user)}.`);
         } catch (error) {
             if (error) sendError(channel, error);
         }

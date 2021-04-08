@@ -1,6 +1,7 @@
 import { Command } from '../commandHandler.js';
 import { sendError } from '../lib/embeds.js';
 import log from '../lib/log.js';
+import { parseUser } from '../lib/misc.js';
 
 export const command: Command = {
     commands: ['purge'],
@@ -18,6 +19,6 @@ export const command: Command = {
 
         await message.delete();
         const { size } = await channel.bulkDelete(count);
-        log(`<@${message.member.id}> deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`);
+        log(`${parseUser(message.author)} deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`);
     },
 };

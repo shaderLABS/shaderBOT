@@ -1,6 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { unban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -22,6 +23,6 @@ export const command: Command = {
             return sendError(channel, error);
         }
 
-        sendSuccess(channel, `<@${user.id}> has been unbanned.`);
+        sendSuccess(channel, `${parseUser(user)} has been unbanned.`);
     },
 };

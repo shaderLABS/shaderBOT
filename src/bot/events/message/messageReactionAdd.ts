@@ -5,7 +5,7 @@ import { Event } from '../../eventHandler.js';
 import { editComment, editTicketDescription, editTicketTitle } from '../../lib/edit/editTicket.js';
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { getGuild } from '../../lib/misc.js';
+import { getGuild, parseUser } from '../../lib/misc.js';
 import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -182,5 +182,5 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
 
     if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, member.guild);
 
-    log(`<@${member.id}> deleted ${member.id === comment.author_id ? 'their' : `<@${comment.author_id}>`} ticket comment from <#${channel.id}>:\n\n${comment.content}`);
+    log(`${parseUser(member.user)} deleted ${member.id === comment.author_id ? 'their' : `${parseUser(comment.author_id)}'s`} ticket comment from <#${channel.id}>:\n\n${comment.content}`);
 }

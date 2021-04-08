@@ -1,6 +1,7 @@
 import { Command } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import { kick } from '../lib/kickUser.js';
+import { parseUser } from '../lib/misc.js';
 import { getMember, removeArgumentsFromText } from '../lib/searchMessage.js';
 
 export const command: Command = {
@@ -23,7 +24,7 @@ export const command: Command = {
 
         try {
             const { dmed } = await kick(user, member.id, reason);
-            sendSuccess(channel, `<@${user.id}> has been kicked:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
+            sendSuccess(channel, `${parseUser(user.user)} has been kicked:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
         } catch (error) {
             sendError(channel, error);
         }

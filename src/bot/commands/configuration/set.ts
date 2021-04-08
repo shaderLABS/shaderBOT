@@ -2,6 +2,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { update } from '../../settings/settings.js';
 
@@ -25,7 +26,7 @@ export const command: Command = {
 
             update();
             sendSuccess(channel, 'Successfully edited the configuration value.');
-            log(`<@${message.author.id}> edited the configuration \`${args[0]}\` from:\n\n\`${oldValue}\`\n\nto:\n\n\`${value}\``);
+            log(`${parseUser(message.author)} edited the configuration \`${args[0]}\` from:\n\n\`${oldValue}\`\n\nto:\n\n\`${value}\``);
         } catch {
             sendError(channel, 'Invalid JSON value.');
         }

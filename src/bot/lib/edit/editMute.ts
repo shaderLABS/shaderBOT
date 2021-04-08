@@ -1,6 +1,6 @@
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
-import { getGuild } from '../misc.js';
+import { getGuild, parseUser } from '../misc.js';
 import { unmute } from '../muteUser.js';
 import { store } from '../punishments.js';
 import { formatTimeDate } from '../time.js';
@@ -22,7 +22,7 @@ export async function editMuteReason(uuid: string, reason: string, modID: string
 
     if (!result) return Promise.reject('There is no mute with the specified UUID.');
 
-    log(`<@${modID}> edited the reason of <@${result.user_id}>'s mute (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s mute (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
     return result;
 }
 
@@ -65,7 +65,7 @@ export async function editMuteDuration(uuid: string, time: number, modID: string
     }
 
     log(
-        `<@${modID}> edited the expiry date of <@${result.user_id}>'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
+        `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
             new Date(result.expire_timestamp)
         )}.`
     );

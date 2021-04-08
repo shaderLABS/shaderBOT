@@ -3,6 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 
 export const command: Command = {
     commands: ['description'],
@@ -23,7 +24,7 @@ export const command: Command = {
 
         if (text.length > 1024) return sendError(channel, 'Channel descriptions must be less than 32 characters long.');
 
-        log(`<@${author.id}> edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`);
+        log(`${parseUser(author)} edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`);
         channel.edit({ topic: text });
         sendSuccess(channel, 'Successfully edited the description of this channel.');
     },

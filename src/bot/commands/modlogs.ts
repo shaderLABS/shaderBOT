@@ -1,6 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
+import { parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
 import { getUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
@@ -64,7 +65,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Severity:** ${row.severity}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
-                            `\n**Moderator:** <@${row.mod_id}>` +
+                            `\n**Moderator:** ${parseUser(row.mod_id)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`
                     )
@@ -78,11 +79,11 @@ export const command: Command = {
                         (row) =>
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
-                            `\n**Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}` +
+                            `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
                             `\n**Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}` +
-                            (row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
+                            (row.edited_timestamp ? `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
                     )
                 );
             }
@@ -93,10 +94,10 @@ export const command: Command = {
                     queries[2].rows.map(
                         (row) =>
                             `\n**Content:** ${row.content}` +
-                            `\n**Moderator:** <@${row.mod_id}>` +
+                            `\n**Moderator:** ${parseUser(row.mod_id)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
-                            (row.edited_timestamp ? `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
+                            (row.edited_timestamp ? `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
                     )
                 );
             }
@@ -108,13 +109,13 @@ export const command: Command = {
                         let content =
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
-                            `\n**Moderator:** ${row.mod_id ? `<@${row.mod_id}>` : 'System'}` +
+                            `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
 
                         if (row.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(row.lifted_timestamp))}`;
-                        if (row.lifted_mod_id) content += `\n**Lifted By:** <@${row.lifted_mod_id}>`;
-                        if (row.edited_timestamp) content += `\n*(last edited by <@${row.edited_mod_id}> at ${formatTimeDate(new Date(row.edited_timestamp))})*`;
+                        if (row.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(row.lifted_mod_id)}`;
+                        if (row.edited_timestamp) content += `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*`;
 
                         return content;
                     })

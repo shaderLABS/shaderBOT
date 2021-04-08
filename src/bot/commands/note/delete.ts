@@ -4,6 +4,7 @@ import { db } from '../../../db/postgres.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 const expectedArgs = '<uuid>';
@@ -32,8 +33,8 @@ export const command: Command = {
         if (!result) return sendError(channel, 'There is no note with this ID.');
 
         const messageContent = [
-            `**User:** <@${result.user_id}>\n**Content:** ${result.content}\n**Moderator:** <@${result.mod_id}>\n**Created At:** ${formatTimeDate(new Date(result.timestamp))}`,
-            result.edited_timestamp ? `\n*(last edited by <@${result.edited_mod_id}> at ${formatTimeDate(new Date(result.edited_timestamp))})*` : '',
+            `**User:** ${parseUser(result.user_id)}\n**Content:** ${result.content}\n**Moderator:** ${parseUser(result.mod_id)}\n**Created At:** ${formatTimeDate(new Date(result.timestamp))}`,
+            result.edited_timestamp ? `\n*(last edited by ${parseUser(result.edited_mod_id)} at ${formatTimeDate(new Date(result.edited_timestamp))})*` : '',
         ];
 
         channel.send(

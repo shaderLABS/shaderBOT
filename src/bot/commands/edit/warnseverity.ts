@@ -1,6 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { editWarnSeverity, getWarnUUID } from '../../lib/edit/editWarning.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <severity>';
 
@@ -23,7 +24,7 @@ export const command: Command = {
 
             try {
                 const userID = await editWarnSeverity(severity, warnUUID, author.id);
-                sendSuccess(channel, `Successfully edited the severity of <@${userID}>'s warning (${warnUUID}).`);
+                sendSuccess(channel, `Successfully edited the severity of ${parseUser(userID)}'s warning (${warnUUID}).`);
             } catch (error) {
                 return sendError(channel, error);
             }

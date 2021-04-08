@@ -2,7 +2,7 @@ import { MessageEmbed, Permissions, TextChannel } from 'discord.js';
 import gq from 'graphql';
 import tgq from 'type-graphql';
 import log from '../../bot/lib/log.js';
-import { getGuild } from '../../bot/lib/misc.js';
+import { getGuild, parseUser } from '../../bot/lib/misc.js';
 import { formatTimeDate } from '../../bot/lib/time.js';
 import { db } from '../postgres.js';
 import { Comment } from '../typedefinitions/Comment.js';
@@ -39,7 +39,7 @@ export class CommentResolver {
             }
         }
 
-        log(`<@${ctx.req.user.id}> deleted ticket comment by <@${deleted.rows[0].author_id}>:\n\n${deleted.rows[0].content}`);
+        log(`${parseUser(ctx.req.user.id)} deleted a ticket comment by ${parseUser(deleted.rows[0].author_id)}:\n\n${deleted.rows[0].content}`);
 
         return deleted.rows[0];
     }
@@ -135,7 +135,7 @@ export class CommentResolver {
             [content, editedAt, comment_id]
         );
 
-        log(`<@${user.id}> edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${content}`);
+        log(`${parseUser(user.id)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${content}`);
         return true;
     }
 }

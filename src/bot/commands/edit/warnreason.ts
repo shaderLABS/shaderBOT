@@ -1,6 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { editWarnReason, getWarnUUID } from '../../lib/edit/editWarning.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
@@ -24,7 +25,7 @@ export const command: Command = {
 
             try {
                 const { user_id } = await editWarnReason(reason, warnUUID, author.id);
-                sendSuccess(channel, `Successfully edited the reason of <@${user_id}>'s warning (${warnUUID}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${warnUUID}).`);
             } catch (error) {
                 return sendError(channel, error);
             }

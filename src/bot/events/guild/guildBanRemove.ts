@@ -2,7 +2,7 @@ import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { sleep } from '../../lib/misc.js';
+import { parseUser, sleep } from '../../lib/misc.js';
 import { store } from '../../lib/punishments.js';
 
 export const event: Event = {
@@ -35,7 +35,7 @@ export const event: Event = {
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to remove ban entry of <@${user.id}>: an error occurred while accessing the database.`);
+            log(`Failed to remove ban entry of ${parseUser(user)}: an error occurred while accessing the database.`);
         }
 
         const timeout = store.tempbans.get(user.id);
@@ -44,6 +44,6 @@ export const event: Event = {
             store.tempbans.delete(user.id);
         }
 
-        log(`<@${executor.id}> unbanned <@${user.id}>.`, 'Unban');
+        log(`${parseUser(executor)} unbanned ${parseUser(user)}.`, 'Unban');
     },
 };

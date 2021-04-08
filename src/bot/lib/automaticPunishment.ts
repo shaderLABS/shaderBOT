@@ -3,6 +3,7 @@ import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import { ban, tempban } from './banUser.js';
 import log from './log.js';
+import { parseUser } from './misc.js';
 import { mute } from './muteUser.js';
 
 export default async function (user: User, member?: GuildMember) {
@@ -43,7 +44,7 @@ export default async function (user: User, member?: GuildMember) {
             ban(user, null, 'Too many warnings.', false);
         }
     } catch (error) {
-        log(`Failed to auto-punish <@${user.id}>:\n` + error);
+        log(`Failed to auto-punish ${parseUser(user)}:\n` + error);
     }
 }
 

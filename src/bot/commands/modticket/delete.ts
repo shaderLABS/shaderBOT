@@ -1,6 +1,7 @@
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { deleteTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -18,7 +19,7 @@ export const command: Command = {
             const ticket = await deleteTicket(args, text, guild);
 
             sendSuccess(channel, 'Ticket deleted.');
-            log(`<@${message.author.id}> deleted the ticket "${ticket.title}" by <@${ticket.author}>.`);
+            log(`${parseUser(message.author)} deleted the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`);
         } catch (error) {
             if (error) sendError(channel, error);
         }

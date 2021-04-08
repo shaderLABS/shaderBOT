@@ -3,6 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -30,7 +31,7 @@ export const command: Command = {
         if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals('SEND_MESSAGES')) currentOverwrite.delete();
         else currentOverwrite.update({ SEND_MESSAGES: null });
 
-        log(`<@${author.id}> unmuted <@${targetUser.id}> in their project (<#${channel.id}>)`);
-        sendSuccess(channel, `Successfully unmuted <@${targetUser.id}> in this project.`);
+        log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>)`);
+        sendSuccess(channel, `Successfully unmuted ${parseUser(targetUser)} in this project.`);
     },
 };

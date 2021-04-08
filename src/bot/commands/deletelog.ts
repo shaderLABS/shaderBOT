@@ -3,6 +3,7 @@ import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import log from '../lib/log.js';
+import { parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
 import { getUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
@@ -33,19 +34,19 @@ export const command: Command = {
             if (!deletedEntry) return sendError(channel, 'The specified log entry could not be resolved.');
 
             let content =
-                `**User:** <@${deletedEntry.user_id}>\n` +
+                `**User:** ${parseUser(deletedEntry.user_id)}\n` +
                 `**Type:** ${punishmentTypeAsString[deletedEntry.type]}\n` +
                 `**Reason:** ${deletedEntry.reason || 'No reason provided.'}\n` +
-                `**Moderator:** ${deletedEntry.mod_id ? `<@${deletedEntry.mod_id}>` : 'System'}\n` +
+                `**Moderator:** ${deletedEntry.mod_id ? parseUser(deletedEntry.mod_id) : 'System'}\n` +
                 `**ID:** ${id}\n` +
                 `**Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
 
             if (deletedEntry.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(deletedEntry.lifted_timestamp))}`;
-            if (deletedEntry.lifted_mod_id) content += `\n**Lifted By:** <@${deletedEntry.lifted_mod_id}>`;
-            if (deletedEntry.edited_timestamp) content += `\n*(last edited by <@${deletedEntry.edited_mod_id}> at ${formatTimeDate(new Date(deletedEntry.edited_timestamp))})*`;
+            if (deletedEntry.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(deletedEntry.lifted_mod_id)}`;
+            if (deletedEntry.edited_timestamp) content += `\n*(last edited by ${parseUser(deletedEntry.edited_mod_id)} at ${formatTimeDate(new Date(deletedEntry.edited_timestamp))})*`;
 
             sendSuccess(channel, `Successfully deleted the past punishment entry \`${id}\`.`);
-            log(`<@${message.author.id}> deleted a past punishment entry:\n\n${content}`);
+            log(`${parseUser(message.author)} deleted a past punishment entry:\n\n${content}`);
         } catch (error) {
             sendError(channel, error);
         }

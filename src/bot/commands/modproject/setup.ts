@@ -4,6 +4,7 @@ import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { embedColor, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { ownerOverwrites } from '../../lib/project.js';
 import { getMember } from '../../lib/searchMessage.js';
 
@@ -69,6 +70,6 @@ export const command: Command = {
                     },
                 ])
         );
-        log(`<@${message.author.id}> created a project linked to <#${channel.id}>.`);
+        log(`${parseUser(message.author)} created a project linked to <#${channel.id}>.`);
     },
 };

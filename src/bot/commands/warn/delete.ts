@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -42,7 +43,12 @@ export const command: Command = {
                     return sendError(
                         channel,
                         `The specified reason is ambiguous. Please use the UUID from one of the following results instead:\n${warnings.rows
-                            .map((row: any) => `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${row.id}\n`)
+                            .map(
+                                (row: any) =>
+                                    `${parseUser(row.user_id)} warned by ${parseUser(row.mod_id)} for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${
+                                        row.id
+                                    }\n`
+                            )
                             .join('\n')}`
                     );
                 }
@@ -67,7 +73,10 @@ export const command: Command = {
                 errorMessage +=
                     '\nSimilar results:\n' +
                     similarResults.rows
-                        .map((row: any) => `<@${row.user_id}> warned by <@${row.mod_id}> for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${row.id}\n`)
+                        .map(
+                            (row: any) =>
+                                `${parseUser(row.user_id)} warned by ${parseUser(row.mod_id)} for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${row.id}\n`
+                        )
                         .join('\n');
 
             return sendError(channel, errorMessage);
@@ -79,9 +88,9 @@ export const command: Command = {
 
         await db.query(/*sql*/ `DELETE FROM warn WHERE id = $1;`, [warning.id]);
 
-        const content = `**User:** <@${warning.user_id}>\n**Severity:** ${warning.severity}\n**Reason:** ${warning.reason || 'No reason provided.'}\n**Moderator:** <@${warning.mod_id}>\n**ID:** ${
-            warning.id
-        }`;
+        const content = `**User:** ${parseUser(warning.user_id)}\n**Severity:** ${warning.severity}\n**Reason:** ${warning.reason || 'No reason provided.'}\n**Moderator:** ${parseUser(
+            warning.mod_id
+        )}\n**ID:** ${warning.id}`;
 
         sendSuccess(channel, content, 'Deleted Warning');
         log(`**Deleted By:** ${member.id}\n${content}`, 'Deleted Warning');

@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editMuteDuration } from '../../lib/edit/editMute.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 
@@ -29,7 +30,7 @@ export const command: Command = {
                 const { user_id, expire_timestamp } = await editMuteDuration(args[0], time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of <@${user_id}'s mute (${args[0]}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`
+                    `Successfully edited the duration of ${parseUser(user_id)}'s mute (${args[0]}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`
                 );
             } else {
                 const user = await getUser(args[0]);
@@ -40,7 +41,9 @@ export const command: Command = {
                 const { expire_timestamp } = await editMuteDuration(latestMuteID.id, time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of <@${user.id}>'s mute (${latestMuteID.id}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`
+                    `Successfully edited the duration of ${parseUser(user)}'s mute (${latestMuteID.id}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(
+                        new Date(expire_timestamp)
+                    )}.`
                 );
             }
         } catch (error) {

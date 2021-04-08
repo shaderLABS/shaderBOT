@@ -1,4 +1,4 @@
-import { CategoryChannel, TextChannel } from 'discord.js';
+import { CategoryChannel, TextChannel, User } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
@@ -15,6 +15,18 @@ export function getAlphabeticalChannelPosition(channel: TextChannel, parent: Cat
         .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
 
     return totalChannels.keyArray().indexOf(channel.id);
+}
+
+export function parseUser(user: User | string) {
+    let target: User | null;
+    if (user instanceof User) {
+        target = user;
+    } else {
+        target = client.users.resolve(user);
+        if (!target) return `<@${user}> (${user})`;
+    }
+
+    return `<@${target.id}> (${target.tag} | ${target.id})`;
 }
 
 export const sleep = promisify(setTimeout);

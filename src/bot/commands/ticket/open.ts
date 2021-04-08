@@ -2,6 +2,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { openTicket } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -23,7 +24,7 @@ export const command: Command = {
             await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');
-            log(`<@${message.author.id}> opened the ticket "${title}".`);
+            log(`${parseUser(message.author)} opened the ticket "${title}".`);
         } catch (error) {
             await loadingEmbed.delete();
             if (error) sendError(channel, error);

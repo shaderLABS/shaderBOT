@@ -1,5 +1,6 @@
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { unmute } from '../../lib/muteUser.js';
 import { getMember, getUser } from '../../lib/searchMessage.js';
 
@@ -26,6 +27,6 @@ export const command: Command = {
             return sendError(channel, error);
         }
 
-        sendSuccess(channel, `<@${targetUser.id}> has been unmuted.`);
+        sendSuccess(channel, `${parseUser(targetUser)} has been unmuted.`);
     },
 };

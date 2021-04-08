@@ -1,5 +1,6 @@
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
+import { parseUser } from '../misc.js';
 
 export async function editNote(uuid: string, content: string, modID: string) {
     const result = (
@@ -16,6 +17,6 @@ export async function editNote(uuid: string, content: string, modID: string) {
 
     if (!result) return Promise.reject('There is no note with the specified UUID.');
 
-    log(`<@${modID}> edited the content of <@${result.user_id}>'s note (${uuid}) from:\n\n${result.old_content}\n\nto:\n\n${content}`);
+    log(`${parseUser(modID)} edited the content of ${parseUser(result.user_id)}'s note (${uuid}) from:\n\n${result.old_content}\n\nto:\n\n${content}`);
     return result;
 }

@@ -3,6 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { editBanReason } from '../../lib/edit/editBan.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
@@ -25,7 +26,7 @@ export const command: Command = {
             if (uuid.test(args[0])) {
                 const past_table = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [args[0]])).rows[0];
                 const { user_id } = await editBanReason(args[0], content, author.id, past_table);
-                sendSuccess(channel, `Successfully edited the reason of <@${user_id}'s ban (${args[0]}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s ban (${args[0]}).`);
             } else {
                 const user = await getUser(args[0]);
 
@@ -44,7 +45,7 @@ export const command: Command = {
                 if (!latestBanID) return sendError(channel, 'The specified user does not have any bans.');
 
                 await editBanReason(latestBanID.id, content, author.id, latestBanID.db === 'pp');
-                sendSuccess(channel, `Successfully edited the reason of <@${user.id}>'s ban (${latestBanID.id}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s ban (${latestBanID.id}).`);
             }
         } catch (error) {
             sendError(channel, error);

@@ -2,7 +2,7 @@ import { GuildMember, MessageEmbed } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { getGuild, parseUser } from './misc.js';
 import { formatTimeDate } from './time.js';
 
 export async function kick(user: GuildMember, modID: string | null = null, reason: string | null = null) {
@@ -39,19 +39,19 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
         }
     } catch (error) {
         console.error(error);
-        log(`Failed to kick <@${user.id}>: an error occurred while accessing the database.`);
+        log(`Failed to kick ${parseUser(user.user)}: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }
 
     await user.kick(reason || 'No reason provided.');
-    log(`${modID ? `<@${modID}>` : 'System'} kicked <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
+    log(`${modID ? parseUser(modID) : 'System'} kicked ${parseUser(user.user)}:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
     return { dmed };
 }
 
 function punishmentToString(punishment: any) {
     return (
         `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n` +
+        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
         `**ID:** ${punishment.id}\n` +
         `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`
     );

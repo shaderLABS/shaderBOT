@@ -3,7 +3,7 @@ import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { getGuild, parseUser } from './misc.js';
 import { store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
@@ -12,7 +12,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
-        log(`Failed to mute <@${userID}> for ${secondsToString(duration)}: mute role not found.`);
+        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: mute role not found.`);
         return Promise.reject('Mute role not found.');
     }
 
@@ -70,13 +70,13 @@ export async function mute(userID: string, duration: number, modID: string | nul
         }
 
         log(
-            `${modID ? `<@${modID}>` : 'System'} muted <@${userID}> for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
-                overwrittenPunishment ? `\n\n<@${userID}>'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+            `${modID ? parseUser(modID) : 'System'} muted ${parseUser(userID)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+                overwrittenPunishment ? `\n\n${parseUser(userID)}'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to mute <@${userID}> for ${secondsToString(duration)}: an error occurred while accessing the database.`);
+        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -101,7 +101,7 @@ export async function unmute(userID: string, modID?: string, member?: GuildMembe
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
-        log(`Failed to unmute <@${userID}>: mute role not found.`);
+        log(`Failed to unmute ${parseUser(userID)}: mute role not found.`);
         return Promise.reject('Mute role not found.');
     }
 
@@ -119,10 +119,10 @@ export async function unmute(userID: string, modID?: string, member?: GuildMembe
                 [userID, new Date(), modID || null]
             )
         ).rowCount;
-        if (deleted === 0) return Promise.reject(`The user <@${userID}> is not muted.`);
+        if (deleted === 0) return Promise.reject(`The user ${parseUser(userID)} is not muted.`);
     } catch (error) {
         console.error(error);
-        log(`Failed to unmute <@${userID}>: an error occurred while accessing the database.`);
+        log(`Failed to unmute ${parseUser(userID)}: an error occurred while accessing the database.`);
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -134,7 +134,7 @@ export async function unmute(userID: string, modID?: string, member?: GuildMembe
         store.mutes.delete(userID);
     }
 
-    log(`${modID ? `<@${modID}>` : 'System'} unmuted <@${userID}>.`);
+    log(`${modID ? parseUser(modID) : 'System'} unmuted ${parseUser(userID)}.`);
 }
 
 export async function checkMuteEvasion(member: GuildMember) {
@@ -171,14 +171,14 @@ export async function checkMuteEvasion(member: GuildMember) {
         if (previousTimeout) clearTimeout(previousTimeout);
 
         store.mutes.set(member.id, timeout);
-        log(`<@${member.id}> possibly tried to evade their mute (${mute.id}).`);
+        log(`${parseUser(member.user)} possibly tried to evade their mute (${mute.id}).`);
     }
 }
 
 function punishmentToString(punishment: any) {
     return (
         `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? `<@${punishment.mod_id}>` : 'System'}\n` +
+        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
         `**ID:** ${punishment.id}\n` +
         `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
         `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`

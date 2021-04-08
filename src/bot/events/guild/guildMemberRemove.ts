@@ -2,7 +2,7 @@ import { GuildMember, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { getGuild, sleep } from '../../lib/misc.js';
+import { getGuild, parseUser, sleep } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'guildMemberRemove',
@@ -33,9 +33,9 @@ export const event: Event = {
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to add kick entry for <@${member.id}>: an error occurred while accessing the database.`);
+            log(`Failed to add kick entry for ${parseUser(member.user)}: an error occurred while accessing the database.`);
         }
 
-        log(`<@${executor.id}> kicked <@${member.id}>:\n\`${reason || 'No reason provided.'}\``, 'Kick');
+        log(`${parseUser(executor)} kicked ${parseUser(member.user)}:\n\`${reason || 'No reason provided.'}\``, 'Kick');
     },
 };

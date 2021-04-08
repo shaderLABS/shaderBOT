@@ -3,7 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { getAlphabeticalChannelPosition } from '../../lib/misc.js';
+import { getAlphabeticalChannelPosition, parseUser } from '../../lib/misc.js';
 
 export const command: Command = {
     commands: ['name'],
@@ -33,7 +33,7 @@ export const command: Command = {
             return sendError(channel, 'Failed to edit the name of this channel.');
         }
 
-        log(`<@${author.id}> edited the name of their project (<#${channel.id}>) from:\n\n${oldName}\n\nto:\n\n${channel.name}`);
+        log(`${parseUser(author)} edited the name of their project (<#${channel.id}>) from:\n\n${oldName}\n\nto:\n\n${channel.name}`);
         sendSuccess(channel, 'Successfully edited the name of this channel.');
     },
 };

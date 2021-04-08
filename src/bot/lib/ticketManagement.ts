@@ -5,7 +5,7 @@ import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild } from './misc.js';
+import { getGuild, parseUser } from './misc.js';
 import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
@@ -276,7 +276,7 @@ export async function purgeAllTickets(user: User, guild: Guild) {
     );
 
     if (ticketIDs.rowCount === 0) {
-        return Promise.reject(`<@${user.id}> does not have any tickets.`);
+        return Promise.reject(`${parseUser(user)} does not have any tickets.`);
     }
 
     const titles: string[] = [];

@@ -1,6 +1,7 @@
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 export const command: Command = {
@@ -24,11 +25,9 @@ export const command: Command = {
 
             if (tickets.rowCount === 0) return sendError(channel, 'There are no open tickets related to this channel.');
 
-            const content = tickets.rows.map((ticket) => {
-                return `**Title:** <#${ticket.channel_id}>
-                **Author:** <@${ticket.author_id}>
-                **Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`;
-            });
+            const content = tickets.rows.map(
+                (ticket) => `**Title:** <#${ticket.channel_id}>\n**Author:** ${parseUser(ticket.author_id)}\n**Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`
+            );
 
             const pages: string[] = [];
 

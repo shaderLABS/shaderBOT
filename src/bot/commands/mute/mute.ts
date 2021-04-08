@@ -1,5 +1,6 @@
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { parseUser } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
 import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
@@ -33,7 +34,7 @@ export const command: Command = {
             const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, targetMember);
             sendSuccess(
                 channel,
-                `<@${targetUser.id}> has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+                `${parseUser(targetUser)} has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                     dmed ? '' : '\n\n*The target could not be DMed.*'
                 }`
             );

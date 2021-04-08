@@ -5,6 +5,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { embedColor, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
+import { parseUser } from '../../lib/misc.js';
 import { cacheAttachment, cutDescription, deleteAttachmentFromDiscord, getCategoryChannel } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -121,7 +122,7 @@ export const command: Command = {
                 [ticketID, titleAnswer.content, projectChannel.id, descriptionAnswer.content, attachments, author.id, date, ticketChannel.id, subscriptionMessage.id]
             );
 
-            log(`<@${message.author.id}> created a ticket ("${titleAnswer.content}").`);
+            log(`${parseUser(message.author)} created a ticket ("${titleAnswer.content}").`);
         } catch (error) {
             if (question) question.delete();
             attachments.forEach((attachment) => {

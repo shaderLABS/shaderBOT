@@ -4,7 +4,7 @@ import { client } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { punishmentToString } from '../../lib/banUser.js';
 import log from '../../lib/log.js';
-import { sleep } from '../../lib/misc.js';
+import { parseUser, sleep } from '../../lib/misc.js';
 import { store } from '../../lib/punishments.js';
 
 export const event: Event = {
@@ -23,7 +23,9 @@ export const event: Event = {
         if (client.user && auditLog?.executor.id === client.user.id) return;
         if (!auditLog || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || auditLog.executor.bot)
             return log(
-                `Someone banned <@${user.id}>, but the moderator could not be retrieved. Please check the audit logs, ban <@${user.id}> again using the command and refrain from banning people using other bots or the Discord feature!`
+                `Someone banned ${parseUser(user)}, but the moderator could not be retrieved. Please check the audit logs, ban ${parseUser(
+                    user.id
+                )} again using the command and refrain from banning people using other bots or the Discord feature!`
             );
 
         const { createdAt, executor, reason } = auditLog;
@@ -62,14 +64,14 @@ export const event: Event = {
             );
 
             log(
-                `<@${executor.id}> permanently banned <@${user.id}>:\n\`${reason || 'No reason provided.'}\`${
-                    overwrittenPunishment ? `\n\n<@${user.id}>'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
+                `${parseUser(executor)} permanently banned ${parseUser(user)}:\n\`${reason || 'No reason provided.'}\`${
+                    overwrittenPunishment ? `\n\n${parseUser(user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
                 }`,
                 'Ban'
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to create ban entry for <@${user.id}>.`);
+            log(`Failed to create ban entry for ${parseUser(user)}.`);
         }
     },
 };
