@@ -26,10 +26,10 @@ export const command: Command = {
         if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
 
         const currentOverwrite = channel.permissionOverwrites.get(targetUser.id);
-        if (!currentOverwrite || !currentOverwrite.deny.has('SEND_MESSAGES')) return sendError(channel, 'The specified user is not muted.');
+        if (!currentOverwrite || !currentOverwrite.deny.has('SEND_MESSAGES') || !currentOverwrite.deny.has('ADD_REACTIONS')) return sendError(channel, 'The specified user is not muted.');
 
-        if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals('SEND_MESSAGES')) currentOverwrite.delete();
-        else currentOverwrite.update({ SEND_MESSAGES: null });
+        if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals(['SEND_MESSAGES', 'ADD_REACTIONS'])) currentOverwrite.delete();
+        else currentOverwrite.update({ SEND_MESSAGES: null, ADD_REACTIONS: null });
 
         log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>)`);
         sendSuccess(channel, `Successfully unmuted ${parseUser(targetUser)} in this project.`);
