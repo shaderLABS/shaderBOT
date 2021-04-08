@@ -1,8 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { unban } from './banUser.js';
-import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { getGuild } from './misc.js';
 import { unmute } from './muteUser.js';
 
 export const punishmentTypeAsString: {
@@ -44,8 +43,7 @@ export async function loadTimeouts() {
                 const member = await getGuild()
                     ?.members.fetch(punishment.user_id)
                     .catch(() => undefined);
-                if (member) unmute(member.id, undefined, member);
-                else log(`System could not unmute ${parseUser(punishment.user_id)}: member not found.`);
+                unmute(punishment.user_id, undefined, member);
             }
         } else {
             if (punishment.type === 'ban') {
@@ -62,8 +60,7 @@ export async function loadTimeouts() {
                     const member = await getGuild()
                         ?.members.fetch(punishment.user_id)
                         .catch(() => undefined);
-                    if (member) unmute(member.id, undefined, member);
-                    else log(`System could not unmute ${parseUser(punishment.user_id)}: member not found.`);
+                    unmute(punishment.user_id, undefined, member);
                 }, ms);
 
                 const previousTimeout = store.mutes.get(punishment.user_id);
