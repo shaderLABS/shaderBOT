@@ -5,7 +5,7 @@ import { client, settings } from '../bot.js';
 import { update } from '../settings/settings.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { getGuild, parseUser, sleep } from './misc.js';
 import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
@@ -143,6 +143,8 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
             if (comment.attachment) commentEmbed.attachFiles([comment.attachment.split('|')[0]]);
             const commentMessage = await ticketChannel.send(commentEmbed);
             commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
+
+            await sleep(1000);
         }
 
         await db.query(commentMessageQuery);
