@@ -14,13 +14,13 @@ export const command: Command = {
     maxArgs: null,
     cooldownDuration: 10000,
     channelWhitelist: [settings.ticket.managementChannelID],
-    callback: async (message, args, text) => {
+    callback: async (message, _, text) => {
         const { channel, member } = message;
 
         const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 
         try {
-            const { title } = await openTicket(args, text, member);
+            const { title } = await openTicket(text, member);
             await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');

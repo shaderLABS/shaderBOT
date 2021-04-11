@@ -9,16 +9,16 @@ export const command: Command = {
     commands: ['close'],
     superCommands: ['ticket'],
     help: 'Close any of your open tickets.',
-    expectedArgs: '<ticketID|ticketTitle>',
+    expectedArgs: '<ticketID|ticketTitle|#ticketChannel>',
     minArgs: 1,
     maxArgs: null,
     cooldownDuration: 10000,
     channelWhitelist: [settings.ticket.managementChannelID],
-    callback: async (message, args, text) => {
+    callback: async (message, _, text) => {
         const { channel, member } = message;
 
         try {
-            const { title } = await closeTicket(args, text, member);
+            const { title } = await closeTicket(message.mentions.channels.first()?.id || text, member);
             sendSuccess(channel, 'Ticket closed.');
             log(`${parseUser(message.author)} closed the ticket "${title}".`);
         } catch (error) {

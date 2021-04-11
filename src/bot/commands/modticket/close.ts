@@ -8,15 +8,15 @@ export const command: Command = {
     commands: ['close'],
     superCommands: ['modticket', 'mticket'],
     help: 'Close any open ticket.',
-    expectedArgs: '<ticketID|ticketTitle>',
+    expectedArgs: '<ticketID|ticketTitle|#ticketChannel>',
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message, args, text) => {
+    callback: async (message, _, text) => {
         const { member, channel } = message;
 
         try {
-            const ticket = await closeTicket(args, text, member, true);
+            const ticket = await closeTicket(message.mentions.channels.first()?.id || text, member, true);
             sendSuccess(channel, 'Ticket closed.');
             log(`${parseUser(message.author)} closed the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`);
         } catch (error) {

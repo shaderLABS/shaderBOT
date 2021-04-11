@@ -12,13 +12,13 @@ export const command: Command = {
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message, args, text) => {
+    callback: async (message, _, text) => {
         const { channel, member } = message;
 
         const loadingEmbed = await sendInfo(channel, 'Opening ticket...');
 
         try {
-            const ticket = await openTicket(args, text, member, true);
+            const ticket = await openTicket(text, member, true);
             await loadingEmbed.delete();
 
             sendSuccess(channel, 'Ticket opened.');

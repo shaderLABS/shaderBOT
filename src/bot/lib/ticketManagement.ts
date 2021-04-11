@@ -28,7 +28,17 @@ export async function cacheAttachment(message: Message): Promise<string | undefi
     }
 }
 
-export async function openTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
+function getSQLCondition(text: string) {
+    if (/^\d+$/.test(text)) {
+        return /*sql*/ `ticket.channel_id = $1::NUMERIC`;
+    }
+    if (uuid.test(text)) {
+        return /*sql*/ `ticket.id = $1::UUID`;
+    }
+    return /*sql*/ `ticket.title = $1::TEXT`;
+}
+
+export async function openTicket(text: string, member: GuildMember, moderate: boolean = false) {
     const { guild } = member;
 
     const response = await db.query(
@@ -36,11 +46,11 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
         SELECT ticket.id, title, project_channel_id, description, author_id, edited, attachments, timestamp
         FROM ticket
         ${moderate ? '' : 'LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
-        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'title = $1'}
+        WHERE ${getSQLCondition(text)}
             ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
             AND closed = TRUE
-        LIMIT 1`,
-        moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
+        LIMIT 1;`,
+        moderate ? [text] : [text, member.id]
     );
 
     if (response.rowCount === 0) {
@@ -50,8 +60,8 @@ export async function openTicket(args: string[], text: string, member: GuildMemb
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = TRUE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
-            ORDER BY SIMILARITY(title, $1) DESC
-            LIMIT 3`,
+            ORDER BY SIMILARITY(title, $1::TEXT) DESC
+            LIMIT 3;`,
             moderate ? [text] : [text, member.id]
         );
 
@@ -156,17 +166,17 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     return ticket;
 }
 
-export async function closeTicket(args: string[], text: string, member: GuildMember, moderate: boolean = false) {
+export async function closeTicket(text: string, member: GuildMember, moderate: boolean = false) {
     const response = await db.query(
         /*sql*/ `
         UPDATE ticket
         SET closed = TRUE
         ${moderate ? '' : 'FROM ticket t LEFT JOIN project ON t.project_channel_id = project.channel_id'}
-        WHERE ${uuid.test(args[0]) ? 'ticket.id = $1' : 'ticket.title = $1'}
-            AND ticket.closed = FALSE
+        WHERE ${getSQLCondition(text)}
             ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
+            AND ticket.closed = FALSE
         RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title, ticket.author_id;`,
-        moderate ? [uuid.test(args[0]) ? args[0] : text] : [uuid.test(args[0]) ? args[0] : text, member.id]
+        moderate ? [text] : [text, member.id]
     );
 
     if (response.rowCount === 0) {
@@ -176,8 +186,8 @@ export async function closeTicket(args: string[], text: string, member: GuildMem
             FROM ${moderate ? 'ticket' : 'ticket LEFT JOIN project ON ticket.project_channel_id = project.channel_id'}
             WHERE ticket.closed = FALSE
                 ${moderate ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
-            ORDER BY SIMILARITY(title, $1) DESC
-            LIMIT 3`,
+            ORDER BY SIMILARITY(title, $1::TEXT) DESC
+            LIMIT 3;`,
             moderate ? [text] : [text, member.id]
         );
 
@@ -207,12 +217,12 @@ export async function closeTicketLib(ticket: any, guild: Guild | undefined = get
     }
 }
 
-export async function deleteTicket(args: string[], text: string, guild: Guild) {
+export async function deleteTicket(text: string, guild: Guild) {
     const response = await db.query(
         /*sql*/ `
         SELECT id FROM ticket
-        WHERE ${uuid.test(args[0]) ? 'id = $1' : 'title = $1'};`,
-        [uuid.test(args[0]) ? args[0] : text]
+        WHERE ${getSQLCondition(text)};`,
+        [text]
     );
 
     if (response.rowCount === 0) {
@@ -220,7 +230,7 @@ export async function deleteTicket(args: string[], text: string, guild: Guild) {
             /*sql*/ `
             SELECT id, title
             FROM ticket
-            ORDER BY SIMILARITY(title, $1) DESC
+            ORDER BY SIMILARITY(title, $1::TEXT) DESC
             LIMIT 3`,
             [text]
         );
