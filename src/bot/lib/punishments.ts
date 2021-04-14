@@ -57,10 +57,10 @@ export async function loadTimeouts() {
                 store.tempbans.set(punishment.user_id, timeout);
             } else {
                 const timeout = setTimeout(async () => {
-                    const member = await getGuild()
+                    const timeoutMember = await getGuild()
                         ?.members.fetch(punishment.user_id)
                         .catch(() => undefined);
-                    unmute(punishment.user_id, undefined, member);
+                    unmute(punishment.user_id, undefined, timeoutMember);
                 }, ms);
 
                 const previousTimeout = store.mutes.get(punishment.user_id);

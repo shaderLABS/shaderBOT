@@ -53,8 +53,11 @@ export async function editMuteDuration(uuid: string, time: number, modID: string
         if (expireTime < editTime) {
             unmute(member.id, undefined, member).catch(() => undefined);
         } else if (expireTime < editTimestamp.setHours(23, 55, 0, 0)) {
-            const timeout = setTimeout(() => {
-                unmute(member.id, undefined, member);
+            const timeout = setTimeout(async () => {
+                const timeoutMember = await getGuild()
+                    ?.members.fetch(member.id)
+                    .catch(() => undefined);
+                unmute(member.id, undefined, timeoutMember);
             }, expireTime - editTime);
 
             const previousTimeout = store.mutes.get(member.id);

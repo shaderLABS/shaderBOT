@@ -83,8 +83,13 @@ export async function mute(userID: string, duration: number, modID: string | nul
     if (member) member.roles.add(role);
 
     if (expire.getTime() < timestamp.setHours(23, 55, 0, 0)) {
-        const timeout = setTimeout(() => {
-            unmute(userID, undefined, member);
+        const timeout = setTimeout(async () => {
+            const timeoutMember =
+                member &&
+                (await getGuild()
+                    ?.members.fetch(member.id)
+                    .catch(() => undefined));
+            unmute(userID, undefined, timeoutMember);
         }, duration * 1000);
 
         const previousTimeout = store.mutes.get(userID);
@@ -163,8 +168,11 @@ export async function checkMuteEvasion(member: GuildMember) {
     } else if (expireTime < new Date().setHours(23, 55, 0, 0)) {
         const duration = expireTime - checkTime;
 
-        const timeout = setTimeout(() => {
-            unmute(member.id, undefined, member);
+        const timeout = setTimeout(async () => {
+            const timeoutMember = await getGuild()
+                ?.members.fetch(member.id)
+                .catch(() => undefined);
+            unmute(member.id, undefined, timeoutMember);
         }, duration);
 
         const previousTimeout = store.mutes.get(member.id);
