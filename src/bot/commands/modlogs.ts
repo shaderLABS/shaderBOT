@@ -1,5 +1,6 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
+import { getPunishmentPoints } from '../lib/automaticPunishment.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
 import { parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
@@ -60,7 +61,7 @@ export const command: Command = {
 
             if (queries[0].rowCount !== 0) {
                 pageCategory(
-                    'Warnings',
+                    `Warnings (${queries[0].rowCount})`,
                     queries[0].rows.map(
                         (row) =>
                             `\n**Severity:** ${row.severity}` +
@@ -74,7 +75,7 @@ export const command: Command = {
 
             if (queries[1].rowCount !== 0) {
                 pageCategory(
-                    'Punishments',
+                    `Punishments (${queries[1].rowCount})`,
                     queries[1].rows.map(
                         (row) =>
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
@@ -90,7 +91,7 @@ export const command: Command = {
 
             if (queries[2].rowCount !== 0) {
                 pageCategory(
-                    'Notes',
+                    `Notes (${queries[2].rowCount})`,
                     queries[2].rows.map(
                         (row) =>
                             `\n**Content:** ${row.content}` +
@@ -104,7 +105,7 @@ export const command: Command = {
 
             if (queries[3].rowCount !== 0) {
                 pageCategory(
-                    'Past Punishments',
+                    `Past Punishments (${queries[3].rowCount})`,
                     queries[3].rows.map((row) => {
                         let content =
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
@@ -120,9 +121,10 @@ export const command: Command = {
                         return content;
                     })
                 );
-
-                // .match(/[\s\S]{1,2000}(?!\S)/g);
             }
+
+            const punishmentPoints = await getPunishmentPoints(user.id);
+            if (punishmentPoints !== 0) pages[0] = `**Punishment Points:** ${punishmentPoints}\n\n` + pages[0];
 
             const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.username}#${user.discriminator}`);
             embedPages(embedMessage, message.author, pages);

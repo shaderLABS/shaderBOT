@@ -6,18 +6,28 @@ import log from './log.js';
 import { parseUser } from './misc.js';
 import { mute } from './muteUser.js';
 
-export default async function (user: User, member?: GuildMember) {
+function interpolateTime(range: number[], values: number[], punishmentPoints: number) {
+    return values[0] + ((values[1] - values[0]) * (punishmentPoints - range[0])) / (range[1] - range[0]);
+}
+
+function warningToPoints(severity: number, passedMS: number) {
+    const elapsedDays = Math.floor((Date.now() - passedMS) / 86400000);
+    const scale = elapsedDays / settings.warnings.decay[severity - 1];
+    return severity / (scale + 1.0);
+}
+
+export async function getPunishmentPoints(userID: string) {
     const warnings = (
         await db.query(
             /*sql*/ `
             SELECT severity, timestamp
             FROM warn
             WHERE severity > 0 AND user_id = $1;`,
-            [user.id]
+            [userID]
         )
     ).rows;
 
-    if (warnings.length === 0) return;
+    if (warnings.length === 0) return 0;
 
     const excludedTimes = await Promise.all(
         warnings.map((warning) =>
@@ -26,12 +36,18 @@ export default async function (user: User, member?: GuildMember) {
                 SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - timestamp))), 0) AS exclude
                 FROM past_punishment
                 WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND timestamp >= $1::TIMESTAMP AND user_id = $2;`,
-                [new Date(warning.timestamp), user.id]
+                [new Date(warning.timestamp), userID]
             )
         )
     );
 
-    const punishmentPoints = warnings.reduce((prev, curr, i) => prev + warningToPoints(curr.severity, new Date(curr.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000), 0);
+    const points: number = warnings.reduce((prev, curr, i) => prev + warningToPoints(curr.severity, new Date(curr.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000), 0);
+    return Math.round(points * 1000) / 1000;
+}
+
+export default async function (user: User, member?: GuildMember) {
+    const punishmentPoints = await getPunishmentPoints(user.id);
+    if (punishmentPoints === 0) return;
 
     try {
         if (punishmentPoints >= settings.warnings.punishment.muteRange[0] && punishmentPoints < settings.warnings.punishment.muteRange[1]) {
@@ -46,14 +62,4 @@ export default async function (user: User, member?: GuildMember) {
     } catch (error) {
         log(`Failed to auto-punish ${parseUser(user)}:\n` + error);
     }
-}
-
-function interpolateTime(range: number[], values: number[], punishmentPoints: number) {
-    return values[0] + ((values[1] - values[0]) * (punishmentPoints - range[0])) / (range[1] - range[0]);
-}
-
-function warningToPoints(severity: number, passedMS: number) {
-    const elapsedDays = Math.floor((Date.now() - passedMS) / 86400000);
-    const scale = elapsedDays / settings.warnings.decay[severity - 1];
-    return severity / (scale + 1.0);
 }
