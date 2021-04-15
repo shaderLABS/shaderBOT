@@ -41,7 +41,7 @@ export async function getPunishmentPoints(userID: string) {
         )
     );
 
-    const points: number = warnings.reduce((prev, curr, i) => prev + warningToPoints(curr.severity, new Date(curr.timestamp).getTime() - excludedTimes[i].rows[0].exclude * 1000), 0);
+    const points: number = warnings.reduce((prev, curr, i) => prev + warningToPoints(curr.severity, new Date(curr.timestamp).getTime() + excludedTimes[i].rows[0].exclude * 1000), 0);
     return Math.round(points * 1000) / 1000;
 }
 
