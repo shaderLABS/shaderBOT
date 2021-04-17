@@ -1,3 +1,8 @@
+This project is licensed under the following license (MIT License),
+except for the files in /scripts/prod/pg_backup/, which are licensed under
+the PostgreSQL License (/scripts/prod/pg_backup/LICENSE).
+
+
 MIT License
 
 Copyright (c) 2021 shaderLABS
