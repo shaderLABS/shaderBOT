@@ -47,19 +47,24 @@ export async function getPunishmentPoints(userID: string) {
 
 export default async function (user: User, member?: GuildMember) {
     const punishmentPoints = await getPunishmentPoints(user.id);
-    if (punishmentPoints === 0) return;
+    if (punishmentPoints === 0) return 0;
 
     try {
         if (punishmentPoints >= settings.warnings.punishment.muteRange[0] && punishmentPoints < settings.warnings.punishment.muteRange[1]) {
             const duration = interpolateTime(settings.warnings.punishment.muteRange, settings.warnings.punishment.muteValues, punishmentPoints);
-            mute(user.id, duration, null, 'Too many warnings.', member);
+            await mute(user.id, duration, null, 'Too many warnings.', member);
+            return 1;
         } else if (punishmentPoints >= settings.warnings.punishment.tempbanRange[0] && punishmentPoints < settings.warnings.punishment.tempbanRange[1]) {
             const duration = interpolateTime(settings.warnings.punishment.tempbanRange, settings.warnings.punishment.tempbanValues, punishmentPoints);
-            tempban(user, duration, null, 'Too many warnings.', false);
+            await tempban(user, duration, null, 'Too many warnings.', false);
+            return 2;
         } else if (punishmentPoints >= settings.warnings.punishment.ban) {
-            ban(user, null, 'Too many warnings.', false);
+            await ban(user, null, 'Too many warnings.', false);
+            return 3;
         }
     } catch (error) {
         log(`Failed to auto-punish ${parseUser(user)}:\n` + error);
     }
+
+    return 0;
 }
