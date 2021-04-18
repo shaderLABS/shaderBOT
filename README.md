@@ -1,7 +1,7 @@
 # shaderBOT Server
 
-![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/Shader-Labs/shaderBOT-server?style=flat-square)
-![GitHub](https://img.shields.io/github/license/Shader-Labs/shaderBOT-server?style=flat-square)
+![Dependency Status](https://img.shields.io/librariesio/github/Shader-Labs/shaderBOT-server?style=flat-square)
+![GitHub](https://img.shields.io/badge/license-MIT-%2391BF0A?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
 The following information is for developers and contributors. If you're a user, please go to [the wiki](https://github.com/shaderLABS/shaderBOT-server/wiki) instead.
