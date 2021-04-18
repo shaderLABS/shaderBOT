@@ -11,7 +11,7 @@ export const command: Command = {
     superCommands: ['project'],
     help: 'Mute a user in your project channel.',
     expectedArgs: '<@user|userID|username>',
-    minArgs: 0,
+    minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_WEBHOOKS'],
     permissionOverwrites: true,

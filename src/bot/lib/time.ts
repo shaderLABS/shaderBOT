@@ -93,7 +93,7 @@ export function secondsToString(seconds: number) {
     if (minutes) units.push(minutes + 'min');
     seconds -= minutes * 60;
 
-    if (seconds) units.push(seconds + 's');
+    if (seconds) units.push(Math.round(seconds) + 's');
 
     return units.join(' ');
 }
