@@ -30,7 +30,7 @@ export const command: Command = {
 
         channel.updateOverwrite(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 
-        log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>)`);
+        log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
         sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`);
     },
 };

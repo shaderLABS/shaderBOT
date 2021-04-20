@@ -10,7 +10,8 @@ CREATE TABLE "project" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     channel_id NUMERIC(20) UNIQUE NOT NULL,
     owners NUMERIC(20)[] NOT NULL,
-    role_id NUMERIC(20) UNIQUE NOT NULL
+    role_id NUMERIC(20) UNIQUE NOT NULL,
+    issue_tracker_url TEXT
 );
 
 DROP TABLE IF EXISTS "ticket";

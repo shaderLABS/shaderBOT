@@ -1,9 +1,10 @@
 import { Guild, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { URL } from 'node:url';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
-import { embedColor, sendError, sendInfo } from '../../lib/embeds.js';
+import { embedColor, embedIcon, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
 import { cacheAttachment, cutDescription, deleteAttachmentFromDiscord, getCategoryChannel } from '../../lib/ticketManagement.js';
@@ -53,8 +54,29 @@ export const command: Command = {
             if (!projectChannel) return sendErrorAndDelete(channel, 'The message does not contain a mentioned text channel.', question, attachments, guild);
             if (projectChannel.parentID && settings.archiveCategoryIDs.includes(projectChannel.parentID))
                 return sendErrorAndDelete(channel, 'The mentioned channel is archived.', question, attachments, guild);
-            if (!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0])
-                return sendErrorAndDelete(channel, 'The mentioned text channel is not a valid project.', question, attachments, guild);
+            const project = (await db.query(/*sql*/ `SELECT issue_tracker_url FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0];
+            if (!project) return sendErrorAndDelete(channel, 'The mentioned text channel is not a valid project.', question, attachments, guild);
+            if (project.issue_tracker_url) {
+                const issueTrackerURL = new URL(project.issue_tracker_url);
+                return sendErrorAndDelete(
+                    channel,
+                    new MessageEmbed({
+                        color: embedColor.blue,
+                        author: {
+                            iconURL: embedIcon.info,
+                            name: 'Issue Tracker',
+                        },
+                        description: `${projectChannel} uses an external issue tracker:\n${project.issue_tracker_url}`,
+                        footer: {
+                            iconURL: 'https://api.faviconkit.com/' + issueTrackerURL.hostname,
+                            text: issueTrackerURL.hostname,
+                        },
+                    }),
+                    question,
+                    attachments,
+                    guild
+                );
+            }
 
             /***************
              * DESCRIPTION *
@@ -155,11 +177,12 @@ async function awaitResponse(channel: TextChannel, authorID: string) {
     return response;
 }
 
-function sendErrorAndDelete(channel: TextChannel, message: string, question: Message, attachments: (string | undefined)[], guild: Guild) {
+function sendErrorAndDelete(channel: TextChannel, message: string | MessageEmbed, question: Message, attachments: (string | undefined)[], guild: Guild) {
     question.delete();
     attachments.forEach((attachment) => {
         if (attachment) deleteAttachmentFromDiscord(attachment, guild);
     });
 
-    sendError(channel, message);
+    if (message instanceof MessageEmbed) channel.send(message);
+    else sendError(channel, message);
 }

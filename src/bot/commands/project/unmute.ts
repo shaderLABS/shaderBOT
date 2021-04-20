@@ -31,7 +31,7 @@ export const command: Command = {
         if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals(['SEND_MESSAGES', 'ADD_REACTIONS'])) currentOverwrite.delete();
         else currentOverwrite.update({ SEND_MESSAGES: null, ADD_REACTIONS: null });
 
-        log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>)`);
+        log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
         sendSuccess(channel, `Successfully unmuted ${parseUser(targetUser)} in this project.`);
     },
 };
