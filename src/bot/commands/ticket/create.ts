@@ -24,27 +24,11 @@ export const command: Command = {
         let attachments: (string | undefined)[] = [];
 
         try {
-            /*********
-             * TITLE *
-             *********/
-
-            question = await sendInfo(channel, 'Please enter the title.', 'Ticket Creation', undefined, `Type '${settings.prefix}cancel' to stop.`);
-            const titleAnswer = await awaitResponse(channel, author.id);
-            attachments.push(await cacheAttachment(titleAnswer));
-            titleAnswer.delete();
-
-            // VALIDATION
-            if (titleAnswer.content.length > 32 || titleAnswer.content.length < 2)
-                return sendErrorAndDelete(channel, 'The title must be between 2 and 32 characters long.', question, attachments, guild);
-            if (uuid.test(titleAnswer.content)) return sendErrorAndDelete(channel, 'The title may not be or resemble an UUID.', question, attachments, guild);
-            if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [titleAnswer.content])).rows[0])
-                return sendErrorAndDelete(channel, 'A ticket with this name already exists.', question, attachments, guild);
-
             /***********
              * PROJECT *
              ***********/
 
-            await question.edit(question.embeds[0].setDescription('Please mention the project.'));
+            question = await sendInfo(channel, 'Please mention the project.', 'Ticket Creation', undefined, `Type '${settings.prefix}cancel' to stop.`);
             const projectAnswer = await awaitResponse(channel, author.id);
             attachments.push(await cacheAttachment(projectAnswer));
             projectAnswer.delete();
@@ -77,6 +61,22 @@ export const command: Command = {
                     guild
                 );
             }
+
+            /*********
+             * TITLE *
+             *********/
+
+            await question.edit(question.embeds[0].setDescription('Please enter the title.'));
+            const titleAnswer = await awaitResponse(channel, author.id);
+            attachments.push(await cacheAttachment(titleAnswer));
+            titleAnswer.delete();
+
+            // VALIDATION
+            if (titleAnswer.content.length > 32 || titleAnswer.content.length < 2)
+                return sendErrorAndDelete(channel, 'The title must be between 2 and 32 characters long.', question, attachments, guild);
+            if (uuid.test(titleAnswer.content)) return sendErrorAndDelete(channel, 'The title may not be or resemble an UUID.', question, attachments, guild);
+            if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [titleAnswer.content])).rows[0])
+                return sendErrorAndDelete(channel, 'A ticket with this name already exists.', question, attachments, guild);
 
             /***************
              * DESCRIPTION *
