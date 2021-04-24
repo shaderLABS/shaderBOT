@@ -10,7 +10,7 @@ export const command: Command = {
     maxArgs: 0,
     requiredPermissions: ['MANAGE_GUILD'],
     callback: (message) => {
-        const attachment = new MessageAttachment(Buffer.from(JSON.stringify(settings, null, 2)), 'configuration.json');
+        const attachment = new MessageAttachment(Buffer.from(JSON.stringify(settings, null, 4)), 'configuration.json');
         message.channel.send(attachment);
     },
 };

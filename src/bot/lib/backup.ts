@@ -3,7 +3,7 @@ import { Collection, Message, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-export const backupPath = 'channelBackup/';
+export const backupPath = 'customContent/channelBackup/';
 
 function parseProperty(prop: string | undefined | null) {
     return prop ? '\n\t' + prop.replaceAll(/\r?\n|\r/g, '') : '';
@@ -43,8 +43,8 @@ function decryptBackup(content: string) {
 }
 
 async function writeBackup(name: string, content: string) {
-    await fs.stat(backupPath).catch((error) => {
-        if (error.code === 'ENOENT') fs.mkdir(backupPath);
+    await fs.stat(backupPath).catch(async (error) => {
+        if (error.code === 'ENOENT') await fs.mkdir(backupPath, { recursive: true });
         else throw error;
     });
 

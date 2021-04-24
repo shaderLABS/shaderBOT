@@ -17,9 +17,16 @@ export const command: Command = {
         const { channel } = message;
 
         // read backup dir & sort by creation time
+        const files: string[] = await fs.readdir(backupPath).catch((error) => {
+            if (error.code !== 'ENOENT') console.error(error);
+            return [];
+        });
+
+        if (files.length === 0) return sendInfo(channel, 'There are no backups.');
+
         const backups = (
             await Promise.all(
-                (await fs.readdir(backupPath)).map(async (name) => {
+                files.map(async (name) => {
                     return { name, createdAt: (await fs.stat(path.join(backupPath, name))).birthtime.getTime() };
                 })
             )
