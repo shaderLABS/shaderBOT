@@ -32,8 +32,10 @@ export function parseUser(user: User | string) {
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {
-    let longer = s1;
-    let shorter = s2;
+    // case insensitive
+    let longer = s1.toLowerCase();
+    let shorter = s2.toLowerCase();
+
     if (s1.length < s2.length) {
         longer = s2;
         shorter = s1;
