@@ -40,12 +40,16 @@ function parseContent(content: string) {
     return content
         .slice(settings.prefix.length)
         .trim()
-        .match(/\\?.|^$/g)
+        .match(/\n|\\?.|^$/g)
         ?.reduce(
             (prev, curr) => {
-                if (curr === '"') prev.quote ^= 1;
-                else if (!prev.quote && curr === ' ') prev.args.push('');
-                else prev.args[prev.args.length - 1] += curr.replace(/\\"/g, '"');
+                if (curr === '^') {
+                    prev.quote ^= 1;
+                } else if (!prev.quote && (curr === ' ' || curr === '\n')) {
+                    if (prev.args[prev.args.length - 1]) prev.args.push('');
+                } else {
+                    prev.args[prev.args.length - 1] += curr.replace(/\\\^/g, '^');
+                }
                 return prev;
             },
             { args: [''], quote: 0 }
