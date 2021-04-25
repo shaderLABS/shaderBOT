@@ -83,7 +83,7 @@ npm run dev
 This will transpile the TypeScript files and run the server using [nodemon](https://www.npmjs.com/package/nodemon).
 You can also manually transpile the TypeScript files with `npm run build` and then run the server using `npm run start`.
 
-### pm2 (production)
+### PM2 (production)
 
 ```properties
 npm run build
@@ -91,6 +91,16 @@ pm2 start ecosystem.config.cjs
 ```
 
 This will daemonize and run the server with [PM2](https://pm2.keymetrics.io/) using the [`ecosystem.config.cjs`](ecosystem.config.cjs) configuration file.
+
+### Docker (production)
+
+Move the files in `/scripts/prod/docker/` to the root folder of this project. After configuring the `Dockerfile`, you can create and start the container using `docker-compose`:
+
+```properties
+docker-compose up
+```
+
+**IMPORTANT:** The Docker configuration is mostly untested, so you should expect issues when using it.
 
 ## Recommended Visual Studio Code Settings and Extensions
 

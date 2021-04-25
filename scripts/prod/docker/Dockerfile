@@ -1,0 +1,16 @@
+FROM node:15-alpine
+WORKDIR /app
+
+COPY . .
+RUN npm install
+
+ENV NODE_ENV=production
+# PUT OTHER ENVIRONMENT VARIABLES HERE
+
+# REMOVE THIS IF YOU'RE NOT RUNNING THE WEB SERVER
+ENV PORT=80
+EXPOSE 80
+
+RUN npm run build
+
+CMD [ "npm", "run", "start" ]

@@ -9,3 +9,4 @@ nodemon.json
 .gitignore
 Dockerfile
 .git/
+scripts/

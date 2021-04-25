@@ -10,6 +10,7 @@ services:
         volumes:
             - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
             - ./pgdata:/var/lib/postgresql/data
+            - ./customContent:/app/customContent
         ports:
             - '5432:5432'
     server:

@@ -7,3 +7,6 @@ dist/
 pgdata/
 src/bot/settings/settings.json
 customContent/
+/.dockerignore
+/docker_compose.yml
+/Dockerfile
