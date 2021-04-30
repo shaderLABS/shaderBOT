@@ -28,6 +28,7 @@ export async function startBot() {
     registerCommands('./src/bot/commands');
     registerEvents('./src/bot/events');
     registerPastas(pastaPath);
+    cleanBackups();
 
     client.login(process.env.TOKEN);
 }

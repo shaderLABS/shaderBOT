@@ -17,6 +17,7 @@ import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { ChannelResolver, RoleResolver } from '../db/resolvers/MarkdownResolver.js';
+import { production } from '../index.js';
 import { authChecker } from './gqlAuth.js';
 import './strategies/discord.js';
 
@@ -25,7 +26,6 @@ export const DOMAIN = process.env.DOMAIN || 'localhost';
 export const URL = `http://${DOMAIN}:${PORT}`;
 
 const app = polka();
-const production = process.env.NODE_ENV === 'production';
 
 export async function startWebserver() {
     /**************
