@@ -34,9 +34,11 @@ export const event: Event = {
             const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1;`, [newChannel.id])).rows[0];
 
             try {
-                const role = await newChannel.guild.roles.fetch(project.role_id);
-                if (!role?.editable) throw new Error();
-                await role.delete();
+                if (project) {
+                    const role = await newChannel.guild.roles.fetch(project.role_id);
+                    if (!role?.editable) throw new Error();
+                    await role.delete();
+                }
 
                 newChannel.lockPermissions();
 
@@ -49,25 +51,29 @@ export const event: Event = {
              * UNARCHIVE *
              *************/
 
+            const project = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1;`, [newChannel.id])).rows[0];
+
             try {
-                const role = await newChannel.guild.roles.create({
-                    data: {
-                        name: `${newChannel.name}`,
-                        mentionable: false,
-                    },
-                    reason: `Create notification role for #${newChannel.name}.`,
-                });
+                if (project) {
+                    project.owners.forEach(async (ownerID: string) => {
+                        const owner = await client.users.fetch(ownerID).catch(() => undefined);
+                        if (owner) newChannel.createOverwrite(owner, ownerOverwrites);
+                    });
 
-                const project = (await db.query(/*sql*/ `UPDATE project SET role_id = $1 WHERE channel_id = $2 RETURNING owners::TEXT[];`, [role.id, newChannel.id])).rows[0];
+                    const role = await newChannel.guild.roles.create({
+                        data: {
+                            name: `${newChannel.name}`,
+                            mentionable: false,
+                        },
+                        reason: `Create notification role for #${newChannel.name}.`,
+                    });
 
-                project.owners.forEach(async (ownerID: string) => {
-                    const owner = await client.users.fetch(ownerID);
-                    if (owner) newChannel.createOverwrite(owner, ownerOverwrites);
-                });
+                    db.query(/*sql*/ `UPDATE project SET role_id = $1 WHERE channel_id = $2;`, [role.id, newChannel.id]);
+                }
 
                 log(`<#${newChannel.id}> has been unarchived.`);
             } catch {
-                log(`<#${newChannel.id}> has been unarchived, but the notification role could not be created. The project might still be archived in the database.`);
+                log(`<#${newChannel.id}> has been unarchived, but the notification role could not be created.`);
             }
         }
     },
