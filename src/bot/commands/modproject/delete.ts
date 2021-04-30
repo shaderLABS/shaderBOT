@@ -22,8 +22,8 @@ export const command: Command = {
 
         channel.lockPermissions();
 
-        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) {
-            const role = await channel.guild.roles.fetch(project.role_id);
+        if (!channel.parentID || !settings.archiveCategoryIDs.includes(channel.parentID)) {
+            const role = await channel.guild.roles.fetch(project.role_id).catch(() => undefined);
             if (role) role.delete();
         }
 

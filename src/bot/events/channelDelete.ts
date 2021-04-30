@@ -40,23 +40,23 @@ export const event: Event = {
                 }
 
                 return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
-            }
+            } else {
+                let logContent = `The channel #${channel.name} has been deleted. `;
 
-            let logContent = `The channel #${channel.name} has been deleted. `;
+                await db.query(/*sql*/ `UPDATE ticket SET project_channel_id = NULL WHERE project_channel_id = $1;`, [channel.id]);
 
-            const deletedProject = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
-            if (deletedProject) {
-                const role = await channel.guild.roles.fetch(deletedProject.role_id);
-                if (role) {
-                    role.delete();
-                    logContent += 'The role and project that were linked to this channel have been removed. ';
+                const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
+                if (project) {
+                    const role = await channel.guild.roles.fetch(project.role_id).catch(() => undefined);
+                    if (role) role.delete();
+                    logContent += 'The project that was linked to this channel has been removed. ';
                 }
+
+                const backupSize = await createBackup(channel).catch(() => undefined);
+                logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved.` : 'There were no cached messages to save.';
+
+                log(logContent);
             }
-
-            const backupSize = await createBackup(channel).catch(() => undefined);
-            logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved.` : 'There were no cached messages to save.';
-
-            log(logContent);
         }
     },
 };
