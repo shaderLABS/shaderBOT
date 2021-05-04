@@ -11,12 +11,11 @@ export const autoResponsePath = 'customContent/autoResponses';
 
 export interface AutoResponse {
     readonly regex: RegExp;
-    readonly directMessage?: boolean;
     readonly message?: string;
     readonly embed?: MessageEmbedOptions;
-    readonly attachments?: string[];
-    readonly maxMemberDuration?: number;
+    readonly directMessage?: boolean;
     readonly deleteAfter?: number;
+    readonly maxMemberDuration?: number;
 }
 
 export async function registerAutoResponses(dir: string) {
