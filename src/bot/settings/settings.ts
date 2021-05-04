@@ -14,6 +14,7 @@ export interface Settings {
         attachmentCacheChannelID: string;
         openCategoryID: string;
     };
+    botChannelID: string;
     mediaChannelIDs: string[];
     muteRoleID: string;
     guildID: string;

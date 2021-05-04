@@ -3,7 +3,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { writePasta } from '../../lib/pasta.js';
+import { getStringFromCodeBlock, writePasta } from '../../lib/pastaAutoResponse.js';
 import { Pasta } from '../../pastaHandler.js';
 
 export const command: Command = {
@@ -17,16 +17,8 @@ export const command: Command = {
     callback: async (message, _, text) => {
         const { channel } = message;
 
-        const start = text.match(/```[a-z]*/);
-        if (!start) return sendError(channel, 'Invalid data formatting.');
-
-        const startIndex = text.indexOf(start[0]);
-        if (startIndex === -1) return sendError(channel, 'Invalid data formatting.');
-
-        const endIndex = text.lastIndexOf('```');
-        if (endIndex === -1) return sendError(channel, 'Invalid data formatting.');
-
-        const data = text.substring(startIndex + start[0].length, endIndex);
+        const data = getStringFromCodeBlock(text);
+        if (!data) return sendError(channel, 'Invalid data formatting.');
 
         try {
             const pasta: Pasta = JSON.parse(data);

@@ -2,7 +2,7 @@ import { MessageAttachment } from 'discord.js';
 import { pastas } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError } from '../../lib/embeds.js';
-import { aliasToFileName } from '../../lib/pasta.js';
+import { stringToFileName } from '../../lib/pastaAutoResponse.js';
 
 export const command: Command = {
     commands: ['read'],
@@ -19,7 +19,7 @@ export const command: Command = {
         if (!pasta) return sendError(channel, 'The specified pasta does not exist.');
 
         try {
-            const attachment = new MessageAttachment(Buffer.from(JSON.stringify(pasta, null, 4)), aliasToFileName(pasta.alias));
+            const attachment = new MessageAttachment(Buffer.from(JSON.stringify(pasta, null, 4)), stringToFileName(pasta.alias));
             channel.send(attachment);
         } catch {
             sendError(channel, 'Failed to send pasta.');

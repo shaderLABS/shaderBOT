@@ -1,5 +1,6 @@
 import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { sendAutoResponse } from '../../autoResponseHandler.js';
 import { commands, settings } from '../../bot.js';
 import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
@@ -22,8 +23,10 @@ export const event: Event = {
                 const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
                 if (command) runCommand(command, message, invoke, args);
             }
+        } else if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+            createTicketComment(message);
         } else {
-            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) createTicketComment(message);
+            sendAutoResponse(message);
         }
     },
 };

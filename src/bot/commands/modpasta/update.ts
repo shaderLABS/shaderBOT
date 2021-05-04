@@ -5,7 +5,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { aliasToFileName, writePasta } from '../../lib/pasta.js';
+import { stringToFileName, writePasta } from '../../lib/pastaAutoResponse.js';
 import { removeArgumentsFromText } from '../../lib/searchMessage.js';
 import { pastaPath } from '../../pastaHandler.js';
 
@@ -21,19 +21,23 @@ export const command: Command = {
         const { channel } = message;
 
         try {
+            const pasta = pastas.get(args[0]);
+            if (!pasta) return sendError(channel, 'The specified pasta does not exist.');
+
             const objPath = args[1].split('.');
 
             const rawValue = removeArgumentsFromText(text, args[1]);
             const jsonValue = rawValue ? JSON.parse(rawValue) : undefined;
 
-            const pasta = pastas.get(args[0]);
-            if (!pasta) return sendError(channel, 'The specified pasta does not exist.');
-            const oldAlias = pasta.alias;
-
             setValue(pasta, objPath, jsonValue);
 
+            pastas.set(pasta.alias, pasta);
             await writePasta(pasta);
-            if (oldAlias !== pasta.alias) await fs.rm(path.join(pastaPath, aliasToFileName(oldAlias)));
+
+            if (args[0] !== pasta.alias) {
+                pastas.delete(args[0]);
+                await fs.rm(path.join(pastaPath, stringToFileName(args[0])));
+            }
 
             sendSuccess(channel, `Successfully updated the pasta \`${pasta.alias}\`.`);
             log(`${parseUser(message.author)} updated the pasta \`${pasta.alias}\`.`);
