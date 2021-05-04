@@ -36,6 +36,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "attachmentCacheChannelID": "", // private channel in which attachments will be cached
         "openCategoryID": "" // private/muted category in which tickets will be opened
     },
+    "botChannelID": "", // channel to send auto responses in if the DM failed
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "muteRoleID": "",
     "guildID": "",
