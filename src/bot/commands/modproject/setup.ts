@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed, Util } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
@@ -62,7 +62,7 @@ export const command: Command = {
                 .addFields([
                     {
                         name: owners.size > 1 ? 'Owners' : 'Owner',
-                        value: [...owners].map((owner) => owner.user.username).join(', '),
+                        value: [...owners].map((owner) => Util.escapeMarkdown(owner.user.tag)).join(', '),
                     },
                     {
                         name: 'Notification Role',

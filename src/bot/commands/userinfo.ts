@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageEmbed, Util } from 'discord.js';
 import { Command } from '../commandHandler.js';
 import { embedColor, embedIcon, sendError } from '../lib/embeds.js';
 import { getMember, getUser } from '../lib/searchMessage.js';
@@ -20,7 +20,7 @@ export const command: Command = {
 
         const embed = new MessageEmbed({
             author: {
-                name: user.tag,
+                name: Util.escapeMarkdown(user.tag),
                 iconURL: embedIcon.info,
             },
             color: embedColor.blue,

@@ -1,4 +1,4 @@
-import { Guild, Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Guild, Message, MessageEmbed, TextChannel, Util } from 'discord.js';
 import { URL } from 'node:url';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
@@ -110,7 +110,7 @@ export const command: Command = {
             const ticketEmbed = new MessageEmbed({
                 color: embedColor.blue,
                 author: {
-                    name: author.username + '#' + author.discriminator,
+                    name: Util.escapeMarkdown(author.tag),
                     iconURL: author.displayAvatarURL() || undefined,
                 },
                 title: titleAnswer.content,

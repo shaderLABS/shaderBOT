@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
+import { Message, MessageEmbed, TextChannel, Util } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { sendAutoResponse } from '../../autoResponseHandler.js';
 import { commands, settings } from '../../bot.js';
@@ -69,7 +69,7 @@ async function createTicketComment(message: GuildMessage) {
 
     const commentEmbed = new MessageEmbed()
         .setColor(message.member.displayHexColor === '#000000' ? '#212121' : message.member.displayHexColor)
-        .setAuthor(member.user.username + '#' + member.user.discriminator, member.user.displayAvatarURL() || undefined)
+        .setAuthor(Util.escapeMarkdown(member.user.tag), member.user.displayAvatarURL() || undefined)
         .setTimestamp(timestamp)
         .setDescription(content);
 

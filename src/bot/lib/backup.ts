@@ -65,7 +65,7 @@ export async function createBackup(channel: TextChannel, backupMessages?: Collec
     if (backupMessages) messageArray.reverse();
 
     let content = messageArray.reduce((prev, curr) => {
-        let content = `${curr.author.username}#${curr.author.discriminator} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, '')}`;
+        let content = `${curr.author.tag} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, '')}`;
         if (curr.embeds[0]) content += (parseProperty(curr.embeds[0].title) + parseProperty(curr.embeds[0].author?.name) + parseProperty(curr.embeds[0].description)).trim();
 
         return prev + `${curr.createdAt.toUTCString()} - ${content}\n`;

@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, TextChannel, User } from 'discord.js';
+import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, TextChannel, User, Util } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
@@ -90,7 +90,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
     if (ticket.edited) ticketFooter += ` | edited at ${formatTimeDate(new Date(ticket.edited))}`;
 
     const ticketEmbed = new MessageEmbed()
-        .setAuthor(ticketAuthor.username + '#' + ticketAuthor.discriminator, ticketAuthor.displayAvatarURL() || undefined)
+        .setAuthor(Util.escapeMarkdown(ticketAuthor.tag), ticketAuthor.displayAvatarURL() || undefined)
         .setTitle(ticket.title)
         .setColor(embedColor.blue)
         .setFooter(ticketFooter)
@@ -140,12 +140,12 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
             const comment = comments.rows[i];
             const author = (await guild.members.fetch(comment.author_id).catch(() => undefined)) || {
                 displayHexColor: '#000000',
-                user: await client.users.fetch(comment.author_id),
+                user: await client.users.fetch(comment.author_id).catch(() => undefined),
             };
 
             const commentEmbed = new MessageEmbed()
-                .setColor(author?.displayHexColor === '#000000' ? '#212121' : author.displayHexColor)
-                .setAuthor(author?.user.username + '#' + author?.user.discriminator, author?.user.displayAvatarURL() || undefined)
+                .setColor(author.displayHexColor === '#000000' ? '#212121' : author.displayHexColor)
+                .setAuthor(author.user ? Util.escapeMarkdown(author.user.tag) : 'Deleted User', author.user?.displayAvatarURL())
                 .setFooter(comment.edited ? `edited at ${formatTimeDate(new Date(comment.edited))}` : '')
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);

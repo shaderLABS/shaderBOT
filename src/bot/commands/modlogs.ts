@@ -1,3 +1,4 @@
+import { Util } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { getPunishmentPoints } from '../lib/automaticPunishment.js';
@@ -126,7 +127,7 @@ export const command: Command = {
             const punishmentPoints = await getPunishmentPoints(user.id);
             if (punishmentPoints !== 0) pages[0] = `**Punishment Points:** ${punishmentPoints}\n\n` + pages[0];
 
-            const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.username}#${user.discriminator}`);
+            const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${Util.escapeMarkdown(user.tag)}`);
             embedPages(embedMessage, message.author, pages);
         } catch (error) {
             sendError(channel, error);
