@@ -1,4 +1,4 @@
-import { MessageEmbed, Permissions, TextChannel, Util } from 'discord.js';
+import { MessageEmbed, Permissions, TextChannel } from 'discord.js';
 import gq from 'graphql';
 import tgq from 'type-graphql';
 import log from '../../bot/lib/log.js';
@@ -72,7 +72,7 @@ export class CommentResolver {
 
         const commentEmbed = new MessageEmbed()
             .setColor(user.roleColor || '#212121')
-            .setAuthor(Util.escapeMarkdown(user.username + '#' + user.discriminator), user.avatarURL || undefined)
+            .setAuthor(user.username + '#' + user.discriminator, user.avatarURL || undefined)
             .setTimestamp(timestamp)
             .setDescription(content);
 
