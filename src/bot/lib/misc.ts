@@ -1,4 +1,4 @@
-import { CategoryChannel, TextChannel, User } from 'discord.js';
+import { CategoryChannel, TextChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
@@ -26,7 +26,7 @@ export function parseUser(user: User | string) {
         if (!target) return `<@${user}> (${user})`;
     }
 
-    return `<@${target.id}> (${target.tag} | ${target.id})`;
+    return `<@${target.id}> (${Util.escapeMarkdown(target.tag)} | ${target.id})`;
 }
 
 export const sleep = promisify(setTimeout);
