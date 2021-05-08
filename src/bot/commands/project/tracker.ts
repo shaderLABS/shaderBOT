@@ -1,4 +1,4 @@
-import { URL } from 'node:url';
+import { URL } from 'url';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';

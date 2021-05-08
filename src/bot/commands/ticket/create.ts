@@ -1,5 +1,5 @@
 import { Guild, Message, MessageEmbed, TextChannel } from 'discord.js';
-import { URL } from 'node:url';
+import { URL } from 'url';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
