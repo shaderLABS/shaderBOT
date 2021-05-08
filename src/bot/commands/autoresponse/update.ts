@@ -31,8 +31,8 @@ export const command: Command = {
 
             setValue(autoResponse, objPath, jsonValue);
 
-            // if regex got updated (which made it a string), turn it into an actual regex object
-            autoResponse = { ...autoResponse, regex: autoResponse.regex instanceof RegExp ? autoResponse.regex : new RegExp(autoResponse.regex) };
+            // always recreate because it's a string if it got updated (and the flags might have been changed)
+            autoResponse = { ...autoResponse, regex: recreateRegExp(autoResponse.regex, autoResponse.flags) };
 
             autoResponses.set(autoResponse.regex.source, autoResponse);
             await writeAutoResponse(autoResponse);
@@ -51,6 +51,10 @@ export const command: Command = {
         }
     },
 };
+
+function recreateRegExp(regex: RegExp | string, flags?: string) {
+    return regex instanceof RegExp ? new RegExp(regex.source, flags) : new RegExp(regex, flags);
+}
 
 function setValue(obj: any, path: string[], value: any) {
     path.reduce((a, b, i) => {

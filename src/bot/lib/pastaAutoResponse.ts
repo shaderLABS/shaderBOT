@@ -39,7 +39,7 @@ export function autoResponseToJSON(autoResponse: AutoResponse): string {
 
 export function JSONToAutoResponse(json: string): AutoResponse {
     let autoResponse = JSON.parse(json);
-    return { ...autoResponse, regex: new RegExp(autoResponse.regex) };
+    return { ...autoResponse, regex: new RegExp(autoResponse.regex, autoResponse.flags) };
 }
 
 export async function writeAutoResponse(autoResponse: AutoResponse) {

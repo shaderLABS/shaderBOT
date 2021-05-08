@@ -31,9 +31,10 @@ export const event: Event = {
     },
 };
 
+const mediaURLs = /([a-zA-Z0-9]+:\/\/)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\.[A-Za-z]{2,4})(:[0-9]+)?(\/.*)?/;
 function mediaOnly(message: GuildMessage) {
     if (!settings.mediaChannelIDs.includes(message.channel.id) || message.attachments.size !== 0 || message.member.permissions.has('MANAGE_MESSAGES')) return false;
-    if (new RegExp('([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?').test(message.content)) return true;
+    if (mediaURLs.test(message.content)) return true;
 
     message.delete();
     return true;

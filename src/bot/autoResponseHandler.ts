@@ -11,6 +11,7 @@ export const autoResponsePath = 'customContent/autoResponses';
 
 export interface AutoResponse {
     readonly regex: RegExp;
+    readonly flags?: string;
     readonly message?: string;
     readonly embed?: MessageEmbedOptions;
     readonly directMessage?: boolean;
