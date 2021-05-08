@@ -1,4 +1,4 @@
-import { DMChannel, MessageEmbed, MessageEmbedOptions, TextChannel } from 'discord.js';
+import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { autoResponses, settings } from './bot.js';
@@ -14,6 +14,7 @@ export interface AutoResponse {
     readonly flags?: string;
     readonly message?: string;
     readonly embed?: MessageEmbedOptions;
+    readonly attachments?: string[];
     readonly directMessage?: boolean;
     readonly deleteAfter?: number;
     readonly maxMemberDuration?: number;
@@ -47,11 +48,15 @@ export async function sendAutoResponse(message: GuildMessage) {
             let channel = autoResponse.directMessage ? await message.author.createDM() : message.channel;
 
             const responseMessage = fillVariables(message, autoResponse.message || '');
-            let responseEmbed: MessageEmbed[] = [];
+            let responseEmbed: (MessageEmbed | MessageAttachment)[] = [];
 
             try {
                 if (autoResponse.embed) {
                     responseEmbed.push(new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed)))));
+                }
+
+                if (autoResponse.attachments) {
+                    responseEmbed.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
                 }
 
                 const response = await channel.send(responseMessage, responseEmbed).catch(async () => {
