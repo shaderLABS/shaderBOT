@@ -48,23 +48,23 @@ export async function sendAutoResponse(message: GuildMessage) {
             let channel = autoResponse.directMessage ? await message.author.createDM() : message.channel;
 
             const responseMessage = fillVariables(message, autoResponse.message || '');
-            let responseEmbed: (MessageEmbed | MessageAttachment)[] = [];
+            const responseMessageAdditions: (MessageEmbed | MessageAttachment)[] = [];
 
             try {
                 if (autoResponse.embed) {
-                    responseEmbed.push(new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed)))));
+                    responseMessageAdditions.push(new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed)))));
                 }
 
                 if (autoResponse.attachments) {
-                    responseEmbed.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
+                    responseMessageAdditions.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
                 }
 
-                const response = await channel.send(responseMessage, responseEmbed).catch(async () => {
+                const response = await channel.send(responseMessage, responseMessageAdditions).catch(async () => {
                     let botChannel = message.guild.channels.cache.get(settings.botChannelID);
                     if (!botChannel || !(botChannel instanceof TextChannel)) return;
                     channel = botChannel;
 
-                    return channel.send(responseMessage, responseEmbed);
+                    return channel.send(responseMessage, responseMessageAdditions);
                 });
 
                 if (!response) throw new Error();

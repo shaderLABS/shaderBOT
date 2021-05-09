@@ -9,6 +9,7 @@ export interface Pasta {
     readonly alias: string;
     readonly message?: string;
     readonly embed?: MessageEmbedOptions;
+    readonly attachments?: string[];
 }
 
 export async function registerPastas(dir: string) {

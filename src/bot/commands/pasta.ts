@@ -1,4 +1,4 @@
-import { MessageEmbed } from 'discord.js';
+import { MessageAttachment, MessageEmbed } from 'discord.js';
 import { pastas } from '../bot.js';
 import { Command } from '../commandHandler.js';
 import { sendError, sendInfo } from '../lib/embeds.js';
@@ -19,11 +19,17 @@ export const command: Command = {
             if (!pasta || similarityLevenshtein(pasta.alias, text) < 0.5) return sendError(channel, 'Pasta not found.');
 
             try {
+                const responseMessageAdditions: (MessageEmbed | MessageAttachment)[] = [];
+
                 if (pasta.embed) {
-                    channel.send(pasta.message, new MessageEmbed(pasta.embed));
-                } else if (pasta.message) {
-                    channel.send(pasta.message);
+                    responseMessageAdditions.push(new MessageEmbed(pasta.embed));
                 }
+
+                if (pasta.attachments) {
+                    responseMessageAdditions.push(...pasta.attachments.map((attachment) => new MessageAttachment(attachment)));
+                }
+
+                channel.send(pasta.message, responseMessageAdditions);
             } catch (error) {
                 sendError(channel, 'The specified pasta is invalid: ' + error);
             }
