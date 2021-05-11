@@ -1,4 +1,5 @@
 import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextChannel } from 'discord.js';
+import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { autoResponses, settings } from './bot.js';
@@ -21,23 +22,22 @@ export interface AutoResponse {
 }
 
 export async function registerAutoResponses(dir: string) {
-    const filePath = path.join(path.resolve(), dir);
-    const files = await fs.readdir(filePath).catch((error) => {
+    const dirPath = path.join(path.resolve(), dir);
+    const dirEntries: Dirent[] = await fs.readdir(dirPath, { withFileTypes: true }).catch((error) => {
         if (error.code !== 'ENOENT') console.error(error);
         return [];
     });
 
-    for (const file of files) {
-        const stat = await fs.stat(path.join(filePath, file));
-        if (stat.isDirectory()) {
-            registerAutoResponses(path.join(dir, file));
-        } else if (file.endsWith('.json')) {
-            const autoResponse = JSONToAutoResponse(await fs.readFile(path.join(filePath, file), 'utf-8'));
-
-            console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering automatic response "${file}"...`);
-            autoResponses.set(autoResponse.regex.source, autoResponse);
-        }
-    }
+    return Promise.all(
+        dirEntries.map(async (dirEntry) => {
+            if (dirEntry.isDirectory()) {
+                registerAutoResponses(path.join(dir, dirEntry.name));
+            } else if (dirEntry.name.endsWith('.json')) {
+                const autoResponse = JSONToAutoResponse(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
+                autoResponses.set(autoResponse.regex.source, autoResponse);
+            }
+        })
+    );
 }
 
 export async function sendAutoResponse(message: GuildMessage) {

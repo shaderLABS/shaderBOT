@@ -10,20 +10,20 @@ export interface Event {
 }
 
 export async function registerEvents(dir: string) {
-    const filePath = path.join(path.resolve(), dir);
-    const files = await fs.readdir(filePath);
-    for (const file of files) {
-        const stat = await fs.stat(path.join(filePath, file));
-        if (stat.isDirectory()) {
-            registerEvents(path.join(dir, file));
-        } else if (file.endsWith('.js')) {
-            const { event }: { event: Event } = await import(url.pathToFileURL(path.join(filePath, file)).href);
-            console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering event "${file}"...`);
+    const dirPath = path.join(path.resolve(), dir);
+    const dirEntries = await fs.readdir(dirPath, { withFileTypes: true });
 
-            events.set(event.name, event);
+    return Promise.all(
+        dirEntries.map(async (dirEntry) => {
+            if (dirEntry.isDirectory()) {
+                registerEvents(path.join(dir, dirEntry.name));
+            } else if (dirEntry.name.endsWith('.js')) {
+                const { event }: { event: Event } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
+                events.set(event.name, event);
 
-            if (event.name === 'ready') client.once(event.name, event.callback.bind(event));
-            else client.on(event.name, event.callback.bind(event));
-        }
-    }
+                if (event.name === 'ready') client.once(event.name, event.callback.bind(event));
+                else client.on(event.name, event.callback.bind(event));
+            }
+        })
+    );
 }

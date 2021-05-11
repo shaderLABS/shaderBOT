@@ -1,7 +1,7 @@
 import { Client, Collection } from 'discord.js';
 import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
-import { Command, registerCommands } from './commandHandler.js';
+import { Command, commandsToDebugMessage, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { loadTimeouts } from './lib/punishments.js';
@@ -28,10 +28,10 @@ export async function startBot() {
     autoResponses = new Collection<string, AutoResponse>();
     settings = await settingsFile.read();
 
-    registerCommands('./src/bot/commands');
-    registerEvents('./src/bot/events');
-    registerPastas(pastaPath);
-    registerAutoResponses(autoResponsePath);
+    registerCommands('./src/bot/commands').then(() => console.debug(`Registered Commands:\n\t${commandsToDebugMessage(commands)}`));
+    registerEvents('./src/bot/events').then(() => console.debug(`Registered Events:\n\t${events.keyArray().join('\n\t')}`));
+    registerPastas(pastaPath).then(() => console.debug(`Registered Pastas:\n\t${pastas.keyArray().join('\n\t')}`));
+    registerAutoResponses(autoResponsePath).then(() => console.debug(`Registered Automatic Responses:\n\t${autoResponses.keyArray().join('\n\t')}`));
     cleanBackups();
 
     client.login(process.env.TOKEN);

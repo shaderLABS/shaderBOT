@@ -1,4 +1,5 @@
 import { MessageEmbedOptions } from 'discord.js';
+import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { pastas } from './bot.js';
@@ -13,21 +14,20 @@ export interface Pasta {
 }
 
 export async function registerPastas(dir: string) {
-    const filePath = path.join(path.resolve(), dir);
-    const files = await fs.readdir(filePath).catch((error) => {
+    const dirPath = path.join(path.resolve(), dir);
+    const dirEntries: Dirent[] = await fs.readdir(dirPath, { withFileTypes: true }).catch((error) => {
         if (error.code !== 'ENOENT') console.error(error);
         return [];
     });
 
-    for (const file of files) {
-        const stat = await fs.stat(path.join(filePath, file));
-        if (stat.isDirectory()) {
-            registerPastas(path.join(dir, file));
-        } else if (file.endsWith('.json')) {
-            const pasta: Pasta = JSON.parse(await fs.readFile(path.join(filePath, file), 'utf-8'));
-
-            console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering pasta "${file}"...`);
-            pastas.set(pasta.alias, pasta);
-        }
-    }
+    return Promise.all(
+        dirEntries.map(async (dirEntry) => {
+            if (dirEntry.isDirectory()) {
+                registerPastas(path.join(dirPath, dirEntry.name));
+            } else if (dirEntry.name.endsWith('.json')) {
+                const pasta: Pasta = JSON.parse(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
+                pastas.set(pasta.alias, pasta);
+            }
+        })
+    );
 }

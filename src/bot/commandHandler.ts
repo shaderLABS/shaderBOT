@@ -33,28 +33,28 @@ export interface Command {
 }
 
 export async function registerCommands(dir: string) {
-    const filePath = path.join(path.resolve(), dir);
-    const files = await fs.readdir(filePath);
-    for (const file of files) {
-        const stat = await fs.stat(path.join(filePath, file));
-        if (stat.isDirectory()) {
-            registerCommands(path.join(dir, file));
-        } else if (file.endsWith('.js')) {
-            const { command }: { command: Command } = await import(url.pathToFileURL(path.join(filePath, file)).href);
+    const dirPath = path.join(path.resolve(), dir);
+    const dirEntries = await fs.readdir(dirPath, { withFileTypes: true });
 
-            if (!command.superCommands) {
-                console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering command "${file}"...`);
-                commands.set(JSON.stringify(command.commands), command);
-            } else {
-                const superCmd = commands.get(JSON.stringify(command.superCommands)) || new Collection<string, Command>();
-                if (!(superCmd instanceof Collection)) return;
+    return Promise.all(
+        dirEntries.map(async (dirEntry) => {
+            if (dirEntry.isDirectory()) {
+                registerCommands(path.join(dir, dirEntry.name));
+            } else if (dirEntry.name.endsWith('.js')) {
+                const { command }: { command: Command } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
 
-                console.debug('\x1b[30m\x1b[1m%s\x1b[0m', `Registering command "${file}" (sub-command of "${command.superCommands.join('/')}")...`);
-                superCmd.set(JSON.stringify(command.commands), command);
-                commands.set(JSON.stringify(command.superCommands), superCmd);
+                if (!command.superCommands) {
+                    commands.set(JSON.stringify(command.commands), command);
+                } else {
+                    const superCommand = commands.get(JSON.stringify(command.superCommands)) || new Collection<string, Command>();
+                    if (!(superCommand instanceof Collection)) return;
+
+                    superCommand.set(JSON.stringify(command.commands), command);
+                    commands.set(JSON.stringify(command.superCommands), superCommand);
+                }
             }
-        }
-    }
+        })
+    );
 }
 
 export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
@@ -172,4 +172,16 @@ export function runCommand(command: Command | Collection<string, Command>, messa
      *******/
 
     callback(message, args, args.join(' '));
+}
+
+export function commandsToDebugMessage(collection: Collection<string, Command | Collection<string, Command>>): string {
+    return collection
+        .array()
+        .map((value) => {
+            if (value instanceof Collection) return commandsToDebugMessage(value);
+
+            if (value.superCommands) return value.superCommands.join('|') + ' ' + value.commands.join('|');
+            else return value.commands.join('|');
+        })
+        .join('\n\t');
 }
