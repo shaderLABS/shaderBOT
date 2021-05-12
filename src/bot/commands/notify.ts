@@ -15,7 +15,7 @@ export const command: Command = {
     callback: async (message) => {
         const { guild, channel, member } = message;
         const projectChannel = message.mentions.channels.first();
-        if (!projectChannel) return syntaxError(channel, 'project notify ' + expectedArgs);
+        if (!projectChannel) return syntaxError(channel, 'notify ' + expectedArgs);
 
         const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
         if (!project) return sendError(channel, `<#${projectChannel.id}> is not a project channel.`);
