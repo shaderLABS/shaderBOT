@@ -2,7 +2,7 @@ import { BitFieldResolvable, Collection, DMChannel, Guild, GuildMember, Message,
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { commands, settings } from './bot.js';
+import { commands, cooldowns, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
 
 export interface GuildMessage extends Message {
@@ -84,8 +84,6 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
 
     return true;
 }
-
-const cooldowns: Map<string, boolean> = new Map();
 
 function getSubcommandSyntax(invoke: string, subcommands: Collection<string, Command>): string {
     const commands = subcommands

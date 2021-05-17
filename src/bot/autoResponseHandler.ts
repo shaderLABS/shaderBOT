@@ -2,7 +2,7 @@ import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextCh
 import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { autoResponses, settings } from './bot.js';
+import { autoResponses, cooldowns, settings } from './bot.js';
 import { GuildMessage } from './commandHandler.js';
 import { sendInfo } from './lib/embeds.js';
 import log from './lib/log.js';
@@ -19,6 +19,7 @@ export interface AutoResponse {
     readonly directMessage?: boolean;
     readonly deleteAfter?: number;
     readonly maxMemberDuration?: number;
+    readonly cooldown?: number;
 }
 
 export async function registerAutoResponses(dir: string) {
@@ -43,7 +44,11 @@ export async function registerAutoResponses(dir: string) {
 export async function sendAutoResponse(message: GuildMessage) {
     for (const [regex, autoResponse] of autoResponses) {
         if (autoResponse.regex.test(message.content)) {
-            if (autoResponse.maxMemberDuration && message.member.joinedAt && autoResponse.maxMemberDuration < (Date.now() - message.member.joinedAt.getTime()) / 1000) return;
+            if (
+                (autoResponse.maxMemberDuration && message.member.joinedAt && autoResponse.maxMemberDuration < (Date.now() - message.member.joinedAt.getTime()) / 1000) ||
+                (autoResponse.cooldown && cooldowns.has(`${message.member.id}:${regex}`))
+            )
+                return;
 
             let channel = autoResponse.directMessage ? await message.author.createDM() : message.channel;
 
@@ -71,6 +76,12 @@ export async function sendAutoResponse(message: GuildMessage) {
 
                 if (autoResponse.deleteAfter) {
                     setTimeout(() => response.delete(), autoResponse.deleteAfter * 1000);
+                }
+
+                if (autoResponse.cooldown) {
+                    const cooldownID = `${message.member.id}:${regex}`;
+                    cooldowns.set(cooldownID, true);
+                    setTimeout(() => cooldowns.delete(cooldownID), autoResponse.cooldown * 1000);
                 }
 
                 if (autoResponse.directMessage && channel.id !== message.channel.id) {
