@@ -11,15 +11,16 @@ import { JSONToAutoResponse } from './lib/pastaAutoResponse.js';
 export const autoResponsePath = 'customContent/autoResponses';
 
 export interface AutoResponse {
-    readonly regex: RegExp;
-    readonly flags?: string;
-    readonly message?: string;
-    readonly embed?: MessageEmbedOptions;
-    readonly attachments?: string[];
-    readonly directMessage?: boolean;
-    readonly deleteAfter?: number;
-    readonly maxMemberDuration?: number;
-    readonly cooldown?: number;
+    alias: string;
+    regex: RegExp;
+    flags?: string;
+    message?: string;
+    embed?: MessageEmbedOptions;
+    attachments?: string[];
+    directMessage?: boolean;
+    deleteAfter?: number;
+    maxMemberDuration?: number;
+    cooldown?: number;
 }
 
 export async function registerAutoResponses(dir: string) {
@@ -35,18 +36,18 @@ export async function registerAutoResponses(dir: string) {
                 registerAutoResponses(path.join(dir, dirEntry.name));
             } else if (dirEntry.name.endsWith('.json')) {
                 const autoResponse = JSONToAutoResponse(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
-                autoResponses.set(autoResponse.regex.source, autoResponse);
+                autoResponses.set(autoResponse.alias, autoResponse);
             }
         })
     );
 }
 
 export async function sendAutoResponse(message: GuildMessage) {
-    for (const [regex, autoResponse] of autoResponses) {
+    for (const [alias, autoResponse] of autoResponses) {
         if (autoResponse.regex.test(message.content)) {
             if (
                 (autoResponse.maxMemberDuration && message.member.joinedAt && autoResponse.maxMemberDuration < (Date.now() - message.member.joinedAt.getTime()) / 1000) ||
-                (autoResponse.cooldown && cooldowns.has(`${message.member.id}:${regex}`))
+                (autoResponse.cooldown && cooldowns.has(`${message.member.id}:${alias}`))
             )
                 return;
 
@@ -79,7 +80,7 @@ export async function sendAutoResponse(message: GuildMessage) {
                 }
 
                 if (autoResponse.cooldown) {
-                    const cooldownID = `${message.member.id}:${regex}`;
+                    const cooldownID = `${message.member.id}:${alias}`;
                     cooldowns.set(cooldownID, true);
                     setTimeout(() => cooldowns.delete(cooldownID), autoResponse.cooldown * 1000);
                 }
@@ -88,7 +89,7 @@ export async function sendAutoResponse(message: GuildMessage) {
                     sendInfo(message.channel, channel instanceof DMChannel ? `${message.author.toString()} check your DMs!` : `${message.author.toString()} go to <#${settings.botChannelID}>!`);
                 }
             } catch {
-                log(`Failed to send automatic response \`${regex}\`.`);
+                log(`Failed to send automatic response \`${alias}\`.`);
             }
 
             return;

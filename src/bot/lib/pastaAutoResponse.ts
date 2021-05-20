@@ -48,5 +48,5 @@ export async function writeAutoResponse(autoResponse: AutoResponse) {
         else throw error;
     });
 
-    fs.writeFile(path.join(autoResponsePath, stringToFileName(autoResponse.regex.source)), autoResponseToJSON(autoResponse));
+    fs.writeFile(path.join(autoResponsePath, stringToFileName(autoResponse.alias)), autoResponseToJSON(autoResponse));
 }

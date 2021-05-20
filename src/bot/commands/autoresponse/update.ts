@@ -32,16 +32,16 @@ export const command: Command = {
             setValue(autoResponse, objPath, jsonValue);
 
             // always recreate because it's a string if it got updated (and the flags might have been changed)
-            autoResponse = { ...autoResponse, regex: recreateRegExp(autoResponse.regex, autoResponse.flags) };
+            autoResponse.regex = new RegExp(autoResponse.regex instanceof RegExp ? autoResponse.regex.source : autoResponse.regex, autoResponse.flags);
 
-            autoResponses.set(autoResponse.regex.source, autoResponse);
+            autoResponses.set(autoResponse.alias, autoResponse);
             await writeAutoResponse(autoResponse);
 
-            if (args[0] !== autoResponse.regex.source) {
+            if (args[0] !== autoResponse.alias) {
                 autoResponses.delete(args[0]);
 
                 const oldFileName = stringToFileName(args[0]);
-                if (oldFileName !== stringToFileName(autoResponse.regex.source)) await fs.rm(path.join(autoResponsePath, oldFileName));
+                if (oldFileName !== stringToFileName(autoResponse.alias)) await fs.rm(path.join(autoResponsePath, oldFileName));
             }
 
             sendSuccess(channel, `Successfully updated the automatic response \`${args[0]}\`.`);
@@ -51,10 +51,6 @@ export const command: Command = {
         }
     },
 };
-
-function recreateRegExp(regex: RegExp | string, flags?: string) {
-    return regex instanceof RegExp ? new RegExp(regex.source, flags) : new RegExp(regex, flags);
-}
 
 function setValue(obj: any, path: string[], value: any) {
     path.reduce((a, b, i) => {

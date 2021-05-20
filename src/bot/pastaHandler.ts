@@ -7,10 +7,10 @@ import { pastas } from './bot.js';
 export const pastaPath = 'customContent/pastas';
 
 export interface Pasta {
-    readonly alias: string;
-    readonly message?: string;
-    readonly embed?: MessageEmbedOptions;
-    readonly attachments?: string[];
+    alias: string;
+    message?: string;
+    embed?: MessageEmbedOptions;
+    attachments?: string[];
 }
 
 export async function registerPastas(dir: string) {

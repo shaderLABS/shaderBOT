@@ -21,14 +21,15 @@ export const command: Command = {
 
         try {
             const autoResponse = JSONToAutoResponse(data);
+            if (!autoResponse.alias) return sendError(channel, 'You must specify an alias.');
             if (!autoResponse.regex) return sendError(channel, 'You must specify a regular expression.');
             if (!autoResponse.message && !autoResponse.embed) return sendError(channel, 'You must specifiy a message or an embed.');
 
             await writeAutoResponse(autoResponse);
-            autoResponses.set(autoResponse.regex.source, autoResponse);
+            autoResponses.set(autoResponse.alias, autoResponse);
 
-            sendSuccess(channel, `Successfully created the automatic response \`${autoResponse.regex}\`.`);
-            log(`${parseUser(message.author)} created the automatic response \`${autoResponse.regex}\`.`);
+            sendSuccess(channel, `Successfully created the automatic response \`${autoResponse.alias}\`.`);
+            log(`${parseUser(message.author)} created the automatic response \`${autoResponse.alias}\`.`);
         } catch {
             sendError(channel, 'Failed to save the automatic response.');
         }

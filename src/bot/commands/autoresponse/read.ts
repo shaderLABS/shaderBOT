@@ -27,7 +27,7 @@ export const command: Command = {
             }
         } else {
             if (autoResponses.size === 0) return sendInfo(channel, 'There are no automatic responses.');
-            sendInfo(channel, autoResponses.map((_, regex) => '`' + regex + '`').join(', '), 'All Automatic Responses');
+            sendInfo(channel, '`' + autoResponses.keyArray().join('`, `') + '`', 'All Automatic Responses');
         }
     },
 };
