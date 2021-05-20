@@ -13,7 +13,7 @@ export const command: Command = {
     commands: ['update'],
     superCommands: ['autoresponse'],
     help: 'Update an automatic response.',
-    expectedArgs: '<regex> <path> <JSONValue>',
+    expectedArgs: '<alias> <path> <JSONValue>',
     minArgs: 2,
     maxArgs: null,
     requiredPermissions: ['MANAGE_GUILD'],

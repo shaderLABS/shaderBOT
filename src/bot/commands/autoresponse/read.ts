@@ -8,7 +8,7 @@ export const command: Command = {
     commands: ['read'],
     superCommands: ['autoresponse'],
     help: 'Send the JSON data of a specific automatic response or a list containing all of them.',
-    expectedArgs: '[regex]',
+    expectedArgs: '[alias]',
     minArgs: 0,
     maxArgs: null,
     requiredPermissions: ['MANAGE_GUILD'],

@@ -12,7 +12,7 @@ export const command: Command = {
     commands: ['delete'],
     superCommands: ['autoresponse'],
     help: 'Delete an automatic response.',
-    expectedArgs: '<regex>',
+    expectedArgs: '<alias>',
     minArgs: 1,
     maxArgs: null,
     requiredPermissions: ['MANAGE_GUILD'],
