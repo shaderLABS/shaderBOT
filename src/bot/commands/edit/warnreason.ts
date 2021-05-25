@@ -18,19 +18,15 @@ export const command: Command = {
         const { author, channel } = message;
 
         try {
-            const warnUUID = await getWarnUUID(args[0]);
+            const warnUUID = await getWarnUUID(args[0], author, channel);
 
             const reason = removeArgumentsFromText(text, args[0]);
             if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
-            try {
-                const { user_id } = await editWarnReason(reason, warnUUID, author.id);
-                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${warnUUID}).`);
-            } catch (error) {
-                return sendError(channel, error);
-            }
+            const { user_id } = await editWarnReason(reason, warnUUID, author.id);
+            sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${warnUUID}).`);
         } catch (error) {
-            return sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

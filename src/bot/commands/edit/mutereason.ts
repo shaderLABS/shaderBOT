@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { editMuteReason } from '../../lib/edit/editMute.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 
@@ -28,7 +28,7 @@ export const command: Command = {
                 const { user_id } = await editMuteReason(args[0], content, author.id, past_table);
                 sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s mute (${args[0]}).`);
             } else {
-                const user = await getUser(args[0]);
+                const user = await requireUser(args[0], { author, channel });
 
                 const latestMuteID = (
                     await db.query(
@@ -48,7 +48,7 @@ export const command: Command = {
                 sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s mute (${latestMuteID.id}).`);
             }
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

@@ -3,7 +3,7 @@ import { sendError, sendSuccess } from '../lib/embeds.js';
 import eraseEndUserData from '../lib/eraseEndUserData.js';
 import log from '../lib/log.js';
 import { parseUser } from '../lib/misc.js';
-import { getUser } from '../lib/searchMessage.js';
+import { requireUser } from '../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['eraseeud'],
@@ -16,7 +16,8 @@ export const command: Command = {
         const { channel } = message;
 
         try {
-            const user = await getUser(text);
+            const user = await requireUser(text, { author: message.author, channel });
+
             eraseEndUserData(user.id);
 
             sendSuccess(channel, `Successfully erased all End User Data of ${parseUser(user)}.`);

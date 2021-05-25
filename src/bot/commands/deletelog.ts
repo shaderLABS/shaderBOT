@@ -5,7 +5,7 @@ import { sendError, sendSuccess } from '../lib/embeds.js';
 import log from '../lib/log.js';
 import { parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
-import { getUser } from '../lib/searchMessage.js';
+import { requireUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
 
 export const command: Command = {
@@ -19,7 +19,11 @@ export const command: Command = {
         const { channel } = message;
 
         try {
-            const id = uuid.test(text) ? text : (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [(await getUser(text)).id])).rows[0]?.id;
+            const id = uuid.test(text)
+                ? text
+                : (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [(await requireUser(text, { author: message.author, channel })).id]))
+                      .rows[0]?.id;
+
             if (!id) return sendError(channel, 'The specified user does not have any log entries of past panishments.');
 
             const deletedEntry = (
@@ -48,7 +52,7 @@ export const command: Command = {
             sendSuccess(channel, `Successfully deleted the past punishment entry \`${id}\`.`);
             log(`${parseUser(message.author)} deleted a past punishment entry:\n\n${content}`);
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

@@ -1,15 +1,17 @@
+import { TextChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { parseUser } from '../misc.js';
-import { getUser } from '../searchMessage.js';
+import { requireUser } from '../searchMessage.js';
 
-export async function getWarnUUID(argument: string): Promise<string> {
+export async function getWarnUUID(argument: string, author: User, channel: TextChannel): Promise<string> {
     if (uuid.test(argument)) {
         return argument;
     } else {
-        const { id } = await getUser(argument);
-        const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [id])).rows[0];
+        const user = await requireUser(argument, { author, channel });
+
+        const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
 
         if (!latestWarnID) return Promise.reject('The specified user does not have any warnings.');
         return latestWarnID.id;

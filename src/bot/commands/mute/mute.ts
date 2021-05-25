@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
-import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { getMember, removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 
 export const command: Command = {
@@ -18,14 +18,13 @@ export const command: Command = {
         const reason = removeArgumentsFromText(text, args[1]);
         if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
-        const targetMember = await getMember(args[0]).catch(() => undefined);
-        const targetUser = targetMember?.user || (await getUser(args[0]).catch(() => undefined));
-        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
-
-        if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
-            return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
-
         try {
+            const targetMember = await getMember(args[0], { author: message.author, channel });
+            const targetUser = targetMember?.user || (await requireUser(args[0], { author: message.author, channel }));
+
+            if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
+                return sendError(channel, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
+
             const time = stringToSeconds(splitString(args[1]));
 
             if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
@@ -39,7 +38,7 @@ export const command: Command = {
                 }`
             );
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

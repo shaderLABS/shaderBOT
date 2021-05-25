@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 import { purgeAllTickets } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -17,7 +17,8 @@ export const command: Command = {
         const { channel, guild } = message;
 
         try {
-            const user = await getUser(text);
+            const user = await requireUser(text, { author: message.author, channel });
+
             const ticket = await purgeAllTickets(user, guild);
 
             sendSuccess(channel, 'Purged all tickets.');

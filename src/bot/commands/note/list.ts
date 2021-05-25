@@ -4,7 +4,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedIcon, embedPages, sendError } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 const expectedArgs = '<@user|userID|username|uuid>';
@@ -51,7 +51,7 @@ export const command: Command = {
             } else {
                 // <@user|userID|username>
 
-                const user = await getUser(text);
+                const user = await requireUser(text);
 
                 const notes = (
                     await db.query(
@@ -90,7 +90,7 @@ export const command: Command = {
                 embedPages(embed, author, pages);
             }
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

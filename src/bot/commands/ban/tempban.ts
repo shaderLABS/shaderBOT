@@ -2,7 +2,7 @@ import { Command } from '../../commandHandler.js';
 import { tempban } from '../../lib/banUser.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
-import { getMember, getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { getMember, removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 
 export const command: Command = {
@@ -15,15 +15,14 @@ export const command: Command = {
     callback: async (message, args, text) => {
         const { member, channel } = message;
 
-        const targetMember = await getMember(args[0]).catch(() => undefined);
-        const targetUser = targetMember?.user || (await getUser(args[0]).catch(() => undefined));
-        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
-
-        const deleteMessages = args[2]?.toLowerCase() === 'delete';
-        const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
-        if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
-
         try {
+            const targetMember = await getMember(args[0], { author: message.author, channel });
+            const targetUser = targetMember?.user || (await requireUser(args[0], { author: message.author, channel }));
+
+            const deleteMessages = args[2]?.toLowerCase() === 'delete';
+            const reason = removeArgumentsFromText(text, args[deleteMessages ? 2 : 1]);
+            if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
+
             const time = stringToSeconds(splitString(args[1]));
 
             if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
@@ -40,7 +39,7 @@ export const command: Command = {
 
             sendSuccess(channel, `${parseUser(targetUser)} has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

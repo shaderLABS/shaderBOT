@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { editKick } from '../../lib/edit/editKick.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <content>';
 
@@ -27,7 +27,7 @@ export const command: Command = {
                 const { user_id } = await editKick(args[0], content, author.id);
                 sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s kick (${args[0]}).`);
             } else {
-                const user = await getUser(args[0]);
+                const user = await requireUser(args[0], { author, channel });
 
                 const latestKickID = (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
                 if (!latestKickID) return sendError(channel, 'The specified user does not have any kicks.');
@@ -36,7 +36,7 @@ export const command: Command = {
                 sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s kick (${latestKickID.id}).`);
             }
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

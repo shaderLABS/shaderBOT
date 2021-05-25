@@ -27,7 +27,7 @@ export const command: Command = {
         let owners: Set<GuildMember> = new Set();
 
         for (const potentialID of args) {
-            const user = await getMember(potentialID).catch(() => undefined);
+            const user = await getMember(potentialID);
             if (user) owners.add(user);
         }
 

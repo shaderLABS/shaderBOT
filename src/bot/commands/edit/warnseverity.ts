@@ -17,19 +17,15 @@ export const command: Command = {
         const { author, channel } = message;
 
         try {
-            const warnUUID = await getWarnUUID(args[0]);
+            const warnUUID = await getWarnUUID(args[0], author, channel);
 
             const severity = Number.parseInt(args[1]);
             if (severity < 0 || severity > 3) return sendError(channel, 'The severity must be an integer between 0 and 3.');
 
-            try {
-                const userID = await editWarnSeverity(severity, warnUUID, author.id);
-                sendSuccess(channel, `Successfully edited the severity of ${parseUser(userID)}'s warning (${warnUUID}).`);
-            } catch (error) {
-                return sendError(channel, error);
-            }
+            const userID = await editWarnSeverity(severity, warnUUID, author.id);
+            sendSuccess(channel, `Successfully edited the severity of ${parseUser(userID)}'s warning (${warnUUID}).`);
         } catch (error) {
-            return sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

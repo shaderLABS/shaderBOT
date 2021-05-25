@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { editMuteDuration } from '../../lib/edit/editMute.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 
 const expectedArgs = '<uuid|<@user|userID|username>> <time>';
@@ -33,7 +33,7 @@ export const command: Command = {
                     `Successfully edited the duration of ${parseUser(user_id)}'s mute (${args[0]}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`
                 );
             } else {
-                const user = await getUser(args[0]);
+                const user = await requireUser(args[0], { author, channel });
 
                 const latestMuteID = (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
                 if (!latestMuteID) return sendError(channel, 'The specified user does not have any active mutes.');
@@ -47,7 +47,7 @@ export const command: Command = {
                 );
             }
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

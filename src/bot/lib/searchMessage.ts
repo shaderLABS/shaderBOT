@@ -1,38 +1,76 @@
-import { GuildMember, MessageMentions, User } from 'discord.js';
+import { GuildMember, MessageMentions, TextChannel, User } from 'discord.js';
 import { client } from '../bot.js';
-import { getGuild } from './misc.js';
+import { sendInfo } from './embeds.js';
+import { getGuild, parseUser } from './misc.js';
 
-export async function getUser(potentialUser: string): Promise<User> {
-    try {
-        const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
-        if (mention) potentialUser = mention[0].replace(/\D/g, '');
+export async function getUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel }): Promise<User | undefined> {
+    const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
+    if (mention) potentialUser = mention[0].replace(/\D/g, '');
 
-        if (!isNaN(+potentialUser) && potentialUser.length >= 17 && potentialUser.length <= 19) {
-            const user = await client.users.fetch(potentialUser).catch(() => undefined);
-            if (user) return user;
-        }
+    if (!isNaN(+potentialUser) && potentialUser.length >= 17 && potentialUser.length <= 19) {
+        const user = await client.users.fetch(potentialUser).catch(() => undefined);
+        if (user) return user;
+    }
 
-        return (await getGuild()?.members.fetch({ query: potentialUser, limit: 1 }))?.first()?.user || Promise.reject('Specified user not found.');
-    } catch {
-        return Promise.reject('Specified user not found.');
+    const user = (
+        await getGuild()
+            ?.members.fetch({ query: potentialUser, limit: 1 })
+            .catch(() => undefined)
+    )?.first()?.user;
+    if (user) {
+        if (confirmation) await confirmUser(user, confirmation.author, confirmation.channel);
+        return user;
     }
 }
 
-export async function getMember(potentialMember: string): Promise<GuildMember> {
+export async function requireUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel }): Promise<User> {
+    return (await getUser(potentialUser, confirmation)) || Promise.reject('Specified user not found.');
+}
+
+export async function getMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel }): Promise<GuildMember | undefined> {
     const guild = getGuild();
 
-    try {
-        const mention = potentialMember.match(MessageMentions.USERS_PATTERN);
-        if (mention) potentialMember = mention[0].replace(/\D/g, '');
+    const mention = potentialMember.match(MessageMentions.USERS_PATTERN);
+    if (mention) potentialMember = mention[0].replace(/\D/g, '');
 
-        if (!isNaN(+potentialMember) && potentialMember.length >= 17 && potentialMember.length <= 19) {
-            const member = await guild?.members.fetch(potentialMember).catch(() => undefined);
-            if (member) return member;
+    if (!isNaN(+potentialMember) && potentialMember.length >= 17 && potentialMember.length <= 19) {
+        const member = await guild?.members.fetch(potentialMember).catch(() => undefined);
+        if (member) return member;
+    }
+
+    const member = (await guild?.members.fetch({ query: potentialMember, limit: 1 }).catch(() => undefined))?.first();
+    if (member) {
+        if (confirmation) await confirmUser(member.user, confirmation.author, confirmation.channel);
+        return member;
+    }
+}
+
+export async function requireMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel }): Promise<GuildMember> {
+    return (await getMember(potentialMember, confirmation)) || Promise.reject('Specified member not found.');
+}
+
+async function confirmUser(user: User, author: User, channel: TextChannel): Promise<void> {
+    const confirmation = await sendInfo(channel, `Please confirm that ${parseUser(user)} is the correct user.`);
+
+    await confirmation.react('✅');
+    await confirmation.react('❌');
+
+    try {
+        const reaction = (await confirmation.awaitReactions((reaction, reactor) => ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, { max: 1, idle: 300000 })).first();
+        confirmation.delete();
+
+        if (!reaction) {
+            await sendInfo(channel, 'The user confirmation was cancelled due to inactivity.');
+            return Promise.reject();
         }
 
-        return (await guild?.members.fetch({ query: potentialMember, limit: 1 }))?.first() || Promise.reject('Specified member not found.');
+        if (reaction.emoji.name === '❌') {
+            await sendInfo(channel, 'The user confirmation was rejected.');
+            return Promise.reject();
+        }
     } catch {
-        return Promise.reject('Specified member not found.');
+        confirmation.delete();
+        return Promise.reject('The user confirmation failed.');
     }
 }
 

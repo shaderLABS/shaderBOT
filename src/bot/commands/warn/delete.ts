@@ -22,39 +22,43 @@ export const command: Command = {
 
         let warning: any;
 
-        if (uuid.test(args[0])) {
-            warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE id = $1;`, [args[0]])).rows[0];
-        } else {
-            const targetUser = await getUser(text).catch(() => undefined);
-            if (targetUser) {
-                // GRAB LATEST WARNING OF USER
-                warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id])).rows[0];
+        try {
+            if (uuid.test(args[0])) {
+                warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE id = $1;`, [args[0]])).rows[0];
             } else {
-                // GRAB WARNING BY REASON
-                const warnings = await db.query(
-                    /*sql*/ `
-                    SELECT id, user_id, mod_id, severity, reason, timestamp::TEXT
-                    FROM warn
-                    WHERE reason = $1;`,
-                    [text]
-                );
-
-                if (warnings.rowCount > 1) {
-                    return sendError(
-                        channel,
-                        `The specified reason is ambiguous. Please use the UUID from one of the following results instead:\n${warnings.rows
-                            .map(
-                                (row: any) =>
-                                    `${parseUser(row.user_id)} warned by ${parseUser(row.mod_id)} for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${
-                                        row.id
-                                    }\n`
-                            )
-                            .join('\n')}`
+                const targetUser = await getUser(text, { author: message.author, channel });
+                if (targetUser) {
+                    // GRAB LATEST WARNING OF USER
+                    warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id])).rows[0];
+                } else {
+                    // GRAB WARNING BY REASON
+                    const warnings = await db.query(
+                        /*sql*/ `
+                        SELECT id, user_id, mod_id, severity, reason, timestamp::TEXT
+                        FROM warn
+                        WHERE reason = $1;`,
+                        [text]
                     );
-                }
 
-                warning = warnings.rows[0];
+                    if (warnings.rowCount > 1) {
+                        return sendError(
+                            channel,
+                            `The specified reason is ambiguous. Please use the UUID from one of the following results instead:\n${warnings.rows
+                                .map(
+                                    (row: any) =>
+                                        `${parseUser(row.user_id)} warned by ${parseUser(row.mod_id)} for: "${row.reason || 'No reason provided.'}"\n${formatTimeDate(new Date(row.timestamp))} | ${
+                                            row.id
+                                        }\n`
+                                )
+                                .join('\n')}`
+                        );
+                    }
+
+                    warning = warnings.rows[0];
+                }
             }
+        } catch (error) {
+            if (error) return sendError(channel, error);
         }
 
         if (!warning) {

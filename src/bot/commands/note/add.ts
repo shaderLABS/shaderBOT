@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser, removeArgumentsFromText } from '../../lib/searchMessage.js';
+import { removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 const expectedArgs = '<@user|userID|username> <content>';
@@ -21,7 +21,8 @@ export const command: Command = {
         const { channel, author } = message;
 
         try {
-            const user = await getUser(args[0]);
+            const user = await requireUser(args[0], { author, channel });
+
             const content = removeArgumentsFromText(text, args[0]);
             if (content.length < 1 || content.length > 500) return sendError(channel, 'The content must be between 1 and 500 characters long.');
 
@@ -50,7 +51,7 @@ export const command: Command = {
 
             log(`${messageContent}\n**ID:** ${result.id}`, 'Added Note');
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

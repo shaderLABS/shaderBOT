@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['unmute'],
@@ -22,16 +22,19 @@ export const command: Command = {
         const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
 
-        const targetUser = await getUser(text);
-        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
+        try {
+            const targetUser = await requireUser(text, { author, channel });
 
-        const currentOverwrite = channel.permissionOverwrites.get(targetUser.id);
-        if (!currentOverwrite || !currentOverwrite.deny.has('SEND_MESSAGES') || !currentOverwrite.deny.has('ADD_REACTIONS')) return sendError(channel, 'The specified user is not muted.');
+            const currentOverwrite = channel.permissionOverwrites.get(targetUser.id);
+            if (!currentOverwrite || !currentOverwrite.deny.has('SEND_MESSAGES') || !currentOverwrite.deny.has('ADD_REACTIONS')) return sendError(channel, 'The specified user is not muted.');
 
-        if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals(['SEND_MESSAGES', 'ADD_REACTIONS'])) currentOverwrite.delete();
-        else currentOverwrite.update({ SEND_MESSAGES: null, ADD_REACTIONS: null });
+            if (currentOverwrite.allow.equals(0) && currentOverwrite.deny.equals(['SEND_MESSAGES', 'ADD_REACTIONS'])) currentOverwrite.delete();
+            else currentOverwrite.update({ SEND_MESSAGES: null, ADD_REACTIONS: null });
 
-        log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
-        sendSuccess(channel, `Successfully unmuted ${parseUser(targetUser)} in this project.`);
+            log(`${parseUser(author)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
+            sendSuccess(channel, `Successfully unmuted ${parseUser(targetUser)} in this project.`);
+        } catch (error) {
+            if (error) sendError(channel, error);
+        }
     },
 };

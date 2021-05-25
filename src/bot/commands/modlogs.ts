@@ -4,7 +4,7 @@ import { getPunishmentPoints } from '../lib/automaticPunishment.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
 import { parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
-import { getUser } from '../lib/searchMessage.js';
+import { requireUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
 
 export const command: Command = {
@@ -18,7 +18,7 @@ export const command: Command = {
         const { channel } = message;
 
         try {
-            const user = await getUser(text);
+            const user = await requireUser(text);
 
             const warnQuery = db.query(
                 /*sql*/ `
@@ -129,7 +129,7 @@ export const command: Command = {
             const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.tag}`);
             embedPages(embedMessage, message.author, pages);
         } catch (error) {
-            sendError(channel, error);
+            if (error) sendError(channel, error);
         }
     },
 };

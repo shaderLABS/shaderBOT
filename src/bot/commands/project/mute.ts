@@ -4,7 +4,7 @@ import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
     commands: ['mute'],
@@ -23,14 +23,17 @@ export const command: Command = {
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
         if (!project.owners) return sendError(channel, 'Failed to query channel owners.');
 
-        const targetUser = await getUser(text);
-        if (!targetUser) return sendError(channel, 'The specified user argument is not resolvable.');
+        try {
+            const targetUser = await requireUser(text, { author, channel });
 
-        if (project.owners.includes(targetUser.id)) return sendError(channel, 'You can not mute a channel owner.');
+            if (project.owners.includes(targetUser.id)) return sendError(channel, 'You can not mute a channel owner.');
 
-        channel.updateOverwrite(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
+            channel.updateOverwrite(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 
-        log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
-        sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`);
+            log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
+            sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`);
+        } catch (error) {
+            if (error) return sendError(channel, error);
+        }
     },
 };

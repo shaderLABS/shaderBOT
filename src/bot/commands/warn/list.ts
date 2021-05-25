@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
 import { parseUser, sleep } from '../../lib/misc.js';
-import { getUser } from '../../lib/searchMessage.js';
+import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 export const command: Command = {
@@ -54,11 +54,12 @@ export const command: Command = {
                 userID = member.id;
             } else {
                 try {
-                    const user = await getUser(text);
+                    const user = await requireUser(text);
                     if (user.id !== member.id && !member.hasPermission('KICK_MEMBERS')) return sendError(channel, 'You do not have permission to view the warnings of other users.');
                     userID = user.id;
                 } catch (error) {
-                    return sendError(channel, error);
+                    if (error) sendError(channel, error);
+                    return;
                 }
             }
 
