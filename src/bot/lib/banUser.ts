@@ -75,7 +75,7 @@ export async function tempban(user: User, duration: number, modID: string | null
             'Temporary Ban'
         );
 
-        if (timestamp.getDate() === expire.getDate() && timestamp.getMonth() === expire.getMonth()) {
+        if (expire.getTime() - timestamp.getTime() < new Date().setHours(24, 0, 0, 0) - timestamp.getTime()) {
             const timeout = setTimeout(() => {
                 unban(user.id);
             }, duration * 1000);

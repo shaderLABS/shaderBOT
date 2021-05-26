@@ -30,7 +30,7 @@ export async function loadTimeouts() {
         await db.query(/*sql*/ `
             SELECT user_id::TEXT, "type", mod_id::TEXT, expire_timestamp::TEXT
             FROM punishment
-            WHERE (("type" = 'ban' AND expire_timestamp IS NOT NULL) OR "type" = 'mute') AND expire_timestamp <= NOW() + INTERVAL '1 day 5 minutes';`)
+            WHERE (("type" = 'ban' AND expire_timestamp IS NOT NULL) OR "type" = 'mute') AND expire_timestamp <= NOW()::DATE + INTERVAL '1 day 5 minutes';`)
     ).rows;
 
     for (const punishment of expiringPunishments) {
