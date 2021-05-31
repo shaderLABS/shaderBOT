@@ -169,7 +169,7 @@ export async function ban(user: User, modID: string | null = null, reason: strin
 export function punishmentToString(punishment: any) {
     return (
         `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}>\n` +
+        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
         `**ID:** ${punishment.id}\n` +
         `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
         `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`

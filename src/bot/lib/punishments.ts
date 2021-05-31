@@ -36,38 +36,28 @@ export async function loadTimeouts() {
     for (const punishment of expiringPunishments) {
         const ms = new Date(punishment.expire_timestamp).getTime() - Date.now();
 
-        if (ms <= 5000) {
-            if (punishment.type === 'ban') {
+        if (punishment.type === 'ban') {
+            const timeout = setTimeout(() => {
                 unban(punishment.user_id);
-            } else {
-                const member = await getGuild()
+            }, ms);
+
+            const previousTimeout = store.tempbans.get(punishment.user_id);
+            if (previousTimeout) clearTimeout(previousTimeout);
+
+            store.tempbans.set(punishment.user_id, timeout);
+        } else {
+            const timeout = setTimeout(async () => {
+                const timeoutMember = await getGuild()
                     ?.members.fetch(punishment.user_id)
                     .catch(() => undefined);
-                unmute(punishment.user_id, undefined, member);
-            }
-        } else {
-            if (punishment.type === 'ban') {
-                const timeout = setTimeout(() => {
-                    unban(punishment.user_id);
-                }, ms);
 
-                const previousTimeout = store.tempbans.get(punishment.user_id);
-                if (previousTimeout) clearTimeout(previousTimeout);
+                unmute(punishment.user_id, undefined, timeoutMember);
+            }, ms);
 
-                store.tempbans.set(punishment.user_id, timeout);
-            } else {
-                const timeout = setTimeout(async () => {
-                    const timeoutMember = await getGuild()
-                        ?.members.fetch(punishment.user_id)
-                        .catch(() => undefined);
-                    unmute(punishment.user_id, undefined, timeoutMember);
-                }, ms);
+            const previousTimeout = store.mutes.get(punishment.user_id);
+            if (previousTimeout) clearTimeout(previousTimeout);
 
-                const previousTimeout = store.mutes.get(punishment.user_id);
-                if (previousTimeout) clearTimeout(previousTimeout);
-
-                store.mutes.set(punishment.user_id, timeout);
-            }
+            store.mutes.set(punishment.user_id, timeout);
         }
     }
 }

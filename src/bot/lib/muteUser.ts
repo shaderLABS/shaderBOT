@@ -82,7 +82,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
 
     if (member) member.roles.add(role);
 
-    if (expire.getTime() < timestamp.setHours(23, 55, 0, 0)) {
+    if (expire.getTime() - timestamp.getTime() < new Date().setHours(24, 0, 0, 0) - timestamp.getTime()) {
         const timeout = setTimeout(async () => {
             const timeoutMember =
                 member &&
