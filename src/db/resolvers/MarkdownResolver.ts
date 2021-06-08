@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import gq from 'graphql';
 import tgq from 'type-graphql';
 import { getGuild } from '../../bot/lib/misc.js';
@@ -7,7 +8,7 @@ import { Role } from '../typedefinitions/User.js';
 @tgq.Resolver(() => Channel)
 export class ChannelResolver {
     @tgq.Query(() => Channel)
-    channel(@tgq.Arg('id', () => String) id: string) {
+    channel(@tgq.Arg('id', () => String) id: Snowflake) {
         const channel = getGuild()?.channels.cache.get(id);
         if (!channel) return new gq.GraphQLError('Channel not found');
         return channel;
@@ -17,7 +18,7 @@ export class ChannelResolver {
 @tgq.Resolver(() => Role)
 export class RoleResolver {
     @tgq.Query(() => Role)
-    async role(@tgq.Arg('id', () => String) id: string) {
+    async role(@tgq.Arg('id', () => String) id: Snowflake) {
         const role = await getGuild()?.roles.fetch(id);
         if (!role?.mentionable) return new gq.GraphQLError('Mentionable role not found.');
         return role;

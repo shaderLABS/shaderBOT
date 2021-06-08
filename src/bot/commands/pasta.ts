@@ -29,7 +29,7 @@ export const command: Command = {
                     responseMessageAdditions.push(...pasta.attachments.map((attachment) => new MessageAttachment(attachment)));
                 }
 
-                channel.send(pasta.message, responseMessageAdditions);
+                channel.send(pasta.message || null, responseMessageAdditions);
             } catch (error) {
                 sendError(channel, 'The specified pasta is invalid: ' + error);
             }

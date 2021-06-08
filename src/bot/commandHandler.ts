@@ -1,4 +1,4 @@
-import { BitFieldResolvable, Collection, DMChannel, Guild, GuildMember, Message, NewsChannel, PermissionString, TextChannel } from 'discord.js';
+import { Collection, DMChannel, Guild, GuildMember, Message, NewsChannel, PermissionString, Snowflake, TextChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -21,8 +21,8 @@ export interface Command {
     readonly expectedArgs?: string;
     readonly minArgs?: number;
     readonly maxArgs?: number | null;
-    readonly requiredRoles?: string[];
-    readonly requiredPermissions?: BitFieldResolvable<PermissionString>[];
+    readonly requiredRoles?: Snowflake[];
+    readonly requiredPermissions?: PermissionString[];
     readonly permissionOverwrites?: boolean;
     readonly permissionError?: string;
     readonly superCommands?: string[];
@@ -68,18 +68,12 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
         if (command.permissionOverwrites === true) {
             if (command.requiredPermissions.some((permission) => !member.permissionsIn(message.channel).has(permission))) return false;
         } else {
-            if (command.requiredPermissions.some((permission) => !member.hasPermission(permission))) return false;
+            if (command.requiredPermissions.some((permission) => !member.permissions.has(permission))) return false;
         }
     }
 
     if (command.requiredRoles) {
-        if (
-            !command.requiredRoles.every((potentialRole) => {
-                const role = message.guild.roles.cache.find((role) => role.name === potentialRole);
-                return member.roles.cache.has(role ? role.id : potentialRole);
-            })
-        )
-            return false;
+        if (!command.requiredRoles.every((potentialRole) => member.roles.cache.has(potentialRole))) return false;
     }
 
     return true;

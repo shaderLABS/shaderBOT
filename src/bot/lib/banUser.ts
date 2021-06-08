@@ -1,4 +1,4 @@
-import { MessageEmbed, User } from 'discord.js';
+import { MessageEmbed, Snowflake, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
@@ -10,7 +10,7 @@ import { formatTimeDate, secondsToString } from './time.js';
  * BAN *
  *******/
 
-export async function tempban(user: User, duration: number, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false) {
+export async function tempban(user: User, duration: number, modID: Snowflake | null = null, reason: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -94,7 +94,7 @@ export async function tempban(user: User, duration: number, modID: string | null
     return { expire, dmed };
 }
 
-export async function ban(user: User, modID: string | null = null, reason: string | null = null, deleteMessages: boolean = false) {
+export async function ban(user: User, modID: Snowflake | null = null, reason: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -180,7 +180,7 @@ export function punishmentToString(punishment: any) {
  * UNBAN *
  *********/
 
-export async function unban(userID: string, modID?: string) {
+export async function unban(userID: Snowflake, modID?: Snowflake) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 

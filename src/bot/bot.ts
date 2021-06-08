@@ -1,4 +1,4 @@
-import { Client, Collection } from 'discord.js';
+import { Client, Collection, Intents } from 'discord.js';
 import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
 import { Command, commandsToDebugMessage, registerCommands } from './commandHandler.js';
@@ -23,10 +23,12 @@ cron.schedule('55 23 * * *', () => {
 
 export async function startBot() {
     client = new Client({
-        disableMentions: 'everyone',
+        allowedMentions: {
+            parse: ['roles', 'users'],
+            repliedUser: false,
+        },
         partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'],
-        messageEditHistoryMaxSize: 0,
-        ws: { intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_BANS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES'] },
+        intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_BANS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGES],
     });
 
     commands = new Collection<string, Command>();

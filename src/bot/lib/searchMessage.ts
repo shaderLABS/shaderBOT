@@ -1,13 +1,17 @@
-import { GuildMember, MessageMentions, TextChannel, User } from 'discord.js';
+import { GuildMember, MessageMentions, Snowflake, TextChannel, User } from 'discord.js';
 import { client } from '../bot.js';
 import { sendInfo } from './embeds.js';
 import { getGuild, parseUser } from './misc.js';
 
-export async function getUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel }): Promise<User | undefined> {
+export function isSnowflake(potentialSnowflake: Snowflake | string): potentialSnowflake is Snowflake {
+    return !isNaN(+potentialSnowflake) && potentialSnowflake.length >= 17 && potentialSnowflake.length <= 19;
+}
+
+export async function getUser(potentialUser: Snowflake | string, confirmation?: { author: User; channel: TextChannel }): Promise<User | undefined> {
     const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
     if (mention) potentialUser = mention[0].replace(/\D/g, '');
 
-    if (!isNaN(+potentialUser) && potentialUser.length >= 17 && potentialUser.length <= 19) {
+    if (isSnowflake(potentialUser)) {
         const user = await client.users.fetch(potentialUser).catch(() => undefined);
         if (user) return user;
     }
@@ -33,7 +37,7 @@ export async function getMember(potentialMember: string, confirmation?: { author
     const mention = potentialMember.match(MessageMentions.USERS_PATTERN);
     if (mention) potentialMember = mention[0].replace(/\D/g, '');
 
-    if (!isNaN(+potentialMember) && potentialMember.length >= 17 && potentialMember.length <= 19) {
+    if (isSnowflake(potentialMember)) {
         const member = await guild?.members.fetch(potentialMember).catch(() => undefined);
         if (member) return member;
     }
@@ -56,7 +60,9 @@ async function confirmUser(user: User, author: User, channel: TextChannel): Prom
     await confirmation.react('❌');
 
     try {
-        const reaction = (await confirmation.awaitReactions((reaction, reactor) => ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, { max: 1, idle: 300000 })).first();
+        const reaction = (
+            await confirmation.awaitReactions((reaction, reactor) => !!reaction.emoji.name && ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, { max: 1, idle: 300000 })
+        ).first();
         confirmation.delete();
 
         if (!reaction) {

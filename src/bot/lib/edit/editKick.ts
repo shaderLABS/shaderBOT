@@ -1,8 +1,9 @@
+import { Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { parseUser } from '../misc.js';
 
-export async function editKick(uuid: string, reason: string, modID: string) {
+export async function editKick(uuid: string, reason: string, modID: Snowflake) {
     const result = (
         await db.query(
             /*sql*/ `

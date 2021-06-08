@@ -18,7 +18,7 @@ export const event: Event = {
             })
         ).entries.first();
 
-        if (!auditLog || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || auditLog.executor.bot) return;
+        if (!auditLog?.executor || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || auditLog.executor.bot) return;
         const { createdAt, executor } = auditLog;
 
         try {

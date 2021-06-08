@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { unban } from '../banUser.js';
 import log from '../log.js';
@@ -5,7 +6,7 @@ import { parseUser } from '../misc.js';
 import { store } from '../punishments.js';
 import { formatTimeDate } from '../time.js';
 
-export async function editBanReason(uuid: string, reason: string, modID: string, past_table: boolean) {
+export async function editBanReason(uuid: string, reason: string, modID: Snowflake, past_table: boolean) {
     const table = past_table ? 'past_punishment' : 'punishment';
 
     const result = (
@@ -26,7 +27,7 @@ export async function editBanReason(uuid: string, reason: string, modID: string,
     return result;
 }
 
-export async function editBanDuration(uuid: string, time: number, modID: string) {
+export async function editBanDuration(uuid: string, time: number, modID: Snowflake) {
     const editTimestamp = new Date();
 
     const result = (

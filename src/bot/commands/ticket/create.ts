@@ -35,7 +35,7 @@ export const command: Command = {
 
             // VALIDATION
             const projectChannel = projectAnswer.mentions.channels.first();
-            if (!projectChannel) return sendErrorAndDelete(channel, 'The message does not contain a mentioned text channel.', question, attachments, guild);
+            if (!projectChannel || !(projectChannel instanceof TextChannel)) return sendErrorAndDelete(channel, 'The message does not contain a mentioned text channel.', question, attachments, guild);
             if (projectChannel.parentID && settings.archiveCategoryIDs.includes(projectChannel.parentID))
                 return sendErrorAndDelete(channel, 'The mentioned channel is archived.', question, attachments, guild);
             const project = (await db.query(/*sql*/ `SELECT issue_tracker_url FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0];

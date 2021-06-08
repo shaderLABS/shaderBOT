@@ -1,4 +1,4 @@
-import { Channel, TextChannel } from 'discord.js';
+import { Channel, Snowflake, TextChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
@@ -55,16 +55,14 @@ export const event: Event = {
 
             try {
                 if (project) {
-                    project.owners.forEach(async (ownerID: string) => {
+                    project.owners.forEach(async (ownerID: Snowflake) => {
                         const owner = await client.users.fetch(ownerID).catch(() => undefined);
                         if (owner) newChannel.createOverwrite(owner, ownerOverwrites);
                     });
 
                     const role = await newChannel.guild.roles.create({
-                        data: {
-                            name: `${newChannel.name}`,
-                            mentionable: false,
-                        },
+                        name: `${newChannel.name}`,
+                        mentionable: false,
                         reason: `Create notification role for #${newChannel.name}.`,
                     });
 

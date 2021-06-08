@@ -38,10 +38,8 @@ export const command: Command = {
         }
 
         const role = await guild.roles.create({
-            data: {
-                name: `${channel.name}`,
-                mentionable: false,
-            },
+            name: `${channel.name}`,
+            mentionable: false,
             reason: `Create notification role for #${channel.name}.`,
         });
 

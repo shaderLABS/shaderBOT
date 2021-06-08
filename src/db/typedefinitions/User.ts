@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { Project } from './Project.js';
 import { Ticket } from './Ticket.js';
@@ -11,7 +12,7 @@ export class Warning {
 @tgq.ObjectType()
 export class Role {
     @tgq.Field(() => String)
-    id!: string;
+    id!: Snowflake;
 
     @tgq.Field(() => String)
     hexColor!: string;
@@ -26,7 +27,7 @@ export class Role {
 @tgq.ObjectType()
 export class User {
     @tgq.Field(() => String)
-    id!: string;
+    id!: Snowflake;
 
     // @tgq.Field(() => String)
     // user_id!: string;

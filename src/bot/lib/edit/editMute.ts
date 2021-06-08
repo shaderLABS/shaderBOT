@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { getGuild, parseUser } from '../misc.js';
@@ -5,7 +6,7 @@ import { unmute } from '../muteUser.js';
 import { store } from '../punishments.js';
 import { formatTimeDate } from '../time.js';
 
-export async function editMuteReason(uuid: string, reason: string, modID: string, past_table: boolean) {
+export async function editMuteReason(uuid: string, reason: string, modID: Snowflake, past_table: boolean) {
     const table = past_table ? 'past_punishment' : 'punishment';
 
     const result = (
@@ -26,7 +27,7 @@ export async function editMuteReason(uuid: string, reason: string, modID: string
     return result;
 }
 
-export async function editMuteDuration(uuid: string, time: number, modID: string) {
+export async function editMuteDuration(uuid: string, time: number, modID: Snowflake) {
     const editTimestamp = new Date();
 
     const result = (

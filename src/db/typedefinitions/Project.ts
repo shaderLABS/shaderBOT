@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { Ticket } from './Ticket.js';
 import { User } from './User.js';
@@ -17,10 +18,10 @@ export class Project {
     // id!: string;
 
     @tgq.Field(() => String)
-    channel_id!: string;
+    channel_id!: Snowflake;
 
     @tgq.Field(() => [String])
-    owners!: string[];
+    owners!: Snowflake[];
 
     // @tgq.Authorized('P_ADMINISTRATOR')
     @tgq.Field(() => [User], { nullable: true })

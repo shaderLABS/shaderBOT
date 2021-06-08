@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, TextChannel, User } from 'discord.js';
+import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, Snowflake, TextChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
@@ -6,6 +6,7 @@ import { update } from '../settings/settings.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser, sleep } from './misc.js';
+import { isSnowflake } from './searchMessage.js';
 import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
@@ -256,12 +257,12 @@ export async function deleteAttachmentFromDiscord(attachment: string, guild: Gui
     const messageID = attachment.split('|')[1];
 
     const attachmentCache = guild.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-    if (!attachmentCache || !(attachmentCache instanceof TextChannel)) return log('Failed to delete comment attachment `' + attachment + '`!');
+    if (!attachmentCache || !(attachmentCache instanceof TextChannel) || !isSnowflake(messageID)) return log('Failed to delete comment attachment `' + attachment + '`!');
 
     (await attachmentCache.messages.fetch(messageID)).delete();
 }
 
-export async function deleteTicketFromDiscord(ticket: { subscription_message_id?: string; channel_id?: string; attachments?: string[]; closed: boolean }, guild: Guild) {
+export async function deleteTicketFromDiscord(ticket: { subscription_message_id?: Snowflake; channel_id?: Snowflake; attachments?: string[]; closed: boolean }, guild: Guild) {
     const attachments = ticket.attachments?.filter(Boolean);
     if (attachments) attachments.forEach((attachment) => deleteAttachmentFromDiscord(attachment, guild));
 
@@ -306,7 +307,7 @@ export async function purgeAllTickets(user: User, guild: Guild) {
     return { titles, amount: ticketIDs.rowCount };
 }
 
-export async function getCategoryChannel(categoryIDs: string[], guild: Guild): Promise<CategoryChannel> {
+export async function getCategoryChannel(categoryIDs: Snowflake[], guild: Guild): Promise<CategoryChannel> {
     let lowestPosition = 0;
     for (const id of categoryIDs) {
         const category = guild.channels.cache.get(id);

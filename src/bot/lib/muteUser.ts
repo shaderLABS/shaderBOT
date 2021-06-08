@@ -1,4 +1,4 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import { embedColor } from './embeds.js';
@@ -7,7 +7,7 @@ import { getGuild, parseUser } from './misc.js';
 import { store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
-export async function mute(userID: string, duration: number, modID: string | null = null, reason: string | null = null, member?: GuildMember) {
+export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string | null = null, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
@@ -101,7 +101,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
     return { expire, dmed };
 }
 
-export async function unmute(userID: string, modID?: string, member?: GuildMember) {
+export async function unmute(userID: Snowflake, modID?: Snowflake, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
