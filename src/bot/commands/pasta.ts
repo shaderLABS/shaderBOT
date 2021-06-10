@@ -19,17 +19,18 @@ export const command: Command = {
             if (!pasta || similarityLevenshtein(pasta.alias, text) < 0.5) return sendError(channel, 'Pasta not found.');
 
             try {
-                const responseMessageAdditions: (MessageEmbed | MessageAttachment)[] = [];
+                const responseFiles: MessageAttachment[] = [];
+                let responseEmbed: MessageEmbed | undefined;
 
                 if (pasta.embed) {
-                    responseMessageAdditions.push(new MessageEmbed(pasta.embed));
+                    responseEmbed = new MessageEmbed(pasta.embed);
                 }
 
                 if (pasta.attachments) {
-                    responseMessageAdditions.push(...pasta.attachments.map((attachment) => new MessageAttachment(attachment)));
+                    responseFiles.push(...pasta.attachments.map((attachment) => new MessageAttachment(attachment)));
                 }
 
-                channel.send(pasta.message || null, responseMessageAdditions);
+                channel.send({ content: pasta.message, embed: responseEmbed, files: responseFiles });
             } catch (error) {
                 sendError(channel, 'The specified pasta is invalid: ' + error);
             }

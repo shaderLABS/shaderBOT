@@ -45,7 +45,7 @@ export const command: Command = {
 
             try {
                 const data = await readBackup(backup.name);
-                channel.send(new MessageAttachment(Buffer.from(data), backup.name));
+                channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
             } catch (error) {
                 sendError(channel, error);
             }

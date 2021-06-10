@@ -30,13 +30,13 @@ export function sendError(channel: TextChannel | DMChannel | NewsChannel, descri
     return channel.send(embed);
 }
 
-export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message: string | null = null, footer?: string) {
+export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? embedIcon.info : undefined)
         .setDescription(description)
         .setColor(embedColor.blue)
         .setFooter(footer || '');
-    return channel.send(message, embed);
+    return channel.send({ content: message, embed });
 }
 
 export async function embedPages(message: Message, author: User, pages: string[]) {

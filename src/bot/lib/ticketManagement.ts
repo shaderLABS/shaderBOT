@@ -23,7 +23,7 @@ export async function cacheAttachment(message: Message): Promise<string | undefi
 
         if (attachment.size > fileUploadLimit) return Promise.reject('The attachment is too large.');
 
-        const attachmentMessage = await attachmentStorage.send(attachment);
+        const attachmentMessage = await attachmentStorage.send({ files: [attachment] });
         const storedAttachment = attachmentMessage.attachments.first();
         if (storedAttachment) return storedAttachment.url + '|' + attachmentMessage.id;
     }

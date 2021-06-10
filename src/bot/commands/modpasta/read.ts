@@ -20,7 +20,7 @@ export const command: Command = {
 
         try {
             const attachment = new MessageAttachment(Buffer.from(JSON.stringify(pasta, null, 4)), stringToFileName(pasta.alias));
-            channel.send(attachment);
+            channel.send({ files: [attachment] });
         } catch {
             sendError(channel, 'Failed to send pasta.');
         }
