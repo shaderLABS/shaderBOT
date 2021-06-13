@@ -8,6 +8,6 @@ export const event: Event = {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as '${client.user.tag}'.`);
 
-        loadTimeouts();
+        loadTimeouts(false);
     },
 };

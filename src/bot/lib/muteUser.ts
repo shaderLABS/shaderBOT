@@ -89,7 +89,7 @@ export async function mute(userID: string, duration: number, modID: string | nul
                 (await getGuild()
                     ?.members.fetch(member.id)
                     .catch(() => undefined));
-            unmute(userID, undefined, timeoutMember);
+            unmute(userID, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(userID)}: ${e}`));
         }, duration * 1000);
 
         const previousTimeout = store.mutes.get(userID);
