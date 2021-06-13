@@ -41,8 +41,10 @@ export async function tempban(user: User, duration: number, modID: string | null
                 clearTimeout(timeout);
                 store.tempbans.delete(user.id);
             }
+        }
 
-            if (deleteMessages) await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
+        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+            await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
         const tempban = (
@@ -124,8 +126,10 @@ export async function ban(user: User, modID: string | null = null, reason: strin
                 clearTimeout(timeout);
                 store.tempbans.delete(user.id);
             }
+        }
 
-            if (deleteMessages) await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
+        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+            await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
         const ban = (
