@@ -12,11 +12,11 @@ import serveStatic from 'serve-static';
 import ssr from 'tossr';
 import typegraphql from 'type-graphql';
 import { db } from '../db/postgres.js';
-import { TicketResolver } from '../db/resolvers/TicketResolver.js';
-import { UserResolver } from '../db/resolvers/UserResolver.js';
-import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
 import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { ChannelResolver, RoleResolver } from '../db/resolvers/MarkdownResolver.js';
+import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
+import { TicketResolver } from '../db/resolvers/TicketResolver.js';
+import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { production } from '../index.js';
 import { authChecker } from './gqlAuth.js';
 import './strategies/discord.js';
@@ -50,6 +50,7 @@ export async function startWebserver() {
 
     app.use(cors(corsConfig));
     app.use(
+        // @ts-ignore
         helmet({
             contentSecurityPolicy: {
                 directives: {
@@ -63,6 +64,7 @@ export async function startWebserver() {
             },
         })
     );
+    // @ts-ignore
     app.use(bodyParser.json());
     // app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -113,6 +115,7 @@ export async function startWebserver() {
         const ENTRYPOINT = path.join(DIST_PATH, '__app.html');
         const APP = path.join(DIST_PATH, 'build', 'main.js');
 
+        // @ts-ignore
         app.use(serveStatic(DIST_PATH));
 
         app.get('*', async (req, res) => {
