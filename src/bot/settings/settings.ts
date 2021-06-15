@@ -29,6 +29,10 @@ export interface Settings {
             ban: number;
         };
     };
+    blacklist: {
+        strings: string[];
+        muteDuration: number;
+    };
 }
 
 export function write(data: Object) {

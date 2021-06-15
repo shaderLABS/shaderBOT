@@ -1,7 +1,10 @@
 import { GuildMember, MessageMentions, TextChannel, User } from 'discord.js';
-import { client } from '../bot.js';
+import { client, settings } from '../bot.js';
+import { GuildMessage } from '../commandHandler.js';
 import { sendInfo } from './embeds.js';
+import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
+import { mute } from './muteUser.js';
 
 export async function getUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel }): Promise<User | undefined> {
     const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
@@ -76,4 +79,17 @@ async function confirmUser(user: User, author: User, channel: TextChannel): Prom
 
 export function removeArgumentsFromText(text: string, lastArgument: string) {
     return text.substring(text.indexOf(lastArgument) + lastArgument.length).trim();
+}
+
+export function matchBlacklist(message: GuildMessage) {
+    if (settings.blacklist.strings.some((str) => message.content.includes(str))) {
+        if (message.deletable) message.delete();
+        mute(message.author.id, settings.blacklist.muteDuration, null, 'Sent message containing blacklisted content.', message.member).catch((e) =>
+            log(`Failed to mute ${parseUser(message.author)} due to blacklisted content: ${e}`)
+        );
+
+        return true;
+    }
+
+    return false;
 }

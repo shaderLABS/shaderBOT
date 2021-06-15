@@ -5,6 +5,7 @@ import { commands, settings } from '../../bot.js';
 import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
+import { matchBlacklist } from '../../lib/searchMessage.js';
 import { cacheAttachment } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -13,7 +14,7 @@ export const event: Event = {
         if (!isGuildMessage(message) || message.author.bot) return;
 
         const { content, channel } = message;
-        if (mediaOnly(message)) return;
+        if (matchBlacklist(message) || mediaOnly(message)) return;
 
         if (content.startsWith(settings.prefix)) {
             const args = parseContent(content);
