@@ -14,7 +14,7 @@ export const event: Event = {
         if (!isGuildMessage(message) || message.author.bot) return;
 
         const { content, channel } = message;
-        if (matchBlacklist(message) || mediaOnly(message)) return;
+        if (mediaOnly(message)) return;
 
         if (content.startsWith(settings.prefix)) {
             const args = parseContent(content);
@@ -24,10 +24,12 @@ export const event: Event = {
                 const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
                 if (command) runCommand(command, message, invoke, args);
             }
-        } else if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
-            createTicketComment(message);
-        } else {
-            sendAutoResponse(message);
+        } else if (!matchBlacklist(message)) {
+            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+                createTicketComment(message);
+            } else {
+                sendAutoResponse(message);
+            }
         }
     },
 };
