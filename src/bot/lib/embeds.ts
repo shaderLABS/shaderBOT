@@ -19,7 +19,7 @@ export function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, desc
         .setAuthor(title || 'Success', embedIcon.success)
         .setDescription(description)
         .setColor(embedColor.green);
-    return channel.send(embed);
+    return channel.send({ embeds: [embed] });
 }
 
 export function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
@@ -27,7 +27,7 @@ export function sendError(channel: TextChannel | DMChannel | NewsChannel, descri
         .setAuthor(title || 'Error', embedIcon.error)
         .setDescription(description)
         .setColor(embedColor.red);
-    return channel.send(embed);
+    return channel.send({ embeds: [embed] });
 }
 
 export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
@@ -36,7 +36,7 @@ export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, descrip
         .setDescription(description)
         .setColor(embedColor.blue)
         .setFooter(footer || '');
-    return channel.send({ content: message, embed });
+    return channel.send({ content: message, embeds: [embed] });
 }
 
 export async function embedPages(message: Message, author: User, pages: string[]) {
@@ -54,7 +54,7 @@ export async function embedPages(message: Message, author: User, pages: string[]
 
         await message.reactions.removeAll();
         // if (pageFooter) embed.setFooter(`Page ${index + 1}/${pages.length}`);
-        message.edit(embed.setDescription(pages[index]));
+        message.edit({ embeds: [embed.setDescription(pages[index])] });
 
         if (index !== 0) message.react('⬅️');
         if (index + 1 < pages.length) message.react('➡️');
@@ -81,7 +81,7 @@ export async function embedFields(message: Message, author: User, fields: { name
         await message.reactions.removeAll();
 
         embed.fields = fields[index];
-        message.edit(embed);
+        message.edit({ embeds: [embed] });
 
         if (index !== 0) message.react('⬅️');
         if (index + 1 < fields.length) message.react('➡️');

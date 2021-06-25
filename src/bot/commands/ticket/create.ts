@@ -66,7 +66,7 @@ export const command: Command = {
              * TITLE *
              *********/
 
-            await question.edit(question.embeds[0].setDescription('Please enter the title.'));
+            await question.edit({ embeds: [question.embeds[0].setDescription('Please enter the title.')] });
             const titleAnswer = await awaitResponse(channel, author.id);
             attachments.push(await cacheAttachment(titleAnswer));
             titleAnswer.delete();
@@ -82,7 +82,7 @@ export const command: Command = {
              * DESCRIPTION *
              ***************/
 
-            await question.edit(question.embeds[0].setDescription('Please enter the description.'));
+            await question.edit({ embeds: [question.embeds[0].setDescription('Please enter the description.')] });
             const descriptionAnswer = await awaitResponse(channel, author.id);
             attachments.push(await cacheAttachment(descriptionAnswer));
             attachments = attachments.filter(Boolean); // remove undefined values
@@ -130,12 +130,15 @@ export const command: Command = {
                 ],
             });
 
-            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+            const subscriptionMessage = await subscriptionChannel.send({ embeds: [ticketEmbed] });
 
-            if (attachments) ticketEmbed.attachFiles(attachments.map((attachment: any) => attachment.split('|')[0]));
+            const ticketMessage = {
+                embeds: [ticketEmbed],
+                files: attachments ? (attachments as string[]).map((attachment: string) => attachment.split('|')[0] || '') : [],
+            };
 
-            channel.send(ticketEmbed);
-            ticketChannel.send(ticketEmbed);
+            channel.send(ticketMessage);
+            ticketChannel.send(ticketMessage);
 
             await db.query(
                 /*sql*/ `
@@ -183,6 +186,6 @@ function sendErrorAndDelete(channel: TextChannel, message: string | MessageEmbed
         if (attachment) deleteAttachmentFromDiscord(attachment, guild);
     });
 
-    if (message instanceof MessageEmbed) channel.send(message);
+    if (message instanceof MessageEmbed) channel.send({ embeds: [message] });
     else sendError(channel, message);
 }

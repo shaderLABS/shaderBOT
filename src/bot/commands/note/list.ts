@@ -41,13 +41,15 @@ export const command: Command = {
                     `**Created At:** ${formatTimeDate(new Date(note.timestamp))}` +
                     (note.edited_timestamp ? `\n*(last edited by ${parseUser(note.edited_mod_id)} at ${formatTimeDate(new Date(note.edited_timestamp))})*` : '');
 
-                channel.send(
-                    new MessageEmbed()
-                        .setAuthor('Note', embedIcon.note)
-                        .setColor('#ffc107')
-                        .setDescription(messageContent)
-                        .setFooter('ID: ' + args[0])
-                );
+                channel.send({
+                    embeds: [
+                        new MessageEmbed()
+                            .setAuthor('Note', embedIcon.note)
+                            .setColor('#ffc107')
+                            .setDescription(messageContent)
+                            .setFooter('ID: ' + args[0]),
+                    ],
+                });
             } else {
                 // <@user|userID|username>
 
@@ -80,12 +82,14 @@ export const command: Command = {
                     return prev + '\n\n' + page;
                 }, '');
 
-                const embed = await channel.send(
-                    new MessageEmbed()
-                        .setAuthor(notes.length > 1 ? 'Notes' : 'Note', embedIcon.note)
-                        .setColor('#ffc107')
-                        .setDescription(pages[0])
-                );
+                const embed = await channel.send({
+                    embeds: [
+                        new MessageEmbed()
+                            .setAuthor(notes.length > 1 ? 'Notes' : 'Note', embedIcon.note)
+                            .setColor('#ffc107')
+                            .setDescription(pages[0]),
+                    ],
+                });
 
                 embedPages(embed, author, pages);
             }

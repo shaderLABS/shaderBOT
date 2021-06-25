@@ -26,13 +26,15 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
 
         if (kick) {
             await user
-                .send(
-                    new MessageEmbed({
-                        author: { name: 'You have been kicked from shaderLABS.' },
-                        description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
-                        color: embedColor.blue,
-                    })
-                )
+                .send({
+                    embeds: [
+                        new MessageEmbed({
+                            author: { name: 'You have been kicked from shaderLABS.' },
+                            description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                            color: embedColor.blue,
+                        }),
+                    ],
+                })
                 .catch(() => {
                     dmed = false;
                 });

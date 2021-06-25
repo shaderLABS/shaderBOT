@@ -43,7 +43,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
             }
         }
 
-        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+        if (deleteMessages && (await guild.bans.fetch(user).catch(() => undefined))) {
             await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
@@ -58,13 +58,15 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
         ).rows[0];
 
         await user
-            .send(
-                new MessageEmbed({
-                    author: { name: 'You have been banned from shaderLABS.' },
-                    description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
-                    color: embedColor.blue,
-                })
-            )
+            .send({
+                embeds: [
+                    new MessageEmbed({
+                        author: { name: 'You have been banned from shaderLABS.' },
+                        description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
+                        color: embedColor.blue,
+                    }),
+                ],
+            })
             .catch(() => {
                 dmed = false;
             });
@@ -128,7 +130,7 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
             }
         }
 
-        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+        if (deleteMessages && (await guild.bans.fetch(user).catch(() => undefined))) {
             await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
@@ -143,13 +145,15 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
         ).rows[0];
 
         await user
-            .send(
-                new MessageEmbed({
-                    author: { name: 'You have been banned from shaderLABS.' },
-                    description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
-                    color: embedColor.blue,
-                })
-            )
+            .send({
+                embeds: [
+                    new MessageEmbed({
+                        author: { name: 'You have been banned from shaderLABS.' },
+                        description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                        color: embedColor.blue,
+                    }),
+                ],
+            })
             .catch(() => {
                 dmed = false;
             });

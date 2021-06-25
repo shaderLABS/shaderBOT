@@ -18,7 +18,7 @@ export async function registerSlashCommands(dir: string, directories: string[] =
     await Promise.all(
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
-                registerSlashCommands(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
+                registerSlashCommands(path.join(dir, dirEntry.name), [...directories, dirEntry.name]); // maybe await
             } else if (dirEntry.name.endsWith('.js')) {
                 const { command }: { command: ApplicationCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
 

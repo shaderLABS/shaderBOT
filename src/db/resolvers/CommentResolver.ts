@@ -76,7 +76,9 @@ export class CommentResolver {
             .setTimestamp(timestamp)
             .setDescription(content);
 
-        const commentMessage = await channel.send(commentEmbed);
+        const commentMessage = await channel.send({
+            embeds: [commentEmbed],
+        });
 
         await db.query(
             /*sql*/ `
@@ -122,7 +124,9 @@ export class CommentResolver {
                     embed.setFooter(`edited at ${formatTimeDate(editedAt)}`);
                     embed.setDescription(content);
 
-                    await originalMessage.edit(embed);
+                    await originalMessage.edit({
+                        embeds: [embed],
+                    });
                 }
             }
         }

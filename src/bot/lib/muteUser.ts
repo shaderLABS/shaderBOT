@@ -57,13 +57,15 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
 
         if (mute && member) {
             await member
-                .send(
-                    new MessageEmbed({
-                        author: { name: 'You have been muted on shaderLABS.' },
-                        description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
-                        color: embedColor.blue,
-                    })
-                )
+                .send({
+                    embeds: [
+                        new MessageEmbed({
+                            author: { name: 'You have been muted on shaderLABS.' },
+                            description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
+                            color: embedColor.blue,
+                        }),
+                    ],
+                })
                 .catch(() => {
                     dmed = false;
                 });

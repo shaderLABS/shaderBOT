@@ -37,13 +37,15 @@ export const command: Command = {
             result.edited_timestamp ? `\n*(last edited by ${parseUser(result.edited_mod_id)} at ${formatTimeDate(new Date(result.edited_timestamp))})*` : '',
         ];
 
-        channel.send(
-            new MessageEmbed()
-                .setAuthor('Deleted Note', embedIcon.note)
-                .setColor('#ffc107')
-                .setDescription(messageContent.join(''))
-                .setFooter('ID: ' + args[0])
-        );
+        channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor('Deleted Note', embedIcon.note)
+                    .setColor('#ffc107')
+                    .setDescription(messageContent.join(''))
+                    .setFooter('ID: ' + args[0]),
+            ],
+        });
 
         log(messageContent.join(`\n**ID:** ${args[0]}`), 'Deleted Note');
     },

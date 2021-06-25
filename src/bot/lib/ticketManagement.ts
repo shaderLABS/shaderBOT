@@ -11,8 +11,8 @@ import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
     let fileUploadLimit = 8388119;
-    if (message.guild?.premiumTier === 2) fileUploadLimit = 52428308;
-    else if (message.guild?.premiumTier === 3) fileUploadLimit = 104856616;
+    if (message.guild?.premiumTier === 'TIER_2') fileUploadLimit = 52428308;
+    else if (message.guild?.premiumTier === 'TIER_3') fileUploadLimit = 104856616;
 
     if (message.attachments.size > 1) return Promise.reject('You may not send more than one attachment in one message.');
     const attachment = message.attachments.first();
@@ -108,14 +108,16 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         .setTimestamp(new Date(ticket.timestamp));
 
     const attachments = ticket.attachments?.filter(Boolean);
-    if (attachments) ticketEmbed.attachFiles(attachments.map((attachment: any) => attachment.split('|')[0]));
 
-    await ticketChannel.send(ticketEmbed);
+    await ticketChannel.send({
+        embeds: [ticketEmbed],
+        files: attachments ? [attachments.map((attachment: any) => attachment.split('|')[0])] : [],
+    });
 
     const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
     if (!(subscriptionChannel instanceof TextChannel)) return Promise.reject('Invalid subscription channel.');
 
-    const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
+    const subscriptionMessage = await subscriptionChannel.send({ embeds: [ticketEmbed] });
 
     await db.query(
         /*sql*/ `
@@ -151,8 +153,10 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);
 
-            if (comment.attachment) commentEmbed.attachFiles([comment.attachment.split('|')[0]]);
-            const commentMessage = await ticketChannel.send(commentEmbed);
+            const commentMessage = await ticketChannel.send({
+                embeds: [commentEmbed],
+                files: comment.attachment ? [comment.attachment.split('|')[0]] : [],
+            });
             commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
 
             await sleep(1000);

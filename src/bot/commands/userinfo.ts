@@ -52,7 +52,7 @@ export const command: Command = {
                 if (roles.length !== 0) embed.addField('Roles', `<@&${roles.join('>, <@&')}>`);
             }
 
-            channel.send(embed);
+            channel.send({ embeds: [embed] });
         } catch (error) {
             if (error) sendError(channel, error);
         }

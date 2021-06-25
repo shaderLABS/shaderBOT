@@ -52,22 +52,24 @@ export const command: Command = {
         );
         const projectID = insert.rows[0].id;
 
-        channel.send(
-            new MessageEmbed()
-                .setAuthor(channel.name)
-                .setFooter('ID: ' + projectID)
-                .setColor(embedColor.green)
-                .addFields([
-                    {
-                        name: owners.size > 1 ? 'Owners' : 'Owner',
-                        value: [...owners].map((owner) => Util.escapeMarkdown(owner.user.tag)).join(', '),
-                    },
-                    {
-                        name: 'Notification Role',
-                        value: role.toString(),
-                    },
-                ])
-        );
+        channel.send({
+            embeds: [
+                new MessageEmbed()
+                    .setAuthor(channel.name)
+                    .setFooter('ID: ' + projectID)
+                    .setColor(embedColor.green)
+                    .addFields([
+                        {
+                            name: owners.size > 1 ? 'Owners' : 'Owner',
+                            value: [...owners].map((owner) => Util.escapeMarkdown(owner.user.tag)).join(', '),
+                        },
+                        {
+                            name: 'Notification Role',
+                            value: role.toString(),
+                        },
+                    ]),
+            ],
+        });
         log(`${parseUser(message.author)} created a project linked to <#${channel.id}>.`);
     },
 };
