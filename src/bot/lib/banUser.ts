@@ -41,8 +41,10 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
                 clearTimeout(timeout);
                 store.tempbans.delete(user.id);
             }
+        }
 
-            if (deleteMessages) await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
+        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+            await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
         const tempban = (
@@ -77,7 +79,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
 
         if (expire.getTime() - timestamp.getTime() < new Date().setHours(24, 0, 0, 0) - timestamp.getTime()) {
             const timeout = setTimeout(() => {
-                unban(user.id);
+                unban(user.id).catch((e) => log(`Failed to unban ${parseUser(user.id)}: ${e}`));
             }, duration * 1000);
 
             const previousTimeout = store.tempbans.get(user.id);
@@ -124,8 +126,10 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
                 clearTimeout(timeout);
                 store.tempbans.delete(user.id);
             }
+        }
 
-            if (deleteMessages) await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
+        if (deleteMessages && (await guild.fetchBan(user).catch(() => undefined))) {
+            await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
         }
 
         const ban = (
@@ -205,7 +209,7 @@ export async function unban(userID: Snowflake, modID?: Snowflake) {
         return Promise.reject('Error while accessing the database.');
     }
 
-    guild.members.unban(userID);
+    await guild.members.unban(userID);
 
     const timeout = store.tempbans.get(userID);
     if (timeout) {

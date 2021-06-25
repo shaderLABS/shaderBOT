@@ -5,6 +5,7 @@ import { commands, settings } from '../../bot.js';
 import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
+import { matchBlacklist } from '../../lib/searchMessage.js';
 import { cacheAttachment } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -23,10 +24,12 @@ export const event: Event = {
                 const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
                 if (command) runCommand(command, message, invoke, args);
             }
-        } else if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
-            createTicketComment(message);
-        } else {
-            sendAutoResponse(message);
+        } else if (!matchBlacklist(message)) {
+            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+                createTicketComment(message);
+            } else {
+                sendAutoResponse(message);
+            }
         }
     },
 };

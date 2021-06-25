@@ -17,7 +17,7 @@ export let cooldowns: Map<string, boolean>;
 export let settings: settingsFile.Settings;
 
 cron.schedule('55 23 * * *', () => {
-    loadTimeouts();
+    loadTimeouts(true);
     cleanBackups();
 });
 

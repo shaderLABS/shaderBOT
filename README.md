@@ -50,6 +50,10 @@ The file `src/bot/settings/settings.json` contains information specific to the b
             "tempbanValues": [0, 0], // min - max values in seconds
             "ban": 0 // min threshold
         }
+    },
+    "blacklist": {
+        "strings": [""], // any message containing these links will be deleted and the author will be muted
+        "muteDuration": 900 // duration of the mute in seconds, as explained above
     }
 }
 ```

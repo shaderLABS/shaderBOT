@@ -11,14 +11,13 @@ export const event: Event = {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as '${client.user.tag}'.`);
 
-        loadTimeouts();
+        loadTimeouts(false);
 
         const guild = getGuild();
         if (!guild) return;
 
         await registerSlashCommands('./src/bot/slashCommands');
-
-        guild.commands.set(slashCommandStructure);
+        await guild.commands.set(slashCommandStructure);
 
         const commands = await guild.commands.fetch();
         const permissions: GuildApplicationCommandPermissionData[] = [];

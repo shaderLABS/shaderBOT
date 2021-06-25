@@ -1,7 +1,8 @@
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { unban } from './banUser.js';
-import { getGuild } from './misc.js';
+import log from './log.js';
+import { getGuild, parseUser } from './misc.js';
 import { unmute } from './muteUser.js';
 
 export const punishmentTypeAsString: {
@@ -22,7 +23,7 @@ let store: {
 
 export { store };
 
-export async function loadTimeouts() {
+export async function loadTimeouts(includeTomorrow: boolean) {
     if (!client.user) return Promise.reject('The client is not logged in.');
     console.log('Loading punishments...');
 
@@ -30,7 +31,7 @@ export async function loadTimeouts() {
         await db.query(/*sql*/ `
             SELECT user_id::TEXT, "type", mod_id::TEXT, expire_timestamp::TEXT
             FROM punishment
-            WHERE (("type" = 'ban' AND expire_timestamp IS NOT NULL) OR "type" = 'mute') AND expire_timestamp <= NOW()::DATE + INTERVAL '1 day 5 minutes';`)
+            WHERE (("type" = 'ban' AND expire_timestamp IS NOT NULL) OR "type" = 'mute') AND expire_timestamp::DATE <= NOW()::DATE ${includeTomorrow ? `+ INTERVAL '1 day'` : ''};`)
     ).rows;
 
     for (const punishment of expiringPunishments) {
@@ -38,7 +39,7 @@ export async function loadTimeouts() {
 
         if (punishment.type === 'ban') {
             const timeout = setTimeout(() => {
-                unban(punishment.user_id);
+                unban(punishment.user_id).catch((e) => log(`Failed to unban ${parseUser(punishment.user_id)}: ${e}`));
             }, ms);
 
             const previousTimeout = store.tempbans.get(punishment.user_id);
@@ -51,7 +52,7 @@ export async function loadTimeouts() {
                     ?.members.fetch(punishment.user_id)
                     .catch(() => undefined);
 
-                unmute(punishment.user_id, undefined, timeoutMember);
+                unmute(punishment.user_id, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(punishment.user_id)}: ${e}`));
             }, ms);
 
             const previousTimeout = store.mutes.get(punishment.user_id);
