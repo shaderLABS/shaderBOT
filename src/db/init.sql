@@ -25,8 +25,7 @@ CREATE TABLE "ticket" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     edited TIMESTAMP WITH TIME ZONE,
     closed BOOLEAN DEFAULT FALSE,
-    channel_id NUMERIC(20) UNIQUE,
-    subscription_message_id NUMERIC(20) UNIQUE
+    channel_id NUMERIC(20) UNIQUE
 );
 
 DROP TABLE IF EXISTS "comment";

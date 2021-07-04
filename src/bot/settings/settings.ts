@@ -9,8 +9,6 @@ export interface Settings {
     };
     ticket: {
         categoryIDs: string[];
-        managementChannelID: string;
-        subscriptionChannelID: string;
         attachmentCacheChannelID: string;
         openCategoryID: string;
     };

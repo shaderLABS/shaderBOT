@@ -34,7 +34,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
          * EDIT TICKET *
          ***************/
 
-        const ticket = (await db.query(/*sql*/ `SELECT id, author_id, channel_id, subscription_message_id FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
+        const ticket = (await db.query(/*sql*/ `SELECT id, author_id, channel_id FROM ticket WHERE channel_id = $1 LIMIT 1`, [channel.id])).rows[0];
         if (!ticket) return;
 
         const originalMessage = await channel.messages.fetch(reaction.message.id);
@@ -43,25 +43,19 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
         const embed = originalMessage.embeds[0];
         if (!embed?.footer?.text?.includes(ticket.id) || ticket.author_id !== user.id) return;
 
-        let subscriptionMessage;
-        const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-        if (subscriptionChannel instanceof TextChannel && ticket.subscription_message_id) {
-            subscriptionMessage = await subscriptionChannel.messages.fetch(ticket.subscription_message_id);
-        }
-
-        const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
-        if (!(managementChannel instanceof TextChannel)) return;
+        const botChannel = guild.channels.cache.get(settings.botChannelID);
+        if (!(botChannel instanceof TextChannel)) return;
 
         const editPartQuestion = await sendInfo(
-            managementChannel,
+            botChannel,
             'Please enter the part of the ticket which you want to edit (`title` or `description`).',
             undefined,
             `<@${user.id}>`,
             `Type '${settings.prefix}cancel' to stop.`
         );
 
-        const editPartAnswer = await awaitResponse(managementChannel, user.id).catch((error) => {
-            if (error) sendError(managementChannel, error);
+        const editPartAnswer = await awaitResponse(botChannel, user.id).catch((error) => {
+            if (error) sendError(botChannel, error);
         });
 
         if (!editPartAnswer || !['TITLE', 'DESCRIPTION'].includes(editPartAnswer.content.toUpperCase())) {
@@ -75,14 +69,14 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
              * EDIT TICKET TITLE *
              *********************/
 
-            const titleQuestion = await sendInfo(managementChannel, 'Please enter the new title.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
+            const titleQuestion = await sendInfo(botChannel, 'Please enter the new title.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
 
             try {
-                const titleAnswer = await awaitResponse(managementChannel, user.id);
-                editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage, subscriptionMessage);
+                const titleAnswer = await awaitResponse(botChannel, user.id);
+                editTicketTitle(ticket, titleAnswer.content, user, guild, originalMessage);
                 titleAnswer.delete();
             } catch (error) {
-                if (error) sendError(managementChannel, error);
+                if (error) sendError(botChannel, error);
             } finally {
                 reaction.users.remove(user);
                 editPartQuestion.delete();
@@ -94,14 +88,14 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
              * EDIT TICKET DESCRIPTION *
              ***************************/
 
-            const descriptionQuestion = await sendInfo(managementChannel, 'Please enter the new description.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
+            const descriptionQuestion = await sendInfo(botChannel, 'Please enter the new description.', undefined, undefined, `Type '${settings.prefix}cancel' to stop.`);
 
             try {
-                const descriptionAnswer = await awaitResponse(managementChannel, user.id);
-                editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage, subscriptionMessage);
+                const descriptionAnswer = await awaitResponse(botChannel, user.id);
+                editTicketDescription(ticket, descriptionAnswer.content, user, guild, originalMessage);
                 descriptionAnswer.delete();
             } catch (error) {
-                if (error) sendError(managementChannel, error);
+                if (error) sendError(botChannel, error);
             } finally {
                 reaction.users.remove(user);
                 editPartQuestion.delete();
@@ -116,13 +110,13 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
         if (comment.author_id !== user.id) return reaction.users.remove(user);
 
-        const managementChannel = guild.channels.cache.get(settings.ticket.managementChannelID);
-        if (!(managementChannel instanceof TextChannel)) return;
+        const botChannel = guild.channels.cache.get(settings.botChannelID);
+        if (!(botChannel instanceof TextChannel)) return;
 
-        const question = await sendInfo(managementChannel, 'Please enter the new message.', undefined, `<@${user.id}>`, `Type '${settings.prefix}cancel' to stop.`);
+        const question = await sendInfo(botChannel, 'Please enter the new message.', undefined, `<@${user.id}>`, `Type '${settings.prefix}cancel' to stop.`);
 
         try {
-            const answer = await awaitResponse(managementChannel, user.id);
+            const answer = await awaitResponse(botChannel, user.id);
 
             const originalMessage = await channel.messages.fetch(reaction.message.id);
             if (!originalMessage) return;
@@ -130,7 +124,7 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
             editComment(comment, originalMessage, answer.content, user);
             answer.delete();
         } catch (error) {
-            if (error) sendError(managementChannel, error);
+            if (error) sendError(botChannel, error);
         } finally {
             reaction.users.remove(user);
             question.delete();

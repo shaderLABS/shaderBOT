@@ -21,7 +21,7 @@ export default async function (userID: string) {
             if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, guild);
         });
 
-        const ticket = (await db.query(/*sql*/ `DELETE FROM ticket WHERE id = $1 RETURNING subscription_message_id, channel_id, closed, attachments;`, [row.id])).rows[0];
+        const ticket = (await db.query(/*sql*/ `DELETE FROM ticket WHERE id = $1 RETURNING channel_id, closed, attachments;`, [row.id])).rows[0];
         deleteTicketFromDiscord(ticket, guild);
     });
 

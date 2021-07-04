@@ -15,58 +15,39 @@ export const command: Command = {
     help: 'Create a new ticket.',
     minArgs: 0,
     maxArgs: 0,
-    cooldownDuration: 20000,
-    channelWhitelist: [settings.ticket.managementChannelID],
+    cooldownDuration: 10000,
     callback: async (message) => {
         const { channel, author, guild } = message;
+
+        const project = (await db.query(/*sql*/ `SELECT issue_tracker_url FROM project WHERE channel_id = $1;`, [channel.id])).rows[0];
+        if (!project) return sendError(channel, 'This text channel is not a project.');
+        if (project.issue_tracker_url) {
+            const issueTrackerURL = new URL(project.issue_tracker_url);
+            return channel.send(
+                new MessageEmbed({
+                    color: embedColor.blue,
+                    author: {
+                        iconURL: embedIcon.info,
+                        name: 'Issue Tracker',
+                    },
+                    description: `This project uses an external issue tracker:\n${project.issue_tracker_url}`,
+                    footer: {
+                        iconURL: 'https://api.faviconkit.com/' + issueTrackerURL.hostname,
+                        text: issueTrackerURL.hostname,
+                    },
+                })
+            );
+        }
 
         let question: Message | undefined;
         let attachments: (string | undefined)[] = [];
 
         try {
-            /***********
-             * PROJECT *
-             ***********/
-
-            question = await sendInfo(channel, 'Please mention the project.', 'Ticket Creation', undefined, `Type '${settings.prefix}cancel' to stop.`);
-            const projectAnswer = await awaitResponse(channel, author.id);
-            attachments.push(await cacheAttachment(projectAnswer));
-            projectAnswer.delete();
-
-            // VALIDATION
-            const projectChannel = projectAnswer.mentions.channels.first();
-            if (!projectChannel) return sendErrorAndDelete(channel, 'The message does not contain a mentioned text channel.', question, attachments, guild);
-            if (projectChannel.parentID && settings.archiveCategoryIDs.includes(projectChannel.parentID))
-                return sendErrorAndDelete(channel, 'The mentioned channel is archived.', question, attachments, guild);
-            const project = (await db.query(/*sql*/ `SELECT issue_tracker_url FROM project WHERE channel_id = $1;`, [projectChannel.id])).rows[0];
-            if (!project) return sendErrorAndDelete(channel, 'The mentioned text channel is not a valid project.', question, attachments, guild);
-            if (project.issue_tracker_url) {
-                const issueTrackerURL = new URL(project.issue_tracker_url);
-                return sendErrorAndDelete(
-                    channel,
-                    new MessageEmbed({
-                        color: embedColor.blue,
-                        author: {
-                            iconURL: embedIcon.info,
-                            name: 'Issue Tracker',
-                        },
-                        description: `${projectChannel} uses an external issue tracker:\n${project.issue_tracker_url}`,
-                        footer: {
-                            iconURL: 'https://api.faviconkit.com/' + issueTrackerURL.hostname,
-                            text: issueTrackerURL.hostname,
-                        },
-                    }),
-                    question,
-                    attachments,
-                    guild
-                );
-            }
-
             /*********
              * TITLE *
              *********/
 
-            await question.edit(question.embeds[0].setDescription('Please enter the title.'));
+            question = await sendInfo(channel, 'Please enter the title.', 'Ticket Creation', undefined, `Type '${settings.prefix}cancel' to stop.`);
             const titleAnswer = await awaitResponse(channel, author.id);
             attachments.push(await cacheAttachment(titleAnswer));
             titleAnswer.delete();
@@ -96,13 +77,11 @@ export const command: Command = {
             const ticketID = uuid();
             const date = new Date();
 
-            const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-            if (!(subscriptionChannel instanceof TextChannel)) return;
-
             const ticketChannel = await guild.channels.create(titleAnswer.content, {
                 type: 'text',
                 parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
-                topic: `${ticketID} | <#${projectChannel.id}> | ${cutDescription(descriptionAnswer.content)}`,
+                topic: `${ticketID} | ${channel.toString()} | ${cutDescription(descriptionAnswer.content)}`,
+                permissionOverwrites: channel.permissionOverwrites,
                 rateLimitPerUser: 10,
                 // position: 0, // new - old
             });
@@ -121,27 +100,24 @@ export const command: Command = {
                 fields: [
                     {
                         name: 'Project',
-                        value: projectChannel.toString(),
+                        value: channel.toString(),
                     },
                     {
                         name: 'Description',
                         value: descriptionAnswer.content || 'NO DESCRIPTION',
                     },
                 ],
+                files: attachments.map((attachment: any) => attachment.split('|')[0]),
             });
-
-            const subscriptionMessage = await subscriptionChannel.send(ticketEmbed);
-
-            if (attachments) ticketEmbed.attachFiles(attachments.map((attachment: any) => attachment.split('|')[0]));
 
             channel.send(ticketEmbed);
             ticketChannel.send(ticketEmbed);
 
             await db.query(
                 /*sql*/ `
-                INSERT INTO ticket (id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id, subscription_message_id)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-                [ticketID, titleAnswer.content, projectChannel.id, descriptionAnswer.content, attachments, author.id, date, ticketChannel.id, subscriptionMessage.id]
+                INSERT INTO ticket (id, title, project_channel_id, description, attachments, author_id, timestamp, channel_id)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+                [ticketID, titleAnswer.content, channel.id, descriptionAnswer.content, attachments, author.id, date, ticketChannel.id]
             );
 
             log(`${parseUser(message.author)} created a ticket ("${titleAnswer.content}").`);

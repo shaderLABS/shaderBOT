@@ -11,7 +11,7 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     cooldownDuration: 10000,
-    channelWhitelist: [settings.ticket.managementChannelID],
+    channelWhitelist: [settings.botChannelID],
     callback: async (message) => {
         const { channel, member } = message;
 
