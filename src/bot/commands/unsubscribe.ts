@@ -6,16 +6,16 @@ import { sendError, sendSuccess } from '../lib/embeds.js';
 const expectedArgs = '<#project>';
 
 export const command: Command = {
-    commands: ['notify'],
-    help: 'Opt in/out to receive notifications from a project.',
+    commands: ['unsubscribe'],
+    help: 'Unsubscribe from notifications of a project.',
     minArgs: 1,
     maxArgs: 1,
     expectedArgs,
-    channelWhitelist: [settings.ticket.managementChannelID],
+    channelWhitelist: [settings.botChannelID],
     callback: async (message) => {
         const { guild, channel, member } = message;
         const projectChannel = message.mentions.channels.first();
-        if (!projectChannel) return syntaxError(channel, 'notify ' + expectedArgs);
+        if (!projectChannel) return syntaxError(channel, 'unsubscribe ' + expectedArgs);
 
         const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
         if (!project) return sendError(channel, `<#${projectChannel.id}> is not a project channel.`);
@@ -26,9 +26,8 @@ export const command: Command = {
         if (member.roles.cache.has(role.id)) {
             member.roles.remove(role);
             return sendSuccess(channel, `You will no longer receive notifications from <#${projectChannel.id}>.`);
-        } else {
-            member.roles.add(role);
-            return sendSuccess(channel, `You will now receive notifications from <#${projectChannel.id}>.`);
         }
+
+        return sendError(channel, `You do not receive notifications from <#${projectChannel.id}>.\nYou can subscribe to notifications using \`${settings.prefix}subscribe\`.`);
     },
 };
