@@ -51,7 +51,14 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     },
     "blacklist": {
         "strings": [""], // any message containing these links will be deleted and the author will be muted
-        "muteDuration": 900 // duration of the mute in seconds, as explained above
+        "muteDuration": 900 // duration of the mute in seconds
+    },
+    "spamProtection": {
+        "cacheLength": 0, // length of the spam protection cache
+        "characterThreshold": 0, // minimum characters after which messages will be checked for spam
+        "muteDuration": 0, // duration of the mute in seconds
+        "messageThreshold": 0, // number of identical messages after which the mute protection will be triggered
+        "timeThreshold": 0 // maximum delay between identical messages in seconds (after which they won't be counted)
     }
 }
 ```
