@@ -31,6 +31,13 @@ export interface Settings {
         strings: string[];
         muteDuration: number;
     };
+    spamProtection: {
+        cacheLength: number;
+        characterThreshold: number;
+        muteDuration: number;
+        messageThreshold: number;
+        timeThreshold: number;
+    };
 }
 
 export function write(data: Object) {
