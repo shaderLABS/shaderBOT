@@ -27,7 +27,8 @@ export function checkSpam(message: GuildMessage) {
             message.createdTimestamp - previousMessage.createdTimestamp < settings.spamProtection.timeThreshold * 1000
     ) as cachedMessage[];
 
-    if (potentialSpam.length >= settings.spamProtection.messageThreshold - 1) {
+    const isSpam = potentialSpam.length >= settings.spamProtection.messageThreshold - 1;
+    if (isSpam) {
         mute(message.author.id, settings.spamProtection.muteDuration, null, 'Spamming messages in multiple channels.', message.member).catch((e) =>
             log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`)
         );
@@ -36,16 +37,16 @@ export function checkSpam(message: GuildMessage) {
         potentialSpam.forEach(async (spam) => {
             const spamChannel = message.guild.channels.cache.get(spam.channelID);
             if (spamChannel && spamChannel instanceof TextChannel) {
-                const spamMessage = await spamChannel.messages.fetch(spam.id);
-                if (spamMessage.deletable) spamMessage.delete();
+                const spamMessage = await spamChannel.messages.fetch(spam.id).catch(() => undefined);
+                if (spamMessage?.deletable) {
+                    spamMessage.delete();
+                }
             }
         });
-
-        return true;
     }
 
     cache.unshift({ id: message.id, content: message.content, authorID: message.author.id, channelID: message.channel.id, createdTimestamp: message.createdTimestamp });
     cache.pop();
 
-    return false;
+    return isSpam;
 }
