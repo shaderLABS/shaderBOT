@@ -33,14 +33,12 @@ export function checkSpam(message: GuildMessage) {
             log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`)
         );
 
-        if (message.deletable) message.delete();
+        message.delete().catch(() => undefined);
         potentialSpam.forEach(async (spam) => {
             const spamChannel = message.guild.channels.cache.get(spam.channelID);
             if (spamChannel && spamChannel instanceof TextChannel) {
                 const spamMessage = await spamChannel.messages.fetch(spam.id).catch(() => undefined);
-                if (spamMessage?.deletable) {
-                    spamMessage.delete();
-                }
+                if (spamMessage) spamMessage.delete().catch(() => undefined);
             }
         });
     }
