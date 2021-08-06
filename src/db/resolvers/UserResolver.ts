@@ -1,10 +1,11 @@
+import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { client } from '../../bot/bot.js';
 import { getGuild } from '../../bot/lib/misc.js';
 import { db } from '../postgres.js';
 import { User } from '../typedefinitions/User.js';
 
-export async function fetchUser(id: string) {
+export async function fetchUser(id: Snowflake) {
     const guild = getGuild();
     if (!guild) return Promise.reject("The bot isn't in any guilds.");
 
@@ -56,7 +57,7 @@ export class UserResolver {
     }
 
     @tgq.Query(() => User)
-    async user(@tgq.Arg('id', () => String) id: string) {
+    async user(@tgq.Arg('id', () => String) id: Snowflake) {
         return await fetchUser(id);
     }
 

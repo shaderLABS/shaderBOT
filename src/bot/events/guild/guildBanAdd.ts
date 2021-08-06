@@ -20,7 +20,7 @@ export const event: Event = {
             })
         ).entries.first();
 
-        if (client.user && auditLog?.executor.id === client.user.id) return;
+        if (!auditLog?.executor || (client.user && auditLog?.executor.id === client.user.id)) return;
         if (!auditLog || !(auditLog.target instanceof User) || auditLog.target.id !== user.id || auditLog.executor.bot)
             return log(
                 `Someone banned ${parseUser(user)}, but the moderator could not be retrieved. Please check the audit logs, ban ${parseUser(

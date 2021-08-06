@@ -11,6 +11,6 @@ export const command: Command = {
     requiredPermissions: ['MANAGE_GUILD'],
     callback: (message) => {
         const attachment = new MessageAttachment(Buffer.from(JSON.stringify(settings, null, 4)), 'configuration.json');
-        message.channel.send(attachment);
+        message.channel.send({ files: [attachment] });
     },
 };

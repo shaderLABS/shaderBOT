@@ -1,16 +1,18 @@
+import { Snowflake } from 'discord.js';
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { getGuild } from '../../bot/lib/misc.js';
+import { isSnowflake } from '../../bot/lib/searchMessage.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.id);
 });
 
-passport.deserializeUser(async (user_id: string, done) => {
+passport.deserializeUser(async (user_id: Snowflake, done) => {
     try {
         const member = await getGuild()
             ?.members.fetch(user_id)
-            .catch(() => undefined);
+            ?.catch(() => undefined);
         if (!member) return done(null);
 
         const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
@@ -42,9 +44,11 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
+            if (!isSnowflake(profile.id)) return done(undefined, undefined, { error: 0 });
+
             const member = await getGuild()
                 ?.members.fetch(profile.id)
-                .catch(() => undefined);
+                ?.catch(() => undefined);
             if (!member) return done(undefined, undefined, { error: 0 });
 
             const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);

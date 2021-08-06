@@ -14,7 +14,7 @@ export async function editComment(comment: any, message: Message, newContent: st
     embed.setFooter(`edited at ${formatTimeDate(editedAt)}`);
     embed.setDescription(newContent);
 
-    await message.edit(embed);
+    await message.edit({ embeds: [embed] });
 
     db.query(
         /*sql*/ `
@@ -54,7 +54,7 @@ export async function editTicketTitle(ticket: any, newTitle: string, user: User,
     log(`${parseUser(user)} edited their ticket title from:\n\n${originalTitle}\n\nto:\n\n${newTitle}`);
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
-    originalMessage.edit(embed);
+    originalMessage.edit({ embeds: [embed] });
 }
 
 export async function editTicketDescription(ticket: any, newDescription: string, user: User, guild: Guild, originalMessage: Message) {
@@ -87,5 +87,5 @@ export async function editTicketDescription(ticket: any, newDescription: string,
     log(`${parseUser(user)} edited their ticket description from:\n\n${originalDescription}\n\nto:\n\n${newDescription}`);
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
-    originalMessage.edit(embed);
+    originalMessage.edit({ embeds: [embed] });
 }

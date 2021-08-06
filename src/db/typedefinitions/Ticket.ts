@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { Comment } from './Comment.js';
 import { Project } from './Project.js';
@@ -12,13 +13,13 @@ export class Ticket {
     title!: string;
 
     @tgq.Field(() => String, { nullable: true })
-    project_channel_id!: string;
+    project_channel_id!: Snowflake;
 
     @tgq.Field(() => Project)
     project!: Project;
 
     @tgq.Field(() => String, { nullable: true })
-    channel_id!: string;
+    channel_id!: Snowflake;
 
     @tgq.Field(() => String, { nullable: true })
     description!: string;
@@ -27,7 +28,7 @@ export class Ticket {
     attachments!: string[];
 
     @tgq.Field(() => String)
-    author_id!: string;
+    author_id!: Snowflake;
 
     @tgq.Field(() => User, { nullable: true })
     author!: User;

@@ -157,7 +157,7 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
     const id = (await db.query(/*sql*/ `SELECT id FROM ticket WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.id;
     if (!id) return;
 
-    const managePerm = member.hasPermission('MANAGE_MESSAGES');
+    const managePerm = member.permissions.has('MANAGE_MESSAGES');
 
     const comment = (
         await db.query(

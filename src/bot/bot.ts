@@ -1,7 +1,7 @@
-import { Client, Collection } from 'discord.js';
+import { Client, Collection, Intents } from 'discord.js';
 import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
-import { Command, commandsToDebugMessage, registerCommands } from './commandHandler.js';
+import { Command } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { loadTimeouts } from './lib/punishments.js';
@@ -23,10 +23,20 @@ cron.schedule('55 23 * * *', () => {
 
 export async function startBot() {
     client = new Client({
-        disableMentions: 'everyone',
+        allowedMentions: {
+            parse: ['roles', 'users'],
+            repliedUser: false,
+        },
         partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'],
-        messageEditHistoryMaxSize: 0,
-        ws: { intents: ['GUILDS', 'GUILD_MEMBERS', 'GUILD_BANS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES'] },
+        intents: [
+            Intents.FLAGS.GUILDS,
+            Intents.FLAGS.GUILD_MEMBERS,
+            Intents.FLAGS.GUILD_BANS,
+            Intents.FLAGS.GUILD_MESSAGES,
+            Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+            Intents.FLAGS.DIRECT_MESSAGES,
+            Intents.FLAGS.GUILD_INTEGRATIONS,
+        ],
     });
 
     commands = new Collection<string, Command>();
@@ -36,7 +46,6 @@ export async function startBot() {
     cooldowns = new Map<string, boolean>();
     settings = await settingsFile.read();
 
-    registerCommands('./src/bot/commands').then(() => console.debug(`Registered Commands:\n\t${commandsToDebugMessage(commands)}`));
     registerEvents('./src/bot/events').then(() => console.debug(`Registered Events:\n\t${events.keyArray().join('\n\t')}`));
     registerPastas(pastaPath).then(() => console.debug(`Registered Pastas:\n\t${pastas.keyArray().join('\n\t')}`));
     registerAutoResponses(autoResponsePath).then(() => console.debug(`Registered Automatic Responses:\n\t${autoResponses.keyArray().join('\n\t')}`));

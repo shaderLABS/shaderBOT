@@ -41,13 +41,15 @@ export const command: Command = {
 
             const messageContent = `**User:** ${parseUser(user)}\n**Content:** ${content}\n**Moderator:** ${parseUser(author)}\n**Created At:** ${formatTimeDate(timestamp)}`;
 
-            channel.send(
-                new MessageEmbed()
-                    .setAuthor('Added Note', embedIcon.note)
-                    .setColor('#ffc107')
-                    .setDescription(messageContent)
-                    .setFooter('ID: ' + result.id)
-            );
+            channel.send({
+                embeds: [
+                    new MessageEmbed()
+                        .setAuthor('Added Note', embedIcon.note)
+                        .setColor('#ffc107')
+                        .setDescription(messageContent)
+                        .setFooter('ID: ' + result.id),
+                ],
+            });
 
             log(`${messageContent}\n**ID:** ${result.id}`, 'Added Note');
         } catch (error) {

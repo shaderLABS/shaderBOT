@@ -21,7 +21,7 @@ export const command: Command = {
 
             try {
                 const attachment = new MessageAttachment(Buffer.from(autoResponseToJSON(autoResponse)), stringToFileName(text));
-                channel.send(attachment);
+                channel.send({ files: [attachment] });
             } catch {
                 sendError(channel, 'Failed to send automatic response.');
             }

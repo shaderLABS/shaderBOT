@@ -1,4 +1,4 @@
-import { TextChannel, User } from 'discord.js';
+import { Snowflake, TextChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
@@ -18,7 +18,7 @@ export async function getWarnUUID(argument: string, author: User, channel: TextC
     }
 }
 
-export async function editWarnReason(reason: string, id: string, modID: string) {
+export async function editWarnReason(reason: string, id: string, modID: Snowflake) {
     const warning = (
         await db.query(
             /*sql*/ `
@@ -37,7 +37,7 @@ export async function editWarnReason(reason: string, id: string, modID: string) 
     return warning;
 }
 
-export async function editWarnSeverity(severity: number, id: string, modID: string) {
+export async function editWarnSeverity(severity: number, id: string, modID: Snowflake) {
     const warning = (
         await db.query(
             /*sql*/ `

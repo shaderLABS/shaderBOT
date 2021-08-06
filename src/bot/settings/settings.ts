@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import fs from 'fs/promises';
 
 const settingsFile = './src/bot/settings/settings.json';
@@ -5,18 +6,18 @@ const settingsFile = './src/bot/settings/settings.json';
 export interface Settings {
     prefix: string;
     logging: {
-        channelID: string;
+        channelID: Snowflake;
     };
     ticket: {
-        categoryIDs: string[];
-        attachmentCacheChannelID: string;
-        openCategoryID: string;
+        categoryIDs: Snowflake[];
+        attachmentCacheChannelID: Snowflake;
+        openCategoryID: Snowflake;
     };
-    botChannelID: string;
-    mediaChannelIDs: string[];
-    muteRoleID: string;
-    guildID: string;
-    archiveCategoryIDs: string[];
+    botChannelID: Snowflake;
+    mediaChannelIDs: Snowflake[];
+    muteRoleID: Snowflake;
+    guildID: Snowflake;
+    archiveCategoryIDs: Snowflake[];
     warnings: {
         decay: number[];
         punishment: {

@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, TextChannel, User } from 'discord.js';
+import { CategoryChannel, Guild, GuildMember, Message, MessageEmbed, Snowflake, TextChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
@@ -6,12 +6,13 @@ import { update } from '../settings/settings.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser, sleep } from './misc.js';
+import { isSnowflake } from './searchMessage.js';
 import { formatTimeDate } from './time.js';
 
 export async function cacheAttachment(message: Message): Promise<string | undefined> {
     let fileUploadLimit = 8388119;
-    if (message.guild?.premiumTier === 2) fileUploadLimit = 52428308;
-    else if (message.guild?.premiumTier === 3) fileUploadLimit = 104856616;
+    if (message.guild?.premiumTier === 'TIER_2') fileUploadLimit = 52428308;
+    else if (message.guild?.premiumTier === 'TIER_3') fileUploadLimit = 104856616;
 
     if (message.attachments.size > 1) return Promise.reject('You may not send more than one attachment in one message.');
     const attachment = message.attachments.first();
@@ -22,7 +23,7 @@ export async function cacheAttachment(message: Message): Promise<string | undefi
 
         if (attachment.size > fileUploadLimit) return Promise.reject('The attachment is too large.');
 
-        const attachmentMessage = await attachmentStorage.send(attachment);
+        const attachmentMessage = await attachmentStorage.send({ files: [attachment] });
         const storedAttachment = attachmentMessage.attachments.first();
 
         if (storedAttachment) return storedAttachment.url + '|' + attachmentMessage.id;
@@ -109,10 +110,12 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         .setTimestamp(new Date(ticket.timestamp));
 
     const attachments = ticket.attachments?.filter(Boolean);
-    if (attachments) ticketEmbed.attachFiles(attachments.map((attachment: any) => attachment.split('|')[0]));
 
-    await ticketChannel.send(ticketEmbed);
-
+    await ticketChannel.send({
+        embeds: [ticketEmbed],
+        files: attachments ? [attachments.map((attachment: any) => attachment.split('|')[0])] : [],
+    });
+  
     await db.query(
         /*sql*/ `
         UPDATE ticket
@@ -147,8 +150,10 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
                 .setTimestamp(new Date(comment.timestamp))
                 .setDescription(comment.content);
 
-            if (comment.attachment) commentEmbed.attachFiles([comment.attachment.split('|')[0]]);
-            const commentMessage = await ticketChannel.send(commentEmbed);
+            const commentMessage = await ticketChannel.send({
+                embeds: [commentEmbed],
+                files: comment.attachment ? [comment.attachment.split('|')[0]] : [],
+            });
             commentMessageQuery += /*sql*/ `UPDATE comment SET message_id = ${commentMessage.id} WHERE id = '${comment.id}';\n`;
 
             await sleep(1000);
@@ -247,12 +252,13 @@ export async function deleteAttachmentFromDiscord(attachment: string, guild: Gui
     const messageID = attachment.split('|')[1];
 
     const attachmentCache = guild.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-    if (!attachmentCache || !(attachmentCache instanceof TextChannel)) return log('Failed to delete comment attachment `' + attachment + '`!');
+    if (!attachmentCache || !(attachmentCache instanceof TextChannel) || !isSnowflake(messageID)) return log('Failed to delete comment attachment `' + attachment + '`!');
 
     (await attachmentCache.messages.fetch(messageID)).delete();
 }
 
-export async function deleteTicketFromDiscord(ticket: { channel_id?: string; attachments?: string[]; closed: boolean }, guild: Guild) {
+
+export async function deleteTicketFromDiscord(ticket: { channel_id?: Snowflake; attachments?: string[]; closed: boolean }, guild: Guild) {
     const attachments = ticket.attachments?.filter(Boolean);
     if (attachments) attachments.forEach((attachment) => deleteAttachmentFromDiscord(attachment, guild));
 
@@ -289,7 +295,7 @@ export async function purgeAllTickets(user: User, guild: Guild) {
     return { titles, amount: ticketIDs.rowCount };
 }
 
-export async function getCategoryChannel(categoryIDs: string[], guild: Guild): Promise<CategoryChannel> {
+export async function getCategoryChannel(categoryIDs: Snowflake[], guild: Guild): Promise<CategoryChannel> {
     let lowestPosition = 0;
     for (const id of categoryIDs) {
         const category = guild.channels.cache.get(id);

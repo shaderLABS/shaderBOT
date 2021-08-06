@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { User } from './User.js';
 
@@ -10,7 +11,7 @@ export class Comment {
     ticket_id!: string;
 
     @tgq.Field(() => String)
-    author_id!: string;
+    author_id!: Snowflake;
 
     @tgq.Field(() => User, { nullable: true })
     author!: User;
@@ -22,7 +23,7 @@ export class Comment {
     attachments!: string[];
 
     @tgq.Field(() => String)
-    message_id!: string;
+    message_id!: Snowflake;
 
     @tgq.Field(() => String)
     timestamp!: string;

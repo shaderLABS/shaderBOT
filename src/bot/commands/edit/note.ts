@@ -27,13 +27,15 @@ export const command: Command = {
             if (uuid.test(args[0])) {
                 const { user_id } = await editNote(args[0], content, author.id);
 
-                channel.send(
-                    new MessageEmbed()
-                        .setAuthor('Edited Note', embedIcon.note)
-                        .setColor('#ffc107')
-                        .setDescription(`Successfully edited the content of ${parseUser(user_id)}'s note.`)
-                        .setFooter('ID: ' + args[0])
-                );
+                channel.send({
+                    embeds: [
+                        new MessageEmbed()
+                            .setAuthor('Edited Note', embedIcon.note)
+                            .setColor('#ffc107')
+                            .setDescription(`Successfully edited the content of ${parseUser(user_id)}'s note.`)
+                            .setFooter('ID: ' + args[0]),
+                    ],
+                });
             } else {
                 const user = await requireUser(args[0], { author, channel });
 
@@ -42,13 +44,15 @@ export const command: Command = {
 
                 await editNote(latestNoteID.id, content, author.id);
 
-                channel.send(
-                    new MessageEmbed()
-                        .setAuthor('Edited Note', embedIcon.note)
-                        .setColor('#ffc107')
-                        .setDescription(`Successfully edited the content of ${parseUser(user)}'s note.`)
-                        .setFooter('ID: ' + latestNoteID.id)
-                );
+                channel.send({
+                    embeds: [
+                        new MessageEmbed()
+                            .setAuthor('Edited Note', embedIcon.note)
+                            .setColor('#ffc107')
+                            .setDescription(`Successfully edited the content of ${parseUser(user)}'s note.`)
+                            .setFooter('ID: ' + latestNoteID.id),
+                    ],
+                });
             }
         } catch (error) {
             if (error) sendError(channel, error);

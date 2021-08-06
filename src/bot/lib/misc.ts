@@ -1,4 +1,4 @@
-import { CategoryChannel, TextChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Snowflake, TextChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
@@ -17,7 +17,7 @@ export function getAlphabeticalChannelPosition(channel: TextChannel, parent: Cat
     return totalChannels.keyArray().indexOf(channel.id);
 }
 
-export function parseUser(user: User | string) {
+export function parseUser(user: User | Snowflake) {
     let target: User | null;
     if (user instanceof User) {
         target = user;

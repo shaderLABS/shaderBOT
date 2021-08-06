@@ -80,11 +80,7 @@ async function createTicketComment(message: GuildMessage) {
 
     let attachment: string | undefined;
     try {
-        const messageAttachment = await cacheAttachment(message);
-        if (messageAttachment) {
-            commentEmbed.attachFiles([messageAttachment.split('|')[0]]);
-            attachment = messageAttachment;
-        }
+        attachment = await cacheAttachment(message);
     } catch (error) {
         const errorMessage = await sendError(channel, error);
         setTimeout(() => errorMessage.delete(), 7500);
@@ -93,7 +89,7 @@ async function createTicketComment(message: GuildMessage) {
     await message.delete();
 
     if (!attachment && (!content || content === '')) return;
-    const commentMessage = await channel.send(commentEmbed);
+    const commentMessage = await channel.send({ embeds: [commentEmbed], files: attachment ? [attachment.split('|')[0]] : [] });
 
     let referenceUUID: string | null = null;
     if (reference) {

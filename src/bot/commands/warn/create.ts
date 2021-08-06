@@ -44,7 +44,7 @@ export const command: Command = {
             ).rows[0].id;
 
             let content = `**User:** ${parseUser(targetUser)}\n**Severity:** ${severity}\n**Reason:** ${reason || 'No reason provided.'}\n**Moderator:** ${parseUser(member.user)}\n**ID:** ${id}`;
-            await targetUser.send(new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })).catch(() => {
+            await targetUser.send({ embeds: [new MessageEmbed({ author: { name: 'You have been warned in shaderLABS.' }, description: content, color: embedColor.blue })] }).catch(() => {
                 content += '\n\n*The target could not be DMed.*';
             });
 

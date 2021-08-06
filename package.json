@@ -21,7 +21,7 @@
         "body-parser": "^1.19.0",
         "connect-pg-simple": "^6.2.1",
         "cors": "^2.8.5",
-        "discord.js": "^12.5.3",
+        "discord.js": "^13.0.0-dev.4714a961b87746b0f85214c756614d276666f285",
         "express-session": "^1.17.2",
         "graphql": "^15.5.1",
         "helmet": "^4.6.0",

@@ -53,24 +53,22 @@ export async function sendAutoResponse(message: GuildMessage) {
 
             let channel = autoResponse.directMessage ? await message.author.createDM() : message.channel;
 
-            const responseMessage = fillVariables(message, autoResponse.message || '');
-            const responseMessageAdditions: (MessageEmbed | MessageAttachment)[] = [];
+            const responseContent = fillVariables(message, autoResponse.message || '');
+            const responseFiles: MessageAttachment[] = [];
 
             try {
-                if (autoResponse.embed) {
-                    responseMessageAdditions.push(new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed)))));
-                }
+                const responseEmbed = autoResponse.embed ? [new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed))))] : [];
 
                 if (autoResponse.attachments) {
-                    responseMessageAdditions.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
+                    responseFiles.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
                 }
 
-                const response = await channel.send(responseMessage, responseMessageAdditions).catch(async () => {
+                const response = await channel.send({ content: responseContent, embeds: responseEmbed, files: responseFiles }).catch(async () => {
                     let botChannel = message.guild.channels.cache.get(settings.botChannelID);
                     if (!botChannel || !(botChannel instanceof TextChannel)) return;
                     channel = botChannel;
 
-                    return channel.send(responseMessage, responseMessageAdditions);
+                    return channel.send({ content: responseContent, embeds: responseEmbed, files: responseFiles });
                 });
 
                 if (!response) throw new Error();

@@ -1,3 +1,4 @@
+import { Snowflake } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
@@ -49,13 +50,13 @@ export const command: Command = {
              * LIST ALL WARNINGS OF USER *
              *****************************/
 
-            let userID: string;
+            let userID: Snowflake;
             if (args.length === 0) {
                 userID = member.id;
             } else {
                 try {
                     const user = await requireUser(text);
-                    if (user.id !== member.id && !member.hasPermission('KICK_MEMBERS')) return sendError(channel, 'You do not have permission to view the warnings of other users.');
+                    if (user.id !== member.id && !member.permissions.has('KICK_MEMBERS')) return sendError(channel, 'You do not have permission to view the warnings of other users.');
                     userID = user.id;
                 } catch (error) {
                     if (error) sendError(channel, error);

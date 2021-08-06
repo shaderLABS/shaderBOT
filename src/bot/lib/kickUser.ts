@@ -1,11 +1,11 @@
-import { GuildMember, MessageEmbed } from 'discord.js';
+import { GuildMember, MessageEmbed, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
 import { formatTimeDate } from './time.js';
 
-export async function kick(user: GuildMember, modID: string | null = null, reason: string | null = null) {
+export async function kick(user: GuildMember, modID: Snowflake | null = null, reason: string | null = null) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
     if (!user.kickable) return Promise.reject('The specified user is not kickable.');
@@ -26,13 +26,15 @@ export async function kick(user: GuildMember, modID: string | null = null, reaso
 
         if (kick) {
             await user
-                .send(
-                    new MessageEmbed({
-                        author: { name: 'You have been kicked from shaderLABS.' },
-                        description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
-                        color: embedColor.blue,
-                    })
-                )
+                .send({
+                    embeds: [
+                        new MessageEmbed({
+                            author: { name: 'You have been kicked from shaderLABS.' },
+                            description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                            color: embedColor.blue,
+                        }),
+                    ],
+                })
                 .catch(() => {
                     dmed = false;
                 });
