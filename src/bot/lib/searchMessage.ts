@@ -1,4 +1,4 @@
-import { GuildMember, MessageMentions, Snowflake, TextChannel, User } from 'discord.js';
+import { GuildMember, MessageMentions, Snowflake, TextChannel, ThreadChannel, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../commandHandler.js';
 import { sendInfo } from './embeds.js';
@@ -10,7 +10,7 @@ export function isSnowflake(potentialSnowflake: Snowflake | string): potentialSn
     return !isNaN(+potentialSnowflake) && potentialSnowflake.length >= 17 && potentialSnowflake.length <= 19;
 }
 
-export async function getUser(potentialUser: Snowflake | string, confirmation?: { author: User; channel: TextChannel }): Promise<User | undefined> {
+export async function getUser(potentialUser: Snowflake | string, confirmation?: { author: User; channel: TextChannel | ThreadChannel }): Promise<User | undefined> {
     const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
     if (mention) potentialUser = mention[0].replace(/\D/g, '');
 
@@ -30,11 +30,11 @@ export async function getUser(potentialUser: Snowflake | string, confirmation?: 
     }
 }
 
-export async function requireUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel }): Promise<User> {
+export async function requireUser(potentialUser: string, confirmation?: { author: User; channel: TextChannel | ThreadChannel }): Promise<User> {
     return (await getUser(potentialUser, confirmation)) || Promise.reject('Specified user not found.');
 }
 
-export async function getMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel }): Promise<GuildMember | undefined> {
+export async function getMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel | ThreadChannel }): Promise<GuildMember | undefined> {
     const guild = getGuild();
 
     const mention = potentialMember.match(MessageMentions.USERS_PATTERN);
@@ -52,11 +52,11 @@ export async function getMember(potentialMember: string, confirmation?: { author
     }
 }
 
-export async function requireMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel }): Promise<GuildMember> {
+export async function requireMember(potentialMember: string, confirmation?: { author: User; channel: TextChannel | ThreadChannel }): Promise<GuildMember> {
     return (await getMember(potentialMember, confirmation)) || Promise.reject('Specified member not found.');
 }
 
-async function confirmUser(user: User, author: User, channel: TextChannel): Promise<void> {
+async function confirmUser(user: User, author: User, channel: TextChannel | ThreadChannel): Promise<void> {
     const confirmation = await sendInfo(channel, `Please confirm that ${parseUser(user)} is the correct user.`);
 
     await confirmation.react('✅');
@@ -64,7 +64,7 @@ async function confirmUser(user: User, author: User, channel: TextChannel): Prom
 
     try {
         const reaction = (
-            await confirmation.awaitReactions((reaction, reactor) => !!reaction.emoji.name && ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, { max: 1, idle: 300000 })
+            await confirmation.awaitReactions({ filter: (reaction, reactor) => !!reaction.emoji.name && ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, max: 1, idle: 300000 })
         ).first();
         confirmation.delete();
 

@@ -1,7 +1,7 @@
 import { Client, Collection, Intents } from 'discord.js';
 import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
-import { Command } from './commandHandler.js';
+import { Command, commandsToDebugMessage, registerCommands } from './commandHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { loadTimeouts } from './lib/punishments.js';
@@ -46,9 +46,10 @@ export async function startBot() {
     cooldowns = new Map<string, boolean>();
     settings = await settingsFile.read();
 
-    registerEvents('./src/bot/events').then(() => console.debug(`Registered Events:\n\t${events.keyArray().join('\n\t')}`));
-    registerPastas(pastaPath).then(() => console.debug(`Registered Pastas:\n\t${pastas.keyArray().join('\n\t')}`));
-    registerAutoResponses(autoResponsePath).then(() => console.debug(`Registered Automatic Responses:\n\t${autoResponses.keyArray().join('\n\t')}`));
+    registerCommands('./src/bot/commands').then(() => console.debug(`Registered Commands:\n\t${commandsToDebugMessage(commands)}`));
+    registerEvents('./src/bot/events').then(() => console.debug(`Registered Events:\n\t${[...events.keys()].join('\n\t')}`));
+    registerPastas(pastaPath).then(() => console.debug(`Registered Pastas:\n\t${[...pastas.keys()].join('\n\t')}`));
+    registerAutoResponses(autoResponsePath).then(() => console.debug(`Registered Automatic Responses:\n\t${[...autoResponses.keys()].join('\n\t')}`));
     cleanBackups();
 
     client.login(process.env.TOKEN);

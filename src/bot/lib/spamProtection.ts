@@ -1,8 +1,7 @@
-import { TextChannel } from 'discord.js';
 import { settings } from '../bot.js';
 import { GuildMessage } from '../commandHandler.js';
 import log from './log.js';
-import { parseUser } from './misc.js';
+import { isTextOrThreadChannel, parseUser } from './misc.js';
 import { mute } from './muteUser.js';
 
 type cachedMessage = {
@@ -48,7 +47,7 @@ export function checkSpam(message: GuildMessage) {
 
         for (const spam of spamMessages) {
             const spamChannel = guild.channels.cache.get(spam.channelID);
-            if (spamChannel && spamChannel instanceof TextChannel) {
+            if (spamChannel && isTextOrThreadChannel(spamChannel)) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
         }

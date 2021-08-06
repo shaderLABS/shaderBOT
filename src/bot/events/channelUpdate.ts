@@ -8,13 +8,13 @@ import { ownerOverwrites } from '../lib/project.js';
 export const event: Event = {
     name: 'channelUpdate',
     callback: async (oldChannel: Channel, newChannel: Channel) => {
-        if (!(oldChannel instanceof TextChannel) || !(newChannel instanceof TextChannel) || !oldChannel.parentID || !newChannel.parentID || settings.ticket.categoryIDs.includes(newChannel.parentID))
+        if (!(oldChannel instanceof TextChannel) || !(newChannel instanceof TextChannel) || !oldChannel.parentId || !newChannel.parentId || settings.ticket.categoryIDs.includes(newChannel.parentId))
             return;
 
         if (oldChannel.name !== newChannel.name) {
-            /**********
-             * RENAME *
-             **********/
+            /******************
+             * RENAME PROJECT *
+             ******************/
 
             const projectRole = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1;`, [newChannel.id])).rows[0];
             if (!projectRole) return;
@@ -28,7 +28,7 @@ export const event: Event = {
             }
         }
 
-        if (!oldChannel.permissionOverwrites.equals(newChannel.permissionOverwrites)) {
+        if (!oldChannel.permissionOverwrites.cache.equals(newChannel.permissionOverwrites.cache)) {
             /**********************
              * UPDATE PERMISSIONS *
              **********************/
@@ -39,11 +39,11 @@ export const event: Event = {
                 if (!ticket.channel_id) continue;
 
                 const ticketChannel = newChannel.guild.channels.cache.get(ticket.channel_id);
-                ticketChannel?.overwritePermissions(newChannel.permissionOverwrites);
+                if (ticketChannel instanceof TextChannel) ticketChannel.permissionOverwrites.set(newChannel.permissionOverwrites.cache);
             }
         }
 
-        if (!settings.archiveCategoryIDs.includes(oldChannel.parentID) && settings.archiveCategoryIDs.includes(newChannel.parentID)) {
+        if (!settings.archiveCategoryIDs.includes(oldChannel.parentId) && settings.archiveCategoryIDs.includes(newChannel.parentId)) {
             /***********
              * ARCHIVE *
              ***********/
@@ -63,7 +63,7 @@ export const event: Event = {
             } catch {
                 log(`<#${newChannel.id}> has been archived, but the notification role could not be deleted.`);
             }
-        } else if (settings.archiveCategoryIDs.includes(oldChannel.parentID) && !settings.archiveCategoryIDs.includes(newChannel.parentID)) {
+        } else if (settings.archiveCategoryIDs.includes(oldChannel.parentId) && !settings.archiveCategoryIDs.includes(newChannel.parentId)) {
             /*************
              * UNARCHIVE *
              *************/
@@ -74,7 +74,7 @@ export const event: Event = {
                 if (project) {
                     project.owners.forEach(async (ownerID: Snowflake) => {
                         const owner = await client.users.fetch(ownerID).catch(() => undefined);
-                        if (owner) newChannel.createOverwrite(owner, ownerOverwrites);
+                        if (owner) newChannel.permissionOverwrites.create(owner, ownerOverwrites);
                     });
 
                     const role = await newChannel.guild.roles.create({

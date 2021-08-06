@@ -13,7 +13,7 @@ export const event: Event = {
     callback: async (reaction: MessageReaction, user: User) => {
         // *always* safe to access, even if partial
         const channel = reaction.message.channel;
-        if (!(channel instanceof TextChannel) || user.bot || !channel.parentID || !settings.ticket.categoryIDs.includes(channel.parentID)) return;
+        if (!(channel instanceof TextChannel) || user.bot || !channel.parentId || !settings.ticket.categoryIDs.includes(channel.parentId)) return;
 
         const guild = getGuild();
         if (!guild) return;
@@ -134,7 +134,8 @@ async function edit(reaction: MessageReaction, user: User, guild: Guild, channel
 
 async function awaitResponse(channel: TextChannel, authorID: string) {
     const response = (
-        await channel.awaitMessages((msg) => msg.author.id === authorID, {
+        await channel.awaitMessages({
+            filter: (msg) => msg.author.id === authorID,
             time: 60000,
             max: 1,
         })

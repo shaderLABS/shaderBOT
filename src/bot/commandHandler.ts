@@ -1,4 +1,4 @@
-import { Collection, DMChannel, Guild, GuildMember, Message, NewsChannel, PermissionString, Snowflake, TextChannel } from 'discord.js';
+import { Collection, DMChannel, Guild, GuildMember, Message, PermissionString, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -6,13 +6,9 @@ import { commands, cooldowns, settings } from './bot.js';
 import { sendError } from './lib/embeds.js';
 
 export interface GuildMessage extends Message {
-    channel: TextChannel;
+    channel: TextChannel | ThreadChannel;
     guild: Guild;
     member: GuildMember;
-}
-
-export function isGuildMessage(message: Message): message is GuildMessage {
-    return message.channel.type === 'text' && !!message.guild && !!message.member;
 }
 
 export interface Command {
@@ -57,7 +53,7 @@ export async function registerCommands(dir: string) {
     );
 }
 
-export function syntaxError(channel: TextChannel | DMChannel | NewsChannel, syntax: string) {
+export function syntaxError(channel: TextChannel | DMChannel | ThreadChannel, syntax: string) {
     sendError(channel, `\`${settings.prefix}${syntax.trimEnd()}\``, 'Syntax Error');
 }
 
@@ -80,11 +76,7 @@ export function hasPermissions(message: GuildMessage, command: Command): boolean
 }
 
 function getSubcommandSyntax(invoke: string, subcommands: Collection<string, Command>): string {
-    const commands = subcommands
-        .keyArray()
-        .map((cmd) => JSON.parse(cmd).join('|'))
-        .join('|');
-
+    const commands = [...subcommands.keys()].map((cmd) => JSON.parse(cmd).join('|')).join('|');
     return `${invoke} <${commands}>`;
 }
 
@@ -135,7 +127,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         callback,
     } = command;
 
-    if (!ticketChannels && channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+    if (!ticketChannels && channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
         if (message.deletable) message.delete();
         return;
     }
@@ -167,8 +159,7 @@ export function runCommand(command: Command | Collection<string, Command>, messa
 }
 
 export function commandsToDebugMessage(collection: Collection<string, Command | Collection<string, Command>>): string {
-    return collection
-        .array()
+    return [...collection.values()]
         .map((value) => {
             if (value instanceof Collection) return commandsToDebugMessage(value);
 

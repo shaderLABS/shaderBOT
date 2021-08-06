@@ -1,7 +1,7 @@
-import { TextChannel } from 'discord.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
+import { isTextOrThreadChannel } from '../../lib/misc.js';
 
 const expectedArgs = '[text_channel] [limit]';
 
@@ -18,7 +18,7 @@ export const command: Command = {
 
         const mentionedChannel = message.mentions.channels.first();
         const backupChannel = mentionedChannel || channel;
-        if (!(backupChannel instanceof TextChannel)) return sendError(channel, 'You have specified an invalid channel.');
+        if (!isTextOrThreadChannel(backupChannel)) return sendError(channel, 'You have specified an invalid channel.');
 
         const limit = +(mentionedChannel ? args[1] : args[0]) || undefined;
         if (limit && limit < 1) return syntaxError(channel, 'backup create ' + expectedArgs);

@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { Collection, Message, TextChannel } from 'discord.js';
+import { Collection, Message, TextChannel, ThreadChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -56,12 +56,12 @@ export async function readBackup(name: string) {
     return decryptBackup(file.toString());
 }
 
-export async function createBackup(channel: TextChannel, backupMessages?: Collection<string, Message>) {
+export async function createBackup(channel: TextChannel | ThreadChannel, backupMessages?: Collection<string, Message>) {
     const messages = backupMessages || channel.messages.cache;
     if (!messages.size) return Promise.reject('There are no messages to create a backup of.');
     const creationTime = new Date().toUTCString();
 
-    const messageArray = messages.array();
+    const messageArray = [...messages.values()];
     if (backupMessages) messageArray.reverse();
 
     let content = messageArray.reduce((prev, curr) => {

@@ -3,10 +3,10 @@ import { URL } from 'url';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
-import { Command } from '../../commandHandler.js';
+import { Command, GuildMessage } from '../../commandHandler.js';
 import { embedColor, embedIcon, sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 import { cacheAttachment, cutDescription, deleteAttachmentFromDiscord, getCategoryChannel } from '../../lib/ticketManagement.js';
 
 export const command: Command = {
@@ -16,27 +16,30 @@ export const command: Command = {
     minArgs: 0,
     maxArgs: 0,
     cooldownDuration: 10000,
-    callback: async (message) => {
+    callback: async (message: GuildMessage) => {
         const { channel, author, guild } = message;
+        if (!ensureTextChannel(channel)) return;
 
         const project = (await db.query(/*sql*/ `SELECT issue_tracker_url FROM project WHERE channel_id = $1;`, [channel.id])).rows[0];
         if (!project) return sendError(channel, 'This text channel is not a project.');
         if (project.issue_tracker_url) {
             const issueTrackerURL = new URL(project.issue_tracker_url);
-            return channel.send(
-                new MessageEmbed({
-                    color: embedColor.blue,
-                    author: {
-                        iconURL: embedIcon.info,
-                        name: 'Issue Tracker',
-                    },
-                    description: `This project uses an external issue tracker:\n${project.issue_tracker_url}`,
-                    footer: {
-                        iconURL: 'https://api.faviconkit.com/' + issueTrackerURL.hostname,
-                        text: issueTrackerURL.hostname,
-                    },
-                })
-            );
+            return channel.send({
+                embeds: [
+                    new MessageEmbed({
+                        color: embedColor.blue,
+                        author: {
+                            iconURL: embedIcon.info,
+                            name: 'Issue Tracker',
+                        },
+                        description: `This project uses an external issue tracker:\n${project.issue_tracker_url}`,
+                        footer: {
+                            iconURL: 'https://api.faviconkit.com/' + issueTrackerURL.hostname,
+                            text: issueTrackerURL.hostname,
+                        },
+                    }),
+                ],
+            });
         }
 
         let question: Message | undefined;
@@ -78,10 +81,10 @@ export const command: Command = {
             const date = new Date();
 
             const ticketChannel = await guild.channels.create(titleAnswer.content, {
-                type: 'text',
+                type: 'GUILD_TEXT',
                 parent: await getCategoryChannel(settings.ticket.categoryIDs, guild),
                 topic: `${ticketID} | ${channel.toString()} | ${cutDescription(descriptionAnswer.content)}`,
-                permissionOverwrites: channel.permissionOverwrites,
+                permissionOverwrites: channel.permissionOverwrites.cache,
                 rateLimitPerUser: 10,
                 // position: 0, // new - old
             });
@@ -107,7 +110,6 @@ export const command: Command = {
                         value: descriptionAnswer.content || 'NO DESCRIPTION',
                     },
                 ],
-                files: attachments.map((attachment: any) => attachment.split('|')[0]),
             });
 
             const ticketMessage = {
@@ -139,7 +141,8 @@ export const command: Command = {
 
 async function awaitResponse(channel: TextChannel, authorID: string) {
     const response = (
-        await channel.awaitMessages((msg) => msg.author.id === authorID, {
+        await channel.awaitMessages({
+            filter: (msg) => msg.author.id === authorID,
             time: 60000,
             max: 1,
         })

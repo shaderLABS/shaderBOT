@@ -44,11 +44,7 @@ export const command: Command = {
             if (member) {
                 if (member.joinedAt) embed.addField('Joined At', `${formatTimeDate(member.joinedAt)}\n(${secondsToString(Math.floor((Date.now() - member.joinedAt.getTime()) / 1000))})`, true);
 
-                const roles = member.roles.cache
-                    .sort((a, b) => b.position - a.position)
-                    .keyArray()
-                    .filter((id) => id !== member.guild.roles.everyone.id);
-
+                const roles = [...member.roles.cache.sort((a, b) => b.position - a.position).keys()].filter((id) => id !== member.guild.roles.everyone.id);
                 if (roles.length !== 0) embed.addField('Roles', `<@&${roles.join('>, <@&')}>`);
             }
 

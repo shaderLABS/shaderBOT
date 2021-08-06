@@ -1,7 +1,8 @@
-import { Collection, Message, Snowflake, TextChannel } from 'discord.js';
+import { Collection, Message, Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
+import { isTextOrThreadChannel } from '../../lib/misc.js';
 import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -11,7 +12,7 @@ export const event: Event = {
         if (!firstMessage) return;
 
         const { channel, guild } = firstMessage;
-        if (!(channel instanceof TextChannel) || !channel.parentID || !settings.ticket.categoryIDs.includes(channel.parentID)) return;
+        if (!isTextOrThreadChannel(channel) || !channel.parentId || !settings.ticket.categoryIDs.includes(channel.parentId)) return;
 
         messages.forEach(async (message) => {
             const comment = (

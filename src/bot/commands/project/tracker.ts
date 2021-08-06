@@ -4,7 +4,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 
 function isValidURL(test: string) {
     let url;
@@ -29,7 +29,9 @@ export const command: Command = {
     permissionOverwrites: true,
     callback: async (message, _, text) => {
         const { channel, author } = message;
-        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This project is archived.');
+        if (!ensureTextChannel(channel)) return;
+
+        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return sendError(channel, 'This project is archived.');
 
         const project = (await db.query(/*sql*/ `SELECT id FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');

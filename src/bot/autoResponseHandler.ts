@@ -1,4 +1,4 @@
-import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions, TextChannel } from 'discord.js';
+import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions } from 'discord.js';
 import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
@@ -6,6 +6,7 @@ import { autoResponses, cooldowns, settings } from './bot.js';
 import { GuildMessage } from './commandHandler.js';
 import { sendInfo } from './lib/embeds.js';
 import log from './lib/log.js';
+import { isTextOrThreadChannel } from './lib/misc.js';
 import { JSONToAutoResponse } from './lib/pastaAutoResponse.js';
 
 export const autoResponsePath = 'customContent/autoResponses';
@@ -65,7 +66,7 @@ export async function sendAutoResponse(message: GuildMessage) {
 
                 const response = await channel.send({ content: responseContent, embeds: responseEmbed, files: responseFiles }).catch(async () => {
                     let botChannel = message.guild.channels.cache.get(settings.botChannelID);
-                    if (!botChannel || !(botChannel instanceof TextChannel)) return;
+                    if (!botChannel || !isTextOrThreadChannel(botChannel)) return;
                     channel = botChannel;
 
                     return channel.send({ content: responseContent, embeds: responseEmbed, files: responseFiles });

@@ -1,20 +1,39 @@
-import { CategoryChannel, Snowflake, TextChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Channel, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
+import { GuildMessage } from '../commandHandler.js';
+import { sendError } from './embeds.js';
 
 export function getGuild() {
     return client.guilds.cache.get(settings.guildID);
+}
+
+export function isTextOrThreadChannel(channel: Channel | TextBasedChannels): channel is TextChannel | ThreadChannel {
+    return channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_PUBLIC_THREAD' || channel.type === 'GUILD_PRIVATE_THREAD';
+}
+
+export function isGuildMessage(message: Message): message is GuildMessage {
+    return isTextOrThreadChannel(message.channel) && !!message.guild && !!message.member;
+}
+
+export function ensureTextChannel(channel: TextChannel | ThreadChannel): channel is TextChannel {
+    if (channel.type !== 'GUILD_TEXT') {
+        sendError(channel, 'This command is not usable in thread channels.');
+        return false;
+    }
+
+    return true;
 }
 
 export function getAlphabeticalChannelPosition(channel: TextChannel, parent: CategoryChannel | null) {
     if (!parent) return 0;
 
     const totalChannels = parent.children
-        .filter((channel) => channel.type === 'text')
+        .filter((channel) => channel.type === 'GUILD_TEXT')
         .set(channel.id, channel)
         .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
 
-    return totalChannels.keyArray().indexOf(channel.id);
+    return [...totalChannels.keys()].indexOf(channel.id);
 }
 
 export function parseUser(user: User | Snowflake) {

@@ -3,7 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 
 export const command: Command = {
     commands: ['delete'],
@@ -14,6 +14,7 @@ export const command: Command = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message) => {
         const { channel } = message;
+        if (!ensureTextChannel(channel)) return;
 
         await db.query(/*sql*/ `UPDATE ticket SET project_channel_id = NULL WHERE project_channel_id = $1;`, [channel.id]);
 
@@ -22,7 +23,7 @@ export const command: Command = {
 
         channel.lockPermissions();
 
-        if (!channel.parentID || !settings.archiveCategoryIDs.includes(channel.parentID)) {
+        if (!channel.parentId || !settings.archiveCategoryIDs.includes(channel.parentId)) {
             const role = await channel.guild.roles.fetch(project.role_id).catch(() => undefined);
             if (role) role.delete();
         }

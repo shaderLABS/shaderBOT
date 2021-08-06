@@ -1,11 +1,11 @@
-import { Snowflake, TextChannel, User } from 'discord.js';
+import { Snowflake, TextChannel, ThreadChannel, User } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { parseUser } from '../misc.js';
 import { requireUser } from '../searchMessage.js';
 
-export async function getWarnUUID(argument: string, author: User, channel: TextChannel): Promise<string> {
+export async function getWarnUUID(argument: string, author: User, channel: TextChannel | ThreadChannel): Promise<string> {
     if (uuid.test(argument)) {
         return argument;
     } else {

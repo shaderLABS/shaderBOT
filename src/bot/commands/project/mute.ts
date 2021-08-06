@@ -3,7 +3,7 @@ import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 import { requireUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -17,7 +17,9 @@ export const command: Command = {
     permissionOverwrites: true,
     callback: async (message, _, text) => {
         const { channel, author } = message;
-        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This project is archived.');
+        if (!ensureTextChannel(channel)) return;
+
+        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return sendError(channel, 'This project is archived.');
 
         const project = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, author.id])).rows[0];
         if (!project) return sendError(channel, 'You do not have permission to run this command.');
@@ -28,7 +30,7 @@ export const command: Command = {
 
             if (project.owners.includes(targetUser.id)) return sendError(channel, 'You can not mute a channel owner.');
 
-            channel.updateOverwrite(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
+            channel.permissionOverwrites.edit(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 
             log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
             sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`);

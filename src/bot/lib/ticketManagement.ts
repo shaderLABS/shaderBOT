@@ -79,11 +79,13 @@ export async function openTicket(text: string, member: GuildMember, moderate: bo
 export async function openTicketLib(ticket: any, guild: Guild | undefined = getGuild()) {
     if (!guild) return Promise.reject('No guild.');
 
+    const projectChannel = guild.channels.cache.get(ticket.project_channel_id);
+
     const ticketChannel = await guild.channels.create(ticket.title, {
-        type: 'text',
+        type: 'GUILD_TEXT',
         parent: settings.ticket.openCategoryID,
         topic: `${ticket.id} | ${ticket.project_channel_id ? '<#' + ticket.project_channel_id + '>' : 'DELETED PROJECT'} | ${cutDescription(ticket.description) || 'NO DESCRIPTION'}`,
-        permissionOverwrites: guild.channels.cache.get(ticket.project_channel_id)?.permissionOverwrites,
+        permissionOverwrites: projectChannel instanceof TextChannel ? projectChannel.permissionOverwrites.cache : undefined,
         rateLimitPerUser: 10,
     });
 
@@ -115,7 +117,7 @@ export async function openTicketLib(ticket: any, guild: Guild | undefined = getG
         embeds: [ticketEmbed],
         files: attachments ? [attachments.map((attachment: any) => attachment.split('|')[0])] : [],
     });
-  
+
     await db.query(
         /*sql*/ `
         UPDATE ticket
@@ -257,7 +259,6 @@ export async function deleteAttachmentFromDiscord(attachment: string, guild: Gui
     (await attachmentCache.messages.fetch(messageID)).delete();
 }
 
-
 export async function deleteTicketFromDiscord(ticket: { channel_id?: Snowflake; attachments?: string[]; closed: boolean }, guild: Guild) {
     const attachments = ticket.attachments?.filter(Boolean);
     if (attachments) attachments.forEach((attachment) => deleteAttachmentFromDiscord(attachment, guild));
@@ -307,7 +308,7 @@ export async function getCategoryChannel(categoryIDs: Snowflake[], guild: Guild)
 
     // CREATE NEW CATEGORY
     const newCategory = await guild.channels.create(`Tickets #${categoryIDs.length + 1}`, {
-        type: 'category',
+        type: 'GUILD_CATEGORY',
         position: lowestPosition + 1,
         reason: 'Create new category for tickets.',
         permissionOverwrites: [{ id: settings.muteRoleID, deny: ['SEND_MESSAGES', 'SPEAK', 'ADD_REACTIONS'] }],

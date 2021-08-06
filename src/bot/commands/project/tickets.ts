@@ -1,7 +1,7 @@
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 import { formatTimeDate } from '../../lib/time.js';
 
 export const command: Command = {
@@ -15,6 +15,7 @@ export const command: Command = {
     cooldownDuration: 15000,
     callback: async (message) => {
         const { channel } = message;
+        if (!ensureTextChannel(channel)) return;
 
         try {
             const tickets = await db.query(

@@ -1,9 +1,10 @@
-import { CategoryChannel, Channel, TextChannel } from 'discord.js';
+import { CategoryChannel, Channel } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { createBackup } from '../lib/backup.js';
 import log from '../lib/log.js';
+import { isTextOrThreadChannel } from '../lib/misc.js';
 import { update } from '../settings/settings.js';
 
 export const event: Event = {
@@ -15,8 +16,8 @@ export const event: Event = {
                 settings.ticket.categoryIDs.splice(index, 1);
                 update();
             }
-        } else if (channel instanceof TextChannel) {
-            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+        } else if (isTextOrThreadChannel(channel)) {
+            if (channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
                 await db.query(
                     /*sql*/ `
                     UPDATE ticket

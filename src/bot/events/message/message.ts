@@ -2,15 +2,16 @@ import { Message, MessageEmbed, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { sendAutoResponse } from '../../autoResponseHandler.js';
 import { commands, settings } from '../../bot.js';
-import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.js';
+import { GuildMessage, runCommand } from '../../commandHandler.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
+import { isGuildMessage } from '../../lib/misc.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
 import { checkSpam } from '../../lib/spamProtection.js';
 import { cacheAttachment } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
-    name: 'message',
+    name: 'messageCreate',
     callback: (message: Message) => {
         if (!isGuildMessage(message) || message.author.bot || checkSpam(message)) return;
 
@@ -26,7 +27,7 @@ export const event: Event = {
                 if (command) runCommand(command, message, invoke, args);
             }
         } else if (!matchBlacklist(message)) {
-            if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
+            if (channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
                 createTicketComment(message);
             } else {
                 sendAutoResponse(message);
@@ -93,7 +94,7 @@ async function createTicketComment(message: GuildMessage) {
 
     let referenceUUID: string | null = null;
     if (reference) {
-        const referencedComment = (await db.query(/*sql*/ `SELECT id FROM comment WHERE message_id = $1;`, [reference.messageID])).rows[0];
+        const referencedComment = (await db.query(/*sql*/ `SELECT id FROM comment WHERE message_id = $1;`, [reference.messageId])).rows[0];
         if (referencedComment) referenceUUID = referencedComment.id;
     }
 

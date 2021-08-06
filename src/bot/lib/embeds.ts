@@ -1,9 +1,9 @@
-import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel, User } from 'discord.js';
+import { DMChannel, Message, MessageEmbed, TextChannel, ThreadChannel, User } from 'discord.js';
 
 export const embedColor = {
-    green: '#4caf50',
-    red: '#f44336',
-    blue: '#2196f3',
+    green: 0x4caf50,
+    red: 0xf44336,
+    blue: 0x2196f3,
 };
 
 export const embedIcon = {
@@ -14,7 +14,7 @@ export const embedIcon = {
     note: 'https://img.icons8.com/color/48/000000/note.png',
 };
 
-export function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
+export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Success', embedIcon.success)
         .setDescription(description)
@@ -22,7 +22,7 @@ export function sendSuccess(channel: TextChannel | DMChannel | NewsChannel, desc
     return channel.send({ embeds: [embed] });
 }
 
-export function sendError(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string) {
+export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Error', embedIcon.error)
         .setDescription(description)
@@ -30,7 +30,7 @@ export function sendError(channel: TextChannel | DMChannel | NewsChannel, descri
     return channel.send({ embeds: [embed] });
 }
 
-export function sendInfo(channel: TextChannel | DMChannel | NewsChannel, description: string, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? embedIcon.info : undefined)
         .setDescription(description)
@@ -44,7 +44,11 @@ export async function embedPages(message: Message, author: User, pages: string[]
     if (!embed || pages.length <= 1) return;
 
     message.react('➡️');
-    const collector = message.createReactionCollector((reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 300000, time: 600000 });
+    const collector = message.createReactionCollector({
+        filter: (reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id,
+        idle: 300000,
+        time: 600000,
+    });
 
     let index = 0;
     collector.on('collect', async (reaction) => {
@@ -70,7 +74,11 @@ export async function embedFields(message: Message, author: User, fields: { name
     if (!embed || fields.length <= 1) return;
 
     message.react('➡️');
-    const collector = message.createReactionCollector((reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id, { idle: 300000, time: 600000 });
+    const collector = message.createReactionCollector({
+        filter: (reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id,
+        idle: 300000,
+        time: 600000,
+    });
 
     let index = 0;
     collector.on('collect', async (reaction) => {

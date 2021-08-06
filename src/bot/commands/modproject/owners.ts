@@ -4,7 +4,7 @@ import { settings } from '../../bot.js';
 import { Command, syntaxError } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 import { ownerOverwrites } from '../../lib/project.js';
 import { getMember } from '../../lib/searchMessage.js';
 
@@ -20,7 +20,9 @@ export const command: Command = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (message, args) => {
         const { channel } = message;
-        if (channel.parentID && settings.archiveCategoryIDs.includes(channel.parentID)) return sendError(channel, 'This project is archived.');
+        if (!ensureTextChannel(channel)) return;
+
+        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return sendError(channel, 'This project is archived.');
 
         let owners: Set<GuildMember> = new Set();
 
@@ -44,10 +46,10 @@ export const command: Command = {
 
         if (project.rowCount === 0) return sendError(channel, 'This channel is not linked to a project.');
         const oldOwners: string[] = project.rows[0].old_owners;
-        channel.overwritePermissions(channel.permissionOverwrites.filter((overwrite) => overwrite.type !== 'member' || !oldOwners.includes(overwrite.id)));
+        channel.permissionOverwrites.set(channel.permissionOverwrites.cache.filter((overwrite) => overwrite.type !== 'member' || !oldOwners.includes(overwrite.id)));
 
         for (const owner of owners) {
-            channel.createOverwrite(owner, ownerOverwrites);
+            channel.permissionOverwrites.create(owner, ownerOverwrites);
         }
 
         sendSuccess(channel, `Updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')}.`);

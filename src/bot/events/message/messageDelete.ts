@@ -12,8 +12,8 @@ export const event: Event = {
         const { channel } = message;
         if (
             !(channel instanceof TextChannel) ||
-            !channel.parentID ||
-            !settings.ticket.categoryIDs.includes(channel.parentID) ||
+            !channel.parentId ||
+            !settings.ticket.categoryIDs.includes(channel.parentId) ||
             (!message.partial && (!message.author.bot || message.embeds.length === 0))
         )
             return;
