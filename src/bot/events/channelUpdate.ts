@@ -26,7 +26,24 @@ export const event: Event = {
             } catch {
                 log(`The name of <#${newChannel.id}> has been updated, but the role could not be renamed.`);
             }
-        } else if (!settings.archiveCategoryIDs.includes(oldChannel.parentID) && settings.archiveCategoryIDs.includes(newChannel.parentID)) {
+        }
+
+        if (!oldChannel.permissionOverwrites.equals(newChannel.permissionOverwrites)) {
+            /**********************
+             * UPDATE PERMISSIONS *
+             **********************/
+
+            const tickets = await db.query(/*sql*/ `SELECT channel_id::TEXT FROM ticket WHERE closed = false AND project_channel_id = $1;`, [newChannel.id]);
+
+            for (const ticket of tickets.rows) {
+                if (!ticket.channel_id) continue;
+
+                const ticketChannel = newChannel.guild.channels.cache.get(ticket.channel_id);
+                ticketChannel?.overwritePermissions(newChannel.permissionOverwrites);
+            }
+        }
+
+        if (!settings.archiveCategoryIDs.includes(oldChannel.parentID) && settings.archiveCategoryIDs.includes(newChannel.parentID)) {
             /***********
              * ARCHIVE *
              ***********/

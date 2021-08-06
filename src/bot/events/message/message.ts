@@ -6,12 +6,13 @@ import { GuildMessage, isGuildMessage, runCommand } from '../../commandHandler.j
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
+import { checkSpam } from '../../lib/spamProtection.js';
 import { cacheAttachment } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
     name: 'message',
     callback: (message: Message) => {
-        if (!isGuildMessage(message) || message.author.bot) return;
+        if (!isGuildMessage(message) || message.author.bot || checkSpam(message)) return;
 
         const { content, channel } = message;
         if (mediaOnly(message)) return;

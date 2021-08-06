@@ -1,9 +1,9 @@
 import { DMChannel, Message, MessageEmbed, NewsChannel, TextChannel, User } from 'discord.js';
 
 export const embedColor = {
-    green: '#00ff11',
-    red: '#ff1100',
-    blue: '#006fff',
+    green: '#4caf50',
+    red: '#f44336',
+    blue: '#2196f3',
 };
 
 export const embedIcon = {

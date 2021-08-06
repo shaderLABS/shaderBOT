@@ -10,8 +10,6 @@ export interface Settings {
     };
     ticket: {
         categoryIDs: Snowflake[];
-        managementChannelID: Snowflake;
-        subscriptionChannelID: Snowflake;
         attachmentCacheChannelID: Snowflake;
         openCategoryID: Snowflake;
     };
@@ -33,6 +31,13 @@ export interface Settings {
     blacklist: {
         strings: string[];
         muteDuration: number;
+    };
+    spamProtection: {
+        cacheLength: number;
+        characterThreshold: number;
+        muteDuration: number;
+        messageThreshold: number;
+        timeThreshold: number;
     };
 }
 

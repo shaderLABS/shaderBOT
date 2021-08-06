@@ -40,7 +40,6 @@ export async function startWebserver() {
             authChecker,
         }),
         context: ({ req, res }) => ({ req, res }),
-        playground: false, // use postman/insomnia instead
     });
 
     const corsConfig = {
@@ -50,7 +49,6 @@ export async function startWebserver() {
 
     app.use(cors(corsConfig));
     app.use(
-        // @ts-ignore
         helmet({
             contentSecurityPolicy: {
                 directives: {
@@ -64,7 +62,6 @@ export async function startWebserver() {
             },
         })
     );
-    // @ts-ignore
     app.use(bodyParser.json());
     // app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -115,7 +112,6 @@ export async function startWebserver() {
         const ENTRYPOINT = path.join(DIST_PATH, '__app.html');
         const APP = path.join(DIST_PATH, 'build', 'main.js');
 
-        // @ts-ignore
         app.use(serveStatic(DIST_PATH));
 
         app.get('*', async (req, res) => {
@@ -133,6 +129,5 @@ export async function startWebserver() {
 }
 
 export function stopWebserver() {
-    // @ts-ignore
     app.server?.close(() => console.log('Stopped web server.'));
 }

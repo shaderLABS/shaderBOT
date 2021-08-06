@@ -4,7 +4,6 @@ import { settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { createBackup } from '../lib/backup.js';
 import log from '../lib/log.js';
-import { getGuild } from '../lib/misc.js';
 import { update } from '../settings/settings.js';
 
 export const event: Event = {
@@ -18,26 +17,13 @@ export const event: Event = {
             }
         } else if (channel instanceof TextChannel) {
             if (channel.parentID && settings.ticket.categoryIDs.includes(channel.parentID)) {
-                const ticket = (
-                    await db.query(
-                        /*sql*/ `
-                        UPDATE ticket
-                        SET closed = TRUE
-                        WHERE channel_id = $1 AND closed = FALSE
-                        RETURNING subscription_message_id`,
-                        [channel.id]
-                    )
-                ).rows[0];
-                if (!ticket) return;
-
-                if (ticket.subscription_message_id) {
-                    const guild = getGuild();
-                    if (!guild) return;
-                    const subscriptionChannel = guild.channels.cache.get(settings.ticket.subscriptionChannelID);
-                    if (!(subscriptionChannel instanceof TextChannel)) return;
-
-                    (await subscriptionChannel.messages.fetch(ticket.subscription_message_id)).delete();
-                }
+                await db.query(
+                    /*sql*/ `
+                    UPDATE ticket
+                    SET closed = TRUE
+                    WHERE channel_id = $1 AND closed = FALSE;`,
+                    [channel.id]
+                );
 
                 return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
             } else {

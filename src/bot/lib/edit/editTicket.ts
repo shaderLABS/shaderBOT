@@ -27,7 +27,7 @@ export async function editComment(comment: any, message: Message, newContent: st
     log(`${parseUser(user)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${newContent}`);
 }
 
-export async function editTicketTitle(ticket: any, newTitle: string, user: User, guild: Guild, originalMessage: Message, subscriptionMessage?: Message) {
+export async function editTicketTitle(ticket: any, newTitle: string, user: User, guild: Guild, originalMessage: Message) {
     // VALIDATION
     if (newTitle.length > 32 || newTitle.length < 2) return Promise.reject('The title must be between 2 and 32 characters long.');
     if ((await db.query(/*sql*/ `SELECT 1 FROM ticket WHERE title = $1`, [newTitle])).rows[0]) return Promise.reject('A ticket with this name already exists.');
@@ -55,10 +55,9 @@ export async function editTicketTitle(ticket: any, newTitle: string, user: User,
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
     originalMessage.edit({ embeds: [embed] });
-    if (subscriptionMessage) subscriptionMessage.edit({ embeds: [embed] });
 }
 
-export async function editTicketDescription(ticket: any, newDescription: string, user: User, guild: Guild, originalMessage: Message, subscriptionMessage?: Message) {
+export async function editTicketDescription(ticket: any, newDescription: string, user: User, guild: Guild, originalMessage: Message) {
     // VALIDATION
     if (newDescription.length > 1024) return Promise.reject('The description may not be longer than 1024 characters.');
     if ((!originalMessage.attachments || originalMessage.attachments.size === 0) && !newDescription) return Promise.reject('The description may not be empty.');
@@ -89,5 +88,4 @@ export async function editTicketDescription(ticket: any, newDescription: string,
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
     originalMessage.edit({ embeds: [embed] });
-    if (subscriptionMessage) subscriptionMessage.edit({ embeds: [embed] });
 }

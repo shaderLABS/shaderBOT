@@ -31,12 +31,10 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     },
     "ticket": {
         "categoryIDs": [""], // categories which will be filled with open tickets
-        "managementChannelID": "", // channel used for managing tickets and notifications
-        "subscriptionChannelID": "", // read-only channel in which all open tickets will be listed
         "attachmentCacheChannelID": "", // private channel in which attachments will be cached
         "openCategoryID": "" // private/muted category in which tickets will be opened
     },
-    "botChannelID": "", // channel to send auto responses in if the DM failed
+    "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "muteRoleID": "",
     "guildID": "",
@@ -53,7 +51,14 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     },
     "blacklist": {
         "strings": [""], // any message containing these links will be deleted and the author will be muted
-        "muteDuration": 900 // duration of the mute in seconds, as explained above
+        "muteDuration": 900 // duration of the mute in seconds
+    },
+    "spamProtection": {
+        "cacheLength": 0, // length of the spam protection cache
+        "characterThreshold": 0, // minimum characters after which messages will be checked for spam
+        "muteDuration": 0, // duration of the mute in seconds
+        "messageThreshold": 0, // number of identical messages after which the mute protection will be triggered
+        "timeThreshold": 0 // maximum delay between identical messages in seconds (after which they won't be counted)
     }
 }
 ```

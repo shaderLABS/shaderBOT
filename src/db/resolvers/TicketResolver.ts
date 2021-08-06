@@ -124,7 +124,7 @@ export class TicketResolver {
             WHERE ticket.id = $1
                 AND ticket.closed = FALSE
                 ${bypassAuthor ? '' : 'AND ($2::NUMERIC = ANY (project.owners) OR ticket.author_id = $2)'}
-            RETURNING ticket.subscription_message_id, ticket.channel_id, ticket.title, ticket.author_id, ticket.id, ticket.closed;`,
+            RETURNING ticket.channel_id, ticket.title, ticket.author_id, ticket.id, ticket.closed;`,
             bypassAuthor ? [id] : [id, ctx.req.user.id]
         );
 
