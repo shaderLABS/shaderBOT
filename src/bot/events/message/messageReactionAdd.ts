@@ -6,6 +6,7 @@ import { editComment, editTicketDescription, editTicketTitle } from '../../lib/e
 import { sendError, sendInfo } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { getGuild, parseUser } from '../../lib/misc.js';
+import { isProjectOwner } from '../../lib/project.js';
 import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
 export const event: Event = {
@@ -13,7 +14,7 @@ export const event: Event = {
     callback: async (reaction: MessageReaction, user: User) => {
         // *always* safe to access, even if partial
         const channel = reaction.message.channel;
-        if (!(channel instanceof TextChannel) || user.bot || !channel.parentId || !settings.ticket.categoryIDs.includes(channel.parentId)) return;
+        if (!(channel instanceof TextChannel) || user.bot || !channel.parentId) return;
 
         const guild = getGuild();
         if (!guild) return;
@@ -21,8 +22,27 @@ export const event: Event = {
         const member = await guild.members.fetch(user).catch(() => undefined);
         if (!member) return;
 
-        if (reaction.emoji.name === '✏️') edit(reaction, user, guild, channel);
-        else if (reaction.emoji.name === '❌') deleteComment(reaction, member, channel);
+        if (settings.ticket.categoryIDs.includes(channel.parentId)) {
+            // TICKET CHANNEL
+
+            if (reaction.emoji.name === '✏️') edit(reaction, user, guild, channel);
+            else if (reaction.emoji.name === '❌') deleteComment(reaction, member, channel);
+        } else if (!settings.archiveCategoryIDs.includes(channel.parentId) && (await isProjectOwner(member.id, channel.id))) {
+            // PROJECT CHANNEL
+
+            if (reaction.emoji.name === '📌') {
+                try {
+                    const reactionMessage = await reaction.message.fetch();
+
+                    if (reactionMessage.pinned) await reactionMessage.unpin();
+                    else await reactionMessage.pin();
+
+                    await reaction.users.remove(user);
+                } catch {
+                    sendError(channel, 'Failed to (un)pin message.');
+                }
+            }
+        }
     },
 };
 
