@@ -1,9 +1,9 @@
-import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { ensureTextChannel, parseUser } from '../../lib/misc.js';
+import { isProjectOwner } from '../../lib/project.js';
 import { requireUser } from '../../lib/searchMessage.js';
 
 export const command: Command = {
@@ -20,9 +20,7 @@ export const command: Command = {
         if (!ensureTextChannel(channel)) return;
 
         if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return sendError(channel, 'This project is archived.');
-
-        const project = (await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, author.id])).rows[0];
-        if (!project) return sendError(channel, 'You do not have permission to run this command.');
+        if (!(await isProjectOwner(author.id, channel.id))) return sendError(channel, 'You do not have permission to run this command.');
 
         try {
             const targetUser = await requireUser(text, { author, channel });

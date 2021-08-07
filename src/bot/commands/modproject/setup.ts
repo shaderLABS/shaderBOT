@@ -5,7 +5,7 @@ import { Command, syntaxError } from '../../commandHandler.js';
 import { embedColor, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { ensureTextChannel, parseUser } from '../../lib/misc.js';
-import { ownerOverwrites } from '../../lib/project.js';
+import { isProject, ownerOverwrites } from '../../lib/project.js';
 import { getMember } from '../../lib/searchMessage.js';
 
 const expectedArgs = '<@user|userID|username> [...]';
@@ -23,7 +23,7 @@ export const command: Command = {
         if (!ensureTextChannel(channel)) return;
 
         if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return sendError(channel, 'This channel is archived.');
-        if ((await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channel.id])).rows[0]) return sendError(channel, 'This channel is already linked to a project.');
+        if (await isProject(channel.id)) return sendError(channel, 'This channel is already linked to a project.');
 
         let owners: Set<GuildMember> = new Set();
 
