@@ -18,7 +18,7 @@ export const command: Command = {
         if (isNaN(count) || count < 0 || count > 100) return sendError(channel, 'Please use a number between 0 and 100 as the first argument.');
 
         await message.delete();
-        const { size } = await channel.bulkDelete(count);
-        log(`${parseUser(message.author)} deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`);
+        const { size } = await channel.bulkDelete(count, true);
+        log(`${parseUser(message.author)} deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`, 'Purge Messages');
     },
 };
