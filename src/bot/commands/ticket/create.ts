@@ -127,7 +127,7 @@ export const command: Command = {
                 [ticketID, titleAnswer.content, channel.id, descriptionAnswer.content, attachments, author.id, date, ticketChannel.id]
             );
 
-            log(`${parseUser(message.author)} created a ticket ("${titleAnswer.content}").`);
+            log(`${parseUser(message.author)} created a ticket ("${titleAnswer.content}").`, 'Create Ticket');
         } catch (error) {
             if (question) question.delete();
             attachments.forEach((attachment) => {

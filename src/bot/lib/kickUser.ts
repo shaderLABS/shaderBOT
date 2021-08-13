@@ -41,7 +41,7 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
         }
     } catch (error) {
         console.error(error);
-        log(`Failed to kick ${parseUser(user.user)}: an error occurred while accessing the database.`);
+        log(`Failed to kick ${parseUser(user.user)}: an error occurred while accessing the database.`, 'Kick');
         return Promise.reject('Error while accessing the database.');
     }
 

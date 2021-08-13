@@ -25,7 +25,8 @@ export const event: Event = {
             return log(
                 `Someone banned ${parseUser(user)}, but the moderator could not be retrieved. Please check the audit logs, ban ${parseUser(
                     user.id
-                )} again using the command and refrain from banning people using other bots or the Discord feature!`
+                )} again using the command and refrain from banning people using other bots or the Discord feature!`,
+                'Ban'
             );
 
         const { createdAt, executor, reason } = auditLog;
@@ -71,7 +72,7 @@ export const event: Event = {
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to create ban entry for ${parseUser(user)}.`);
+            log(`Failed to create ban entry for ${parseUser(user)}.`, 'Ban');
         }
     },
 };

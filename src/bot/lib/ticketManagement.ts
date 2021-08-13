@@ -254,7 +254,7 @@ export async function deleteAttachmentFromDiscord(attachment: string, guild: Gui
     const messageID = attachment.split('|')[1];
 
     const attachmentCache = guild.channels.cache.get(settings.ticket.attachmentCacheChannelID);
-    if (!attachmentCache || !(attachmentCache instanceof TextChannel) || !isSnowflake(messageID)) return log('Failed to delete comment attachment `' + attachment + '`!');
+    if (!attachmentCache || !(attachmentCache instanceof TextChannel) || !isSnowflake(messageID)) return log('Failed to delete comment attachment `' + attachment + '`!', 'Delete Attachment');
 
     (await attachmentCache.messages.fetch(messageID)).delete();
 }

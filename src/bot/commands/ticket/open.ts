@@ -23,8 +23,8 @@ export const command: Command = {
             const { title } = await openTicket(text, member);
             await loadingEmbed.delete();
 
-            sendSuccess(channel, 'Ticket opened.');
-            log(`${parseUser(message.author)} opened the ticket "${title}".`);
+            sendSuccess(channel, 'Ticket opened.', 'Open Ticket');
+            log(`${parseUser(message.author)} opened the ticket "${title}".`, 'Open Ticket');
         } catch (error) {
             await loadingEmbed.delete();
             if (error) sendError(channel, error);

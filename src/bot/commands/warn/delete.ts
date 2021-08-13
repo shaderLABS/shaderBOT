@@ -96,7 +96,7 @@ export const command: Command = {
             warning.mod_id
         )}\n**ID:** ${warning.id}`;
 
-        sendSuccess(channel, content, 'Deleted Warning');
-        log(`**Deleted By:** ${member.id}\n${content}`, 'Deleted Warning');
+        sendSuccess(channel, content, 'Delete Warning');
+        log(`**Deleted By:** ${member.id}\n${content}`, 'Delete Warning');
     },
 };

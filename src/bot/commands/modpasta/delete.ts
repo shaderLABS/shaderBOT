@@ -23,8 +23,8 @@ export const command: Command = {
             if (!pastas.delete(text)) return sendError(channel, 'The specified pasta does not exist.');
             await fs.rm(path.join(pastaPath, stringToFileName(text)));
 
-            sendSuccess(channel, `Successfully deleted the pasta \`${text}\`.`);
-            log(`${parseUser(message.author)} deleted the pasta \`${text}\`.`);
+            sendSuccess(channel, `Successfully deleted the pasta \`${text}\`.`, 'Delete Pasta');
+            log(`${parseUser(message.author)} deleted the pasta \`${text}\`.`, 'Delete Pasta');
         } catch {
             sendError(channel, `Failed to delete pasta \`${text}\` from the file system.`);
         }

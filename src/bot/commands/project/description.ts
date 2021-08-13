@@ -24,8 +24,11 @@ export const command: Command = {
 
         if (text.length > 1024) return sendError(channel, 'Channel descriptions must be less than 32 characters long.');
 
-        log(`${parseUser(author)} edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`);
+        log(
+            `${parseUser(author)} edited the description of their project (<#${channel.id}>) from:\n\n${channel.topic || 'No description.'}\n\nto:\n\n${text || 'No description.'}`,
+            'Edit Project Description'
+        );
         channel.edit({ topic: text });
-        sendSuccess(channel, 'Successfully edited the description of this channel.');
+        sendSuccess(channel, 'Successfully edited the description of this channel.', 'Edit Project Description');
     },
 };

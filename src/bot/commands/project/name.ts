@@ -33,7 +33,7 @@ export const command: Command = {
             return sendError(channel, 'Failed to edit the name of this channel.');
         }
 
-        log(`${parseUser(author)} edited the name of their project (<#${channel.id}>) from:\n\n${oldName}\n\nto:\n\n${channel.name}`);
-        sendSuccess(channel, 'Successfully edited the name of this channel.');
+        log(`${parseUser(author)} edited the name of their project (<#${channel.id}>) from:\n\n${oldName}\n\nto:\n\n${channel.name}`, 'Edit Project Name');
+        sendSuccess(channel, 'Successfully edited the name of this channel.', 'Edit Project Name');
     },
 };

@@ -12,7 +12,7 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
-        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: mute role not found.`);
+        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: mute role not found.`, 'Mute');
         return Promise.reject('Mute role not found.');
     }
 
@@ -74,11 +74,12 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
         log(
             `${modID ? parseUser(modID) : 'System'} muted ${parseUser(userID)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                 overwrittenPunishment ? `\n\n${parseUser(userID)}'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
-            }${dmed ? '' : '\n\n*The target could not be DMed.*'}`
+            }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
+            'Mute'
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: an error occurred while accessing the database.`);
+        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: an error occurred while accessing the database.`, 'Mute');
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -91,7 +92,7 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
                 (await getGuild()
                     ?.members.fetch(member.id)
                     .catch(() => undefined));
-            unmute(userID, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(userID)}: ${e}`));
+            unmute(userID, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(userID)}: ${e}`, 'Unmute'));
         }, duration * 1000);
 
         const previousTimeout = store.mutes.get(userID);
@@ -108,7 +109,7 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
     if (!role) {
-        log(`Failed to unmute ${parseUser(userID)}: mute role not found.`);
+        log(`Failed to unmute ${parseUser(userID)}: mute role not found.`, 'Unmute');
         return Promise.reject('Mute role not found.');
     }
 
@@ -129,7 +130,7 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
         if (deleted === 0) return Promise.reject(`The user ${parseUser(userID)} is not muted.`);
     } catch (error) {
         console.error(error);
-        log(`Failed to unmute ${parseUser(userID)}: an error occurred while accessing the database.`);
+        log(`Failed to unmute ${parseUser(userID)}: an error occurred while accessing the database.`, 'Unmute');
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -141,7 +142,7 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
         store.mutes.delete(userID);
     }
 
-    log(`${modID ? parseUser(modID) : 'System'} unmuted ${parseUser(userID)}.`);
+    log(`${modID ? parseUser(modID) : 'System'} unmuted ${parseUser(userID)}.`, 'Unmute');
 }
 
 export async function checkMuteEvasion(member: GuildMember) {
@@ -181,7 +182,7 @@ export async function checkMuteEvasion(member: GuildMember) {
         if (previousTimeout) clearTimeout(previousTimeout);
 
         store.mutes.set(member.id, timeout);
-        log(`${parseUser(member.user)} possibly tried to evade their mute (${mute.id}).`);
+        log(`${parseUser(member.user)} possibly tried to evade their mute (${mute.id}).`, 'Mute Evasion');
     }
 }
 

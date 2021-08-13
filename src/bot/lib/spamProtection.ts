@@ -37,7 +37,7 @@ export function checkSpam(message: GuildMessage) {
     const isSpam = potentialSpam.length >= settings.spamProtection.messageThreshold - 1;
     if (isSpam) {
         mute(message.author.id, settings.spamProtection.muteDuration, null, 'Spamming messages in multiple channels.', message.member).catch((e) =>
-            log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`)
+            log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute')
         );
 
         const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as cachedMessage[];

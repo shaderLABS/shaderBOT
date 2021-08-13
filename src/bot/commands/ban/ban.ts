@@ -30,7 +30,7 @@ export const command: Command = {
             }
 
             const { dmed } = await ban(targetUser, member.id, reason, deleteMessages);
-            sendSuccess(channel, `${parseUser(targetUser)} has been banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`);
+            sendSuccess(channel, `${parseUser(targetUser)} has been banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Ban');
         } catch (error) {
             if (error) sendError(channel, error);
         }

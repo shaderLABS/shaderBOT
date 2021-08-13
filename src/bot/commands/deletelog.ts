@@ -49,8 +49,8 @@ export const command: Command = {
             if (deletedEntry.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(deletedEntry.lifted_mod_id)}`;
             if (deletedEntry.edited_timestamp) content += `\n*(last edited by ${parseUser(deletedEntry.edited_mod_id)} at ${formatTimeDate(new Date(deletedEntry.edited_timestamp))})*`;
 
-            sendSuccess(channel, `Successfully deleted the past punishment entry \`${id}\`.`);
-            log(`${parseUser(message.author)} deleted a past punishment entry:\n\n${content}`);
+            sendSuccess(channel, `Successfully deleted the past punishment entry \`${id}\`.`, 'Delete Log Entry');
+            log(`${parseUser(message.author)} deleted a past punishment entry:\n\n${content}`, 'Delete Log Entry');
         } catch (error) {
             if (error) sendError(channel, error);
         }

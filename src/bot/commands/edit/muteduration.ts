@@ -30,7 +30,8 @@ export const command: Command = {
                 const { user_id, expire_timestamp } = await editMuteDuration(args[0], time, author.id);
                 sendSuccess(
                     channel,
-                    `Successfully edited the duration of ${parseUser(user_id)}'s mute (${args[0]}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`
+                    `Successfully edited the duration of ${parseUser(user_id)}'s mute (${args[0]}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`,
+                    'Edit Mute Duration'
                 );
             } else {
                 const user = await requireUser(args[0], { author, channel });
@@ -43,7 +44,8 @@ export const command: Command = {
                     channel,
                     `Successfully edited the duration of ${parseUser(user)}'s mute (${latestMuteID.id}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(
                         new Date(expire_timestamp)
-                    )}.`
+                    )}.`,
+                    'Edit Mute Duration'
                 );
             }
         } catch (error) {

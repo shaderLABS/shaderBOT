@@ -52,7 +52,7 @@ export const command: Command = {
             channel.permissionOverwrites.create(owner, ownerOverwrites);
         }
 
-        sendSuccess(channel, `Updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')}.`);
-        log(`${parseUser(message.author)} updated the channel owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')} in <#${channel.id}>.`);
+        sendSuccess(channel, `Updated the project owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')}.`, 'Update Project Owners');
+        log(`${parseUser(message.author)} updated the project owners from <@${oldOwners.join('>, <@')}> to ${[...owners].join(', ')} in <#${channel.id}>.`, 'Update Project Owners');
     },
 };

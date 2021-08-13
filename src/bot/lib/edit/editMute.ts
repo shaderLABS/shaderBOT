@@ -23,7 +23,7 @@ export async function editMuteReason(uuid: string, reason: string, modID: Snowfl
 
     if (!result) return Promise.reject('There is no mute with the specified UUID.');
 
-    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s mute (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s mute (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`, 'Edit Mute Reason');
     return result;
 }
 
@@ -71,7 +71,8 @@ export async function editMuteDuration(uuid: string, time: number, modID: Snowfl
     log(
         `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
             new Date(result.expire_timestamp)
-        )}.`
+        )}.`,
+        'Edit Mute Duration'
     );
     return result;
 }

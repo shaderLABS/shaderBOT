@@ -39,7 +39,7 @@ export class CommentResolver {
             }
         }
 
-        log(`${parseUser(ctx.req.user.id)} deleted a ticket comment by ${parseUser(deleted.rows[0].author_id)}:\n\n${deleted.rows[0].content}`);
+        log(`${parseUser(ctx.req.user.id)} deleted a ticket comment by ${parseUser(deleted.rows[0].author_id)}:\n\n${deleted.rows[0].content}`, 'Delete Ticket Comment');
 
         return deleted.rows[0];
     }
@@ -139,7 +139,7 @@ export class CommentResolver {
             [content, editedAt, comment_id]
         );
 
-        log(`${parseUser(user.id)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${content}`);
+        log(`${parseUser(user.id)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${content}`, 'Edit Ticket Comment');
         return true;
     }
 }

@@ -10,7 +10,7 @@ export const command: Command = {
     maxArgs: 0,
     requiredPermissions: ['BAN_MEMBERS'],
     callback: async (message) => {
-        await log(`The bot has been restarted by ${parseUser(message.author)}.`);
+        await log(`The bot has been restarted by ${parseUser(message.author)}.`, 'Restart');
         shutdown();
     },
 };

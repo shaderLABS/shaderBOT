@@ -40,13 +40,13 @@ export const command: Command = {
         channel.send({
             embeds: [
                 new MessageEmbed()
-                    .setAuthor('Deleted Note', embedIcon.note)
+                    .setAuthor('Delete Note', embedIcon.note)
                     .setColor('#ffc107')
                     .setDescription(messageContent.join(''))
                     .setFooter('ID: ' + args[0]),
             ],
         });
 
-        log(messageContent.join(`\n**ID:** ${args[0]}`), 'Deleted Note');
+        log(messageContent.join(`\n**ID:** ${args[0]}`), 'Delete Note');
     },
 };

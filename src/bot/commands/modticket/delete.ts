@@ -18,8 +18,8 @@ export const command: Command = {
         try {
             const ticket = await deleteTicket(message.mentions.channels.first()?.id || text, guild);
 
-            sendSuccess(channel, 'Ticket deleted.');
-            log(`${parseUser(message.author)} deleted the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`);
+            sendSuccess(channel, 'Ticket deleted.', 'Delete Ticket');
+            log(`${parseUser(message.author)} deleted the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`, 'Delete Ticket');
         } catch (error) {
             if (error) sendError(channel, error);
         }

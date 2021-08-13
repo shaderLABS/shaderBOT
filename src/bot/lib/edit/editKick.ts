@@ -18,6 +18,6 @@ export async function editKick(uuid: string, reason: string, modID: Snowflake) {
 
     if (!result) return Promise.reject('There is no kick with the specified UUID.');
 
-    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s kick (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s kick (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`, 'Edit Kick Reason');
     return result;
 }

@@ -39,7 +39,7 @@ export async function loadTimeouts(includeTomorrow: boolean) {
 
         if (punishment.type === 'ban') {
             const timeout = setTimeout(() => {
-                unban(punishment.user_id).catch((e) => log(`Failed to unban ${parseUser(punishment.user_id)}: ${e}`));
+                unban(punishment.user_id).catch((e) => log(`Failed to unban ${parseUser(punishment.user_id)}: ${e}`, 'Unban'));
             }, ms);
 
             const previousTimeout = store.tempbans.get(punishment.user_id);
@@ -52,7 +52,7 @@ export async function loadTimeouts(includeTomorrow: boolean) {
                     ?.members.fetch(punishment.user_id)
                     .catch(() => undefined);
 
-                unmute(punishment.user_id, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(punishment.user_id)}: ${e}`));
+                unmute(punishment.user_id, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(punishment.user_id)}: ${e}`, 'Unmute'));
             }, ms);
 
             const previousTimeout = store.mutes.get(punishment.user_id);

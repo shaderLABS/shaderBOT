@@ -18,6 +18,6 @@ export async function editNote(uuid: string, content: string, modID: Snowflake) 
 
     if (!result) return Promise.reject('There is no note with the specified UUID.');
 
-    log(`${parseUser(modID)} edited the content of ${parseUser(result.user_id)}'s note (${uuid}) from:\n\n${result.old_content}\n\nto:\n\n${content}`);
+    log(`${parseUser(modID)} edited the content of ${parseUser(result.user_id)}'s note (${uuid}) from:\n\n${result.old_content}\n\nto:\n\n${content}`, 'Edit Note');
     return result;
 }

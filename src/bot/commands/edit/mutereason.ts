@@ -26,7 +26,7 @@ export const command: Command = {
             if (uuid.test(args[0])) {
                 const past_table = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [args[0]])).rows[0];
                 const { user_id } = await editMuteReason(args[0], content, author.id, past_table);
-                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s mute (${args[0]}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s mute (${args[0]}).`, 'Edit Mute Reason');
             } else {
                 const user = await requireUser(args[0], { author, channel });
 
@@ -45,7 +45,7 @@ export const command: Command = {
                 if (!latestMuteID) return sendError(channel, 'The specified user does not have any mutes.');
 
                 await editMuteReason(latestMuteID.id, content, author.id, latestMuteID.db === 'pp');
-                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s mute (${latestMuteID.id}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s mute (${latestMuteID.id}).`, 'Edit Mute Reason');
             }
         } catch (error) {
             if (error) sendError(channel, error);

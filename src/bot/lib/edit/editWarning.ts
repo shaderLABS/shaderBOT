@@ -33,7 +33,7 @@ export async function editWarnReason(reason: string, id: string, modID: Snowflak
 
     if (!warning) return Promise.reject('There is no warning with the specified UUID.');
 
-    log(`${parseUser(modID)} edited the reason of ${parseUser(warning.user_id)}'s warning (${id}) from:\n\n${warning.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(warning.user_id)}'s warning (${id}) from:\n\n${warning.old_reason}\n\nto:\n\n${reason}`, 'Edit Warning Reason');
     return warning;
 }
 
@@ -59,6 +59,6 @@ export async function editWarnSeverity(severity: number, id: string, modID: Snow
         [severity, new Date(), modID, id]
     );
 
-    log(`${parseUser(modID)} edited the severity of ${parseUser(warning.user_id)}'s warning (${id}) from ${warning.severity} to ${severity}.`);
+    log(`${parseUser(modID)} edited the severity of ${parseUser(warning.user_id)}'s warning (${id}) from ${warning.severity} to ${severity}.`, 'Edit Warning Severity');
     return warning.user_id;
 }

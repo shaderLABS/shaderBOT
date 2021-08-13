@@ -32,8 +32,8 @@ export const command: Command = {
 
             channel.permissionOverwrites.edit(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 
-            log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`);
-            sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`);
+            log(`${parseUser(author)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`, 'Mute');
+            sendSuccess(channel, `Successfully muted ${parseUser(targetUser)} in this project.`, 'Mute');
         } catch (error) {
             if (error) return sendError(channel, error);
         }

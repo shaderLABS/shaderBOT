@@ -48,8 +48,8 @@ export const command: Command = {
                 content += '\n\n*The target could not be DMed.*';
             });
 
-            sendSuccess(channel, content, 'Added Warning');
-            log(content, 'Added Warning');
+            sendSuccess(channel, content, 'Create Warning');
+            log(content, 'Create Warning');
 
             await automaticPunishment(targetUser, targetMember);
         } catch (error) {

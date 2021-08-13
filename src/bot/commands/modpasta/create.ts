@@ -28,8 +28,8 @@ export const command: Command = {
             await writePasta(pasta);
             pastas.set(pasta.alias, pasta);
 
-            sendSuccess(channel, `Successfully created the pasta \`${pasta.alias}\`.`);
-            log(`${parseUser(message.author)} created the pasta \`${pasta.alias}\`.`);
+            sendSuccess(channel, `Successfully created the pasta \`${pasta.alias}\`.`, 'Create Pasta');
+            log(`${parseUser(message.author)} created the pasta \`${pasta.alias}\`.`, 'Create Pasta');
         } catch {
             sendError(channel, 'Failed to save pasta.');
         }

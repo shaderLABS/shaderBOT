@@ -21,8 +21,8 @@ export const command: Command = {
 
             const ticket = await purgeAllTickets(user, guild);
 
-            sendSuccess(channel, 'Purged all tickets.');
-            log(`${parseUser(message.author)} purged all tickets by ${parseUser(user)}:\n\n\`\`\`${ticket.titles.join('\n')}\`\`\``);
+            sendSuccess(channel, 'Purged all tickets.', 'Purge Tickets');
+            log(`${parseUser(message.author)} purged all tickets by ${parseUser(user)}:\n\n\`\`\`${ticket.titles.join('\n')}\`\`\``, 'Purge Tickets');
         } catch (error) {
             if (error) sendError(channel, error);
         }

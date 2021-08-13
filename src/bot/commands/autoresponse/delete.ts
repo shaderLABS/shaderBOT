@@ -23,8 +23,8 @@ export const command: Command = {
             if (!autoResponses.delete(text)) return sendError(channel, 'The specified automatic response does not exist.');
             await fs.rm(path.join(autoResponsePath, stringToFileName(text)));
 
-            sendSuccess(channel, `Successfully deleted the automatic response \`${text}\`.`);
-            log(`${parseUser(message.author)} deleted the automatic response \`${text}\`.`);
+            sendSuccess(channel, `Successfully deleted the automatic response \`${text}\`.`, 'Delete Automatic Response');
+            log(`${parseUser(message.author)} deleted the automatic response \`${text}\`.`, 'Delete Automatic Response');
         } catch {
             sendError(channel, `Failed to delete automatic response \`${text}\` from the file system.`);
         }

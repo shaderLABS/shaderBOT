@@ -33,7 +33,7 @@ export const event: Event = {
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to add kick entry for ${parseUser(member.user)}: an error occurred while accessing the database.`);
+            log(`Failed to add kick entry for ${parseUser(member.user)}: an error occurred while accessing the database.`, 'Kick');
         }
 
         log(`${parseUser(executor)} kicked ${parseUser(member.user)}:\n\`${reason || 'No reason provided.'}\``, 'Kick');

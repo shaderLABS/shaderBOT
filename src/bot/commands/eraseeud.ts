@@ -20,8 +20,8 @@ export const command: Command = {
 
             eraseEndUserData(user.id);
 
-            sendSuccess(channel, `Successfully erased all End User Data of ${parseUser(user)}.`);
-            log(`${parseUser(message.author)} erased all End User Data of ${parseUser(user)}.`);
+            sendSuccess(channel, `Successfully erased all End User Data of ${parseUser(user)}.`, 'Erase End User Data');
+            log(`${parseUser(message.author)} erased all End User Data of ${parseUser(user)}.`, 'Erase End User Data');
         } catch (error) {
             if (error) sendError(channel, error);
         }

@@ -25,8 +25,8 @@ export const command: Command = {
             if (!oldValue) return sendError(channel, 'The specified path does not exist.');
 
             update();
-            sendSuccess(channel, 'Successfully edited the configuration value.');
-            log(`${parseUser(message.author)} edited the configuration \`${args[0]}\` from:\n\n\`${oldValue}\`\n\nto:\n\n\`${value}\``);
+            sendSuccess(channel, 'Successfully edited the configuration value.', 'Edit Configuration');
+            log(`${parseUser(message.author)} edited the configuration \`${args[0]}\` from:\n\n\`${oldValue}\`\n\nto:\n\n\`${value}\``, 'Edit Configuration');
         } catch {
             sendError(channel, 'Invalid JSON value.');
         }

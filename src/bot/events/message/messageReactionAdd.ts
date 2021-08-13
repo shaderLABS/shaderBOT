@@ -197,5 +197,8 @@ async function deleteComment(reaction: MessageReaction, member: GuildMember, cha
 
     if (comment.attachment) deleteAttachmentFromDiscord(comment.attachment, member.guild);
 
-    log(`${parseUser(member.user)} deleted ${member.id === comment.author_id ? 'their' : `${parseUser(comment.author_id)}'s`} ticket comment from <#${channel.id}>:\n\n${comment.content}`);
+    log(
+        `${parseUser(member.user)} deleted ${member.id === comment.author_id ? 'their' : `${parseUser(comment.author_id)}'s`} ticket comment from <#${channel.id}>:\n\n${comment.content}`,
+        'Delete Ticket Comment'
+    );
 }

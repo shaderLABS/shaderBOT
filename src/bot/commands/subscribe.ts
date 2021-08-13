@@ -25,7 +25,7 @@ export const command: Command = {
 
         if (!member.roles.cache.has(role.id)) {
             member.roles.add(role);
-            return sendSuccess(channel, `You will now receive notifications from <#${projectChannel.id}>.`);
+            return sendSuccess(channel, `You will now receive notifications from <#${projectChannel.id}>.`, 'Subscribe');
         }
 
         return sendError(channel, `You already receive notifications from <#${projectChannel.id}>.\nYou can unsubscribe from notifications using \`${settings.prefix}unsubscribe\`.`);

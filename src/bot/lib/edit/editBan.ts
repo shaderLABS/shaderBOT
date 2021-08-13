@@ -23,7 +23,7 @@ export async function editBanReason(uuid: string, reason: string, modID: Snowfla
 
     if (!result) return Promise.reject('There is no ban with the specified UUID.');
 
-    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s ban (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`);
+    log(`${parseUser(modID)} edited the reason of ${parseUser(result.user_id)}'s ban (${uuid}) from:\n\n${result.old_reason}\n\nto:\n\n${reason}`, 'Edit Ban Reason');
     return result;
 }
 
@@ -63,7 +63,8 @@ export async function editBanDuration(uuid: string, time: number, modID: Snowfla
     log(
         `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s ban (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
             new Date(result.expire_timestamp)
-        )}.`
+        )}.`,
+        'Edit Ban Duration'
     );
     return result;
 }

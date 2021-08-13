@@ -26,7 +26,7 @@ export const event: Event = {
                     [channel.id]
                 );
 
-                return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`);
+                return log(`#${channel.name} has been deleted and the corresponding ticket has been closed.`, 'Delete Channel');
             } else {
                 let logContent = `The channel #${channel.name} has been deleted. `;
 
@@ -42,7 +42,7 @@ export const event: Event = {
                 const backupSize = await createBackup(channel).catch(() => undefined);
                 logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved.` : 'There were no cached messages to save.';
 
-                log(logContent);
+                log(logContent, 'Delete Channel');
             }
         }
     },

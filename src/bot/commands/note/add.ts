@@ -44,14 +44,14 @@ export const command: Command = {
             channel.send({
                 embeds: [
                     new MessageEmbed()
-                        .setAuthor('Added Note', embedIcon.note)
+                        .setAuthor('Add Note', embedIcon.note)
                         .setColor('#ffc107')
                         .setDescription(messageContent)
                         .setFooter('ID: ' + result.id),
                 ],
             });
 
-            log(`${messageContent}\n**ID:** ${result.id}`, 'Added Note');
+            log(`${messageContent}\n**ID:** ${result.id}`, 'Add Note');
         } catch (error) {
             if (error) sendError(channel, error);
         }

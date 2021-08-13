@@ -63,7 +63,7 @@ export default async function (user: User, member?: GuildMember) {
             return 3;
         }
     } catch (error) {
-        log(`Failed to auto-punish ${parseUser(user)}:\n` + error);
+        log(`Failed to auto-punish ${parseUser(user)}:\n` + error, 'Automatic Punishment');
     }
 
     return 0;

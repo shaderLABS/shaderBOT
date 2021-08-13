@@ -43,8 +43,9 @@ export const command: Command = {
         log(
             text
                 ? `${parseUser(author)} set the issue tracker URL in their project (<#${channel.id}>) to ${text}.`
-                : `${parseUser(author)} removed the issue tracker URL from their project (<#${channel.id}>).`
+                : `${parseUser(author)} removed the issue tracker URL from their project (<#${channel.id}>).`,
+            'Edit Project Issue Tracker'
         );
-        sendSuccess(channel, `Successfully ${text ? 'set' : 'removed'} the issue tracker URL.`);
+        sendSuccess(channel, `Successfully ${text ? 'set' : 'removed'} the issue tracker URL.`, 'Edit Project Issue Tracker');
     },
 };

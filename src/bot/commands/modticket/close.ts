@@ -17,8 +17,8 @@ export const command: Command = {
 
         try {
             const ticket = await closeTicket(message.mentions.channels.first()?.id || text, member, true);
-            sendSuccess(channel, 'Ticket closed.');
-            log(`${parseUser(message.author)} closed the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`);
+            sendSuccess(channel, 'Ticket closed.', 'Close Ticket');
+            log(`${parseUser(message.author)} closed the ticket "${ticket.title}" by ${parseUser(ticket.author)}.`, 'Close Ticket');
         } catch (error) {
             if (error) sendError(channel, error);
         }

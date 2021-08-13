@@ -24,7 +24,7 @@ export const command: Command = {
             if (reason.length > 500) return sendError(channel, 'The reason must not be more than 500 characters long.');
 
             const { user_id } = await editWarnReason(reason, warnUUID, author.id);
-            sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${warnUUID}).`);
+            sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${warnUUID}).`, 'Edit Warning Reason');
         } catch (error) {
             if (error) sendError(channel, error);
         }

@@ -25,7 +25,7 @@ export const command: Command = {
         try {
             if (uuid.test(args[0])) {
                 const { user_id } = await editKick(args[0], content, author.id);
-                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s kick (${args[0]}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user_id)}'s kick (${args[0]}).`, 'Edit Kick Reason');
             } else {
                 const user = await requireUser(args[0], { author, channel });
 
@@ -33,7 +33,7 @@ export const command: Command = {
                 if (!latestKickID) return sendError(channel, 'The specified user does not have any kicks.');
 
                 await editKick(latestKickID.id, content, author.id);
-                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s kick (${latestKickID.id}).`);
+                sendSuccess(channel, `Successfully edited the reason of ${parseUser(user)}'s kick (${latestKickID.id}).`, 'Edit Kick Reason');
             }
         } catch (error) {
             if (error) sendError(channel, error);

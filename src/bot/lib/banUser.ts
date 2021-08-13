@@ -81,7 +81,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
 
         if (expire.getTime() - timestamp.getTime() < new Date().setHours(24, 0, 0, 0) - timestamp.getTime()) {
             const timeout = setTimeout(() => {
-                unban(user.id).catch((e) => log(`Failed to unban ${parseUser(user.id)}: ${e}`));
+                unban(user.id).catch((e) => log(`Failed to unban ${parseUser(user.id)}: ${e}`, 'Unban'));
             }, duration * 1000);
 
             const previousTimeout = store.tempbans.get(user.id);
@@ -91,7 +91,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
         }
     } catch (error) {
         console.log(error);
-        log(`Failed to temporarily ban ${parseUser(user)} for ${secondsToString(duration)}.`);
+        log(`Failed to temporarily ban ${parseUser(user)} for ${secondsToString(duration)}.`, 'Temporary Ban');
         return Promise.reject(`Failed to temporarily ban ${parseUser(user)} for ${secondsToString(duration)}.`);
     }
 
@@ -167,7 +167,7 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
         );
     } catch (error) {
         console.error(error);
-        log(`Failed to ban ${parseUser(user)}.`);
+        log(`Failed to ban ${parseUser(user)}.`, 'Ban');
         return Promise.reject('Error while accessing the database.');
     }
 
@@ -209,7 +209,7 @@ export async function unban(userID: Snowflake, modID?: Snowflake) {
         if (deleted === 0) return Promise.reject(`The user ${parseUser(userID)} is not banned.`);
     } catch (error) {
         console.error(error);
-        log(`Failed to unban ${parseUser(userID)}: an error occurred while accessing the database.`);
+        log(`Failed to unban ${parseUser(userID)}: an error occurred while accessing the database.`, 'Unban');
         return Promise.reject('Error while accessing the database.');
     }
 

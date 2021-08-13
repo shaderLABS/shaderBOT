@@ -28,7 +28,7 @@ export const command: Command = {
             if (role) role.delete();
         }
 
-        sendSuccess(channel, 'Successfully deleted the project linked to this channel.');
-        log(`${parseUser(message.author)} deleted the project linked to <#${channel.id}>.`);
+        sendSuccess(channel, 'Successfully deleted the project linked to this channel.', 'Delete Project');
+        log(`${parseUser(message.author)} deleted the project linked to <#${channel.id}>.`, 'Delete Project');
     },
 };

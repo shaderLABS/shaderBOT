@@ -24,8 +24,8 @@ export const command: Command = {
 
             const action = await automaticPunishment(targetUser, targetMember);
 
-            log(`${parseUser(message.author)} triggered the automatic punishment system for ${parseUser(targetUser)}. ${actionToString[action]}`);
-            sendSuccess(channel, `Successfully triggered the automatic punishment system for ${parseUser(targetUser)}. ${actionToString[action]}`);
+            log(`${parseUser(message.author)} triggered the automatic punishment system for ${parseUser(targetUser)}. ${actionToString[action]}`, 'Trigger Punishment');
+            sendSuccess(channel, `Successfully triggered the automatic punishment system for ${parseUser(targetUser)}. ${actionToString[action]}`, 'Trigger Punishment');
         } catch (error) {
             if (error) sendError(channel, error);
         }

@@ -18,7 +18,7 @@ export const command: Command = {
             const user = await requireUser(text, { author: message.author, channel });
             await unban(user.id, member.id);
 
-            sendSuccess(channel, `${parseUser(user)} has been unbanned.`);
+            sendSuccess(channel, `${parseUser(user)} has been unbanned.`, 'Unban');
         } catch (error) {
             if (error) sendError(channel, error);
         }

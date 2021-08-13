@@ -35,7 +35,7 @@ export const event: Event = {
             );
         } catch (error) {
             console.error(error);
-            log(`Failed to remove ban entry of ${parseUser(user)}: an error occurred while accessing the database.`);
+            log(`Failed to remove ban entry of ${parseUser(user)}: an error occurred while accessing the database.`, 'Unban');
         }
 
         const timeout = store.tempbans.get(user.id);

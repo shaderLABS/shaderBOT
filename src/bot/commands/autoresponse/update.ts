@@ -44,8 +44,8 @@ export const command: Command = {
                 if (oldFileName !== stringToFileName(autoResponse.alias)) await fs.rm(path.join(autoResponsePath, oldFileName));
             }
 
-            sendSuccess(channel, `Successfully updated the automatic response \`${args[0]}\`.`);
-            log(`${parseUser(message.author)} updated the automatic response \`${args[0]}\`.`);
+            sendSuccess(channel, `Successfully updated the automatic response \`${args[0]}\`.`, 'Update Automatic Response');
+            log(`${parseUser(message.author)} updated the automatic response \`${args[0]}\`.`, 'Update Automatic Response');
         } catch (error) {
             sendError(channel, 'Invalid JSON value.');
         }

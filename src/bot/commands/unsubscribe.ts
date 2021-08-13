@@ -25,7 +25,7 @@ export const command: Command = {
 
         if (member.roles.cache.has(role.id)) {
             member.roles.remove(role);
-            return sendSuccess(channel, `You will no longer receive notifications from <#${projectChannel.id}>.`);
+            return sendSuccess(channel, `You will no longer receive notifications from <#${projectChannel.id}>.`, 'Unsubscribe');
         }
 
         return sendError(channel, `You do not receive notifications from <#${projectChannel.id}>.\nYou can subscribe to notifications using \`${settings.prefix}subscribe\`.`);

@@ -35,7 +35,8 @@ export const command: Command = {
                 channel,
                 `${parseUser(targetUser)} has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
                     dmed ? '' : '\n\n*The target could not be DMed.*'
-                }`
+                }`,
+                'Mute'
             );
         } catch (error) {
             if (error) sendError(channel, error);

@@ -22,7 +22,7 @@ export const command: Command = {
                 return sendError(channel, "You can't unmute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
             await unmute(targetUser.id, member.id, targetMember);
-            sendSuccess(channel, `${parseUser(targetUser)} has been unmuted.`);
+            sendSuccess(channel, `${parseUser(targetUser)} has been unmuted.`, 'Unmute');
         } catch (error) {
             if (error) sendError(channel, error);
         }

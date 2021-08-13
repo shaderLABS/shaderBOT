@@ -39,8 +39,8 @@ export const command: Command = {
                 await fs.rm(path.join(pastaPath, stringToFileName(args[0])));
             }
 
-            sendSuccess(channel, `Successfully updated the pasta \`${pasta.alias}\`.`);
-            log(`${parseUser(message.author)} updated the pasta \`${pasta.alias}\`.`);
+            sendSuccess(channel, `Successfully updated the pasta \`${pasta.alias}\`.`, 'Update Pasta');
+            log(`${parseUser(message.author)} updated the pasta \`${pasta.alias}\`.`, 'Update Pasta');
         } catch (error) {
             sendError(channel, 'Invalid JSON value.');
         }

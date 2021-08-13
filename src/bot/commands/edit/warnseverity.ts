@@ -23,7 +23,7 @@ export const command: Command = {
             if (severity < 0 || severity > 3) return sendError(channel, 'The severity must be an integer between 0 and 3.');
 
             const userID = await editWarnSeverity(severity, warnUUID, author.id);
-            sendSuccess(channel, `Successfully edited the severity of ${parseUser(userID)}'s warning (${warnUUID}).`);
+            sendSuccess(channel, `Successfully edited the severity of ${parseUser(userID)}'s warning (${warnUUID}).`, 'Edit Warning Severity');
         } catch (error) {
             if (error) sendError(channel, error);
         }

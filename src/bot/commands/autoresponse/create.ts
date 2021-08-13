@@ -28,8 +28,8 @@ export const command: Command = {
             await writeAutoResponse(autoResponse);
             autoResponses.set(autoResponse.alias, autoResponse);
 
-            sendSuccess(channel, `Successfully created the automatic response \`${autoResponse.alias}\`.`);
-            log(`${parseUser(message.author)} created the automatic response \`${autoResponse.alias}\`.`);
+            sendSuccess(channel, `Successfully created the automatic response \`${autoResponse.alias}\`.`, 'Create Automatic Response');
+            log(`${parseUser(message.author)} created the automatic response \`${autoResponse.alias}\`.`, 'Create Automatic Response');
         } catch {
             sendError(channel, 'Failed to save the automatic response.');
         }

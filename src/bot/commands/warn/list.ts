@@ -106,7 +106,7 @@ export const command: Command = {
                         await sleep(1000);
                     }
 
-                    sendSuccess(channel, 'Successfully sent you your warnings in a DM.');
+                    sendSuccess(channel, 'Successfully sent you your warnings in a DM.', 'List Warnings');
                 } catch {
                     sendError(channel, "Failed to send you a DM. Please make sure that they're open and try again.");
                 }

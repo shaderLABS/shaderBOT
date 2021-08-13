@@ -24,7 +24,7 @@ export const event: Event = {
                 if (!role?.editable) throw new Error();
                 await role.edit({ name: newChannel.name });
             } catch {
-                log(`The name of <#${newChannel.id}> has been updated, but the role could not be renamed.`);
+                log(`The name of <#${newChannel.id}> has been updated, but the role could not be renamed.`, 'Edit Channel Name');
             }
         }
 
@@ -59,9 +59,9 @@ export const event: Event = {
 
                 newChannel.lockPermissions();
 
-                log(`<#${newChannel.id}> has been archived.`);
+                log(`<#${newChannel.id}> has been archived.`, 'Archive Project');
             } catch {
-                log(`<#${newChannel.id}> has been archived, but the notification role could not be deleted.`);
+                log(`<#${newChannel.id}> has been archived, but the notification role could not be deleted.`, 'Archive Project');
             }
         } else if (settings.archiveCategoryIDs.includes(oldChannel.parentId) && !settings.archiveCategoryIDs.includes(newChannel.parentId)) {
             /*************
@@ -86,9 +86,9 @@ export const event: Event = {
                     db.query(/*sql*/ `UPDATE project SET role_id = $1 WHERE channel_id = $2;`, [role.id, newChannel.id]);
                 }
 
-                log(`<#${newChannel.id}> has been unarchived.`);
+                log(`<#${newChannel.id}> has been unarchived.`, 'Unarchive Project');
             } catch {
-                log(`<#${newChannel.id}> has been unarchived, but the notification role could not be created.`);
+                log(`<#${newChannel.id}> has been unarchived, but the notification role could not be created.`, 'Unarchive Project');
             }
         }
     },

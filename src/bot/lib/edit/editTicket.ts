@@ -24,7 +24,7 @@ export async function editComment(comment: any, message: Message, newContent: st
         [newContent, editedAt, comment.id]
     );
 
-    log(`${parseUser(user)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${newContent}`);
+    log(`${parseUser(user)} edited their ticket comment from:\n\n${comment.content}\n\nto:\n\n${newContent}`, 'Edit Ticket Comment');
 }
 
 export async function editTicketTitle(ticket: any, newTitle: string, user: User, guild: Guild, originalMessage: Message) {
@@ -51,7 +51,7 @@ export async function editTicketTitle(ticket: any, newTitle: string, user: User,
     const editedTimestamp = new Date();
     await db.query(/*sql*/ `UPDATE ticket SET title = $1, edited = $2 WHERE id = $3`, [newTitle, editedTimestamp, ticket.id]);
 
-    log(`${parseUser(user)} edited their ticket title from:\n\n${originalTitle}\n\nto:\n\n${newTitle}`);
+    log(`${parseUser(user)} edited their ticket title from:\n\n${originalTitle}\n\nto:\n\n${newTitle}`, 'Edit Ticket Title');
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
     originalMessage.edit({ embeds: [embed] });
@@ -84,7 +84,7 @@ export async function editTicketDescription(ticket: any, newDescription: string,
     const editedTimestamp = new Date();
     await db.query(/*sql*/ `UPDATE ticket SET description = $1, edited = $2 WHERE id = $3`, [newDescription, editedTimestamp, ticket.id]);
 
-    log(`${parseUser(user)} edited their ticket description from:\n\n${originalDescription}\n\nto:\n\n${newDescription}`);
+    log(`${parseUser(user)} edited their ticket description from:\n\n${originalDescription}\n\nto:\n\n${newDescription}`, 'Edit Ticket Description');
 
     if (embed.footer?.text) embed.setFooter(embed.footer.text.split(' | ')[0] + ` | edited at ${formatTimeDate(editedTimestamp)}`);
     originalMessage.edit({ embeds: [embed] });

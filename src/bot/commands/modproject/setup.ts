@@ -71,6 +71,6 @@ export const command: Command = {
                     ]),
             ],
         });
-        log(`${parseUser(message.author)} created a project linked to <#${channel.id}>.`);
+        log(`${parseUser(message.author)} created a project linked to <#${channel.id}>.`, 'Create Project');
     },
 };
