@@ -1,7 +1,9 @@
-import { Collection, Message, Snowflake } from 'discord.js';
+import { Collection, Message, Snowflake, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
+import { createBackup } from '../../lib/backup.js';
+import log from '../../lib/log.js';
 import { isTextOrThreadChannel } from '../../lib/misc.js';
 import { deleteAttachmentFromDiscord } from '../../lib/ticketManagement.js';
 
@@ -12,7 +14,19 @@ export const event: Event = {
         if (!firstMessage) return;
 
         const { channel, guild } = firstMessage;
-        if (!isTextOrThreadChannel(channel) || !channel.parentId || !settings.ticket.categoryIDs.includes(channel.parentId)) return;
+        if (!isTextOrThreadChannel(channel)) return;
+
+        createBackup(
+            channel,
+            messages.filter((message) => !message.partial),
+            `Created after ${messages.size} messages were purged.`
+        ).then((messageCount) => {
+            if (messageCount > 0) {
+                log(`${messageCount} out of ${messages.size} purged messages have been backed up. Use \`${settings.prefix}backup list\` in order to view them.`, 'Backup');
+            }
+        });
+
+        if (!(channel instanceof TextChannel) || !channel.parentId || !settings.ticket.categoryIDs.includes(channel.parentId)) return;
 
         messages.forEach(async (message) => {
             const comment = (

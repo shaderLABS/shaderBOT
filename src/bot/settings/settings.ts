@@ -6,7 +6,8 @@ const settingsFile = './src/bot/settings/settings.json';
 export interface Settings {
     prefix: string;
     logging: {
-        channelID: Snowflake;
+        moderationChannelID: Snowflake;
+        messageChannelID: Snowflake;
     };
     ticket: {
         categoryIDs: Snowflake[];

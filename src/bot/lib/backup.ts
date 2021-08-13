@@ -6,7 +6,7 @@ import path from 'path';
 export const backupPath = 'customContent/channelBackup/';
 
 function parseProperty(prop: string | undefined | null) {
-    return prop ? '\n\t' + prop.replaceAll(/\r?\n|\r/g, '') : '';
+    return prop ? '\n\t' + prop.replaceAll(/\r?\n|\r/g, ' ') : '';
 }
 
 function encryptBackup(content: string) {
@@ -56,7 +56,7 @@ export async function readBackup(name: string) {
     return decryptBackup(file.toString());
 }
 
-export async function createBackup(channel: TextChannel | ThreadChannel, backupMessages?: Collection<string, Message>) {
+export async function createBackup(channel: TextChannel | ThreadChannel, backupMessages?: Collection<string, Message>, backupPrefix?: string) {
     const messages = backupMessages || channel.messages.cache;
     if (!messages.size) return Promise.reject('There are no messages to create a backup of.');
     const creationTime = new Date().toUTCString();
@@ -65,11 +65,12 @@ export async function createBackup(channel: TextChannel | ThreadChannel, backupM
     if (backupMessages) messageArray.reverse();
 
     let content = messageArray.reduce((prev, curr) => {
-        let content = `${curr.author.tag} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, '')}`;
-        if (curr.embeds[0]) content += (parseProperty(curr.embeds[0].title) + parseProperty(curr.embeds[0].author?.name) + parseProperty(curr.embeds[0].description)).trim();
+        let content = `${curr.author.tag} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, ' ')}`;
+        for (const embed of curr.embeds) content += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
+        for (const attachment of curr.attachments.values()) content += '\n\t' + attachment.proxyURL;
 
         return prev + `${curr.createdAt.toUTCString()} - ${content}\n`;
-    }, `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.\n\n`);
+    }, `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${backupPrefix ? '\n' + backupPrefix : ''}\n\n`);
 
     await writeBackup(`#${channel.name} - ${creationTime}`, content);
     return messages.size;
