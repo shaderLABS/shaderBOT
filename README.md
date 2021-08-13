@@ -27,7 +27,8 @@ The file `src/bot/settings/settings.json` contains information specific to the b
 {
     "prefix": "",
     "logging": {
-        "channelID": ""
+        "moderationChannelID": "",
+        "messageChannelID": ""
     },
     "ticket": {
         "categoryIDs": [""], // categories which will be filled with open tickets
