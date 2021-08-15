@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedIcon, sendError } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { formatContextURL, parseUser } from '../../lib/misc.js';
 import { removeArgumentsFromText, requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -31,15 +31,20 @@ export const command: Command = {
             const result = (
                 await db.query(
                     /*sql*/ `
-                    INSERT INTO note (user_id, mod_id, content, timestamp)
-                    VALUES ($1, $2, $3, $4)
+                    INSERT INTO note (user_id, mod_id, content, context_url, timestamp)
+                    VALUES ($1, $2, $3, $4, $5)
                     RETURNING id;`,
-                    [user.id, author.id, content, timestamp]
+                    [user.id, author.id, content, message.url, timestamp]
                 )
             ).rows[0];
             if (!result || !result.id) return sendError(channel, 'Failed to insert note into the database.');
 
-            const messageContent = `**User:** ${parseUser(user)}\n**Content:** ${content}\n**Moderator:** ${parseUser(author)}\n**Created At:** ${formatTimeDate(timestamp)}`;
+            const messageContent =
+                `**User:** ${parseUser(user)}` +
+                `\n**Content:** ${content}` +
+                `\n**Moderator:** ${parseUser(author)}` +
+                `\n**Context:** ${formatContextURL(result.context_url)}` +
+                `\n**Created At:** ${formatTimeDate(timestamp)}`;
 
             channel.send({
                 embeds: [

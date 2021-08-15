@@ -35,7 +35,7 @@ export const command: Command = {
                 if (!targetMember.bannable) return sendError(channel, 'This user is not bannable.');
             }
 
-            const { dmed } = await tempban(targetUser, time, member.id, reason, deleteMessages);
+            const { dmed } = await tempban(targetUser, time, member.id, reason, message.url, deleteMessages);
 
             sendSuccess(channel, `${parseUser(targetUser)} has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Temporary Ban');
         } catch (error) {

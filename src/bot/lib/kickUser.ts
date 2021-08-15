@@ -3,9 +3,9 @@ import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
-import { formatTimeDate } from './time.js';
+import { pastPunishmentToString } from './punishments.js';
 
-export async function kick(user: GuildMember, modID: Snowflake | null = null, reason: string | null = null) {
+export async function kick(user: GuildMember, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
     if (!user.kickable) return Promise.reject('The specified user is not kickable.');
@@ -17,10 +17,10 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
         const kick = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp)
-                VALUES ($1, 'kick', $2, $3, $4)
+                INSERT INTO past_punishment (user_id, "type", mod_id, reason, context_url, timestamp)
+                VALUES ($1, 'kick', $2, $3, $4, $6)
                 RETURNING id;`,
-                [user.id, modID, reason, timestamp]
+                [user.id, modID, reason, context, timestamp]
             )
         ).rows[0];
 
@@ -30,7 +30,7 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
                     embeds: [
                         new MessageEmbed({
                             author: { name: 'You have been kicked from shaderLABS.' },
-                            description: punishmentToString({ id: kick.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                            description: pastPunishmentToString({ id: kick.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, timestamp }),
                             color: embedColor.blue,
                         }),
                     ],
@@ -48,13 +48,4 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
     await user.kick(reason || 'No reason provided.');
     log(`${modID ? parseUser(modID) : 'System'} kicked ${parseUser(user.user)}:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
     return { dmed };
-}
-
-function punishmentToString(punishment: any) {
-    return (
-        `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
-        `**ID:** ${punishment.id}\n` +
-        `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`
-    );
 }

@@ -26,10 +26,10 @@ export const command: Command = {
 
             const content = tickets.rows.map(
                 (ticket) =>
-                    `**Title:** ${ticket.closed ? ticket.title : `<#${ticket.channel_id}>`}\n` +
-                    `**Project:** ${ticket.project_channel_id ? `<#${ticket.project_channel_id}>` : 'DELETED PROJECT'}\n` +
-                    `**Status:** ${ticket.closed ? 'closed' : 'open'}\n` +
-                    `**Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`
+                    `**Title:** ${ticket.closed ? ticket.title : `<#${ticket.channel_id}>`}` +
+                    `\n**Project:** ${ticket.project_channel_id ? `<#${ticket.project_channel_id}>` : 'DELETED PROJECT'}` +
+                    `\n**Status:** ${ticket.closed ? 'closed' : 'open'}` +
+                    `\n**Created At:** ${formatTimeDate(new Date(ticket.timestamp))}`
             );
 
             const pages: string[] = [];

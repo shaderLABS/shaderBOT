@@ -3,7 +3,7 @@ import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { sendError, sendSuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { formatContextURL, parseUser } from '../../lib/misc.js';
 import { getUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -24,17 +24,18 @@ export const command: Command = {
 
         try {
             if (uuid.test(args[0])) {
-                warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE id = $1;`, [args[0]])).rows[0];
+                warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, context_url, severity, reason FROM warn WHERE id = $1;`, [args[0]])).rows[0];
             } else {
                 const targetUser = await getUser(text, { author: message.author, channel });
                 if (targetUser) {
                     // GRAB LATEST WARNING OF USER
-                    warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, severity, reason FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id])).rows[0];
+                    warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, context_url, severity, reason FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id]))
+                        .rows[0];
                 } else {
                     // GRAB WARNING BY REASON
                     const warnings = await db.query(
                         /*sql*/ `
-                        SELECT id, user_id, mod_id, severity, reason, timestamp::TEXT
+                        SELECT id, user_id, mod_id, context_url, severity, reason, timestamp::TEXT
                         FROM warn
                         WHERE reason = $1;`,
                         [text]
@@ -92,9 +93,13 @@ export const command: Command = {
 
         await db.query(/*sql*/ `DELETE FROM warn WHERE id = $1;`, [warning.id]);
 
-        const content = `**User:** ${parseUser(warning.user_id)}\n**Severity:** ${warning.severity}\n**Reason:** ${warning.reason || 'No reason provided.'}\n**Moderator:** ${parseUser(
-            warning.mod_id
-        )}\n**ID:** ${warning.id}`;
+        const content =
+            `**User:** ${parseUser(warning.user_id)}` +
+            `\n**Severity:** ${warning.severity}` +
+            `\n**Reason:** ${warning.reason || 'No reason provided.'}` +
+            `\n**Moderator:** ${parseUser(warning.mod_id)}` +
+            `\n**Context:** ${formatContextURL(warning.context_url)}` +
+            `\n**ID:** ${warning.id}`;
 
         sendSuccess(channel, content, 'Delete Warning');
         log(`**Deleted By:** ${member.id}\n${content}`, 'Delete Warning');

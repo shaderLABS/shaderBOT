@@ -22,7 +22,7 @@ export const command: Command = {
                 return sendError(channel, "You can't kick a user with a role higher than or equal to yours.", 'Insufficient Permissions');
             if (!targetMember.kickable) return sendError(channel, 'This user is not kickable.');
 
-            const { dmed } = await kick(targetMember, member.id, reason);
+            const { dmed } = await kick(targetMember, member.id, reason, message.url);
             sendSuccess(channel, `${parseUser(targetMember.user)} has been kicked:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
         } catch (error) {
             if (error) sendError(channel, error);

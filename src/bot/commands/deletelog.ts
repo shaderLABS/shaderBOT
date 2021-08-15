@@ -3,7 +3,7 @@ import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { sendError, sendSuccess } from '../lib/embeds.js';
 import log from '../lib/log.js';
-import { parseUser } from '../lib/misc.js';
+import { formatContextURL, parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
 import { requireUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
@@ -31,19 +31,20 @@ export const command: Command = {
                     /*sql*/ `
                     DELETE FROM past_punishment
                     WHERE id = $1
-                    RETURNING user_id, type, reason, mod_id, timestamp, edited_timestamp, lifted_timestamp, lifted_mod_id;`,
+                    RETURNING user_id, type, reason, context_url, mod_id, timestamp, edited_timestamp, lifted_timestamp, lifted_mod_id;`,
                     [id]
                 )
             ).rows[0];
             if (!deletedEntry) return sendError(channel, 'The specified log entry could not be resolved.');
 
             let content =
-                `**User:** ${parseUser(deletedEntry.user_id)}\n` +
-                `**Type:** ${punishmentTypeAsString[deletedEntry.type]}\n` +
-                `**Reason:** ${deletedEntry.reason || 'No reason provided.'}\n` +
-                `**Moderator:** ${deletedEntry.mod_id ? parseUser(deletedEntry.mod_id) : 'System'}\n` +
-                `**ID:** ${id}\n` +
-                `**Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
+                `**User:** ${parseUser(deletedEntry.user_id)}` +
+                `\n**Type:** ${punishmentTypeAsString[deletedEntry.type]}` +
+                `\n**Reason:** ${deletedEntry.reason || 'No reason provided.'}` +
+                `\n**Moderator:** ${deletedEntry.mod_id ? parseUser(deletedEntry.mod_id) : 'System'}` +
+                `\n**Context:** ${formatContextURL(deletedEntry.context_url)}` +
+                `\n**ID:** ${id}` +
+                `\n**Created At:** ${formatTimeDate(new Date(deletedEntry.timestamp))}`;
 
             if (deletedEntry.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(deletedEntry.lifted_timestamp))}`;
             if (deletedEntry.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(deletedEntry.lifted_mod_id)}`;

@@ -52,14 +52,14 @@ export default async function (user: User, member?: GuildMember) {
     try {
         if (punishmentPoints >= settings.warnings.punishment.muteRange[0] && punishmentPoints < settings.warnings.punishment.muteRange[1]) {
             const duration = interpolateTime(settings.warnings.punishment.muteRange, settings.warnings.punishment.muteValues, punishmentPoints);
-            await mute(user.id, duration, null, 'Too many warnings.', member);
+            await mute(user.id, duration, null, 'Too many warnings.', null, member);
             return 1;
         } else if (punishmentPoints >= settings.warnings.punishment.tempbanRange[0] && punishmentPoints < settings.warnings.punishment.tempbanRange[1]) {
             const duration = interpolateTime(settings.warnings.punishment.tempbanRange, settings.warnings.punishment.tempbanValues, punishmentPoints);
-            await tempban(user, duration, null, 'Too many warnings.', false);
+            await tempban(user, duration, null, 'Too many warnings.', null, false);
             return 2;
         } else if (punishmentPoints >= settings.warnings.punishment.ban) {
-            await ban(user, null, 'Too many warnings.', false);
+            await ban(user, null, 'Too many warnings.', null, false);
             return 3;
         }
     } catch (error) {

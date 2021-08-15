@@ -30,7 +30,7 @@ export const command: Command = {
             if (isNaN(time)) return sendError(channel, 'The specified time exceeds the range of UNIX time.');
             if (time < 10) return sendError(channel, "You can't mute someone for less than 10 seconds.");
 
-            const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, targetMember);
+            const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, message.url, targetMember);
             sendSuccess(
                 channel,
                 `${parseUser(targetUser)} has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${

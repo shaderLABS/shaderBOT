@@ -29,7 +29,7 @@ export const command: Command = {
                 if (!targetMember.bannable) return sendError(channel, 'This user is not bannable.');
             }
 
-            const { dmed } = await ban(targetUser, member.id, reason, deleteMessages);
+            const { dmed } = await ban(targetUser, member.id, reason, message.url, deleteMessages);
             sendSuccess(channel, `${parseUser(targetUser)} has been banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Ban');
         } catch (error) {
             if (error) sendError(channel, error);

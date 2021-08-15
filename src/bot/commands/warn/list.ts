@@ -3,7 +3,7 @@ import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
 import { embedPages, sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
-import { parseUser, sleep } from '../../lib/misc.js';
+import { formatContextURL, parseUser, sleep } from '../../lib/misc.js';
 import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -25,7 +25,7 @@ export const command: Command = {
             const warning = (
                 await db.query(
                     /*sql*/ `
-                    SELECT user_id::TEXT, reason, severity, mod_id::TEXT, timestamp::TEXT, edited_timestamp::TEXT, edited_mod_id::TEXT
+                    SELECT user_id::TEXT, reason, context_url, severity, mod_id::TEXT, timestamp::TEXT, edited_timestamp::TEXT, edited_mod_id::TEXT
                     FROM warn
                     WHERE id = $1
                     LIMIT 1;`,
@@ -36,12 +36,13 @@ export const command: Command = {
             if (!warning) return sendError(channel, 'There is no warning with this UUID.');
 
             const content =
-                `**User:** ${parseUser(warning.user_id)}\n` +
-                `**Severity:** ${warning.severity}\n` +
-                `**Reason:** ${warning.reason || 'No reason provided.'}\n` +
-                `**Moderator:** ${parseUser(warning.mod_id)}\n` +
-                `**ID:** ${args[0]}\n` +
-                `**Created At:** ${formatTimeDate(new Date(warning.timestamp))}` +
+                `**User:** ${parseUser(warning.user_id)}` +
+                `\n**Severity:** ${warning.severity}` +
+                `\n**Reason:** ${warning.reason || 'No reason provided.'}` +
+                `\n**Moderator:** ${parseUser(warning.mod_id)}` +
+                `\n**Context:** ${formatContextURL(warning.context_url)}` +
+                `\n**ID:** ${args[0]}` +
+                `\n**Created At:** ${formatTimeDate(new Date(warning.timestamp))}` +
                 (warning.edited_timestamp ? `\n*(last edited by ${parseUser(warning.edited_mod_id)} at ${formatTimeDate(new Date(warning.edited_timestamp))})*` : '');
 
             sendInfo(channel, content, 'Warning');
@@ -66,7 +67,7 @@ export const command: Command = {
 
             const warnings = await db.query(
                 /*sql*/ `
-                SELECT id::TEXT, reason, severity, mod_id::TEXT, timestamp, edited_timestamp::TEXT, edited_mod_id::TEXT
+                SELECT id::TEXT, reason, context_url, severity, mod_id::TEXT, timestamp, edited_timestamp::TEXT, edited_mod_id::TEXT
                 FROM warn
                 WHERE user_id = $1
                 ORDER BY timestamp DESC;`,
@@ -78,12 +79,13 @@ export const command: Command = {
             const pages: string[] = [];
             warnings.rows.reduce((prev, curr, i, { length }) => {
                 const page =
-                    `**User:** ${parseUser(userID)}\n` +
-                    `**Severity:** ${curr.severity}\n` +
-                    `**Reason:** ${curr.reason || 'No reason provided.'}\n` +
-                    `**Moderator:** ${parseUser(curr.mod_id)}\n` +
-                    `**ID:** ${curr.id}\n` +
-                    `**Created At:** ${formatTimeDate(new Date(curr.timestamp))}` +
+                    `**User:** ${parseUser(userID)}` +
+                    `\n**Severity:** ${curr.severity}` +
+                    `\n**Reason:** ${curr.reason || 'No reason provided.'}` +
+                    `\n**Moderator:** ${parseUser(curr.mod_id)}` +
+                    `\n**Context:** ${formatContextURL(curr.context_url)}` +
+                    `\n**ID:** ${curr.id}` +
+                    `\n**Created At:** ${formatTimeDate(new Date(curr.timestamp))}` +
                     (curr.edited_timestamp ? `\n*(last edited by ${parseUser(curr.edited_mod_id)} at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : '');
 
                 if ((i + 1) % 3 === 0 || i === length - 1) {

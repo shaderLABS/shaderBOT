@@ -3,14 +3,14 @@ import { db } from '../../db/postgres.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
-import { store } from './punishments.js';
+import { punishmentToString, store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
 /*******
  * BAN *
  *******/
 
-export async function tempban(user: User, duration: number, modID: Snowflake | null = null, reason: string | null = null, deleteMessages: boolean = false) {
+export async function tempban(user: User, duration: number, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -25,10 +25,10 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
                 WITH moved_rows AS (
                     DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
-                    INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
+                    INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                    SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
                 [user.id, timestamp, modID]
@@ -50,10 +50,10 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
         const tempban = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp)
-                VALUES ($1, 'ban', $2, $3, $4, $5)
+                INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, expire_timestamp, timestamp)
+                VALUES ($1, 'ban', $2, $3, $4, $5, $6)
                 RETURNING id;`,
-                [user.id, modID, reason, expire, timestamp]
+                [user.id, modID, reason, context, expire, timestamp]
             )
         ).rows[0];
 
@@ -62,7 +62,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
                 embeds: [
                     new MessageEmbed({
                         author: { name: 'You have been banned from shaderLABS.' },
-                        description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
+                        description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
                         color: embedColor.blue,
                     }),
                 ],
@@ -98,7 +98,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
     return { expire, dmed };
 }
 
-export async function ban(user: User, modID: Snowflake | null = null, reason: string | null = null, deleteMessages: boolean = false) {
+export async function ban(user: User, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -112,10 +112,10 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
                 WITH moved_rows AS (
                     DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
-                    INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
+                    INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                    SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
                 [user.id, timestamp, modID]
@@ -137,10 +137,10 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
         const ban = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, timestamp)
-                VALUES ($1, 'ban', $2, $3, $4)
+                INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, timestamp)
+                VALUES ($1, 'ban', $2, $3, $4, $5)
                 RETURNING id;`,
-                [user.id, modID, reason, timestamp]
+                [user.id, modID, reason, context, timestamp]
             )
         ).rows[0];
 
@@ -149,7 +149,7 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
                 embeds: [
                     new MessageEmbed({
                         author: { name: 'You have been banned from shaderLABS.' },
-                        description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', mod_id: modID, timestamp }),
+                        description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, timestamp }),
                         color: embedColor.blue,
                     }),
                 ],
@@ -174,16 +174,6 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
     return { dmed };
 }
 
-export function punishmentToString(punishment: any) {
-    return (
-        `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
-        `**ID:** ${punishment.id}\n` +
-        `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
-        `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`
-    );
-}
-
 /*********
  * UNBAN *
  *********/
@@ -199,10 +189,10 @@ export async function unban(userID: Snowflake, modID?: Snowflake) {
                 WITH moved_rows AS (
                     DELETE FROM punishment
                     WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
                 )
-                INSERT INTO past_punishment
-                SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+                INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
                 [userID, new Date(), modID || null]
             )
         ).rowCount;

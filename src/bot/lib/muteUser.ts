@@ -4,10 +4,10 @@ import { settings } from '../bot.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
-import { store } from './punishments.js';
+import { punishmentToString, store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
-export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string | null = null, member?: GuildMember) {
+export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
@@ -27,10 +27,10 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
                 WITH moved_rows AS (
                     DELETE FROM punishment
                     WHERE "type" = 'mute' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
                 ), inserted_rows AS (
-                    INSERT INTO past_punishment
-                    SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
+                    INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                    SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows
                 )
                 SELECT * FROM moved_rows;`,
                 [userID, timestamp, modID]
@@ -48,10 +48,10 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
         const mute = (
             await db.query(
                 /*sql*/ `
-                INSERT INTO punishment (user_id, "type", mod_id, reason, expire_timestamp, timestamp)
-                VALUES ($1, 'mute', $2, $3, $4, $5)
+                INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, expire_timestamp, timestamp)
+                VALUES ($1, 'mute', $2, $3, $4, $5, $6)
                 RETURNING id;`,
-                [userID, modID, reason, expire, timestamp]
+                [userID, modID, reason, context, expire, timestamp]
             )
         ).rows[0];
 
@@ -61,7 +61,7 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
                     embeds: [
                         new MessageEmbed({
                             author: { name: 'You have been muted on shaderLABS.' },
-                            description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', mod_id: modID, expire_timestamp: expire, timestamp }),
+                            description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
                             color: embedColor.blue,
                         }),
                     ],
@@ -120,10 +120,10 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
                 WITH moved_rows AS (
                     DELETE FROM punishment
                     WHERE "type" = 'mute' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, timestamp
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
                 )
-                INSERT INTO past_punishment
-                SELECT id, user_id, type, mod_id, reason, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+                INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
                 [userID, new Date(), modID || null]
             )
         ).rowCount;
@@ -152,7 +152,7 @@ export async function checkMuteEvasion(member: GuildMember) {
     const mute = (
         await db.query(
             /*sql*/ `
-            SELECT id, user_id, type, mod_id, reason, timestamp, expire_timestamp
+            SELECT id, expire_timestamp
             FROM punishment
             WHERE "type" = 'mute' AND user_id = $1
             LIMIT 1`,
@@ -184,14 +184,4 @@ export async function checkMuteEvasion(member: GuildMember) {
         store.mutes.set(member.id, timeout);
         log(`${parseUser(member.user)} possibly tried to evade their mute (${mute.id}).`, 'Mute Evasion');
     }
-}
-
-function punishmentToString(punishment: any) {
-    return (
-        `**Reason:** ${punishment.reason || 'No reason provided.'}\n` +
-        `**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}\n` +
-        `**ID:** ${punishment.id}\n` +
-        `**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}\n` +
-        `**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`
-    );
 }

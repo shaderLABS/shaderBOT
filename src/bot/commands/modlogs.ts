@@ -2,7 +2,7 @@ import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { getPunishmentPoints } from '../lib/automaticPunishment.js';
 import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
-import { parseUser } from '../lib/misc.js';
+import { formatContextURL, parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
 import { requireUser } from '../lib/searchMessage.js';
 import { formatTimeDate } from '../lib/time.js';
@@ -67,6 +67,7 @@ export const command: Command = {
                             `\n**Severity:** ${row.severity}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
                             `\n**Moderator:** ${parseUser(row.mod_id)}` +
+                            `\n**Context:** ${formatContextURL(row.context_url)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`
                     )
@@ -81,6 +82,7 @@ export const command: Command = {
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
                             `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
+                            `\n**Context:** ${formatContextURL(row.context_url)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
                             `\n**Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}` +
@@ -96,6 +98,7 @@ export const command: Command = {
                         (row) =>
                             `\n**Content:** ${row.content}` +
                             `\n**Moderator:** ${parseUser(row.mod_id)}` +
+                            `\n**Context:** ${formatContextURL(row.context_url)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
                             (row.edited_timestamp ? `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
@@ -111,6 +114,7 @@ export const command: Command = {
                             `\n**Type:** ${punishmentTypeAsString[row.type]}` +
                             `\n**Reason:** ${row.reason || 'No reason provided.'}` +
                             `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
+                            `\n**Context:** ${formatContextURL(row.context_url)}` +
                             `\n**ID:** ${row.id}` +
                             `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
 

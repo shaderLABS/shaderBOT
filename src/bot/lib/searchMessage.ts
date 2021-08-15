@@ -90,7 +90,7 @@ export function removeArgumentsFromText(text: string, lastArgument: string) {
 export function matchBlacklist(message: GuildMessage) {
     if (settings.blacklist.strings.some((str) => message.content.includes(str))) {
         if (message.deletable) message.delete();
-        mute(message.author.id, settings.blacklist.muteDuration, null, 'Sent message containing blacklisted content.', message.member).catch((e) =>
+        mute(message.author.id, settings.blacklist.muteDuration, null, 'Sent message containing blacklisted content.', null, message.member).catch((e) =>
             log(`Failed to mute ${parseUser(message.author)} due to blacklisted content: ${e}`, 'Mute')
         );
 

@@ -48,6 +48,10 @@ export function parseUser(user: User | Snowflake) {
     return `<@${target.id}> (${Util.escapeMarkdown(target.tag)} | ${target.id})`;
 }
 
+export function formatContextURL(context: string | null | undefined) {
+    return context ? `[click here](${context})` : 'No context exists.';
+}
+
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {

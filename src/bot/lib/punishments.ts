@@ -2,8 +2,9 @@ import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { unban } from './banUser.js';
 import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { formatContextURL, getGuild, parseUser } from './misc.js';
 import { unmute } from './muteUser.js';
+import { formatTimeDate } from './time.js';
 
 export const punishmentTypeAsString: {
     [key: string]: string;
@@ -61,4 +62,25 @@ export async function loadTimeouts(includeTomorrow: boolean) {
             store.mutes.set(punishment.user_id, timeout);
         }
     }
+}
+
+export function punishmentToString(punishment: any) {
+    return (
+        `**Reason:** ${punishment.reason || 'No reason provided.'}` +
+        `\n**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}` +
+        `\n**Context:** ${formatContextURL(punishment.context_url)}` +
+        `\n**ID:** ${punishment.id}` +
+        `\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}` +
+        `\n**Expiring At:** ${punishment.expire_timestamp ? formatTimeDate(new Date(punishment.expire_timestamp)) : 'Permanent'}`
+    );
+}
+
+export function pastPunishmentToString(punishment: any) {
+    return (
+        `**Reason:** ${punishment.reason || 'No reason provided.'}` +
+        `\n**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}` +
+        `\n**Context:** ${formatContextURL(punishment.context_url)}` +
+        `\n**ID:** ${punishment.id}` +
+        `\n**Created At:** ${formatTimeDate(new Date(punishment.timestamp))}`
+    );
 }
