@@ -15,7 +15,7 @@ type cachedMessage = {
 const cache: (cachedMessage | undefined)[] = new Array(settings.spamProtection.cacheLength);
 
 export function checkSpam(message: GuildMessage) {
-    if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold || !message.content.includes('http')) return false;
+    if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold) return false;
 
     const currentMessage = {
         id: message.id,
