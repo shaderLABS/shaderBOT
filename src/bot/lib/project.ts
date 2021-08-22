@@ -3,10 +3,7 @@ import { db } from '../../db/postgres.js';
 
 export const ownerOverwrites: PermissionOverwriteOptions = {
     MANAGE_WEBHOOKS: true,
-    MANAGE_MESSAGES: true,
     MANAGE_THREADS: true,
-    USE_PUBLIC_THREADS: true,
-    USE_PRIVATE_THREADS: true,
 };
 
 export async function isProjectOwner(userID: Snowflake, channelID: Snowflake): Promise<Boolean> {
