@@ -40,14 +40,14 @@
         "@types/connect-pg-simple": "^4.2.4",
         "@types/cors": "^2.8.12",
         "@types/express-session": "^1.17.4",
-        "@types/node": "^16.6.1",
+        "@types/node": "^16.7.1",
         "@types/node-cron": "^2.0.4",
         "@types/passport": "^1.0.7",
         "@types/passport-discord": "^0.1.4",
         "@types/pg": "^8.6.1",
         "@types/polka": "^0.5.3",
         "dotenv": "^10.0.0",
-        "tsc-watch": "^4.4.0",
+        "tsc-watch": "^4.5.0",
         "typescript": "^4.3.5"
     }
 }
