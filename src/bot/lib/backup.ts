@@ -67,7 +67,7 @@ export async function createBackup(channel: TextChannel | ThreadChannel, backupM
     let content = messageArray.reduce((prev, curr) => {
         let content = `${curr.author.tag} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, ' ')}`;
         for (const embed of curr.embeds) content += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
-        for (const attachment of curr.attachments.values()) content += '\n\t' + attachment.proxyURL;
+        for (const attachment of curr.attachments.values()) content += '\n\t' + attachment.url;
 
         return prev + `${curr.createdAt.toUTCString()} - ${content}\n`;
     }, `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${backupPrefix ? '\n' + backupPrefix : ''}\n\n`);

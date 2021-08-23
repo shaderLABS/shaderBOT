@@ -33,7 +33,7 @@ export const event: Event = {
 
             logChannel.send({
                 embeds: [logEmbed],
-                files: [...message.attachments.values()].map((attachment) => new MessageAttachment(attachment.proxyURL, attachment.name || undefined)),
+                files: [...message.attachments.values()].map((attachment) => new MessageAttachment(attachment.url, attachment.name || undefined)),
                 allowedMentions: { parse: [] },
             });
         }
