@@ -1,6 +1,6 @@
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { embedPages, sendError, sendInfo } from '../../lib/embeds.js';
+import { embedButtonPages, sendError } from '../../lib/embeds.js';
 import { ensureTextChannel, parseUser } from '../../lib/misc.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -41,8 +41,7 @@ export const command: Command = {
                 return prev + '\n\n' + curr;
             }, '');
 
-            const firstPage = await sendInfo(channel, pages[0], 'Tickets');
-            embedPages(firstPage, message.author, pages);
+            embedButtonPages(channel, message.author, pages, 'Tickets');
         } catch (error) {
             if (error) sendError(channel, error);
         }

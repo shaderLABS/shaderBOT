@@ -1,7 +1,7 @@
 import { db } from '../../db/postgres.js';
 import { Command } from '../commandHandler.js';
 import { getPunishmentPoints } from '../lib/automaticPunishment.js';
-import { embedPages, sendError, sendInfo } from '../lib/embeds.js';
+import { embedButtonPages, sendError } from '../lib/embeds.js';
 import { formatContextURL, parseUser } from '../lib/misc.js';
 import { punishmentTypeAsString } from '../lib/punishments.js';
 import { requireUser } from '../lib/searchMessage.js';
@@ -127,11 +127,12 @@ export const command: Command = {
                 );
             }
 
+            if (!pages[0]) pages[0] = 'There are no entries for this user.';
+
             const punishmentPoints = await getPunishmentPoints(user.id);
             if (punishmentPoints !== 0) pages[0] = `**Punishment Points:** ${punishmentPoints}\n\n` + pages[0];
 
-            const embedMessage = await sendInfo(channel, pages[0] || 'There are no entries for this user.', `Moderation Logs - ${user.tag}`);
-            embedPages(embedMessage, message.author, pages);
+            embedButtonPages(channel, message.author, pages, `Moderation Logs - ${user.tag}`);
         } catch (error) {
             if (error) sendError(channel, error);
         }

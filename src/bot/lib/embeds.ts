@@ -1,4 +1,4 @@
-import { DMChannel, Message, MessageEmbed, TextChannel, ThreadChannel, User } from 'discord.js';
+import { ColorResolvable, DMChannel, GuildMember, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel, ThreadChannel, User } from 'discord.js';
 
 export const embedColor = {
     green: 0x4caf50,
@@ -39,63 +39,68 @@ export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, descr
     return channel.send({ content: message, embeds: [embed] });
 }
 
-export async function embedPages(message: Message, author: User, pages: string[]) {
-    const embed = message.embeds[0];
-    if (!embed || pages.length <= 1) return;
+export async function embedButtonPages(
+    channel: TextChannel | ThreadChannel | DMChannel,
+    author: User,
+    pages: string[],
+    title?: string,
+    color: ColorResolvable = embedColor.blue,
+    iconURL: string = embedIcon.info
+) {
+    const embed = new MessageEmbed({
+        color,
+        description: pages[0],
+        author: {
+            name: title,
+            iconURL,
+        },
+    });
 
-    message.react('➡️');
-    const collector = message.createReactionCollector({
-        filter: (reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id,
-        idle: 300000,
-        time: 600000,
+    if (pages.length <= 1) {
+        channel.send({ embeds: [embed] });
+        return;
+    }
+
+    const backwardButton = new MessageButton({
+        customId: 'backward',
+        style: 'SECONDARY',
+        emoji: '⬅️',
+        disabled: true,
+    });
+
+    const forwardButton = new MessageButton({
+        customId: 'forward',
+        style: 'SECONDARY',
+        emoji: '➡️',
+    });
+
+    const message = await channel.send({
+        embeds: [embed],
+        components: [
+            new MessageActionRow({
+                components: [backwardButton, forwardButton],
+            }),
+        ],
+    });
+
+    const collector = message.createMessageComponentCollector({
+        // TODO: handle APIInteractionGuildMember if there are any issues
+        filter: (interaction) => interaction.user.id === author.id || (interaction.member instanceof GuildMember && interaction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
+        idle: 600000,
     });
 
     let index = 0;
-    collector.on('collect', async (reaction) => {
-        if (reaction.emoji.name === '⬅️' && pages[index - 1]) index--;
-        else if (reaction.emoji.name === '➡️' && pages[index + 1]) index++;
-        else return;
+    collector.on('collect', async (interaction) => {
+        if (interaction.customId === 'backward') {
+            await message.edit({ embeds: [embed.setDescription(pages[--index])] });
+        } else if (interaction.customId === 'forward') {
+            await message.edit({ embeds: [embed.setDescription(pages[++index])] });
+        }
 
-        await message.reactions.removeAll();
-        // if (pageFooter) embed.setFooter(`Page ${index + 1}/${pages.length}`);
-        message.edit({ embeds: [embed.setDescription(pages[index])] });
-
-        if (index !== 0) message.react('⬅️');
-        if (index + 1 < pages.length) message.react('➡️');
+        interaction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
     });
 
     collector.on('end', () => {
-        message.reactions.removeAll();
-    });
-}
-
-export async function embedFields(message: Message, author: User, fields: { name: string; value: string; inline: boolean }[][]) {
-    const embed = message.embeds[0];
-    if (!embed || fields.length <= 1) return;
-
-    message.react('➡️');
-    const collector = message.createReactionCollector({
-        filter: (reaction, user) => !!reaction.emoji.name && ['⬅️', '➡️'].includes(reaction.emoji.name) && user.id === author.id,
-        idle: 300000,
-        time: 600000,
-    });
-
-    let index = 0;
-    collector.on('collect', async (reaction) => {
-        if (reaction.emoji.name === '⬅️' && fields[index - 1]) index--;
-        else if (reaction.emoji.name === '➡️' && fields[index + 1]) index++;
-        else return;
-
-        await message.reactions.removeAll();
-
-        embed.fields = fields[index];
-        message.edit({ embeds: [embed] });
-
-        if (index !== 0) message.react('⬅️');
-        if (index + 1 < fields.length) message.react('➡️');
-    });
-
-    collector.on('end', () => {
-        message.reactions.removeAll();
+        message.edit({ components: [] });
     });
 }

@@ -2,7 +2,7 @@ import { MessageEmbed } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { embedIcon, embedPages, sendError } from '../../lib/embeds.js';
+import { embedButtonPages, embedIcon, sendError } from '../../lib/embeds.js';
 import { formatContextURL, parseUser } from '../../lib/misc.js';
 import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
@@ -84,16 +84,7 @@ export const command: Command = {
                     return prev + '\n\n' + page;
                 }, '');
 
-                const embed = await channel.send({
-                    embeds: [
-                        new MessageEmbed()
-                            .setAuthor(notes.length > 1 ? 'Notes' : 'Note', embedIcon.note)
-                            .setColor('#ffc107')
-                            .setDescription(pages[0]),
-                    ],
-                });
-
-                embedPages(embed, author, pages);
+                embedButtonPages(channel, author, pages, notes.length > 1 ? 'Notes' : 'Note', 0xffc107, embedIcon.note);
             }
         } catch (error) {
             if (error) sendError(channel, error);

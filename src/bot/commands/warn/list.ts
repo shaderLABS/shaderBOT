@@ -2,8 +2,8 @@ import { Snowflake } from 'discord.js';
 import uuid from 'uuid-random';
 import { db } from '../../../db/postgres.js';
 import { Command } from '../../commandHandler.js';
-import { embedPages, sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
-import { formatContextURL, parseUser, sleep } from '../../lib/misc.js';
+import { embedButtonPages, sendError, sendInfo, sendSuccess } from '../../lib/embeds.js';
+import { formatContextURL, parseUser } from '../../lib/misc.js';
 import { requireUser } from '../../lib/searchMessage.js';
 import { formatTimeDate } from '../../lib/time.js';
 
@@ -100,13 +100,7 @@ export const command: Command = {
                 // DM
                 try {
                     const dmChannel = await member.createDM();
-
-                    for (let i = 0; i < pages.length; i++) {
-                        if (i === 0) await sendInfo(dmChannel, pages[0], 'Warnings');
-                        else await sendInfo(dmChannel, pages[i]);
-
-                        await sleep(1000);
-                    }
+                    embedButtonPages(dmChannel, member.user, pages, 'Warnings');
 
                     sendSuccess(channel, 'Successfully sent you your warnings in a DM.', 'List Warnings');
                 } catch {
@@ -114,8 +108,7 @@ export const command: Command = {
                 }
             } else {
                 // public
-                const warningEmbed = await sendInfo(channel, pages[0], 'Warnings');
-                embedPages(warningEmbed, member.user, pages);
+                embedButtonPages(channel, member.user, pages, 'Warnings');
             }
         }
     },

@@ -1,7 +1,7 @@
 import { Collection } from 'discord.js';
 import { commands, settings } from '../bot.js';
 import { Command, hasPermissions } from '../commandHandler.js';
-import { embedPages, sendInfo } from '../lib/embeds.js';
+import { embedButtonPages } from '../lib/embeds.js';
 
 export const command: Command = {
     commands: ['help'],
@@ -40,6 +40,6 @@ export const command: Command = {
         }
 
         if (helpContent.length !== 0) pages.push(helpContent);
-        embedPages(await sendInfo(message.channel, pages[0], 'Help'), message.author, pages);
+        embedButtonPages(message.channel, message.author, pages, 'Help');
     },
 };

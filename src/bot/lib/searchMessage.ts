@@ -1,7 +1,7 @@
-import { GuildMember, MessageMentions, Snowflake, TextChannel, ThreadChannel, User } from 'discord.js';
+import { GuildMember, MessageActionRow, MessageButton, MessageEmbed, MessageMentions, Snowflake, TextChannel, ThreadChannel, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../commandHandler.js';
-import { sendInfo } from './embeds.js';
+import { embedColor } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
 import { mute } from './muteUser.js';
@@ -57,26 +57,41 @@ export async function requireMember(potentialMember: string, confirmation?: { au
 }
 
 async function confirmUser(user: User, author: User, channel: TextChannel | ThreadChannel): Promise<void> {
-    const confirmation = await sendInfo(channel, `Please confirm that ${parseUser(user)} is the correct user.`);
+    const confirmButton = new MessageButton({
+        customId: 'confirm',
+        style: 'SUCCESS',
+        label: 'Confirm',
+        // emoji: '✅',
+    });
 
-    await confirmation.react('✅');
-    await confirmation.react('❌');
+    const denyButton = new MessageButton({
+        customId: 'deny',
+        style: 'DANGER',
+        label: 'Deny',
+        // emoji: '❌',
+    });
+
+    const embed = new MessageEmbed({
+        color: embedColor.blue,
+        description: `Please confirm that ${parseUser(user)} is the correct user.`,
+    });
+
+    const confirmation = await channel.send({ embeds: [embed], components: [new MessageActionRow({ components: [confirmButton, denyButton] })] });
 
     try {
-        const reaction = (
-            await confirmation.awaitReactions({ filter: (reaction, reactor) => !!reaction.emoji.name && ['✅', '❌'].includes(reaction.emoji.name) && reactor.id === author.id, max: 1, idle: 300000 })
-        ).first();
-        confirmation.delete();
+        const interaction = await confirmation.awaitMessageComponent({ filter: (interaction) => interaction.user.id === author.id, time: 300000 }).catch(() => undefined);
 
-        if (!reaction) {
-            await sendInfo(channel, 'The user confirmation was cancelled due to inactivity.');
+        if (!interaction) {
+            await confirmation.edit({ embeds: [embed.setDescription('The user confirmation was cancelled due to inactivity.')], components: [] });
             return Promise.reject();
         }
 
-        if (reaction.emoji.name === '❌') {
-            await sendInfo(channel, 'The user confirmation was rejected.');
+        if (interaction.customId === 'deny') {
+            await interaction.update({ embeds: [embed.setDescription('The user confirmation was rejected.')], components: [] });
             return Promise.reject();
         }
+
+        await confirmation.delete();
     } catch {
         confirmation.delete();
         return Promise.reject('The user confirmation failed.');
