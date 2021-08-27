@@ -14,7 +14,7 @@ export const embedIcon = {
     note: 'https://img.icons8.com/color/48/000000/note.png',
 };
 
-export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string) {
+export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Success', embedIcon.success)
         .setDescription(description)
@@ -22,7 +22,7 @@ export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, de
     return channel.send({ embeds: [embed] });
 }
 
-export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string) {
+export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Error', embedIcon.error)
         .setDescription(description)
@@ -30,7 +30,7 @@ export function sendError(channel: TextChannel | DMChannel | ThreadChannel, desc
     return channel.send({ embeds: [embed] });
 }
 
-export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: string, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || '', title ? embedIcon.info : undefined)
         .setDescription(description)

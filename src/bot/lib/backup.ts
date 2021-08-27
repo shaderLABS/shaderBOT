@@ -89,6 +89,6 @@ export async function cleanBackups() {
             }
         }
     } catch (error) {
-        if (error.code !== 'ENOENT') console.error(error);
+        console.error(error);
     }
 }

@@ -67,7 +67,7 @@ passport.use(
                 done(undefined, user);
             } catch (error) {
                 console.log(error);
-                done(error);
+                done(error instanceof Error ? error : new Error('Login failed.'));
             }
         }
     )
