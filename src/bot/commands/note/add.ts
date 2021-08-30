@@ -43,7 +43,7 @@ export const command: Command = {
                 `**User:** ${parseUser(user)}` +
                 `\n**Content:** ${content}` +
                 `\n**Moderator:** ${parseUser(author)}` +
-                `\n**Context:** ${formatContextURL(result.context_url)}` +
+                `\n**Context:** ${formatContextURL(message.url)}` +
                 `\n**Created At:** ${formatTimeDate(timestamp)}`;
 
             channel.send({
