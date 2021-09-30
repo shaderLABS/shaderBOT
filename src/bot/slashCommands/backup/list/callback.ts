@@ -1,28 +1,22 @@
-import { MessageActionRow, MessageAttachment, MessageSelectMenu } from 'discord.js';
+import { Message, MessageActionRow, MessageAttachment, MessageSelectMenu } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { Command } from '../../commandHandler.js';
-import { backupPath, readBackup } from '../../lib/backup.js';
-import { sendError, sendInfo } from '../../lib/embeds.js';
-import { formatTimeDate } from '../../lib/time.js';
+import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
+import { backupPath, readBackup } from '../../../lib/backup.js';
+import { replyInfo, sendError } from '../../../lib/embeds.js';
+import { formatTimeDate } from '../../../lib/time.js';
+import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 
-export const command: Command = {
-    commands: ['list'],
-    superCommands: ['backup'],
-    help: 'Select, decrypt & send a backup.',
-    minArgs: 0,
-    maxArgs: 0,
+export const command: ApplicationCommandCallback = {
     requiredPermissions: ['MANAGE_MESSAGES'],
-    callback: async (message) => {
-        const { author, channel } = message;
-
+    callback: async (interaction: GuildCommandInteraction) => {
         // read backup dir & sort by creation time
         const files: string[] = await fs.readdir(backupPath).catch((error) => {
             if (error.code !== 'ENOENT') console.error(error);
             return [];
         });
 
-        if (files.length === 0) return sendInfo(channel, 'There are no backups.');
+        if (files.length === 0) return replyInfo(interaction, 'There are no backups.');
 
         const backups = (
             await Promise.all(
@@ -44,11 +38,14 @@ export const command: Command = {
             }),
         });
 
-        const selectionMessage = await channel.send({ content: '**Select a Backup**', components: [new MessageActionRow({ components: [menu] })] });
+        await interaction.reply({ content: '**Select a Backup**', components: [new MessageActionRow({ components: [menu] })] });
+        const selectionMessage = await interaction.fetchReply();
+        if (!(selectionMessage instanceof Message)) return;
+
         const selection = await selectionMessage
             .awaitMessageComponent({
                 componentType: 'SELECT_MENU',
-                filter: (interaction) => interaction.user.id === author.id,
+                filter: (selectionInteraction) => selectionInteraction.user.id === interaction.user.id,
                 time: 300000,
             })
             .catch(() => undefined);
@@ -58,9 +55,9 @@ export const command: Command = {
 
             try {
                 const data = await readBackup(backup.name);
-                channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
+                interaction.channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
             } catch (error) {
-                sendError(channel, error);
+                sendError(interaction.channel, error);
             }
 
             selection.update({ components: [new MessageActionRow({ components: [menu.setPlaceholder(backup.name).setDisabled(true)] })] });

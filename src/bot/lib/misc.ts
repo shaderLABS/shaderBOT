@@ -1,4 +1,4 @@
-import { CategoryChannel, Channel, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../commandHandler.js';
@@ -14,6 +14,10 @@ export function isTextOrThreadChannel(channel: Channel | TextBasedChannels): cha
 
 export function isGuildMessage(message: Message): message is GuildMessage {
     return isTextOrThreadChannel(message.channel) && !!message.guild && !!message.member;
+}
+
+export function userToMember(guild: Guild, id: Snowflake) {
+    return guild.members.fetch(id).catch(() => undefined);
 }
 
 export function ensureTextChannel(channel: TextChannel | ThreadChannel): channel is TextChannel {

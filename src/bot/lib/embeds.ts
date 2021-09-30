@@ -1,4 +1,5 @@
-import { ColorResolvable, DMChannel, GuildMember, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel, ThreadChannel, User } from 'discord.js';
+import { ColorResolvable, CommandInteraction, DMChannel, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel, ThreadChannel, User } from 'discord.js';
+import { GuildCommandInteraction } from '../events/interactionCreate';
 
 export const embedColor = {
     green: 0x4caf50,
@@ -22,12 +23,30 @@ export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, de
     return channel.send({ embeds: [embed] });
 }
 
+export function replySuccess(interaction: CommandInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
+    const embed = new MessageEmbed()
+        .setAuthor(title || 'Success', embedIcon.success)
+        .setDescription(description)
+        .setColor(embedColor.green);
+
+    return interaction.reply({ embeds: [embed], ephemeral });
+}
+
 export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
     const embed = new MessageEmbed()
         .setAuthor(title || 'Error', embedIcon.error)
         .setDescription(description)
         .setColor(embedColor.red);
     return channel.send({ embeds: [embed] });
+}
+
+export function replyError(interaction: CommandInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
+    const embed = new MessageEmbed()
+        .setAuthor(title || 'Error', embedIcon.error)
+        .setDescription(description)
+        .setColor(embedColor.red);
+
+    return interaction.reply({ embeds: [embed], ephemeral });
 }
 
 export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string, message?: string, footer?: string) {
@@ -37,6 +56,16 @@ export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, descr
         .setColor(embedColor.blue)
         .setFooter(footer || '');
     return channel.send({ content: message, embeds: [embed] });
+}
+
+export function replyInfo(interaction: CommandInteraction, description: any, title?: string, message?: string, footer?: string, ephemeral: boolean | undefined = false) {
+    const embed = new MessageEmbed()
+        .setAuthor(title || '', title ? embedIcon.info : undefined)
+        .setDescription(description)
+        .setColor(embedColor.blue)
+        .setFooter(footer || '');
+
+    return interaction.reply({ content: message, embeds: [embed], ephemeral });
 }
 
 export async function embedButtonPages(
@@ -102,5 +131,68 @@ export async function embedButtonPages(
 
     collector.on('end', () => {
         message.edit({ components: [] });
+    });
+}
+
+export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title?: string, color: ColorResolvable = embedColor.blue, iconURL: string = embedIcon.info) {
+    const embed = new MessageEmbed({
+        color,
+        description: pages[0],
+        author: {
+            name: title,
+            iconURL,
+        },
+    });
+
+    if (pages.length <= 1) {
+        interaction.reply({ embeds: [embed] });
+        return;
+    }
+
+    const backwardButton = new MessageButton({
+        customId: 'backward',
+        style: 'SECONDARY',
+        emoji: '⬅️',
+        disabled: true,
+    });
+
+    const forwardButton = new MessageButton({
+        customId: 'forward',
+        style: 'SECONDARY',
+        emoji: '➡️',
+    });
+
+    await interaction.reply({
+        embeds: [embed],
+        components: [
+            new MessageActionRow({
+                components: [backwardButton, forwardButton],
+            }),
+        ],
+    });
+
+    const message = await interaction.fetchReply();
+    if (!(message instanceof Message)) return;
+
+    const collector = message.createMessageComponentCollector({
+        // TODO: handle APIInteractionGuildMember if there are any issues
+        filter: (buttonInteraction) =>
+            buttonInteraction.user.id === interaction.user.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
+        idle: 600000,
+    });
+
+    let index = 0;
+    collector.on('collect', async (buttonInteraction) => {
+        if (buttonInteraction.customId === 'backward') {
+            await interaction.editReply({ embeds: [embed.setDescription(pages[--index])] });
+        } else if (buttonInteraction.customId === 'forward') {
+            await interaction.editReply({ embeds: [embed.setDescription(pages[++index])] });
+        }
+
+        buttonInteraction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+    });
+
+    collector.on('end', () => {
+        interaction.editReply({ components: [] });
     });
 }

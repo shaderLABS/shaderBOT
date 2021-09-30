@@ -1,0 +1,12 @@
+{
+    "name": "info",
+    "description": "Display information about a specified user or yourself.",
+    "options": [
+        {
+            "name": "user",
+            "description": "The user you want to display information about.",
+            "type": "USER",
+            "required": false
+        }
+    ]
+}
