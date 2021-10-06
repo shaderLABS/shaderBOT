@@ -1,0 +1,63 @@
+{
+    "name": "project",
+    "description": "Manage and configure a project. This command only works in your project channel(s).",
+    "options": [
+        {
+            "name": "name",
+            "description": "Change the name of your project channel.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "value",
+                    "description": "The new name for your project channel.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "description",
+            "description": "Change or remove the description of your project channel.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "value",
+                    "description": "The new description for your project channel.",
+                    "type": "STRING",
+                    "required": false
+                }
+            ]
+        },
+        {
+            "name": "mute",
+            "description": "Mute a user in your project channel.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user you want to mute.",
+                    "type": "USER",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "unmute",
+            "description": "Unmute a user in your project channel.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user you want to unmute.",
+                    "type": "USER",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "ping",
+            "description": "Ping all users that are subscribed to this project.",
+            "type": "SUB_COMMAND"
+        }
+    ]
+}

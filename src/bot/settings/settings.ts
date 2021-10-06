@@ -9,11 +9,6 @@ export interface Settings {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;
     };
-    ticket: {
-        categoryIDs: Snowflake[];
-        attachmentCacheChannelID: Snowflake;
-        openCategoryID: Snowflake;
-    };
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
     muteRoleID: Snowflake;

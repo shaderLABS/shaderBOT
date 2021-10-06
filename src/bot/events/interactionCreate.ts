@@ -1,5 +1,5 @@
 import { Collection, CommandInteraction, Guild, GuildMember, Interaction, TextChannel, ThreadChannel } from 'discord.js';
-import { cooldowns, settings } from '../bot.js';
+import { cooldowns } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { replyError } from '../lib/embeds.js';
 import { isTextOrThreadChannel } from '../lib/misc.js';
@@ -66,10 +66,6 @@ export const event: Event = {
 
         if (!hasPermissions(member, channel, command)) {
             return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
-        }
-
-        if (!ticketChannels && channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
-            return replyError(interaction, 'This command is not usable in ticket channels.');
         }
 
         if (channelWhitelist && !channelWhitelist.includes(channel.id)) {

@@ -127,11 +127,6 @@ export function runCommand(command: Command | Collection<string, Command>, messa
         callback,
     } = command;
 
-    if (!ticketChannels && channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
-        if (message.deletable) message.delete();
-        return;
-    }
-
     if (channelWhitelist && !channelWhitelist.includes(channel.id)) {
         sendError(channel, `This command is only usable in <#${channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
         return;

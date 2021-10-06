@@ -12,10 +12,8 @@ import serveStatic from 'serve-static';
 import ssr from 'tossr';
 import typegraphql from 'type-graphql';
 import { db } from '../db/postgres.js';
-import { TicketResolver } from '../db/resolvers/TicketResolver.js';
 import { UserResolver } from '../db/resolvers/UserResolver.js';
 import { ProjectResolver } from '../db/resolvers/ProjectResolver.js';
-import { CommentResolver } from '../db/resolvers/CommentResolver.js';
 import { ChannelResolver, RoleResolver } from '../db/resolvers/MarkdownResolver.js';
 import { production } from '../index.js';
 import { authChecker } from './gqlAuth.js';
@@ -36,7 +34,7 @@ export async function startWebserver() {
 
     const server = new apollo.ApolloServer({
         schema: await typegraphql.buildSchema({
-            resolvers: [TicketResolver, UserResolver, ProjectResolver, CommentResolver, ChannelResolver, RoleResolver],
+            resolvers: [UserResolver, ProjectResolver, ChannelResolver, RoleResolver],
             authChecker,
         }),
         context: ({ req, res }) => ({ req, res }),

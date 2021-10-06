@@ -14,33 +14,6 @@ CREATE TABLE "project" (
     issue_tracker_url TEXT
 );
 
-DROP TABLE IF EXISTS "ticket";
-CREATE TABLE "ticket" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT UNIQUE NOT NULL,
-    project_channel_id NUMERIC(20) REFERENCES project(channel_id),
-    description TEXT,
-    attachments TEXT[],
-    author_id NUMERIC(20) NOT NULL,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    edited TIMESTAMP WITH TIME ZONE,
-    closed BOOLEAN DEFAULT FALSE,
-    channel_id NUMERIC(20) UNIQUE
-);
-
-DROP TABLE IF EXISTS "comment";
-CREATE TABLE "comment" (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    ticket_id UUID NOT NULL REFERENCES ticket(id),
-    author_id NUMERIC(20) NOT NULL,
-    message_id NUMERIC(20) UNIQUE,
-    reference_id UUID,
-    content TEXT,
-    attachment TEXT,
-    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-    edited TIMESTAMP WITH TIME ZONE
-);
-
 DROP TABLE IF EXISTS "warn";
 CREATE TABLE "warn" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
