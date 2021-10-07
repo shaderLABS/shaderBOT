@@ -1,0 +1,32 @@
+{
+    "name": "deletelog",
+    "description": "Delete log entries of past punishments.",
+    "options": [
+        {
+            "name": "user",
+            "description": "Delete the latest log entry of the specified user.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user whose latest log entry you want to delete.",
+                    "type": "USER",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "id",
+            "description": "Delete the log entry with the specified UUID.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The UUID of the log entry you want to delete.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        }
+    ]
+}
