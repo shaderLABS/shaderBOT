@@ -10,6 +10,10 @@ export function isSnowflake(potentialSnowflake: Snowflake | string): potentialSn
     return !isNaN(+potentialSnowflake) && potentialSnowflake.length >= 17 && potentialSnowflake.length <= 19;
 }
 
+export async function getContextURL(channel: TextChannel | ThreadChannel) {
+    return (await channel.messages.fetch({ limit: 1 })).first()?.url;
+}
+
 export async function getUser(potentialUser: Snowflake | string, confirmation?: { author: User; channel: TextChannel | ThreadChannel }): Promise<User | undefined> {
     const mention = potentialUser.match(MessageMentions.USERS_PATTERN);
     if (mention) potentialUser = mention[0].replace(/\D/g, '');

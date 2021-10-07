@@ -1,0 +1,30 @@
+{
+    "name": "ban",
+    "description": "Ban a user temporarily or permanently.",
+    "options": [
+        {
+            "name": "user",
+            "description": "The user that will be banned.",
+            "type": "USER",
+            "required": true
+        },
+        {
+            "name": "reason",
+            "description": "The reason of the ban.",
+            "type": "STRING",
+            "required": false
+        },
+        {
+            "name": "time",
+            "description": "The amount of time that the user will be banned for.",
+            "type": "STRING",
+            "required": false
+        },
+        {
+            "name": "delete_messages",
+            "description": "Whether or not the messages of the banned user should be deleted. Defaults to false.",
+            "type": "BOOLEAN",
+            "required": false
+        }
+    ]
+}
