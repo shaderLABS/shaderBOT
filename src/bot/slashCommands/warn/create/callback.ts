@@ -5,14 +5,13 @@ import automaticPunishment from '../../../lib/automaticPunishment.js';
 import { embedColor, replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { formatContextURL, parseUser, userToMember } from '../../../lib/misc.js';
+import { getContextURL } from '../../../lib/searchMessage.js';
 import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { member } = interaction;
-
-        const contextURL = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
 
         const targetUser = interaction.options.getUser('user', true);
         const severity = interaction.options.getInteger('severity', true);
@@ -23,6 +22,8 @@ export const command: ApplicationCommandCallback = {
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return replyError(interaction, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
+
+        const contextURL = await getContextURL(interaction.channel);
 
         const id = (
             await db.query(

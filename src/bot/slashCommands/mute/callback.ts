@@ -2,6 +2,7 @@ import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { parseUser, userToMember } from '../../lib/misc.js';
 import { mute } from '../../lib/muteUser.js';
+import { getContextURL } from '../../lib/searchMessage.js';
 import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
 import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
 
@@ -9,8 +10,6 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['KICK_MEMBERS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { member, guild } = interaction;
-
-        const contextURL = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
 
         const reason = interaction.options.getString('reason', false);
         if (reason && reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
@@ -22,9 +21,10 @@ export const command: ApplicationCommandCallback = {
             return replyError(interaction, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         const time = stringToSeconds(splitString(interaction.options.getString('time', true)));
-
         if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
         if (time < 10) return replyError(interaction, "You can't mute someone for less than 10 seconds.");
+
+        const contextURL = await getContextURL(interaction.channel);
 
         try {
             const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, contextURL, targetMember);

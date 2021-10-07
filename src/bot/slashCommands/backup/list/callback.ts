@@ -1,4 +1,4 @@
-import { Message, MessageActionRow, MessageAttachment, MessageSelectMenu } from 'discord.js';
+import { Message, MessageActionRow, MessageAttachment, MessageButton, MessageSelectMenu } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
@@ -26,43 +26,81 @@ export const command: ApplicationCommandCallback = {
             )
         ).sort((a, b) => b.createdAt - a.createdAt);
 
-        const menu = new MessageSelectMenu({
-            customId: 'select-backup',
-            placeholder: backups.length + ' backups available...',
-            options: backups.map((backup, index) => {
-                return {
-                    label: backup.name.substring(0, backup.name.lastIndexOf(' - ')),
-                    value: index.toString(),
-                    description: formatTimeDate(new Date(backup.createdAt)),
-                };
-            }),
+        const backupChunks: { name: string; createdAt: number }[][] = [];
+        for (let i = 0; i < Math.ceil(backups.length / 25); ++i) {
+            backupChunks.push(backups.slice(25 * i, 25 * (i + 1)));
+        }
+
+        const menu = backupChunks.map(
+            (chunk, index) =>
+                new MessageSelectMenu({
+                    customId: 'select-backup',
+                    placeholder: `${backups.length} backups available. Page ${index + 1} out of ${backupChunks.length}.`,
+                    options: chunk.map((backup, index) => {
+                        return {
+                            label: backup.name.substring(0, backup.name.lastIndexOf(' - ')),
+                            value: index.toString(),
+                            emoji: '📝',
+                            description: formatTimeDate(new Date(backup.createdAt)),
+                        };
+                    }),
+                })
+        );
+
+        const backwardButton = new MessageButton({
+            customId: 'backward',
+            style: 'SECONDARY',
+            emoji: '⬅️',
+            disabled: true,
         });
 
-        await interaction.reply({ content: '**Select a Backup**', components: [new MessageActionRow({ components: [menu] })] });
+        const forwardButton = new MessageButton({
+            customId: 'forward',
+            style: 'SECONDARY',
+            emoji: '➡️',
+        });
+
+        const components = [new MessageActionRow({ components: [menu[0]] })];
+        if (backupChunks.length > 1) components.push(new MessageActionRow({ components: [backwardButton, forwardButton] }));
+
+        await interaction.reply({ content: '**Select a Backup**', components });
         const selectionMessage = await interaction.fetchReply();
         if (!(selectionMessage instanceof Message)) return;
 
-        const selection = await selectionMessage
-            .awaitMessageComponent({
-                componentType: 'SELECT_MENU',
-                filter: (selectionInteraction) => selectionInteraction.user.id === interaction.user.id,
-                time: 300000,
-            })
-            .catch(() => undefined);
+        const collector = selectionMessage.createMessageComponentCollector({
+            filter: (messageInteraction) => messageInteraction.user.id === interaction.user.id,
+            idle: 300000,
+        });
 
-        if (selection?.isSelectMenu()) {
-            const backup = backups[+selection.values[0]];
+        let index = 0;
+        collector.on('collect', async (messageInteraction) => {
+            if (messageInteraction.isButton()) {
+                if (messageInteraction.customId === 'backward') --index;
+                else if (messageInteraction.customId === 'forward') ++index;
 
-            try {
-                const data = await readBackup(backup.name);
-                interaction.channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
-            } catch (error) {
-                sendError(interaction.channel, error);
+                messageInteraction.update({
+                    components: [
+                        new MessageActionRow({ components: [menu[index]] }),
+                        new MessageActionRow({ components: [backwardButton.setDisabled(!backupChunks[index - 1]), forwardButton.setDisabled(!backupChunks[index + 1])] }),
+                    ],
+                });
+            } else if (messageInteraction.isSelectMenu()) {
+                const backup = backupChunks[index][+messageInteraction.values[0]];
+
+                try {
+                    const data = await readBackup(backup.name);
+                    interaction.channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
+                } catch (error) {
+                    sendError(interaction.channel, error);
+                }
+
+                messageInteraction.update({ components: [new MessageActionRow({ components: [menu[index].setPlaceholder(backup.name).setDisabled(true)] })] });
+                collector.stop('selected');
             }
+        });
 
-            selection.update({ components: [new MessageActionRow({ components: [menu.setPlaceholder(backup.name).setDisabled(true)] })] });
-        } else {
-            selectionMessage.edit({ components: [new MessageActionRow({ components: [menu.setDisabled(true)] })] });
-        }
+        collector.on('end', (_, reason) => {
+            if (reason !== 'selected') selectionMessage.edit({ components: [new MessageActionRow({ components: [menu[index].setDisabled(true)] })] });
+        });
     },
 };

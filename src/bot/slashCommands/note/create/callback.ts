@@ -4,6 +4,7 @@ import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { embedIcon, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { formatContextURL, parseUser } from '../../../lib/misc.js';
+import { getContextURL } from '../../../lib/searchMessage.js';
 import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -11,13 +12,13 @@ export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { member } = interaction;
 
-        const contextURL = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
-
         const targetUser = interaction.options.getUser('user', true);
         const content = interaction.options.getString('content', true);
         if (content.length > 500) return replyError(interaction, 'The content must not be more than 500 characters long.');
 
+        const contextURL = await getContextURL(interaction.channel);
         const timestamp = new Date();
+
         const id = (
             await db.query(
                 /*sql*/ `
