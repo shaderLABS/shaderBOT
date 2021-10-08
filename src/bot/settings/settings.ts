@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 const settingsFile = './src/bot/settings/settings.json';
 
 export interface Settings {
-    prefix: string;
     logging: {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;

@@ -1,7 +1,7 @@
 import { Permissions } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
-import { embedButtonPages, replyButtonPages, replyError, replyInfo, replySuccess } from '../../../lib/embeds.js';
+import { replyButtonPages, replyError, replyInfo, replySuccess, sendButtonPages } from '../../../lib/embeds.js';
 import { formatContextURL, parseUser } from '../../../lib/misc.js';
 import { formatTimeDate } from '../../../lib/time.js';
 import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
@@ -50,7 +50,7 @@ export const command: ApplicationCommandCallback = {
             // DM
             try {
                 const dmChannel = await member.createDM();
-                embedButtonPages(dmChannel, member.user, pages, 'Warnings');
+                sendButtonPages(dmChannel, member.user, pages, 'Warnings');
 
                 replySuccess(interaction, 'Successfully sent you your warnings in a DM.', 'List Warnings');
             } catch {

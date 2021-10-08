@@ -1,8 +1,8 @@
 import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
-import { GuildMessage } from '../commandHandler.js';
 import { GuildCommandInteraction } from '../events/interactionCreate.js';
+import { GuildMessage } from '../events/message/messageCreate.js';
 import { replyError } from './embeds.js';
 
 export function getGuild() {

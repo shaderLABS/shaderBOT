@@ -3,7 +3,7 @@ import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { autoResponses, cooldowns, settings } from './bot.js';
-import { GuildMessage } from './commandHandler.js';
+import { GuildMessage } from './events/message/messageCreate.js';
 import { sendInfo } from './lib/embeds.js';
 import log from './lib/log.js';
 import { isTextOrThreadChannel } from './lib/misc.js';
@@ -54,10 +54,9 @@ export async function sendAutoResponse(message: GuildMessage) {
 
             let channel = autoResponse.directMessage ? await message.author.createDM() : message.channel;
 
-            const responseContent = fillVariables(message, autoResponse.message || '');
-            const responseFiles: MessageAttachment[] = [];
-
             try {
+                const responseContent = fillVariables(message, autoResponse.message || '');
+                const responseFiles: MessageAttachment[] = [];
                 const responseEmbed = autoResponse.embed ? [new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed))))] : [];
 
                 if (autoResponse.attachments) {
@@ -87,8 +86,8 @@ export async function sendAutoResponse(message: GuildMessage) {
                 if (autoResponse.directMessage && channel.id !== message.channel.id) {
                     sendInfo(message.channel, channel instanceof DMChannel ? `${message.author.toString()} check your DMs!` : `${message.author.toString()} go to <#${settings.botChannelID}>!`);
                 }
-            } catch {
-                log(`Failed to send automatic response \`${alias}\`.`);
+            } catch (error) {
+                log(`Failed to send automatic response \`${alias}\`: \`${error}\``);
             }
 
             return;

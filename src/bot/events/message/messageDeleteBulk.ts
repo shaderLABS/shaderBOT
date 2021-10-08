@@ -1,5 +1,4 @@
 import { Collection, Message, Snowflake } from 'discord.js';
-import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
@@ -20,7 +19,7 @@ export const event: Event = {
             `Created after ${messages.size} messages were purged.`
         ).then((messageCount) => {
             if (messageCount > 0) {
-                log(`${messageCount} out of ${messages.size} purged messages have been backed up. Use \`${settings.prefix}backup list\` in order to view them.`, 'Backup');
+                log(`${messageCount} out of ${messages.size} purged messages have been backed up. Use \`/backup list\` in order to view them.`, 'Backup');
             }
         });
     },

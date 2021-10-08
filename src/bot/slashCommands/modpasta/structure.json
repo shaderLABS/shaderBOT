@@ -1,0 +1,70 @@
+{
+    "name": "modpasta",
+    "description": "Manage pastas.",
+    "options": [
+        {
+            "name": "create",
+            "description": "Create a new pasta.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the new pasta.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "delete",
+            "description": "Delete an existing pasta.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the pasta you want to delete.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "read",
+            "description": "Send the JSON data of a specific pasta.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the pasta you want to read.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "update",
+            "description": "Update an existing pasta.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the pasta you want to edit.",
+                    "type": "STRING",
+                    "required": true
+                },
+                {
+                    "name": "path",
+                    "description": "The path of the value you want to edit, separated with dots.",
+                    "type": "STRING",
+                    "required": true
+                },
+                {
+                    "name": "value",
+                    "description": "The JSON value that you want to insert into the path. Not specifying a value will delete the key.",
+                    "type": "STRING",
+                    "required": false
+                }
+            ]
+        }
+    ]
+}

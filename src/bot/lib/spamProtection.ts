@@ -1,5 +1,5 @@
 import { settings } from '../bot.js';
-import { GuildMessage } from '../commandHandler.js';
+import { GuildMessage } from '../events/message/messageCreate.js';
 import log from './log.js';
 import { isTextOrThreadChannel, parseUser } from './misc.js';
 import { mute } from './muteUser.js';

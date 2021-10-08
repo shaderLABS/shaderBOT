@@ -25,7 +25,6 @@ The file `src/bot/settings/settings.json` contains information specific to the b
 
 ```jsonc
 {
-    "prefix": "",
     "logging": {
         "moderationChannelID": "",
         "messageChannelID": ""

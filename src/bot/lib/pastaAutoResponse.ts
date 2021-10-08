@@ -3,19 +3,6 @@ import path from 'path';
 import { AutoResponse, autoResponsePath } from '../autoResponseHandler.js';
 import { Pasta, pastaPath } from '../pastaHandler.js';
 
-export function getStringFromCodeBlock(text: string) {
-    const start = text.match(/```[a-z]*/);
-    if (!start) return;
-
-    const startIndex = text.indexOf(start[0]);
-    if (startIndex === -1) return;
-
-    const endIndex = text.lastIndexOf('```');
-    if (endIndex === -1) return;
-
-    return text.substring(startIndex + start[0].length, endIndex);
-}
-
 export function stringToFileName(alias: string) {
     return alias.replace(/[^a-z0-9]/gi, '_') + '.json';
 }

@@ -68,7 +68,7 @@ export function replyInfo(interaction: CommandInteraction, description: any, tit
     return interaction.reply({ content: message, embeds: [embed], ephemeral });
 }
 
-export async function embedButtonPages(
+export async function sendButtonPages(
     channel: TextChannel | ThreadChannel | DMChannel,
     author: User,
     pages: string[],
