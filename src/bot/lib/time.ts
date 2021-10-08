@@ -1,3 +1,5 @@
+import { Formatters } from 'discord.js';
+
 function getSeconds(time: string) {
     switch (time.replace(/[^a-z]/g, '')) {
         case 'a':
@@ -99,24 +101,13 @@ export function secondsToString(seconds: number) {
 }
 
 export function formatTimeDate(date: Date) {
-    return date.toLocaleString('en-US', {
-        timeZoneName: 'short',
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hourCycle: 'h23',
-    });
+    return Formatters.time(date, Formatters.TimestampStyles.LongDateTime);
 }
 
 export function formatDate(date: Date) {
-    return date
-        .toLocaleDateString('en-US', {
-            timeZoneName: 'short',
-            year: '2-digit',
-            month: '2-digit',
-            day: '2-digit',
-        })
-        .replace(',', '');
+    return Formatters.time(date, Formatters.TimestampStyles.LongDate);
+}
+
+export function formatRelativeTime(date: Date) {
+    return Formatters.time(date, Formatters.TimestampStyles.RelativeTime);
 }
