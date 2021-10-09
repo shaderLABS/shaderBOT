@@ -5,6 +5,7 @@ import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 import { deleteLogEntry } from '../shared.js';
 
 export const command: ApplicationCommandCallback = {
+    requiredPermissions: ['BAN_MEMBERS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
         const id = (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id])).rows[0]?.id;

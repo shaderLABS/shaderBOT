@@ -5,6 +5,7 @@ import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 import { deleteLogEntry } from '../shared.js';
 
 export const command: ApplicationCommandCallback = {
+    requiredPermissions: ['BAN_MEMBERS'],
     callback: (interaction: GuildCommandInteraction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) return replyError(interaction, 'The specified UUID is invalid.');
