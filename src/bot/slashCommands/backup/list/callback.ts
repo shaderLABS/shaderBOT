@@ -4,7 +4,7 @@ import path from 'path';
 import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { backupPath, readBackup } from '../../../lib/backup.js';
 import { replyInfo, sendError } from '../../../lib/embeds.js';
-import { formatTimeDate } from '../../../lib/time.js';
+import { formatTimeDateString } from '../../../lib/time.js';
 import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -41,7 +41,7 @@ export const command: ApplicationCommandCallback = {
                             label: backup.name.substring(0, backup.name.lastIndexOf(' - ')),
                             value: index.toString(),
                             emoji: '📝',
-                            description: formatTimeDate(new Date(backup.createdAt)),
+                            description: formatTimeDateString(new Date(backup.createdAt)),
                         };
                     }),
                 })

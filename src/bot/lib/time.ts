@@ -104,6 +104,18 @@ export function formatTimeDate(date: Date) {
     return Formatters.time(date, Formatters.TimestampStyles.LongDateTime);
 }
 
+export function formatTimeDateString(date: Date) {
+    return date.toLocaleString('en-US', {
+        timeZoneName: 'short',
+        year: '2-digit',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+    });
+}
+
 export function formatDate(date: Date) {
     return Formatters.time(date, Formatters.TimestampStyles.LongDate);
 }
