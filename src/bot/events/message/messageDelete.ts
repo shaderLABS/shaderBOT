@@ -12,6 +12,7 @@ export const event: Event = {
 
         const logChannel = getGuild()?.channels.cache.get(settings.logging.messageChannelID);
         if (logChannel instanceof TextChannel) {
+            const attachments: MessageAttachment[] = [];
             const logEmbed = new MessageEmbed({
                 color: embedColor.red,
                 timestamp: message.createdTimestamp,
@@ -23,14 +24,21 @@ export const event: Event = {
                     .setDescription(`**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}`)
                     .setFooter('This is a partial message with very limited information.');
             } else {
+                let content = message.content + '\n\n';
+
+                for (const attachment of message.attachments.values()) {
+                    if (attachment.size > 8388608) content += attachment.url + '\n';
+                    else attachments.push(new MessageAttachment(attachment.url, attachment.name || undefined));
+                }
+
                 logEmbed
                     .setAuthor('Deleted Message', message.author.displayAvatarURL())
-                    .setDescription(`**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n\n${message.content}`);
+                    .setDescription(`**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n\n${content.trim()}`);
             }
 
             logChannel.send({
                 embeds: [logEmbed],
-                files: [...message.attachments.values()].map((attachment) => new MessageAttachment(attachment.url, attachment.name || undefined)),
+                files: attachments,
                 allowedMentions: { parse: [] },
             });
         }
