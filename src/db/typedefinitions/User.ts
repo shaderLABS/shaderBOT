@@ -1,7 +1,6 @@
 import { Snowflake } from 'discord.js';
 import tgq from 'type-graphql';
 import { Project } from './Project.js';
-import { Ticket } from './Ticket.js';
 
 @tgq.ObjectType()
 export class Warning {
@@ -49,9 +48,6 @@ export class User {
 
     @tgq.Field(() => String, { nullable: true })
     roleColor!: String;
-
-    @tgq.Field(() => [Ticket], { nullable: true })
-    tickets!: Ticket[];
 
     @tgq.Field(() => [Project], { nullable: true })
     projects!: Project[];

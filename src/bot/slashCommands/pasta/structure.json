@@ -1,0 +1,12 @@
+{
+    "name": "pasta",
+    "description": "Send a specific pasta or a list containing all of them.",
+    "options": [
+        {
+            "name": "alias",
+            "description": "The alias of the pasta you want to send.",
+            "type": "STRING",
+            "required": false
+        }
+    ]
+}

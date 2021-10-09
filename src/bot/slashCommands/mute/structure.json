@@ -1,0 +1,24 @@
+{
+    "name": "mute",
+    "description": "Mute a user for a specified amount of time.",
+    "options": [
+        {
+            "name": "user",
+            "description": "The user that will be muted.",
+            "type": "USER",
+            "required": true
+        },
+        {
+            "name": "time",
+            "description": "The amount of time that the user will be muted for.",
+            "type": "STRING",
+            "required": true
+        },
+        {
+            "name": "reason",
+            "description": "The reason of the mute.",
+            "type": "STRING",
+            "required": false
+        }
+    ]
+}

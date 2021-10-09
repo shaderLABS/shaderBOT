@@ -8,8 +8,7 @@ import { ownerOverwrites } from '../lib/project.js';
 export const event: Event = {
     name: 'channelUpdate',
     callback: async (oldChannel: Channel, newChannel: Channel) => {
-        if (!(oldChannel instanceof TextChannel) || !(newChannel instanceof TextChannel) || !oldChannel.parentId || !newChannel.parentId || settings.ticket.categoryIDs.includes(newChannel.parentId))
-            return;
+        if (!(oldChannel instanceof TextChannel) || !(newChannel instanceof TextChannel) || !oldChannel.parentId || !newChannel.parentId) return;
 
         if (oldChannel.name !== newChannel.name) {
             /******************
@@ -25,21 +24,6 @@ export const event: Event = {
                 await role.edit({ name: newChannel.name });
             } catch {
                 log(`The name of <#${newChannel.id}> has been updated, but the role could not be renamed.`, 'Edit Channel Name');
-            }
-        }
-
-        if (!oldChannel.permissionOverwrites.cache.equals(newChannel.permissionOverwrites.cache)) {
-            /**********************
-             * UPDATE PERMISSIONS *
-             **********************/
-
-            const tickets = await db.query(/*sql*/ `SELECT channel_id::TEXT FROM ticket WHERE closed = false AND project_channel_id = $1;`, [newChannel.id]);
-
-            for (const ticket of tickets.rows) {
-                if (!ticket.channel_id) continue;
-
-                const ticketChannel = newChannel.guild.channels.cache.get(ticket.channel_id);
-                if (ticketChannel instanceof TextChannel) ticketChannel.permissionOverwrites.set(newChannel.permissionOverwrites.cache);
             }
         }
 

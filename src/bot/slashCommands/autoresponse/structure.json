@@ -1,0 +1,76 @@
+{
+    "name": "autoresponse",
+    "description": "Manage automatic responses.",
+    "options": [
+        {
+            "name": "create",
+            "description": "Create a new automatic response.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the new automatic response.",
+                    "type": "STRING",
+                    "required": true
+                },
+                {
+                    "name": "regex",
+                    "description": "The regex of the new automatic response.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "delete",
+            "description": "Delete an existing automatic response.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the automatic response you want to delete.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "read",
+            "description": "Send the JSON data of a specific or all automatic responses.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of what you want to read. Not specifying an alias will list all automatic responses.",
+                    "type": "STRING",
+                    "required": false
+                }
+            ]
+        },
+        {
+            "name": "update",
+            "description": "Update an existing automatic response.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "alias",
+                    "description": "The alias of the automatic response you want to edit.",
+                    "type": "STRING",
+                    "required": true
+                },
+                {
+                    "name": "path",
+                    "description": "The path of the value you want to edit, separated with dots.",
+                    "type": "STRING",
+                    "required": true
+                },
+                {
+                    "name": "value",
+                    "description": "The JSON value that you want to insert into the path. Not specifying a value will delete the key.",
+                    "type": "STRING",
+                    "required": false
+                }
+            ]
+        }
+    ]
+}

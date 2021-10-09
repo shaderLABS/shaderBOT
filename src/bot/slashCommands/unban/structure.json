@@ -1,0 +1,12 @@
+{
+    "name": "unban",
+    "description": "Unban a user.",
+    "options": [
+        {
+            "name": "user",
+            "description": "The user that will be unbanned.",
+            "type": "USER",
+            "required": true
+        }
+    ]
+}

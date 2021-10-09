@@ -1,8 +1,9 @@
-import { CategoryChannel, Channel, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
-import { GuildMessage } from '../commandHandler.js';
-import { sendError } from './embeds.js';
+import { GuildCommandInteraction } from '../events/interactionCreate.js';
+import { GuildMessage } from '../events/message/messageCreate.js';
+import { replyError } from './embeds.js';
 
 export function getGuild() {
     return client.guilds.cache.get(settings.guildID);
@@ -16,9 +17,13 @@ export function isGuildMessage(message: Message): message is GuildMessage {
     return isTextOrThreadChannel(message.channel) && !!message.guild && !!message.member;
 }
 
-export function ensureTextChannel(channel: TextChannel | ThreadChannel): channel is TextChannel {
+export function userToMember(guild: Guild, id: Snowflake) {
+    return guild.members.fetch(id).catch(() => undefined);
+}
+
+export function ensureTextChannel(channel: TextChannel | ThreadChannel, interaction: GuildCommandInteraction): channel is TextChannel {
     if (channel.type !== 'GUILD_TEXT') {
-        sendError(channel, 'This command is not usable in thread channels.');
+        replyError(interaction, 'This command is not usable in thread channels.');
         return false;
     }
 

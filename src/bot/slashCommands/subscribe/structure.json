@@ -1,0 +1,12 @@
+{
+    "name": "subscribe",
+    "description": "Subscribe to notifications of a project.",
+    "options": [
+        {
+            "name": "project",
+            "description": "The channel of the project you want to subscribe to.",
+            "type": "CHANNEL",
+            "required": false
+        }
+    ]
+}

@@ -1,22 +1,7 @@
-import { Snowflake, TextChannel, ThreadChannel, User } from 'discord.js';
-import uuid from 'uuid-random';
+import { Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { parseUser } from '../misc.js';
-import { requireUser } from '../searchMessage.js';
-
-export async function getWarnUUID(argument: string, author: User, channel: TextChannel | ThreadChannel): Promise<string> {
-    if (uuid.test(argument)) {
-        return argument;
-    } else {
-        const user = await requireUser(argument, { author, channel });
-
-        const latestWarnID = (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [user.id])).rows[0];
-
-        if (!latestWarnID) return Promise.reject('The specified user does not have any warnings.');
-        return latestWarnID.id;
-    }
-}
 
 export async function editWarnReason(reason: string, id: string, modID: Snowflake) {
     const warning = (

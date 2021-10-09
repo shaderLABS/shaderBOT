@@ -25,15 +25,9 @@ The file `src/bot/settings/settings.json` contains information specific to the b
 
 ```jsonc
 {
-    "prefix": "",
     "logging": {
         "moderationChannelID": "",
         "messageChannelID": ""
-    },
-    "ticket": {
-        "categoryIDs": [""], // categories which will be filled with open tickets
-        "attachmentCacheChannelID": "", // private channel in which attachments will be cached
-        "openCategoryID": "" // private/muted category in which tickets will be opened
     },
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted

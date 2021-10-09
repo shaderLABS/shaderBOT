@@ -25,20 +25,6 @@ export class ProjectResolver {
         return results;
     }
 
-    @tgq.FieldResolver({ name: 'tickets', nullable: true })
-    async tickets(@tgq.Root() project: Project) {
-        return (
-            await db.query(
-                /*sql*/ `
-                SELECT id, title, project_channel_id::TEXT, description, attachments, author_id::TEXT, timestamp::TEXT, edited::TEXT, closed
-                FROM ticket
-                WHERE project_channel_id = $1
-                ORDER BY timestamp ASC;`,
-                [project.channel_id]
-            )
-        ).rows;
-    }
-
     @tgq.Query(() => Project)
     async projectByChannelID(@tgq.Arg('id', () => String) id: string) {
         const project = (

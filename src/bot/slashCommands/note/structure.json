@@ -1,0 +1,84 @@
+{
+    "name": "note",
+    "description": "Manage the notes of a user.",
+    "options": [
+        {
+            "name": "create",
+            "description": "Create a new note.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user you want to add the note to.",
+                    "type": "USER",
+                    "required": true
+                },
+                {
+                    "name": "content",
+                    "description": "The content of the note.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "delete",
+            "description": "Delete an existing note.",
+            "type": "SUB_COMMAND_GROUP",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "Delete the last note of a user.",
+                    "type": "SUB_COMMAND",
+                    "options": [
+                        {
+                            "name": "user",
+                            "description": "The user you want to delete the last note of.",
+                            "type": "USER",
+                            "required": true
+                        }
+                    ]
+                },
+                {
+                    "name": "id",
+                    "description": "Delete a note with the specified UUID.",
+                    "type": "SUB_COMMAND",
+                    "options": [
+                        {
+                            "name": "id",
+                            "description": "The UUID of the note.",
+                            "type": "STRING",
+                            "required": true
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "list",
+            "description": "List all notes of a user.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "user",
+                    "description": "The user you want to list the notes of.",
+                    "type": "USER",
+                    "required": true
+                }
+            ]
+        },
+        {
+            "name": "read",
+            "description": "Read the note with the specified UUID.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "id",
+                    "description": "The UUID of the note you want to read.",
+                    "type": "STRING",
+                    "required": true
+                }
+            ]
+        }
+    ]
+}

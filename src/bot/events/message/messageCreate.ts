@@ -1,38 +1,22 @@
-import { Message, MessageEmbed, TextChannel } from 'discord.js';
-import { db } from '../../../db/postgres.js';
+import { Guild, GuildMember, Message, TextChannel, ThreadChannel } from 'discord.js';
 import { sendAutoResponse } from '../../autoResponseHandler.js';
-import { commands, settings } from '../../bot.js';
-import { GuildMessage, runCommand } from '../../commandHandler.js';
+import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
-import { sendError } from '../../lib/embeds.js';
 import { isGuildMessage } from '../../lib/misc.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
 import { checkSpam } from '../../lib/spamProtection.js';
-import { cacheAttachment } from '../../lib/ticketManagement.js';
+
+export interface GuildMessage extends Message {
+    channel: TextChannel | ThreadChannel;
+    guild: Guild;
+    member: GuildMember;
+}
 
 export const event: Event = {
     name: 'messageCreate',
     callback: (message: Message) => {
-        if (!isGuildMessage(message) || message.author.bot || checkSpam(message)) return;
-
-        const { content, channel } = message;
-        if (mediaOnly(message)) return;
-
-        if (content.startsWith(settings.prefix)) {
-            const args = parseContent(content);
-            const invoke = args?.shift()?.toLowerCase();
-
-            if (invoke && args) {
-                const command = commands.find((_value, key) => JSON.parse(key).includes(invoke));
-                if (command) runCommand(command, message, invoke, args);
-            }
-        } else if (!matchBlacklist(message)) {
-            if (channel.parentId && settings.ticket.categoryIDs.includes(channel.parentId)) {
-                createTicketComment(message);
-            } else {
-                sendAutoResponse(message);
-            }
-        }
+        if (!isGuildMessage(message) || message.author.bot || checkSpam(message) || mediaOnly(message) || matchBlacklist(message)) return;
+        sendAutoResponse(message);
     },
 };
 
@@ -43,65 +27,4 @@ function mediaOnly(message: GuildMessage) {
 
     message.delete();
     return true;
-}
-
-function parseContent(content: string) {
-    return content
-        .slice(settings.prefix.length)
-        .trim()
-        .match(/\n|\\?.|^$/g)
-        ?.reduce(
-            (prev, curr) => {
-                if (curr === '^') {
-                    prev.quote ^= 1;
-                } else if (!prev.quote && (curr === ' ' || curr === '\n')) {
-                    if (prev.args[prev.args.length - 1]) prev.args.push('');
-                } else {
-                    prev.args[prev.args.length - 1] += curr.replace(/\\\^/g, '^');
-                }
-                return prev;
-            },
-            { args: [''], quote: 0 }
-        ).args;
-}
-
-async function createTicketComment(message: GuildMessage) {
-    const { channel, member, content, reference } = message;
-    if (message.partial || !(channel instanceof TextChannel) || !member) return;
-
-    const id = (await db.query(/*sql*/ `SELECT id FROM ticket WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.id;
-    if (!id) return;
-    const timestamp = new Date();
-
-    const commentEmbed = new MessageEmbed()
-        .setColor(message.member.displayHexColor === '#000000' ? '#212121' : message.member.displayHexColor)
-        .setAuthor(member.user.tag, member.user.displayAvatarURL() || undefined)
-        .setTimestamp(timestamp)
-        .setDescription(content);
-
-    let attachment: string | undefined;
-    try {
-        attachment = await cacheAttachment(message);
-    } catch (error) {
-        const errorMessage = await sendError(channel, error);
-        setTimeout(() => errorMessage.delete(), 7500);
-    }
-
-    await message.delete();
-
-    if (!attachment && (!content || content === '')) return;
-    const commentMessage = await channel.send({ embeds: [commentEmbed], files: attachment ? [attachment.split('|')[0]] : [] });
-
-    let referenceUUID: string | null = null;
-    if (reference) {
-        const referencedComment = (await db.query(/*sql*/ `SELECT id FROM comment WHERE message_id = $1;`, [reference.messageId])).rows[0];
-        if (referencedComment) referenceUUID = referencedComment.id;
-    }
-
-    db.query(
-        /*sql*/ `
-        INSERT INTO comment (ticket_id, author_id, message_id, content, attachment, reference_id, timestamp)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [id, member.user.id, commentMessage.id, content, attachment, referenceUUID, timestamp]
-    );
 }
