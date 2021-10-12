@@ -14,7 +14,7 @@ export const command: ApplicationCommandCallback = {
 
         const reason = interaction.options.getString('reason', false);
         const timeString = interaction.options.getString('time', false);
-        const deleteMessages = interaction.options.getBoolean('deleteMessages', false) || false;
+        const deleteMessages = interaction.options.getBoolean('delete_messages', false) || false;
 
         if (targetMember) {
             if (interaction.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
