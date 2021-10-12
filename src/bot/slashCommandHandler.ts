@@ -1,8 +1,8 @@
-import { ApplicationCommandData, Collection, PermissionString } from 'discord.js';
+import { Collection, PermissionString } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { GuildCommandInteraction } from './events/interactionCreate';
+import { GuildCommandInteraction } from './events/interactionCreate.js';
 
 export type ApplicationCommandCallback = {
     readonly cooldownDuration?: number;
@@ -15,7 +15,6 @@ export type ApplicationCommandCallback = {
 
 type SlashCommandCollection = Collection<string, SlashCommandCollection | ApplicationCommandCallback>;
 export const slashCommands: SlashCommandCollection = new Collection();
-export const slashCommandStructure: ApplicationCommandData[] = [];
 
 export async function registerSlashCommands(dir: string, directories: string[] = []) {
     const dirPath = path.join(path.resolve(), dir);
@@ -40,9 +39,6 @@ export async function registerSlashCommands(dir: string, directories: string[] =
                 });
 
                 commandName && collection.set(commandName, command);
-            } else if (dirEntry.name === 'structure.json') {
-                const structure = JSON.parse(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
-                slashCommandStructure.push(structure);
             }
         })
     );

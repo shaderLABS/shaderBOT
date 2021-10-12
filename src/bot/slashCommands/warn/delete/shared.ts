@@ -20,5 +20,5 @@ export async function deleteWarning(interaction: GuildCommandInteraction, warnin
         `\n**ID:** ${warning.id}`;
 
     replySuccess(interaction, content, 'Delete Warning');
-    log(`**Deleted By:** ${interaction.member.id}\n${content}`, 'Delete Warning');
+    log(`${content}\n**Deleted By:** ${parseUser(interaction.user)}`, 'Delete Warning');
 }
