@@ -18,7 +18,7 @@
     "license": "MIT",
     "dependencies": {
         "@polka/redirect": "^1.0.0-next.0",
-        "apollo-server-express": "^3.3.0",
+        "apollo-server-express": "^3.4.0",
         "body-parser": "^1.19.0",
         "connect-pg-simple": "^7.0.0",
         "cors": "^2.8.5",
@@ -41,7 +41,7 @@
         "@types/connect-pg-simple": "^4.2.4",
         "@types/cors": "^2.8.12",
         "@types/express-session": "^1.17.4",
-        "@types/node": "^16.10.3",
+        "@types/node": "^16.10.4",
         "@types/node-cron": "^3.0.0",
         "@types/passport": "^1.0.7",
         "@types/passport-discord": "^0.1.5",
