@@ -24,7 +24,8 @@ export const command: ApplicationCommandCallback = {
         if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
         if (time < 10) return replyError(interaction, "You can't mute someone for less than 10 seconds.");
 
-        const contextURL = await getContextURL(interaction.channel);
+        const contextURL = await getContextURL(interaction);
+        if (!contextURL) return;
 
         try {
             const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, contextURL, targetMember);

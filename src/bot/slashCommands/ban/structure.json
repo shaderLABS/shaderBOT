@@ -25,6 +25,12 @@
             "description": "Whether or not the messages of the banned user should be deleted. Defaults to false.",
             "type": "BOOLEAN",
             "required": false
+        },
+        {
+            "name": "context",
+            "description": "The URL of the message that you want to use as context. Defaults to the most recent message.",
+            "type": "STRING",
+            "required": false
         }
     ]
 }

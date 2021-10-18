@@ -50,12 +50,16 @@
                         {
                             "name": "Warning Severity",
                             "value": "warnseverity"
+                        },
+                        {
+                            "name": "Context",
+                            "value": "context"
                         }
                     ]
                 },
                 {
                     "name": "value",
-                    "description": "The new value. Can be a new reason, amount of time or severity.",
+                    "description": "The new value. Can be a new reason, amount of time, severity or message URL.",
                     "type": "STRING",
                     "required": true
                 }
@@ -109,6 +113,10 @@
                         {
                             "name": "Warning Severity",
                             "value": "warnseverity"
+                        },
+                        {
+                            "name": "Context",
+                            "value": "context"
                         }
                     ]
                 },

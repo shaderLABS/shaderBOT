@@ -24,7 +24,9 @@ export const command: ApplicationCommandCallback = {
         }
 
         if (reason && reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
-        const contextURL = await getContextURL(interaction.channel);
+
+        const contextURL = await getContextURL(interaction);
+        if (!contextURL) return;
 
         if (timeString) {
             const time = stringToSeconds(splitString(timeString));

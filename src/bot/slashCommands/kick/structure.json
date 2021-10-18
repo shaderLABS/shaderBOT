@@ -13,6 +13,12 @@
             "description": "The reason for the kick.",
             "type": "STRING",
             "required": false
+        },
+        {
+            "name": "context",
+            "description": "The URL of the message that you want to use as context. Defaults to the most recent message.",
+            "type": "STRING",
+            "required": false
         }
     ]
 }

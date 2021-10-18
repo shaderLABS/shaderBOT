@@ -23,7 +23,8 @@ export const command: ApplicationCommandCallback = {
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return replyError(interaction, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
-        const contextURL = await getContextURL(interaction.channel);
+        const contextURL = await getContextURL(interaction);
+        if (!contextURL) return;
 
         const id = (
             await db.query(

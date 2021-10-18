@@ -18,6 +18,12 @@
                     "description": "The content of the note.",
                     "type": "STRING",
                     "required": true
+                },
+                {
+                    "name": "context",
+                    "description": "The URL of the message that you want to use as context. Defaults to the most recent message.",
+                    "type": "STRING",
+                    "required": false
                 }
             ]
         },

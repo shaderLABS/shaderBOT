@@ -16,7 +16,9 @@ export const command: ApplicationCommandCallback = {
         const content = interaction.options.getString('content', true);
         if (content.length > 500) return replyError(interaction, 'The content must not be more than 500 characters long.');
 
-        const contextURL = await getContextURL(interaction.channel);
+        const contextURL = await getContextURL(interaction);
+        if (!contextURL) return;
+
         const timestamp = new Date();
 
         const id = (
