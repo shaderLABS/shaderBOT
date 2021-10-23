@@ -52,8 +52,9 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "cacheLength": 0, // length of the spam protection cache
         "characterThreshold": 0, // minimum characters after which messages will be checked for spam
         "muteDuration": 0, // duration of the mute in seconds
-        "messageThreshold": 0, // number of identical messages after which the mute protection will be triggered
-        "timeThreshold": 0 // maximum delay between identical messages in seconds (after which they won't be counted)
+        "messageThreshold": 0, // number of similar messages after which the mute protection will be triggered
+        "timeThreshold": 0, // maximum delay between similar messages in seconds (after which they won't be counted)
+        "similarityThreshold": 0 // threshold that determines how similar messages must be in order to get flagged as spam (between 0 and 1)
     }
 }
 ```

@@ -33,6 +33,7 @@ export interface Settings {
         muteDuration: number;
         messageThreshold: number;
         timeThreshold: number;
+        similarityThreshold: number;
     };
 }
 

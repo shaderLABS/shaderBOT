@@ -1,7 +1,7 @@
 import { settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import log from './log.js';
-import { isTextOrThreadChannel, parseUser } from './misc.js';
+import { isTextOrThreadChannel, parseUser, similarityLevenshtein } from './misc.js';
 import { mute } from './muteUser.js';
 
 type cachedMessage = {
@@ -29,7 +29,7 @@ export function checkSpam(message: GuildMessage) {
         (previousMessage) =>
             previousMessage &&
             currentMessage.authorID === previousMessage.authorID &&
-            currentMessage.content === previousMessage.content &&
+            similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.spamProtection.similarityThreshold &&
             currentMessage.channelID !== previousMessage.channelID &&
             currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.spamProtection.timeThreshold * 1000
     );
