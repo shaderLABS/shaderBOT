@@ -57,7 +57,7 @@ export const command: ApplicationCommandCallback = {
                 queries[0].rows.map(
                     (row) =>
                         `\n**Severity:** ${row.severity}` +
-                        `\n**Reason:** ${row.reason || 'No reason provided.'}` +
+                        `\n**Reason:** ${row.reason}` +
                         `\n**Moderator:** ${parseUser(row.mod_id)}` +
                         `\n**Context:** ${formatContextURL(row.context_url)}` +
                         `\n**ID:** ${row.id}` +
@@ -72,7 +72,7 @@ export const command: ApplicationCommandCallback = {
                 queries[1].rows.map(
                     (row) =>
                         `\n**Type:** ${punishmentTypeAsString[row.type]}` +
-                        `\n**Reason:** ${row.reason || 'No reason provided.'}` +
+                        `\n**Reason:** ${row.reason}` +
                         `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
                         `\n**Context:** ${formatContextURL(row.context_url)}` +
                         `\n**ID:** ${row.id}` +
@@ -104,7 +104,7 @@ export const command: ApplicationCommandCallback = {
                 queries[3].rows.map((row) => {
                     let content =
                         `\n**Type:** ${punishmentTypeAsString[row.type]}` +
-                        `\n**Reason:** ${row.reason || 'No reason provided.'}` +
+                        `\n**Reason:** ${row.reason}` +
                         `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
                         `\n**Context:** ${formatContextURL(row.context_url)}` +
                         `\n**ID:** ${row.id}` +

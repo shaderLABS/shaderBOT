@@ -18,7 +18,7 @@ export const command: ApplicationCommandCallback = {
         const content =
             `**User:** ${parseUser(warning.user_id)}` +
             `\n**Severity:** ${warning.severity}` +
-            `\n**Reason:** ${warning.reason || 'No reason provided.'}` +
+            `\n**Reason:** ${warning.reason}` +
             `\n**Moderator:** ${parseUser(warning.mod_id)}` +
             `\n**Context:** ${formatContextURL(warning.context_url)}` +
             `\n**ID:** ${id}` +

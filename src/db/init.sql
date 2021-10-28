@@ -19,7 +19,7 @@ CREATE TABLE "warn" (
     user_id NUMERIC(20) NOT NULL,
     mod_id NUMERIC(20) NOT NULL,
     severity SMALLINT NOT NULL,
-    reason TEXT,
+    reason TEXT NOT NULL,
     context_url TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
     edited_mod_id NUMERIC(20),
@@ -32,7 +32,7 @@ CREATE TABLE "punishment" (
     user_id NUMERIC(20) NOT NULL,
     type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
-    reason TEXT,
+    reason TEXT NOT NULL,
     context_url TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
     edited_mod_id NUMERIC(20),
@@ -46,7 +46,7 @@ CREATE TABLE "past_punishment" (
     user_id NUMERIC(20) NOT NULL,
     type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
-    reason TEXT,
+    reason TEXT NOT NULL,
     context_url TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
     edited_mod_id NUMERIC(20),

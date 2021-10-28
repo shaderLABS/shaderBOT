@@ -10,7 +10,7 @@ import { formatTimeDate, secondsToString } from './time.js';
  * BAN *
  *******/
 
-export async function tempban(user: User, duration: number, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, deleteMessages: boolean = false) {
+export async function tempban(user: User, duration: number, modID: Snowflake | null = null, reason: string, context: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -62,7 +62,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
                 embeds: [
                     new MessageEmbed({
                         author: { name: 'You have been banned from shaderLABS.' },
-                        description: punishmentToString({ id: tempban.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
+                        description: punishmentToString({ id: tempban.id, reason, context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
                         color: embedColor.blue,
                     }),
                 ],
@@ -71,9 +71,9 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
                 dmed = false;
             });
 
-        guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
+        guild.members.ban(user, { reason, days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? parseUser(modID) : 'System'} temporarily banned ${parseUser(user)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? parseUser(modID) : 'System'} temporarily banned ${parseUser(user)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason}\`${
                 overwrittenPunishment ? `\n\n${parseUser(user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Temporary Ban'
@@ -98,7 +98,7 @@ export async function tempban(user: User, duration: number, modID: Snowflake | n
     return { expire, dmed };
 }
 
-export async function ban(user: User, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, deleteMessages: boolean = false) {
+export async function ban(user: User, modID: Snowflake | null = null, reason: string, context: string | null = null, deleteMessages: boolean = false) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
 
@@ -149,7 +149,7 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
                 embeds: [
                     new MessageEmbed({
                         author: { name: 'You have been banned from shaderLABS.' },
-                        description: punishmentToString({ id: ban.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, timestamp }),
+                        description: punishmentToString({ id: ban.id, reason, context_url: context, mod_id: modID, timestamp }),
                         color: embedColor.blue,
                     }),
                 ],
@@ -158,9 +158,9 @@ export async function ban(user: User, modID: Snowflake | null = null, reason: st
                 dmed = false;
             });
 
-        guild.members.ban(user, { reason: reason || 'No reason provided.', days: deleteMessages ? 7 : 0 });
+        guild.members.ban(user, { reason, days: deleteMessages ? 7 : 0 });
         log(
-            `${modID ? parseUser(modID) : 'System'} permanently banned ${parseUser(user)}:\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? parseUser(modID) : 'System'} permanently banned ${parseUser(user)}:\n\`${reason}\`${
                 overwrittenPunishment ? `\n\n${parseUser(user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Ban'

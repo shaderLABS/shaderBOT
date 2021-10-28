@@ -5,7 +5,7 @@ import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
 import { pastPunishmentToString } from './punishments.js';
 
-export async function kick(user: GuildMember, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null) {
+export async function kick(user: GuildMember, modID: Snowflake | null = null, reason: string, context: string | null = null) {
     const guild = getGuild();
     if (!guild) return Promise.reject('No guild found.');
     if (!user.kickable) return Promise.reject('The specified user is not kickable.');
@@ -30,7 +30,7 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
                     embeds: [
                         new MessageEmbed({
                             author: { name: 'You have been kicked from shaderLABS.' },
-                            description: pastPunishmentToString({ id: kick.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, timestamp }),
+                            description: pastPunishmentToString({ id: kick.id, reason, context_url: context, mod_id: modID, timestamp }),
                             color: embedColor.blue,
                         }),
                     ],
@@ -45,7 +45,7 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
         return Promise.reject('Error while accessing the database.');
     }
 
-    await user.kick(reason || 'No reason provided.');
-    log(`${modID ? parseUser(modID) : 'System'} kicked ${parseUser(user.user)}:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
+    await user.kick(reason);
+    log(`${modID ? parseUser(modID) : 'System'} kicked ${parseUser(user.user)}:\n\`${reason}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick');
     return { dmed };
 }

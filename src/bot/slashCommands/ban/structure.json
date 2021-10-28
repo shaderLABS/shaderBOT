@@ -12,7 +12,7 @@
             "name": "reason",
             "description": "The reason of the ban.",
             "type": "STRING",
-            "required": false
+            "required": true
         },
         {
             "name": "time",

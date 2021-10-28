@@ -28,7 +28,8 @@ export const event: Event = {
                 'Ban'
             );
 
-        const { createdAt, executor, reason } = auditLog;
+        const { createdAt, executor } = auditLog;
+        const reason = auditLog.reason || 'No reason provided.';
 
         try {
             const overwrittenPunishment = (
@@ -64,7 +65,7 @@ export const event: Event = {
             );
 
             log(
-                `${parseUser(executor)} permanently banned ${parseUser(ban.user)}:\n\`${reason || 'No reason provided.'}\`${
+                `${parseUser(executor)} permanently banned ${parseUser(ban.user)}:\n\`${reason}\`${
                     overwrittenPunishment ? `\n\n${parseUser(ban.user)}'s previous ban has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
                 }`,
                 'Ban'

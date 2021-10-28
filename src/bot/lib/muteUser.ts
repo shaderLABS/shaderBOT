@@ -7,7 +7,7 @@ import { getGuild, parseUser } from './misc.js';
 import { punishmentToString, store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
-export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string | null = null, context: string | null = null, member?: GuildMember) {
+export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string, context: string | null = null, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
 
     const role = await getGuild()?.roles.fetch(settings.muteRoleID);
@@ -61,7 +61,7 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
                     embeds: [
                         new MessageEmbed({
                             author: { name: 'You have been muted on shaderLABS.' },
-                            description: punishmentToString({ id: mute.id, reason: reason || 'No reason provided.', context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
+                            description: punishmentToString({ id: mute.id, reason, context_url: context, mod_id: modID, expire_timestamp: expire, timestamp }),
                             color: embedColor.blue,
                         }),
                     ],
@@ -72,7 +72,7 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
         }
 
         log(
-            `${modID ? parseUser(modID) : 'System'} muted ${parseUser(userID)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
+            `${modID ? parseUser(modID) : 'System'} muted ${parseUser(userID)} for ${secondsToString(duration)} (until ${formatTimeDate(expire)}):\n\`${reason}\`${
                 overwrittenPunishment ? `\n\n${parseUser(userID)}'s previous mute has been overwritten:\n ${punishmentToString(overwrittenPunishment)}` : ''
             }${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
             'Mute'

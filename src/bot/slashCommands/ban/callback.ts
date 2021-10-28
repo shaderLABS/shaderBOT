@@ -12,7 +12,7 @@ export const command: ApplicationCommandCallback = {
         const targetUser = interaction.options.getUser('user', true);
         const targetMember = await userToMember(interaction.guild, targetUser.id);
 
-        const reason = interaction.options.getString('reason', false);
+        const reason = interaction.options.getString('reason', true);
         const timeString = interaction.options.getString('time', false);
         const deleteMessages = interaction.options.getBoolean('delete_messages', false) || false;
 
@@ -23,7 +23,7 @@ export const command: ApplicationCommandCallback = {
             if (!targetMember.bannable) return replyError(interaction, 'This user is not bannable.');
         }
 
-        if (reason && reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
+        if (reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
 
         const contextURL = await getContextURL(interaction);
         if (!contextURL) return;
@@ -36,18 +36,14 @@ export const command: ApplicationCommandCallback = {
 
             try {
                 const { dmed } = await tempban(targetUser, time, interaction.user.id, reason, contextURL, deleteMessages);
-                replySuccess(
-                    interaction,
-                    `${parseUser(targetUser)} has been temporarily banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
-                    'Temporary Ban'
-                );
+                replySuccess(interaction, `${parseUser(targetUser)} has been temporarily banned:\n\`${reason}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Temporary Ban');
             } catch (error) {
                 replyError(interaction, error);
             }
         } else {
             try {
                 const { dmed } = await ban(targetUser, interaction.user.id, reason, contextURL, deleteMessages);
-                replySuccess(interaction, `${parseUser(targetUser)} has been banned:\n\`${reason || 'No reason provided.'}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Ban');
+                replySuccess(interaction, `${parseUser(targetUser)} has been banned:\n\`${reason}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Ban');
             } catch (error) {
                 replyError(interaction, error);
             }

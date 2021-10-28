@@ -66,7 +66,7 @@ export async function loadTimeouts(includeTomorrow: boolean) {
 
 export function punishmentToString(punishment: any) {
     return (
-        `**Reason:** ${punishment.reason || 'No reason provided.'}` +
+        `**Reason:** ${punishment.reason}` +
         `\n**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}` +
         `\n**Context:** ${formatContextURL(punishment.context_url)}` +
         `\n**ID:** ${punishment.id}` +
@@ -77,7 +77,7 @@ export function punishmentToString(punishment: any) {
 
 export function pastPunishmentToString(punishment: any) {
     return (
-        `**Reason:** ${punishment.reason || 'No reason provided.'}` +
+        `**Reason:** ${punishment.reason}` +
         `\n**Moderator:** ${punishment.mod_id ? parseUser(punishment.mod_id) : 'System'}` +
         `\n**Context:** ${formatContextURL(punishment.context_url)}` +
         `\n**ID:** ${punishment.id}` +

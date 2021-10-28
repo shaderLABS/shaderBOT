@@ -18,7 +18,7 @@
             "name": "reason",
             "description": "The reason of the mute.",
             "type": "STRING",
-            "required": false
+            "required": true
         },
         {
             "name": "context",

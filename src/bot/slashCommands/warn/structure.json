@@ -41,7 +41,7 @@
                     "name": "reason",
                     "description": "The reason of the warning.",
                     "type": "STRING",
-                    "required": false
+                    "required": true
                 },
                 {
                     "name": "context",

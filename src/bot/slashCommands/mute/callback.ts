@@ -11,9 +11,7 @@ export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { member, guild } = interaction;
 
-        const reason = interaction.options.getString('reason', false);
-        if (reason && reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
-
+        const reason = interaction.options.getString('reason', true);
         const targetUser = interaction.options.getUser('user', true);
         const targetMember = await userToMember(guild, targetUser.id);
 
@@ -24,6 +22,8 @@ export const command: ApplicationCommandCallback = {
         if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
         if (time < 10) return replyError(interaction, "You can't mute someone for less than 10 seconds.");
 
+        if (reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
+
         const contextURL = await getContextURL(interaction);
         if (!contextURL) return;
 
@@ -31,9 +31,7 @@ export const command: ApplicationCommandCallback = {
             const { expire, dmed } = await mute(targetUser.id, time, member.id, reason, contextURL, targetMember);
             replySuccess(
                 interaction,
-                `${parseUser(targetUser)} has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason || 'No reason provided.'}\`${
-                    dmed ? '' : '\n\n*The target could not be DMed.*'
-                }`,
+                `${parseUser(targetUser)} has been muted for ${secondsToString(time)} (until ${formatTimeDate(expire)}):\n\`${reason}\`${dmed ? '' : '\n\n*The target could not be DMed.*'}`,
                 'Mute'
             );
         } catch (error) {

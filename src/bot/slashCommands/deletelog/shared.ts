@@ -21,7 +21,7 @@ export async function deleteLogEntry(id: string, interaction: GuildCommandIntera
     let content =
         `**User:** ${parseUser(deletedEntry.user_id)}` +
         `\n**Type:** ${punishmentTypeAsString[deletedEntry.type]}` +
-        `\n**Reason:** ${deletedEntry.reason || 'No reason provided.'}` +
+        `\n**Reason:** ${deletedEntry.reason}` +
         `\n**Moderator:** ${deletedEntry.mod_id ? parseUser(deletedEntry.mod_id) : 'System'}` +
         `\n**Context:** ${formatContextURL(deletedEntry.context_url)}` +
         `\n**ID:** ${id}` +

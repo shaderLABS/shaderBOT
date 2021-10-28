@@ -31,7 +31,7 @@ export const command: ApplicationCommandCallback = {
             const page =
                 `**User:** ${parseUser(targetUser)}` +
                 `\n**Severity:** ${curr.severity}` +
-                `\n**Reason:** ${curr.reason || 'No reason provided.'}` +
+                `\n**Reason:** ${curr.reason}` +
                 `\n**Moderator:** ${parseUser(curr.mod_id)}` +
                 `\n**Context:** ${formatContextURL(curr.context_url)}` +
                 `\n**ID:** ${curr.id}` +

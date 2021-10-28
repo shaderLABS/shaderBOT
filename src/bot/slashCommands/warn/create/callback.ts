@@ -15,13 +15,14 @@ export const command: ApplicationCommandCallback = {
 
         const targetUser = interaction.options.getUser('user', true);
         const severity = interaction.options.getInteger('severity', true);
-        const reason = interaction.options.getString('reason', false);
-        if (reason && reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
+        const reason = interaction.options.getString('reason', true);
 
         const targetMember = await userToMember(interaction.guild, targetUser.id);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return replyError(interaction, "You can't warn a user with a role higher than or equal to yours.", 'Insufficient Permissions');
+
+        if (reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
 
         const contextURL = await getContextURL(interaction);
         if (!contextURL) return;
@@ -39,7 +40,7 @@ export const command: ApplicationCommandCallback = {
         let content =
             `**User:** ${parseUser(targetUser)}` +
             `\n**Severity:** ${severity}` +
-            `\n**Reason:** ${reason || 'No reason provided.'}` +
+            `\n**Reason:** ${reason}` +
             `\n**Moderator:** ${parseUser(member.user)}` +
             `\n**Context:** ${formatContextURL(contextURL)}` +
             `\n**ID:** ${id}`;

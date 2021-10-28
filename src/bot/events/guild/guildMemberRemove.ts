@@ -21,7 +21,8 @@ export const event: Event = {
         ).entries.first();
 
         if (!auditLog?.executor || !(auditLog.target instanceof User) || auditLog.target.id !== member.id || auditLog.executor.bot) return;
-        const { createdAt, executor, reason } = auditLog;
+        const { createdAt, executor } = auditLog;
+        const reason = auditLog.reason || 'No reason provided.';
 
         try {
             await db.query(
@@ -36,6 +37,6 @@ export const event: Event = {
             log(`Failed to add kick entry for ${parseUser(member.user)}: an error occurred while accessing the database.`, 'Kick');
         }
 
-        log(`${parseUser(executor)} kicked ${parseUser(member.user)}:\n\`${reason || 'No reason provided.'}\``, 'Kick');
+        log(`${parseUser(executor)} kicked ${parseUser(member.user)}:\n\`${reason}\``, 'Kick');
     },
 };
