@@ -1,8 +1,11 @@
-import { settings } from '../bot.js';
+import { ButtonInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel } from 'discord.js';
+import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
+import { ban } from './banUser.js';
+import { embedColor, replyError, replyInfo } from './embeds.js';
 import log from './log.js';
-import { isTextOrThreadChannel, parseUser, similarityLevenshtein } from './misc.js';
-import { mute } from './muteUser.js';
+import { isTextOrThreadChannel, parseUser, similarityLevenshtein, userToMember } from './misc.js';
+import { mute, unmute } from './muteUser.js';
 
 type cachedMessage = {
     id: string;
@@ -13,6 +16,29 @@ type cachedMessage = {
 };
 
 const cache: (cachedMessage | undefined)[] = new Array(settings.spamProtection.cacheLength);
+
+export async function handleSpamInteraction(interaction: ButtonInteraction) {
+    if (!interaction.guild || (!interaction.customId.startsWith('banSpam') && !interaction.customId.startsWith('forgiveSpam')) || !interaction.memberPermissions?.has(Permissions.FLAGS.BAN_MEMBERS))
+        return;
+
+    const id = interaction.customId.split(':')[1];
+    if (!id) return;
+
+    const targetUser = await client.users.fetch(id).catch(() => undefined);
+    if (!targetUser) return replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
+
+    if (interaction.customId.startsWith('banSpam')) {
+        ban(targetUser, undefined, 'Spamming messages in multiple channels.').catch(() => undefined);
+        replyInfo(interaction, `${parseUser(interaction.user)} banned ${parseUser(targetUser)}.`, 'Ban Spammer');
+    } else {
+        const targetMember = await userToMember(interaction.guild, id);
+        unmute(id, undefined, targetMember).catch(() => undefined);
+        replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
+    }
+
+    const message = interaction.message;
+    if (message instanceof Message) message.edit({ components: [] });
+}
 
 export function checkSpam(message: GuildMessage) {
     if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold) return false;
@@ -50,6 +76,39 @@ export function checkSpam(message: GuildMessage) {
             if (spamChannel && isTextOrThreadChannel(spamChannel)) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
+        }
+
+        const banButton = new MessageButton({
+            customId: 'banSpam:' + message.author.id,
+            style: 'DANGER',
+            label: 'Ban',
+        });
+
+        const forgiveButton = new MessageButton({
+            customId: 'forgiveSpam:' + message.author.id,
+            style: 'SUCCESS',
+            label: 'Forgive',
+        });
+
+        const logEmbed = new MessageEmbed({
+            author: {
+                name: 'Potential Spam',
+                iconURL: message.author.displayAvatarURL(),
+            },
+            description: `**User:** ${parseUser(message.author)}\n\n\`\`\`${message.content}\`\`\``,
+            color: embedColor.red,
+        });
+
+        const logChannel = guild.channels.cache.get(settings.logging.moderationChannelID);
+        if (logChannel && logChannel instanceof TextChannel) {
+            logChannel.send({
+                embeds: [logEmbed],
+                components: [
+                    new MessageActionRow({
+                        components: [banButton, forgiveButton],
+                    }),
+                ],
+            });
         }
     }
 

@@ -3,6 +3,7 @@ import { cooldowns } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { replyError } from '../lib/embeds.js';
 import { isTextOrThreadChannel } from '../lib/misc.js';
+import { handleSpamInteraction } from '../lib/spamProtection.js';
 import { ApplicationCommandCallback, slashCommands } from '../slashCommandHandler.js';
 
 export interface GuildCommandInteraction extends CommandInteraction {
@@ -30,6 +31,8 @@ function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChanne
 export const event: Event = {
     name: 'interactionCreate',
     callback: async (interaction: Interaction) => {
+        if (interaction.isButton()) return handleSpamInteraction(interaction);
+
         if (!interaction.isCommand() || !isGuildInteraction(interaction)) return;
 
         let command = slashCommands.get(interaction.commandName);
@@ -62,7 +65,7 @@ export const event: Event = {
          * VALIDATE COMMAND AND PERMISSIONS *
          ************************************/
 
-        const { cooldownDuration = 5000, channelWhitelist, ticketChannels = false, callback } = command;
+        const { cooldownDuration = 5000, channelWhitelist, callback } = command;
 
         if (!hasPermissions(member, channel, command)) {
             return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
