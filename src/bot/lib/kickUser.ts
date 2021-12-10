@@ -18,7 +18,7 @@ export async function kick(user: GuildMember, modID: Snowflake | null = null, re
             await db.query(
                 /*sql*/ `
                 INSERT INTO past_punishment (user_id, "type", mod_id, reason, context_url, timestamp)
-                VALUES ($1, 'kick', $2, $3, $4, $6)
+                VALUES ($1, 'kick', $2, $3, $4, $5)
                 RETURNING id;`,
                 [user.id, modID, reason, context, timestamp]
             )
