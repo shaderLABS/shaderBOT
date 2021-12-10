@@ -18,13 +18,13 @@
     "license": "MIT",
     "dependencies": {
         "@polka/redirect": "^1.0.0-next.0",
-        "apollo-server-express": "^3.4.0",
-        "body-parser": "^1.19.0",
+        "apollo-server-express": "^3.5.0",
+        "body-parser": "^1.19.1",
         "connect-pg-simple": "^7.0.0",
         "cors": "^2.8.5",
-        "discord.js": "^13.3.0",
+        "discord.js": "^13.3.1",
         "express-session": "^1.17.2",
-        "graphql": "^16.0.0",
+        "graphql": "^15.3.0",
         "helmet": "^4.6.0",
         "node-cron": "^3.0.0",
         "passport": "^0.5.0",
@@ -38,10 +38,10 @@
         "uuid-random": "^1.3.2"
     },
     "devDependencies": {
-        "@types/connect-pg-simple": "^4.2.4",
+        "@types/connect-pg-simple": "^7.0.0",
         "@types/cors": "^2.8.12",
         "@types/express-session": "^1.17.4",
-        "@types/node": "^16.11.6",
+        "@types/node": "^16.11.12",
         "@types/node-cron": "^3.0.0",
         "@types/passport": "^1.0.7",
         "@types/passport-discord": "^0.1.5",
@@ -49,6 +49,6 @@
         "@types/polka": "^0.5.3",
         "dotenv": "^10.0.0",
         "tsc-watch": "^4.5.0",
-        "typescript": "^4.4.4"
+        "typescript": "^4.5.3"
     }
 }
