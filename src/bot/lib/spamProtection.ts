@@ -1,8 +1,8 @@
 import { ButtonInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { ban } from './banUser.js';
 import { embedColor, replyError, replyInfo } from './embeds.js';
+import { kick } from './kickUser.js';
 import log from './log.js';
 import { isTextOrThreadChannel, parseUser, similarityLevenshtein, userToMember } from './misc.js';
 import { mute, unmute } from './muteUser.js';
@@ -18,7 +18,7 @@ type cachedMessage = {
 const cache: (cachedMessage | undefined)[] = new Array(settings.spamProtection.cacheLength);
 
 export async function handleSpamInteraction(interaction: ButtonInteraction) {
-    if (!interaction.guild || (!interaction.customId.startsWith('banSpam') && !interaction.customId.startsWith('forgiveSpam')) || !interaction.memberPermissions?.has(Permissions.FLAGS.BAN_MEMBERS))
+    if (!interaction.guild || (!interaction.customId.startsWith('kickSpam') && !interaction.customId.startsWith('forgiveSpam')) || !interaction.memberPermissions?.has(Permissions.FLAGS.KICK_MEMBERS))
         return;
 
     const id = interaction.customId.split(':')[1];
@@ -26,13 +26,19 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
 
     const targetUser = await client.users.fetch(id).catch(() => undefined);
     if (!targetUser) return replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
+    const targetMember = await userToMember(interaction.guild, id);
 
-    if (interaction.customId.startsWith('banSpam')) {
-        ban(targetUser, undefined, 'Spamming messages in multiple channels.').catch(() => undefined);
-        replyInfo(interaction, `${parseUser(interaction.user)} banned ${parseUser(targetUser)}.`, 'Ban Spammer');
+    if (interaction.customId.startsWith('kickSpam')) {
+        if (!targetMember) return replyError(interaction, 'The spammer is not in this guild anymore.', undefined, false);
+        kick(
+            targetMember,
+            interaction.user.id,
+            'Your account has been compromised, please reset your password. After that, feel free to rejoin our server.',
+            interaction.message instanceof Message ? interaction.message.url : undefined
+        ).catch(() => undefined);
+        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
     } else {
-        const targetMember = await userToMember(interaction.guild, id);
-        unmute(id, undefined, targetMember).catch(() => undefined);
+        unmute(id, interaction.user.id, targetMember).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
     }
 
@@ -78,10 +84,10 @@ export function checkSpam(message: GuildMessage) {
             }
         }
 
-        const banButton = new MessageButton({
-            customId: 'banSpam:' + message.author.id,
+        const kickButton = new MessageButton({
+            customId: 'kickSpam:' + message.author.id,
             style: 'DANGER',
-            label: 'Ban',
+            label: 'Kick',
         });
 
         const forgiveButton = new MessageButton({
@@ -105,7 +111,7 @@ export function checkSpam(message: GuildMessage) {
                 embeds: [logEmbed],
                 components: [
                     new MessageActionRow({
-                        components: [banButton, forgiveButton],
+                        components: [kickButton, forgiveButton],
                     }),
                 ],
             });
