@@ -1,6 +1,5 @@
 # shaderBOT Server
 
-![Dependency Status](https://img.shields.io/david/shaderLABS/shaderBOT-server?style=flat-square)
 ![GitHub](https://img.shields.io/badge/license-MIT-%2391BF0A?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
