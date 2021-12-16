@@ -22,7 +22,7 @@ export const command: ApplicationCommandCallback = {
         if (currentOverwrite.allow.equals(0n) && currentOverwrite.deny.equals(['SEND_MESSAGES', 'ADD_REACTIONS'])) currentOverwrite.delete();
         else currentOverwrite.edit({ SEND_MESSAGES: null, ADD_REACTIONS: null });
 
-        log(`${parseUser(user)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>).`, 'Unmute');
-        replySuccess(interaction, `Successfully unmuted ${parseUser(targetUser)} in this project.`, 'Unmute');
+        log(`${parseUser(user)} unmuted ${parseUser(targetUser)} in their project (<#${channel.id}>).`, 'Project Unmute');
+        replySuccess(interaction, `Successfully unmuted ${parseUser(targetUser)} in this project.`, 'Project Unmute');
     },
 };

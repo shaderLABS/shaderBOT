@@ -22,7 +22,7 @@ export const command: ApplicationCommandCallback = {
 
         channel.permissionOverwrites.edit(targetUser, { SEND_MESSAGES: false, ADD_REACTIONS: false });
 
-        log(`${parseUser(user)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`, 'Mute');
-        replySuccess(interaction, `Successfully muted ${parseUser(targetUser)} in this project.`, 'Mute');
+        log(`${parseUser(user)} muted ${parseUser(targetUser)} in their project (<#${channel.id}>).`, 'Project Mute');
+        replySuccess(interaction, `Successfully muted ${parseUser(targetUser)} in this project.`, 'Project Mute');
     },
 };
