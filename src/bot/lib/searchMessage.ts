@@ -11,7 +11,7 @@ export function isSnowflake(potentialSnowflake: Snowflake | string): potentialSn
     return !isNaN(+potentialSnowflake) && potentialSnowflake.length >= 17 && potentialSnowflake.length <= 19;
 }
 
-export async function getContextURL(interaction: GuildCommandInteraction) {
+export async function getContextURL(interaction: GuildCommandInteraction, targetID?: Snowflake) {
     const customURL = interaction.options.getString('context', false);
 
     if (customURL) {
@@ -19,17 +19,32 @@ export async function getContextURL(interaction: GuildCommandInteraction) {
         const messageID = IDs.pop();
         const channelID = IDs.pop();
 
-        if (!messageID || !channelID) return replyError(interaction, 'The specified message URL is invalid.');
+        if (!messageID || !channelID) {
+            replyError(interaction, 'The specified message URL is invalid.');
+            return;
+        }
+
         const channel = interaction.guild.channels.cache.get(channelID);
-        if (!channel || !isTextOrThreadChannel(channel)) return replyError(interaction, 'The specified message URL points to an invalid channel.');
+        if (!channel || !isTextOrThreadChannel(channel)) {
+            replyError(interaction, 'The specified message URL points to an invalid channel.');
+            return;
+        }
+
         const message = await channel.messages.fetch(messageID);
-        if (!message) return replyError(interaction, 'The specified message URL points to an invalid message.');
+        if (!message) {
+            replyError(interaction, 'The specified message URL points to an invalid message.');
+            return;
+        }
 
         return message.url;
     } else {
-        const URL = (await interaction.channel.messages.fetch({ limit: 1 }))?.first()?.url;
-        if (!URL) return replyError(interaction, 'Failed to fetch a context URL.');
-        else return URL;
+        const targetLastMessage = interaction.channel.messages.cache.filter((message) => message.author.id == targetID).last()?.url;
+        if (targetLastMessage) return targetLastMessage;
+
+        const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
+        if (channelLastMessage) return channelLastMessage;
+
+        replyError(interaction, 'Failed to fetch a context URL. Please specify it manually using the `context` argument.');
     }
 }
 
