@@ -6,9 +6,9 @@
     "private": true,
     "scripts": {
         "build": "npx tsc -b --verbose",
-        "start": "node -r dotenv/config src/index.js",
-        "update": "node -r dotenv/config src/update.js",
-        "dev": "tsc-watch --onSuccess \"node --trace-warnings -r dotenv/config src/index.js\""
+        "start": "node -r dotenv/config build/index.js",
+        "update": "node -r dotenv/config build/update.js",
+        "dev": "tsc-watch --onSuccess \"node --trace-warnings -r dotenv/config build/index.js\""
     },
     "author": {
         "name": "Niemand",
