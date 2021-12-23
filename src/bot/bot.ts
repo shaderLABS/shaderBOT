@@ -43,7 +43,7 @@ export async function startBot() {
     cooldowns = new Map<string, boolean>();
     settings = await settingsFile.read();
 
-    registerEvents('./src/bot/events');
+    registerEvents('./build/bot/events');
     registerPastas(pastaPath);
     registerAutoResponses(autoResponsePath);
     cleanBackups();

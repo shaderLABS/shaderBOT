@@ -6,6 +6,7 @@ node_modules/
 .env
 dist/
 pgdata/
+build
 src/bot/settings/settings.json
 customContent/
 /.dockerignore

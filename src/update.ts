@@ -29,7 +29,7 @@ client.on('ready', async () => {
     const guild = client.guilds.cache.get(settings.guildID);
     if (!guild) return console.error('Failed to update slash commands: the specified guild was not found.');
 
-    await stitchCommandStructure('./src/bot/slashCommands');
+    await stitchCommandStructure('./build/bot/slashCommands');
     await guild.commands.set(slashCommandStructure);
 
     console.log('Successfully updated slash commands!');

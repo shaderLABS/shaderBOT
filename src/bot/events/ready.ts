@@ -14,6 +14,6 @@ export const event: Event = {
 
         const guild = getGuild();
         if (!guild) return console.error('Failed to load slash commands: the specified guild was not found.');
-        await registerSlashCommands('./src/bot/slashCommands');
+        await registerSlashCommands('./build/bot/slashCommands');
     },
 };
