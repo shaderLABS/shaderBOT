@@ -38,7 +38,7 @@ export async function getContextURL(interaction: GuildCommandInteraction, target
 
         return message.url;
     } else {
-        const targetLastMessage = interaction.channel.messages.cache.filter((message) => message.author.id == targetID).last()?.url;
+        const targetLastMessage = interaction.channel.messages.cache.filter((message) => message?.author?.id == targetID).last()?.url;
         if (targetLastMessage) return targetLastMessage;
 
         const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
