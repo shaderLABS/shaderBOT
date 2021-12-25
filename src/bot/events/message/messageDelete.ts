@@ -32,7 +32,7 @@ export const event: Event = {
                 }
 
                 logEmbed
-                    .setAuthor('Deleted Message', message.author.displayAvatarURL())
+                    .setAuthor({ name: 'Deleted Message', iconURL: message.author.displayAvatarURL() })
                     .setDescription(`**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n\n${content.trim()}`);
             }
 

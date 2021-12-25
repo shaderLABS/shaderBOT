@@ -21,7 +21,7 @@ export async function deleteNote(interaction: GuildCommandInteraction, note: any
     interaction.reply({
         embeds: [
             new MessageEmbed()
-                .setAuthor('Delete Note', embedIcon.note)
+                .setAuthor({ name: 'Delete Note', iconURL: embedIcon.note })
                 .setColor('#ffc107')
                 .setDescription(messageContent)
                 .setFooter('ID: ' + note.id),

@@ -36,7 +36,7 @@ export const command: ApplicationCommandCallback = {
         interaction.reply({
             embeds: [
                 new MessageEmbed()
-                    .setAuthor('Add Note', embedIcon.note)
+                    .setAuthor({ name: 'Add Note', iconURL: embedIcon.note })
                     .setColor('#ffc107')
                     .setDescription(messageContent)
                     .setFooter('ID: ' + id),

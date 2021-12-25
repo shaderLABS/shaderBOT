@@ -1,4 +1,18 @@
-import { ButtonInteraction, ColorResolvable, CommandInteraction, DMChannel, GuildMember, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel, ThreadChannel, User } from 'discord.js';
+import {
+    ButtonInteraction,
+    ColorResolvable,
+    CommandInteraction,
+    DMChannel,
+    GuildMember,
+    Message,
+    MessageActionRow,
+    MessageButton,
+    MessageEmbed,
+    Permissions,
+    TextChannel,
+    ThreadChannel,
+    User,
+} from 'discord.js';
 import { GuildCommandInteraction } from '../events/interactionCreate';
 
 export const embedColor = {
@@ -17,7 +31,7 @@ export const embedIcon = {
 
 export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Success', embedIcon.success)
+        .setAuthor({ name: title || 'Success', iconURL: embedIcon.success })
         .setDescription(description)
         .setColor(embedColor.green);
     return channel.send({ embeds: [embed] });
@@ -25,7 +39,7 @@ export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, de
 
 export function replySuccess(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Success', embedIcon.success)
+        .setAuthor({ name: title || 'Success', iconURL: embedIcon.success })
         .setDescription(description)
         .setColor(embedColor.green);
 
@@ -34,7 +48,7 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
 
 export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Error', embedIcon.error)
+        .setAuthor({ name: title || 'Error', iconURL: embedIcon.error })
         .setDescription(description)
         .setColor(embedColor.red);
     return channel.send({ embeds: [embed] });
@@ -42,7 +56,7 @@ export function sendError(channel: TextChannel | DMChannel | ThreadChannel, desc
 
 export function replyError(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
     const embed = new MessageEmbed()
-        .setAuthor(title || 'Error', embedIcon.error)
+        .setAuthor({ name: title || 'Error', iconURL: embedIcon.error })
         .setDescription(description)
         .setColor(embedColor.red);
 
@@ -51,7 +65,7 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction, 
 
 export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string, message?: string, footer?: string) {
     const embed = new MessageEmbed()
-        .setAuthor(title || '', title ? embedIcon.info : undefined)
+        .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
         .setDescription(description)
         .setColor(embedColor.blue)
         .setFooter(footer || '');
@@ -60,7 +74,7 @@ export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, descr
 
 export function replyInfo(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, message?: string, footer?: string, ephemeral: boolean | undefined = false) {
     const embed = new MessageEmbed()
-        .setAuthor(title || '', title ? embedIcon.info : undefined)
+        .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
         .setDescription(description)
         .setColor(embedColor.blue)
         .setFooter(footer || '');

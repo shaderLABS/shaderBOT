@@ -1,4 +1,4 @@
-import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannels, TextChannel, ThreadChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannel, TextChannel, ThreadChannel, User, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 import { GuildCommandInteraction } from '../events/interactionCreate.js';
@@ -9,7 +9,7 @@ export function getGuild() {
     return client.guilds.cache.get(settings.guildID);
 }
 
-export function isTextOrThreadChannel(channel: Channel | TextBasedChannels): channel is TextChannel | ThreadChannel {
+export function isTextOrThreadChannel(channel: Channel | TextBasedChannel): channel is TextChannel | ThreadChannel {
     return channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_PUBLIC_THREAD' || channel.type === 'GUILD_PRIVATE_THREAD';
 }
 

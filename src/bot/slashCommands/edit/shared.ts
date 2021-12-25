@@ -179,7 +179,7 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
                 interaction.reply({
                     embeds: [
                         new MessageEmbed()
-                            .setAuthor('Edited Note', embedIcon.note)
+                            .setAuthor({ name: 'Edited Note', iconURL: embedIcon.note })
                             .setColor('#ffc107')
                             .setDescription(`Successfully edited the content of ${parseUser(user_id)}'s note.`)
                             .setFooter('ID: ' + uuid),
