@@ -2,7 +2,7 @@ import { ButtonInteraction, Message, MessageActionRow, MessageButton, MessageEmb
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { embedColor, replyError, replyInfo } from './embeds.js';
-import { kick } from './kickUser.js';
+import { kickSpammer } from './kickUser.js';
 import log from './log.js';
 import { isTextOrThreadChannel, parseUser, similarityLevenshtein, userToMember } from './misc.js';
 import { mute, unmute } from './muteUser.js';
@@ -29,14 +29,8 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
     const targetMember = await userToMember(interaction.guild, id);
 
     if (interaction.customId.startsWith('kickSpam')) {
-        if (!targetMember) return replyError(interaction, 'The spammer is not in this guild anymore.', undefined, false);
-        kick(
-            targetMember,
-            interaction.user.id,
-            'Your account has been compromised, please reset your password. After that, feel free to rejoin our server.',
-            interaction.message instanceof Message ? interaction.message.url : undefined
-        ).catch(() => undefined);
-        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
+        const { dmed } = await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
+        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)} for spamming. ${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick Spammer');
     } else {
         unmute(id, interaction.user.id, targetMember).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
