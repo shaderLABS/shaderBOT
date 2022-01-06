@@ -18,7 +18,12 @@ export const command: ApplicationCommandCallback = {
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
             return replyError(interaction, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
-        const time = stringToSeconds(splitString(interaction.options.getString('time', true)));
+        try {
+            var time = stringToSeconds(splitString(interaction.options.getString('time', true)));
+        } catch (error) {
+            return replyError(interaction, error);
+        }
+
         if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
         if (time < 10) return replyError(interaction, "You can't mute someone for less than 10 seconds.");
 

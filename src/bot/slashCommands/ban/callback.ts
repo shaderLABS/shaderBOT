@@ -29,7 +29,11 @@ export const command: ApplicationCommandCallback = {
         if (!contextURL) return;
 
         if (timeString) {
-            const time = stringToSeconds(splitString(timeString));
+            try {
+                var time = stringToSeconds(splitString(timeString));
+            } catch (error) {
+                return replyError(interaction, error);
+            }
 
             if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
             if (time < 10) return replyError(interaction, "You can't temporarily ban someone for less than 10 seconds.");

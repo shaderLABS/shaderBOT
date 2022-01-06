@@ -54,10 +54,15 @@ export function splitString(str: string): string[] {
     const cleanedString = str.replaceAll(' ', '').toLowerCase();
 
     const units = cleanedString.split(/[0-9]/).filter(Boolean);
-    if (units.length === 0 || units.some((unit) => !validUnits.includes(unit))) throw 'At least one of the time units is invalid.';
+    if (units.length === 0 || units.some((unit) => !validUnits.includes(unit))) {
+        throw 'At least one of the time units is invalid or unspecified.\n[Click here](https://github.com/shaderLABS/shaderBOT-server/wiki#time-notation) for more information.';
+    }
 
     const splitString = cleanedString.match(/\d+(a|y|mo|w|d|h|min|s)/g);
-    if (!splitString || splitString.length !== units.length) throw 'You can not use units without specifying their quantity.';
+    if (!splitString || splitString.length !== units.length) {
+        throw 'You can not use units without specifying their quantity.\n[Click here](https://github.com/shaderLABS/shaderBOT-server/wiki#time-notation) for more information.';
+    }
+
     return splitString;
 }
 
