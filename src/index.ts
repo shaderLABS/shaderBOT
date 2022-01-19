@@ -1,15 +1,13 @@
-import 'reflect-metadata';
 import { client, startBot } from './bot/bot.js';
 import log from './bot/lib/log.js';
 import { connectPostgreSQL, db } from './db/postgres.js';
-import { startWebserver, stopWebserver } from './web/server.js';
+import { startWebserver } from './web/server.js';
 
 export const botOnly = process.env.BOT_ONLY === 'true';
 export const production = process.env.NODE_ENV === 'production';
 
 export function shutdown(code: number = 0) {
     console.log('Shutting down...');
-    if (!botOnly) stopWebserver();
     db.end().catch(() => undefined);
     client.destroy();
     process.exit(code);

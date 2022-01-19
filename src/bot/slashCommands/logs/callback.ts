@@ -2,7 +2,7 @@ import { db } from '../../../db/postgres.js';
 import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
 import { replyButtonPages } from '../../lib/embeds.js';
-import { formatContextURL, parseUser } from '../../lib/misc.js';
+import { formatContextURL, parseUser, trimString } from '../../lib/misc.js';
 import { punishmentTypeAsString } from '../../lib/punishments.js';
 import { formatTimeDate } from '../../lib/time.js';
 import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
@@ -36,7 +36,13 @@ export const command: ApplicationCommandCallback = {
             [targetUser.id]
         );
 
-        const queries = await Promise.all([warnQuery, punishmentQuery, noteQuery, pastPunishmentQuery]);
+        const appealQuery = db.query(
+            /*sql*/ `
+            SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`,
+            [targetUser.id]
+        );
+
+        const queries = await Promise.all([warnQuery, punishmentQuery, noteQuery, pastPunishmentQuery, appealQuery]);
 
         let pages: string[] = [];
         function pageCategory(title: string, content: string[]) {
@@ -113,6 +119,23 @@ export const command: ApplicationCommandCallback = {
                     if (row.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(row.lifted_timestamp))}`;
                     if (row.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(row.lifted_mod_id)}`;
                     if (row.edited_timestamp) content += `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*`;
+
+                    return content;
+                })
+            );
+        }
+
+        if (queries[4].rowCount !== 0) {
+            pageCategory(
+                `Ban Appeals (${queries[4].rowCount})`,
+                queries[4].rows.map((row) => {
+                    let content =
+                        `\n**Reason:** ${trimString(row.reason, 150)}` + `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` + `\n**ID:** ${row.id}` + `\n**Result:** ${row.result}`;
+
+                    if (row.result_reason) content += `\n**Result Reason:** ${trimString(row.result_reason, 150)}`;
+                    if (row.result_mod_id) content += `\n**Result Moderator:** ${parseUser(row.result_mod_id)}`;
+                    if (row.result_timestamp) content += `\n**Result Created At:** ${formatTimeDate(new Date(row.result_timestamp))}`;
+                    if (row.result_edit_timestamp) content += `\n*(last edited by ${parseUser(row.result_edit_mod_id)} at ${formatTimeDate(new Date(row.result_edit_timestamp))})*`;
 
                     return content;
                 })

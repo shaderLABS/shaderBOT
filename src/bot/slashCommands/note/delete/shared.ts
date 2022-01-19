@@ -24,7 +24,7 @@ export async function deleteNote(interaction: GuildCommandInteraction, note: any
                 .setAuthor({ name: 'Delete Note', iconURL: embedIcon.note })
                 .setColor('#ffc107')
                 .setDescription(messageContent)
-                .setFooter('ID: ' + note.id),
+                .setFooter({ text: 'ID: ' + note.id }),
         ],
     });
 

@@ -36,8 +36,8 @@ export const command: ApplicationCommandCallback = {
         interaction.reply({
             embeds: [
                 new MessageEmbed()
-                    .setAuthor(channel.name)
-                    .setFooter('ID: ' + projectID)
+                    .setAuthor({ name: channel.name })
+                    .setFooter({ text: 'ID: ' + projectID })
                     .setColor(embedColor.green)
                     .addField('Notification Role', role.toString()),
             ],

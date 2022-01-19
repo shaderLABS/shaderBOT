@@ -1,6 +1,7 @@
 import { Guild, MessageEmbed, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { GuildCommandInteraction } from '../../events/interactionCreate.js';
+import { editAppealReason } from '../../lib/edit/editAppeal.js';
 import { editBanDuration, editBanReason } from '../../lib/edit/editBan.js';
 import { editContext } from '../../lib/edit/editContext.js';
 import { editKick } from '../../lib/edit/editKick.js';
@@ -182,7 +183,7 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
                             .setAuthor({ name: 'Edited Note', iconURL: embedIcon.note })
                             .setColor('#ffc107')
                             .setDescription(`Successfully edited the content of ${parseUser(user_id)}'s note.`)
-                            .setFooter('ID: ' + uuid),
+                            .setFooter({ text: 'ID: ' + uuid }),
                     ],
                 });
                 break;
@@ -212,6 +213,17 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
 
                 const user_id = await editWarnSeverity(severity, uuid, interaction.user.id);
                 replySuccess(interaction, `Successfully edited the severity of ${parseUser(user_id)}'s warning (${uuid}).`, 'Edit Warning Severity');
+                break;
+            }
+
+            case 'appealreason': {
+                const uuid: string | undefined =
+                    target instanceof User ? (await db.query(/*sql*/ `SELECT id FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0].id : target;
+
+                if (!uuid) return replyError(interaction, 'The specified user does not have any ban appeals');
+
+                const user_id = await editAppealReason(value, uuid, interaction.user.id);
+                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s ban appeal (${uuid}).`, 'Edit Ban Appeal Reason');
                 break;
             }
 

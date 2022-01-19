@@ -57,6 +57,11 @@ export function formatContextURL(context: string | null | undefined) {
     return context ? `[click here](${context})` : 'No context exists.';
 }
 
+export function trimString(str: string, n: number) {
+    if (str.length > n - 3) return str.substring(0, n - 3) + '...';
+    return str;
+}
+
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {

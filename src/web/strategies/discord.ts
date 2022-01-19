@@ -1,6 +1,7 @@
 import { Snowflake } from 'discord.js';
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
+import { client } from '../../bot/bot.js';
 import { getGuild } from '../../bot/lib/misc.js';
 import { isSnowflake } from '../../bot/lib/searchMessage.js';
 
@@ -10,24 +11,21 @@ passport.serializeUser((user: any, done) => {
 
 passport.deserializeUser(async (user_id: Snowflake, done) => {
     try {
-        const member = await getGuild()
-            ?.members.fetch(user_id)
-            ?.catch(() => undefined);
-        if (!member) return done(null);
+        const user = await client.users.fetch(user_id)?.catch(() => undefined);
+        if (!user) return done(null);
 
-        const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
+        const guild = getGuild();
+        if (!guild) return done(null);
 
-        const user = {
-            id: member.id,
-            username: member.user.username,
-            discriminator: member.user.discriminator,
-            avatarURL: member.user.displayAvatarURL(),
-            roleColor: member.displayHexColor,
-            permissions: member.permissions.bitfield,
-            allRoles: roles.sort((first, second) => first.position - second.position).map(({ id, hexColor, name }) => ({ id, hexColor, name })),
+        const data = {
+            id: user.id,
+            username: user.username,
+            discriminator: user.discriminator,
+            avatarURL: user.displayAvatarURL(),
+            isBanned: !!(await guild.bans.fetch(user).catch(() => undefined)),
         };
 
-        return user ? done(undefined, user) : done(null);
+        return done(undefined, data);
     } catch (error) {
         console.log(error);
         done(error);
@@ -46,25 +44,22 @@ passport.use(
         async (_accessToken, _refreshToken, profile, done) => {
             if (!isSnowflake(profile.id)) return done(undefined, undefined, { error: 0 });
 
-            const member = await getGuild()
-                ?.members.fetch(profile.id)
-                ?.catch(() => undefined);
-            if (!member) return done(undefined, undefined, { error: 0 });
+            const user = await client.users.fetch(profile.id)?.catch(() => undefined);
+            if (!user) return done(undefined, undefined, { error: 0 });
 
-            const roles = member.roles.cache.filter((role) => role.id !== member.guild.roles.everyone.id);
+            const guild = getGuild();
+            if (!guild) return done(null);
 
             try {
-                const user = {
-                    id: member.id,
-                    username: member.user.username,
-                    discriminator: member.user.discriminator,
-                    avatarURL: member.user.displayAvatarURL(),
-                    roleColor: member.displayHexColor,
-                    permissions: member.permissions.bitfield,
-                    allRoles: roles.map(({ id, hexColor, name }) => ({ id, hexColor, name })),
+                const data = {
+                    id: user.id,
+                    username: user.username,
+                    discriminator: user.discriminator,
+                    avatarURL: user.displayAvatarURL(),
+                    isBanned: !!(await guild.bans.fetch(user).catch(() => undefined)),
                 };
 
-                done(undefined, user);
+                done(undefined, data);
             } catch (error) {
                 console.log(error);
                 done(error instanceof Error ? error : new Error('Login failed.'));

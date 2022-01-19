@@ -30,7 +30,7 @@ export const command: ApplicationCommandCallback = {
                     .setAuthor({ name: 'Note', iconURL: embedIcon.note })
                     .setColor('#ffc107')
                     .setDescription(messageContent)
-                    .setFooter('ID: ' + note.id),
+                    .setFooter({ text: 'ID: ' + note.id }),
             ],
         });
     },

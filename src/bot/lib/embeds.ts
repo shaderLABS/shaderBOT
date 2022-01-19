@@ -68,7 +68,7 @@ export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, descr
         .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
         .setDescription(description)
         .setColor(embedColor.blue)
-        .setFooter(footer || '');
+        .setFooter({ text: footer || '' });
     return channel.send({ content: message, embeds: [embed] });
 }
 
@@ -77,7 +77,7 @@ export function replyInfo(interaction: CommandInteraction | ButtonInteraction, d
         .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
         .setDescription(description)
         .setColor(embedColor.blue)
-        .setFooter(footer || '');
+        .setFooter({ text: footer || '' });
 
     return interaction.reply({ content: message, embeds: [embed], ephemeral });
 }

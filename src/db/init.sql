@@ -67,6 +67,21 @@ CREATE TABLE "note" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP TABLE IF EXISTS "appeal";
+CREATE TABLE "appeal" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    reason TEXT NOT NULL,
+    result TEXT NOT NULL, -- pending, declined, accepted
+    result_reason TEXT,
+    result_mod_id NUMERIC(20),
+    result_timestamp TIMESTAMP WITH TIME ZONE,
+    result_edit_mod_id NUMERIC(20),
+    result_edit_timestamp TIMESTAMP WITH TIME ZONE,
+    message_id NUMERIC(20),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- SESSION
 
 DROP TABLE IF EXISTS "session";

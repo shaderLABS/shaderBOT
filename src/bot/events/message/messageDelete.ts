@@ -2,7 +2,7 @@ import { Message, MessageAttachment, MessageEmbed, TextChannel } from 'discord.j
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { embedColor } from '../../lib/embeds.js';
-import { getGuild, isTextOrThreadChannel, parseUser } from '../../lib/misc.js';
+import { getGuild, isTextOrThreadChannel, parseUser, trimString } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'messageDelete',
@@ -20,9 +20,9 @@ export const event: Event = {
 
             if (message.partial) {
                 logEmbed
-                    .setAuthor('Deleted Message')
+                    .setAuthor({ name: 'Deleted Message' })
                     .setDescription(`**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}`)
-                    .setFooter('This is a partial message with very limited information.');
+                    .setFooter({ text: 'This is a partial message with very limited information.' });
             } else {
                 let content = message.content + '\n\n';
 
@@ -33,7 +33,7 @@ export const event: Event = {
 
                 logEmbed
                     .setAuthor({ name: 'Deleted Message', iconURL: message.author.displayAvatarURL() })
-                    .setDescription(`**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n\n${content.trim()}`);
+                    .setDescription(trimString(`**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n\n${content.trim()}`, 4096));
             }
 
             logChannel.send({
