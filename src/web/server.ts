@@ -10,7 +10,6 @@ import './strategies/discord.js';
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
 const PORT = Number(process.env.PORT) || 3001;
-const DOMAIN = process.env.DOMAIN || 'localhost';
 
 const app = polka();
 
@@ -82,7 +81,7 @@ export async function startWebserver() {
         if (req.session) {
             req.session.destroy(() => {
                 // clear session cookie
-                res.setHeader('Set-Cookie', `connect.sid=; Path=/; Domain=${DOMAIN}; Expires=Thu, 01 Jan 1970 00:00:01 GMT`);
+                res.setHeader('Set-Cookie', `connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT`);
 
                 res.statusCode = 200;
                 return res.end('OK');
