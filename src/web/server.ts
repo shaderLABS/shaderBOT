@@ -6,9 +6,9 @@ import passport from 'passport';
 import polka from 'polka';
 import { createBanAppeal, getBanInformation } from '../bot/lib/banAppeal.js';
 import { db } from '../db/postgres.js';
-import { production } from '../index.js';
 import './strategies/discord.js';
 
+const PRODUCTION = process.env.NODE_ENV === 'production';
 const PORT = Number(process.env.PORT) || 3001;
 const DOMAIN = process.env.DOMAIN || 'localhost';
 
@@ -23,7 +23,7 @@ export async function startWebserver() {
 
     app.use(
         cors({
-            origin: production ? [] : ['http://localhost:3000'],
+            origin: PRODUCTION ? [] : ['http://localhost:3000'],
             credentials: true,
         })
     );

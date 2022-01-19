@@ -71,7 +71,8 @@ Environment variables are read from `.env` and specifiy sensitive information li
 | `BACKUP_ENCRYPTION_KEY`     |     NONE      | The key used for encrypting and decrypting channel backups. It must be 256 bits (32 characters) long.                                                |
 | `SESSION_SECRET`            |     NONE      | The secret key used for signing session cookies. It is required if `BOT_ONLY` is not set to `true`.                                                  |
 | `NODE_ENV`                  | `development` | The environment this is being run in. Can be either `development` or `production` and should always be set accordingly.                              |
-| `PORT`                      |    `3001`     | The port that the web server will run on.                                                                                                            |
+| `PORT`                      |    `3001`     | The port that the REST API will run on.                                                                                                              |
+| `DOMAIN`                    |  `localhost`  | The domain that the REST API will run on.                                                                                                            |
 | `BOT_ONLY`                  |    `false`    | Run the server in bot-only mode, which disables the Polka and Apollo/GraphQL server.                                                                 |
 | `PG_USER`                   |  `postgres`   | The name used for accessing the PostgreSQL database.                                                                                                 |
 | `PG_PASSWORD`               |  `postgres`   | The password used for accessing the PostgreSQL database.                                                                                             |
