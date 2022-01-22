@@ -109,6 +109,10 @@ export function formatTimeDate(date: Date) {
     return Formatters.time(date, Formatters.TimestampStyles.LongDateTime);
 }
 
+export function formatLongTimeDate(date: Date) {
+    return Formatters.time(date, Formatters.TimestampStyles.LongDate) + Formatters.time(date, Formatters.TimestampStyles.LongTime);
+}
+
 export function formatTimeDateString(date: Date) {
     return date.toLocaleString('en-US', {
         timeZoneName: 'short',
