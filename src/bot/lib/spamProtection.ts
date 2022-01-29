@@ -41,7 +41,15 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
 }
 
 export function checkSpam(message: GuildMessage) {
+    // don't handle message where spam is unlikely
     if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold) return false;
+
+    // mentions everyone and contains a link
+    let isSpamSingleMessage =
+        !message.member.roles.color &&
+        !message.member.permissions.has(Permissions.FLAGS.MENTION_EVERYONE) &&
+        (message.content.includes('@everyone') || message.content.includes('@here')) &&
+        message.content.includes('http');
 
     const currentMessage = {
         id: message.id,
@@ -51,28 +59,37 @@ export function checkSpam(message: GuildMessage) {
         createdTimestamp: message.createdTimestamp,
     };
 
-    const potentialSpam = cache.filter(
-        (previousMessage) =>
-            previousMessage &&
-            currentMessage.authorID === previousMessage.authorID &&
-            similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.spamProtection.similarityThreshold &&
-            currentMessage.channelID !== previousMessage.channelID &&
-            currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.spamProtection.timeThreshold * 1000
-    );
-
-    const isSpam = potentialSpam.length >= settings.spamProtection.messageThreshold - 1;
-    if (isSpam) {
-        mute(message.author.id, settings.spamProtection.muteDuration, null, 'Spamming messages in multiple channels.', null, message.member).catch((e) =>
-            log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute')
+    // if not already flagged as spam, do regular spam check
+    let isSpamSimilarMessage = false;
+    if (!isSpamSingleMessage) {
+        const potentialSpam = cache.filter(
+            (previousMessage) =>
+                previousMessage &&
+                currentMessage.authorID === previousMessage.authorID &&
+                similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.spamProtection.similarityThreshold &&
+                currentMessage.channelID !== previousMessage.channelID &&
+                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.spamProtection.timeThreshold * 1000
         );
 
+        isSpamSimilarMessage = potentialSpam.length >= settings.spamProtection.messageThreshold - 1;
+    }
+
+    // if message is flagged as spam, mute and delete messages
+    if (isSpamSingleMessage || isSpamSimilarMessage) {
+        mute(
+            message.author.id,
+            settings.spamProtection.muteDuration,
+            null,
+            isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.',
+            null,
+            message.member
+        ).catch((e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute'));
+
         const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as cachedMessage[];
-        const guild = message.guild;
 
         message.delete().catch(() => undefined);
-
         for (const spam of spamMessages) {
-            const spamChannel = guild.channels.cache.get(spam.channelID);
+            const spamChannel = message.guild.channels.cache.get(spam.channelID);
             if (spamChannel && isTextOrThreadChannel(spamChannel)) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
@@ -99,7 +116,7 @@ export function checkSpam(message: GuildMessage) {
             color: embedColor.red,
         });
 
-        const logChannel = guild.channels.cache.get(settings.logging.moderationChannelID);
+        const logChannel = message.guild.channels.cache.get(settings.logging.moderationChannelID);
         if (logChannel && logChannel instanceof TextChannel) {
             logChannel.send({
                 embeds: [logEmbed],
@@ -112,8 +129,9 @@ export function checkSpam(message: GuildMessage) {
         }
     }
 
+    // rotate cache
     cache.unshift(currentMessage);
     cache.pop();
 
-    return isSpam;
+    return isSpamSingleMessage || isSpamSimilarMessage;
 }
