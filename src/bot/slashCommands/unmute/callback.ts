@@ -13,7 +13,7 @@ export const command: ApplicationCommandCallback = {
         const targetMember = await userToMember(guild, targetUser.id);
 
         if (targetMember && member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0)
-            return replyError(interaction, "You can't mute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
+            return replyError(interaction, "You can't unmute a user with a role higher than or equal to yours.", 'Insufficient Permissions');
 
         try {
             await unmute(targetUser.id, member.id, targetMember);

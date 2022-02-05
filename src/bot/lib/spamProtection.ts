@@ -1,4 +1,5 @@
 import { ButtonInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel } from 'discord.js';
+import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { embedColor, replyError, replyInfo } from './embeds.js';
@@ -40,7 +41,7 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
     if (message instanceof Message) message.edit({ components: [] });
 }
 
-export function checkSpam(message: GuildMessage) {
+export async function checkSpam(message: GuildMessage) {
     // don't handle message where spam is unlikely
     if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold) return false;
 
@@ -76,14 +77,51 @@ export function checkSpam(message: GuildMessage) {
 
     // if message is flagged as spam, mute and delete messages
     if (isSpamSingleMessage || isSpamSimilarMessage) {
-        mute(
-            message.author.id,
-            settings.spamProtection.muteDuration,
-            null,
-            isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.',
-            null,
-            message.member
-        ).catch((e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute'));
+        const isPunished = !!(await db.query(/*sql*/ `SELECT 1 FROM punishment WHERE user_id = $1 LIMIT 1;`, [message.author.id])).rows[0];
+
+        if (!isPunished) {
+            mute(
+                message.author.id,
+                settings.spamProtection.muteDuration,
+                null,
+                isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.',
+                null,
+                message.member
+            ).catch((e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute'));
+
+            const kickButton = new MessageButton({
+                customId: 'kickSpam:' + message.author.id,
+                style: 'DANGER',
+                label: 'Kick',
+            });
+
+            const forgiveButton = new MessageButton({
+                customId: 'forgiveSpam:' + message.author.id,
+                style: 'SUCCESS',
+                label: 'Forgive',
+            });
+
+            const logEmbed = new MessageEmbed({
+                author: {
+                    name: 'Potential Spam',
+                    iconURL: message.author.displayAvatarURL(),
+                },
+                description: `**User:** ${parseUser(message.author)}\n\n\`\`\`${message.content}\`\`\``,
+                color: embedColor.red,
+            });
+
+            const logChannel = message.guild.channels.cache.get(settings.logging.moderationChannelID);
+            if (logChannel && logChannel instanceof TextChannel) {
+                logChannel.send({
+                    embeds: [logEmbed],
+                    components: [
+                        new MessageActionRow({
+                            components: [kickButton, forgiveButton],
+                        }),
+                    ],
+                });
+            }
+        }
 
         const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as cachedMessage[];
 
@@ -93,39 +131,6 @@ export function checkSpam(message: GuildMessage) {
             if (spamChannel && isTextOrThreadChannel(spamChannel)) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
-        }
-
-        const kickButton = new MessageButton({
-            customId: 'kickSpam:' + message.author.id,
-            style: 'DANGER',
-            label: 'Kick',
-        });
-
-        const forgiveButton = new MessageButton({
-            customId: 'forgiveSpam:' + message.author.id,
-            style: 'SUCCESS',
-            label: 'Forgive',
-        });
-
-        const logEmbed = new MessageEmbed({
-            author: {
-                name: 'Potential Spam',
-                iconURL: message.author.displayAvatarURL(),
-            },
-            description: `**User:** ${parseUser(message.author)}\n\n\`\`\`${message.content}\`\`\``,
-            color: embedColor.red,
-        });
-
-        const logChannel = message.guild.channels.cache.get(settings.logging.moderationChannelID);
-        if (logChannel && logChannel instanceof TextChannel) {
-            logChannel.send({
-                embeds: [logEmbed],
-                components: [
-                    new MessageActionRow({
-                        components: [kickButton, forgiveButton],
-                    }),
-                ],
-            });
         }
     }
 
