@@ -31,6 +31,7 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
 
     if (interaction.customId.startsWith('kickSpam')) {
         const { dmed } = await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
+        unmute(id, interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)} for spamming. ${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick Spammer');
     } else {
         unmute(id, interaction.user.id, targetMember).catch(() => undefined);

@@ -3,6 +3,7 @@ import { replyError, replySuccess } from '../../lib/embeds.js';
 import { kickSpammer } from '../../lib/kickUser.js';
 import log from '../../lib/log.js';
 import { parseUser, userToMember } from '../../lib/misc.js';
+import { unmute } from '../../lib/muteUser.js';
 import { getContextURL } from '../../lib/searchMessage.js';
 import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
 
@@ -23,6 +24,7 @@ export const command: ApplicationCommandCallback = {
         if (!contextURL) return;
 
         const { dmed } = await kickSpammer(targetUser, interaction.user.id, contextURL);
+        unmute(targetUser.id, interaction.user.id).catch(() => undefined);
 
         replySuccess(interaction, `Successfully kicked ${parseUser(targetUser)} for spamming. ${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick Spammer');
         log(`${parseUser(interaction.user)} kicked ${parseUser(targetUser)} for spamming. ${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick Spammer');
