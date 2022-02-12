@@ -14,8 +14,8 @@ export interface GuildMessage extends Message {
 
 export const event: Event = {
     name: 'messageCreate',
-    callback: (message: Message) => {
-        if (!isGuildMessage(message) || message.author.bot || checkSpam(message) || mediaOnly(message) || matchBlacklist(message)) return;
+    callback: async (message: Message) => {
+        if (!isGuildMessage(message) || message.author.bot || (await checkSpam(message)) || mediaOnly(message) || matchBlacklist(message)) return;
         sendAutoResponse(message);
     },
 };
