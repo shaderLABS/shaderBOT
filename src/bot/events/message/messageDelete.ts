@@ -21,12 +21,8 @@ export const event: Event = {
             if (message.partial) {
                 logEmbed
                     .setAuthor({ name: 'Deleted Message' })
-                    .setDescription(
-                        `**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n**Sent At:** ${formatLongTimeDate(
-                            new Date(message.createdTimestamp)
-                        )}\n**Deleted At:** ${formatLongTimeDate(new Date())}`
-                    )
-                    .setFooter({ text: 'This is a partial message with very limited information.' });
+                    .setDescription(`**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(new Date(message.createdTimestamp))}\n**Deleted At:** ${formatLongTimeDate(new Date())}`)
+                    .setFooter({ text: `ID: ${message.id} | This is a partial message with very limited information.` });
             } else {
                 let content = message.content + '\n\n';
 
@@ -35,16 +31,23 @@ export const event: Event = {
                     else attachments.push(new MessageAttachment(attachment.url, attachment.name || undefined));
                 }
 
+                let metadata = `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(
+                    new Date(message.createdTimestamp)
+                )}\n**Deleted At:** ${formatLongTimeDate(new Date())}`;
+
+                if (message.reference) {
+                    metadata += `\n**Reference To:** [click here](https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId})`;
+                }
+
                 logEmbed
-                    .setAuthor({ name: 'Deleted Message', iconURL: message.author.displayAvatarURL() })
-                    .setDescription(
-                        trimString(
-                            `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Message ID:** ${message.id}\n**Sent At:** ${formatLongTimeDate(
-                                new Date(message.createdTimestamp)
-                            )}\n**Deleted At:** ${formatLongTimeDate(new Date())}\n\n${content.trim()}`,
-                            4096
-                        )
-                    );
+                    .setAuthor({
+                        name: message.mentions.repliedUser
+                            ? `Deleted Reply ${message.mentions.users.has(message.mentions.repliedUser.id) ? `(@${message.mentions.repliedUser.tag})` : ''}`
+                            : 'Deleted Message',
+                        iconURL: message.author.displayAvatarURL(),
+                    })
+                    .setDescription(trimString(`${metadata}\n\n${content.trim()}`, 4096))
+                    .setFooter({ text: 'ID: ' + message.id });
             }
 
             logChannel.send({
