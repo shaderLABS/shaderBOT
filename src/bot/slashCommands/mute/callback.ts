@@ -26,6 +26,7 @@ export const command: ApplicationCommandCallback = {
 
         if (isNaN(time)) return replyError(interaction, 'The specified time exceeds the range of UNIX time.');
         if (time < 10) return replyError(interaction, "You can't mute someone for less than 10 seconds.");
+        if (time > 2419200) return replyError(interaction, "You can't mute someone for more than 28 days.");
 
         if (reason.length > 500) return replyError(interaction, 'The reason must not be more than 500 characters long.');
 

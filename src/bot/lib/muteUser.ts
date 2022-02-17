@@ -1,20 +1,14 @@
 import { GuildMember, MessageEmbed, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { settings } from '../bot.js';
 import { embedColor } from './embeds.js';
 import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { parseUser } from './misc.js';
 import { punishmentToString, store } from './punishments.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
 export async function mute(userID: Snowflake, duration: number, modID: Snowflake | null = null, reason: string, context: string | null = null, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
-
-    const role = await getGuild()?.roles.fetch(settings.muteRoleID);
-    if (!role) {
-        log(`Failed to mute ${parseUser(userID)} for ${secondsToString(duration)}: mute role not found.`, 'Mute');
-        return Promise.reject('Mute role not found.');
-    }
+    if (duration < 10 || duration > 2419200) return Promise.reject('The specified duration is outside of the API limits.');
 
     const timestamp = new Date();
     const expire = new Date(timestamp.getTime() + duration * 1000);
@@ -83,17 +77,10 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
         return Promise.reject('Error while accessing the database.');
     }
 
-    if (member) member.roles.add(role);
+    if (member) member.timeout(duration * 1000, reason);
 
-    if (expire.getTime() - timestamp.getTime() < new Date().setHours(24, 0, 0, 0) - timestamp.getTime()) {
-        const timeout = setTimeout(async () => {
-            const timeoutMember =
-                member &&
-                (await getGuild()
-                    ?.members.fetch(member.id)
-                    .catch(() => undefined));
-            unmute(userID, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(userID)}: ${e}`, 'Unmute'));
-        }, duration * 1000);
+    if (expire.getTime() < new Date().setHours(24, 0, 0, 0)) {
+        const timeout = setTimeout(() => expireMute(userID), duration * 1000);
 
         const previousTimeout = store.mutes.get(userID);
         if (previousTimeout) clearTimeout(previousTimeout);
@@ -106,12 +93,6 @@ export async function mute(userID: Snowflake, duration: number, modID: Snowflake
 
 export async function unmute(userID: Snowflake, modID?: Snowflake, member?: GuildMember) {
     if (member && !member.manageable) return Promise.reject('The specified user is not manageable.');
-
-    const role = await getGuild()?.roles.fetch(settings.muteRoleID);
-    if (!role) {
-        log(`Failed to unmute ${parseUser(userID)}: mute role not found.`, 'Unmute');
-        return Promise.reject('Mute role not found.');
-    }
 
     try {
         const deleted = (
@@ -134,7 +115,7 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
         return Promise.reject('Error while accessing the database.');
     }
 
-    if (member) member.roles.remove(role);
+    if (member) member.timeout(null);
 
     const timeout = store.mutes.get(userID);
     if (timeout) {
@@ -145,43 +126,28 @@ export async function unmute(userID: Snowflake, modID?: Snowflake, member?: Guil
     log(`${modID ? parseUser(modID) : 'System'} unmuted ${parseUser(userID)}.`, 'Unmute');
 }
 
-export async function checkMuteEvasion(member: GuildMember) {
-    const role = await getGuild()?.roles.fetch(settings.muteRoleID);
-    if (!role) return;
+export async function expireMute(userID: Snowflake) {
+    try {
+        const expiredMute = (
+            await db.query(
+                /*sql*/ `
+                WITH moved_rows AS (
+                    DELETE FROM punishment
+                    WHERE "type" = 'mute' AND user_id = $1
+                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
+                )
+                INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+                SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, NULL AS lifted_mod_id, timestamp FROM moved_rows
+                RETURNING id;`,
+                [userID, new Date()]
+            )
+        ).rows[0];
 
-    const mute = (
-        await db.query(
-            /*sql*/ `
-            SELECT id, expire_timestamp
-            FROM punishment
-            WHERE "type" = 'mute' AND user_id = $1
-            LIMIT 1`,
-            [member.id]
-        )
-    ).rows[0];
+        store.mutes.delete(userID);
 
-    if (!mute) return;
-
-    member.roles.add(role);
-    const expireTime = new Date(mute.expire_timestamp).getTime();
-    const checkTime = Date.now();
-
-    if (expireTime < checkTime) {
-        unmute(member.id, undefined, member).catch(() => undefined);
-    } else if (expireTime < new Date().setHours(23, 55, 0, 0)) {
-        const duration = expireTime - checkTime;
-
-        const timeout = setTimeout(async () => {
-            const timeoutMember = await getGuild()
-                ?.members.fetch(member.id)
-                .catch(() => undefined);
-            unmute(member.id, undefined, timeoutMember);
-        }, duration);
-
-        const previousTimeout = store.mutes.get(member.id);
-        if (previousTimeout) clearTimeout(previousTimeout);
-
-        store.mutes.set(member.id, timeout);
-        log(`${parseUser(member.user)} possibly tried to evade their mute (${mute.id}).`, 'Mute Evasion');
+        log(`${parseUser(userID)}'s mute (${expiredMute.id}) has expired.`, 'Expire Mute');
+    } catch (error) {
+        console.error(error);
+        log(`Failed to expire ${parseUser(userID)}'s mute: an error occurred while accessing the database.`, 'Expire Mute');
     }
 }

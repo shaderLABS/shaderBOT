@@ -2,8 +2,8 @@ import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { unban } from './banUser.js';
 import log from './log.js';
-import { formatContextURL, getGuild, parseUser } from './misc.js';
-import { unmute } from './muteUser.js';
+import { formatContextURL, parseUser } from './misc.js';
+import { expireMute } from './muteUser.js';
 import { formatTimeDate } from './time.js';
 
 export const punishmentTypeAsString: {
@@ -48,13 +48,7 @@ export async function loadTimeouts(includeTomorrow: boolean) {
 
             store.tempbans.set(punishment.user_id, timeout);
         } else {
-            const timeout = setTimeout(async () => {
-                const timeoutMember = await getGuild()
-                    ?.members.fetch(punishment.user_id)
-                    .catch(() => undefined);
-
-                unmute(punishment.user_id, undefined, timeoutMember).catch((e) => log(`Failed to unmute ${parseUser(punishment.user_id)}: ${e}`, 'Unmute'));
-            }, ms);
+            const timeout = setTimeout(() => expireMute(punishment.user_id), ms);
 
             const previousTimeout = store.mutes.get(punishment.user_id);
             if (previousTimeout) clearTimeout(previousTimeout);

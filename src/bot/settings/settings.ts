@@ -11,7 +11,6 @@ export interface Settings {
     appealChannelID: Snowflake;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
-    muteRoleID: Snowflake;
     guildID: Snowflake;
     archiveCategoryIDs: Snowflake[];
     warnings: {

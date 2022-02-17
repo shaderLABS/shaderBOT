@@ -17,6 +17,7 @@ function requireTime(value: string) {
 
     if (isNaN(time)) throw 'The specified time exceeds the range of UNIX time.';
     if (time < 10) throw 'The specified time must be greater than 10 seconds.';
+    if (time > 2419200) throw 'The specified time must be less than 28 days.';
 
     return time;
 }

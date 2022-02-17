@@ -2,7 +2,7 @@ import { Snowflake } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import log from '../log.js';
 import { getGuild, parseUser } from '../misc.js';
-import { unmute } from '../muteUser.js';
+import { expireMute } from '../muteUser.js';
 import { store } from '../punishments.js';
 import { formatTimeDate } from '../time.js';
 
@@ -47,31 +47,23 @@ export async function editMuteDuration(uuid: string, time: number, modID: Snowfl
     const guild = getGuild();
     const member = guild?.members.cache.get(result.user_id) || (await guild?.members.fetch(result.user_id).catch(() => undefined));
 
-    const expireTime = new Date(result.expire_timestamp).getTime();
+    const expireDate = new Date(result.expire_timestamp);
+    const expireTime = expireDate.getTime();
     const editTime = editTimestamp.getTime();
 
-    if (member) {
-        if (expireTime < editTime) {
-            unmute(member.id, undefined, member).catch(() => undefined);
-        } else if (expireTime < editTimestamp.setHours(23, 55, 0, 0)) {
-            const timeout = setTimeout(async () => {
-                const timeoutMember = await getGuild()
-                    ?.members.fetch(member.id)
-                    .catch(() => undefined);
-                unmute(member.id, undefined, timeoutMember);
-            }, expireTime - editTime);
+    if (member) member.disableCommunicationUntil(expireDate);
 
-            const previousTimeout = store.mutes.get(member.id);
-            if (previousTimeout) clearTimeout(previousTimeout);
+    if (expireTime < editTimestamp.setHours(24, 0, 0, 0)) {
+        const timeout = setTimeout(() => expireMute(result.user_id), expireTime - editTime);
 
-            store.mutes.set(member.id, timeout);
-        }
+        const previousTimeout = store.mutes.get(result.user_id);
+        if (previousTimeout) clearTimeout(previousTimeout);
+
+        store.mutes.set(result.user_id, timeout);
     }
 
     log(
-        `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(
-            new Date(result.expire_timestamp)
-        )}.`,
+        `${parseUser(modID)} edited the expiry date of ${parseUser(result.user_id)}'s mute (${uuid}) from ${formatTimeDate(new Date(result.old_expire_timestamp))} to ${formatTimeDate(expireDate)}.`,
         'Edit Mute Duration'
     );
     return result;
