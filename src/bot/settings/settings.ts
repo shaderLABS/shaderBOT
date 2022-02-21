@@ -8,6 +8,7 @@ export interface Settings {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;
     };
+    moderatorRoleID: Snowflake;
     appealChannelID: Snowflake;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];

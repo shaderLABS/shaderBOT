@@ -84,5 +84,12 @@ export async function createBanAppeal(id: Snowflake, username: string, discrimin
         ],
     });
 
+    const thread = await message.startThread({
+        name: `${username}'s Ban Appeal`,
+        autoArchiveDuration: 'MAX',
+    });
+
+    thread.send(`<@&${settings.moderatorRoleID}>`);
+
     db.query(/*sql*/ `UPDATE appeal SET message_id = $1 WHERE id = $2;`, [message.id, appealID]);
 }

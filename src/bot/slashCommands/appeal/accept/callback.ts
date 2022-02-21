@@ -30,7 +30,11 @@ export const command: ApplicationCommandCallback = {
 
             const appealChannel = interaction.guild.channels.cache.get(settings.appealChannelID);
             if (appealChannel instanceof TextChannel) {
-                appealChannel.messages.delete(appeal.message_id).catch(() => undefined);
+                const appealMessage = await appealChannel.messages.fetch(appeal.message_id).catch(() => undefined);
+                if (appealMessage) {
+                    appealMessage.thread?.setArchived(true).catch(() => undefined);
+                    appealMessage.delete().catch(() => undefined);
+                }
             }
 
             await unban(targetUser.id, interaction.user.id);
