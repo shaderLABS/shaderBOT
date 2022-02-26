@@ -13,7 +13,7 @@ export const event: Event = {
         let logContent = `The channel #${channel.name} has been deleted. `;
 
         const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id`, [channel.id])).rows[0];
-        if (project) {
+        if (project && project.role_id) {
             const role = await channel.guild.roles.fetch(project.role_id).catch(() => undefined);
             if (role) role.delete();
             logContent += 'The project that was linked to this channel has been removed. ';

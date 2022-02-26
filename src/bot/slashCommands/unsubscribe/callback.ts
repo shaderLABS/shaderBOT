@@ -12,8 +12,9 @@ export const command: ApplicationCommandCallback = {
         const projectChannel = (interaction.options.getChannel('project', false) as GuildChannel | null) || interaction.channel;
         if (!isTextOrThreadChannel(projectChannel)) return replyError(interaction, 'You must specify a text or thread channel.');
 
-        const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
+        const project = (await db.query(/*sql*/ `SELECT id, role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
         if (!project) return replyError(interaction, `<#${projectChannel.id}> is not a project channel.`);
+        if (!project.role_id) return replyError(interaction, `<#${projectChannel.id}> is archived.`);
 
         const role = await guild.roles.fetch(project.role_id);
         if (!role) return replyError(interaction, "Failed to resolve the project's role.", undefined, false);

@@ -3,6 +3,7 @@ import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
+import { rotateBanner } from './lib/banner.js';
 import { loadTimeouts } from './lib/punishments.js';
 import { Pasta, pastaPath, registerPastas } from './pastaHandler.js';
 import * as settingsFile from './settings/settings.js';
@@ -17,6 +18,7 @@ export let settings: settingsFile.Settings;
 cron.schedule('55 23 * * *', () => {
     loadTimeouts(true);
     cleanBackups();
+    rotateBanner();
 });
 
 export async function startBot() {

@@ -16,7 +16,7 @@ export const event: Event = {
              ******************/
 
             const projectRole = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1;`, [newChannel.id])).rows[0];
-            if (!projectRole) return;
+            if (!projectRole || !projectRole.role_id) return;
 
             try {
                 const role = await newChannel.guild.roles.fetch(projectRole.role_id);
@@ -35,7 +35,9 @@ export const event: Event = {
             const project = (await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1;`, [newChannel.id])).rows[0];
 
             try {
-                if (project) {
+                if (project && project.role_id) {
+                    await db.query(/*sql*/ `UPDATE project SET role_id = NULL WHERE channel_id = $1;`, [newChannel.id]);
+
                     const role = await newChannel.guild.roles.fetch(project.role_id);
                     if (!role?.editable) throw new Error();
                     await role.delete();

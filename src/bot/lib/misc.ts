@@ -62,6 +62,15 @@ export function trimString(str: string, n: number) {
     return str;
 }
 
+export function isValidUrl(value: string): boolean {
+    try {
+        const url = new URL(value);
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
+
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {

@@ -29,6 +29,19 @@
             ]
         },
         {
+            "name": "banner",
+            "description": "Change or remove the image that will be used as the server banner.",
+            "type": "SUB_COMMAND",
+            "options": [
+                {
+                    "name": "value",
+                    "description": "The URL pointing to the image.",
+                    "type": "STRING",
+                    "required": false
+                }
+            ]
+        },
+        {
             "name": "mute",
             "description": "Mute a user in your project channel.",
             "type": "SUB_COMMAND",

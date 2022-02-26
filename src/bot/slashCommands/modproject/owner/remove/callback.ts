@@ -4,6 +4,7 @@ import { GuildCommandInteraction } from '../../../../events/interactionCreate.js
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import log from '../../../../lib/log.js';
 import { ensureTextChannel, parseUser, userToMember } from '../../../../lib/misc.js';
+import { isProject } from '../../../../lib/project.js';
 import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -11,6 +12,7 @@ export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
         if (!ensureTextChannel(channel, interaction)) return;
+        if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
         if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const targetUser = interaction.options.getUser('user', true);

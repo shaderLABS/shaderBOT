@@ -1,5 +1,4 @@
 import { db } from '../../../../db/postgres.js';
-import { settings } from '../../../bot.js';
 import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
@@ -12,12 +11,12 @@ export const command: ApplicationCommandCallback = {
         const { channel } = interaction;
         if (!ensureTextChannel(channel, interaction)) return;
 
-        const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING role_id;`, [channel.id])).rows[0];
+        const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING id, role_id;`, [channel.id])).rows[0];
         if (!project) return replyError(interaction, 'No project has been set up for this channel.');
 
         channel.lockPermissions();
 
-        if (!channel.parentId || !settings.archiveCategoryIDs.includes(channel.parentId)) {
+        if (project.role_id) {
             const role = await channel.guild.roles.fetch(project.role_id).catch(() => undefined);
             if (role) role.delete();
         }

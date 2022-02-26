@@ -13,3 +13,7 @@ export async function isProjectOwner(userID: Snowflake, channelID: Snowflake): P
 export async function isProject(channelID: Snowflake): Promise<Boolean> {
     return !!(await db.query(/*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, [channelID])).rows[0];
 }
+
+export async function isProjectArchived(channelID: Snowflake): Promise<Boolean> {
+    return !(await db.query(/*sql*/ `SELECT role_id FROM project WHERE channel_id = $1;`, [channelID])).rows[0]?.role_id;
+}
