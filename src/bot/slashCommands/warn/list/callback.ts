@@ -24,7 +24,9 @@ export const command: ApplicationCommandCallback = {
             [targetUser.id]
         );
 
-        if (warnings.rowCount === 0) return replyInfo(interaction, `${isSelfTarget ? 'You do' : '<@' + targetUser.id + '> does'} not have any warnings.`);
+        if (warnings.rowCount === 0) {
+            return replyInfo(interaction, `${isSelfTarget ? 'You do' : '<@' + targetUser.id + '> does'} not have any warnings.`, undefined, undefined, undefined, isSelfTarget);
+        }
 
         const pages: string[] = [];
         warnings.rows.reduce((prev, curr, i, { length }) => {
@@ -52,9 +54,9 @@ export const command: ApplicationCommandCallback = {
                 const dmChannel = await member.createDM();
                 sendButtonPages(dmChannel, member.user, pages, 'Warnings');
 
-                replySuccess(interaction, 'Successfully sent you your warnings in a DM.', 'List Warnings');
+                replySuccess(interaction, 'Successfully sent you your warnings in a DM.', 'List Warnings', true);
             } catch {
-                replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.");
+                replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.", undefined, true);
             }
         } else {
             // public
