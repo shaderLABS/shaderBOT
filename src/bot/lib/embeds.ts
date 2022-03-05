@@ -43,7 +43,16 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
         .setDescription(description)
         .setColor(embedColor.green);
 
-    return interaction.reply({ embeds: [embed], ephemeral });
+    return interaction.reply({ embeds: [embed], ephemeral }).catch(() =>
+        interaction.channel?.send({
+            embeds: [
+                embed.setFooter({
+                    iconURL: interaction.user.displayAvatarURL(),
+                    text: `${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                }),
+            ],
+        })
+    );
 }
 
 export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
@@ -60,7 +69,16 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction, 
         .setDescription(description)
         .setColor(embedColor.red);
 
-    return interaction.reply({ embeds: [embed], ephemeral });
+    return interaction.reply({ embeds: [embed], ephemeral }).catch(() =>
+        interaction.channel?.send({
+            embeds: [
+                embed.setFooter({
+                    iconURL: interaction.user.displayAvatarURL(),
+                    text: `${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                }),
+            ],
+        })
+    );
 }
 
 export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string, message?: string, footer?: string) {
@@ -79,7 +97,16 @@ export function replyInfo(interaction: CommandInteraction | ButtonInteraction, d
         .setColor(embedColor.blue)
         .setFooter({ text: footer || '' });
 
-    return interaction.reply({ content: message, embeds: [embed], ephemeral });
+    return interaction.reply({ content: message, embeds: [embed], ephemeral }).catch(() =>
+        interaction.channel?.send({
+            embeds: [
+                embed.setFooter({
+                    iconURL: interaction.user.displayAvatarURL(),
+                    text: `${footer ? footer + '\n' : ''}${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                }),
+            ],
+        })
+    );
 }
 
 export async function sendButtonPages(
