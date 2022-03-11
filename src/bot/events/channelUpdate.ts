@@ -27,7 +27,7 @@ export const event: Event = {
             }
         }
 
-        if (!settings.archiveCategoryIDs.includes(oldChannel.parentId) && settings.archiveCategoryIDs.includes(newChannel.parentId)) {
+        if (!settings.archive.categoryIDs.includes(oldChannel.parentId) && settings.archive.categoryIDs.includes(newChannel.parentId)) {
             /***********
              * ARCHIVE *
              ***********/
@@ -49,7 +49,7 @@ export const event: Event = {
             } catch {
                 log(`<#${newChannel.id}> has been archived, but the notification role could not be deleted.`, 'Archive Project');
             }
-        } else if (settings.archiveCategoryIDs.includes(oldChannel.parentId) && !settings.archiveCategoryIDs.includes(newChannel.parentId)) {
+        } else if (settings.archive.categoryIDs.includes(oldChannel.parentId) && !settings.archive.categoryIDs.includes(newChannel.parentId)) {
             /*************
              * UNARCHIVE *
              *************/

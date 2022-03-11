@@ -14,7 +14,7 @@ export const command: ApplicationCommandCallback = {
         const { channel, guild } = interaction;
         if (!ensureTextChannel(channel, interaction)) return;
 
-        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
+        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
         if (await isProject(channel.id)) return replyError(interaction, 'This channel is already linked to a project.');
 
         const role = await guild.roles.create({

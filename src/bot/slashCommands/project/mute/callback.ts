@@ -15,7 +15,7 @@ export const command: ApplicationCommandCallback = {
         if (!project) return replyError(interaction, 'You do not have permission to run this command.');
         if (!project.owners) return replyError(interaction, 'Failed to query channel owners.');
 
-        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const targetUser = interaction.options.getUser('user', true);
         if (project.owners.includes(targetUser.id)) return replyError(interaction, 'You can not mute a channel owner.');

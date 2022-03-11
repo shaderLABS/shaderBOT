@@ -14,7 +14,7 @@ export const command: ApplicationCommandCallback = {
         const { channel } = interaction;
         if (!ensureTextChannel(channel, interaction)) return;
         if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
-        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const targetMember = interaction.options.getMember('user', false);
         if (!(targetMember instanceof GuildMember)) return replyError(interaction, 'The specified user is not a member of this guild.');

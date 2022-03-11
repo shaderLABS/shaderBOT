@@ -13,7 +13,11 @@ export interface Settings {
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
     guildID: Snowflake;
-    archiveCategoryIDs: Snowflake[];
+    archive: {
+        categoryIDs: Snowflake[];
+        minimumMessageCount: number;
+        maximumMessageAge: number;
+    };
     warnings: {
         decay: number[];
         punishment: {

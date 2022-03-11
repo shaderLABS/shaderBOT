@@ -12,7 +12,7 @@ export const command: ApplicationCommandCallback = {
         if (!ensureTextChannel(channel, interaction)) return;
 
         if (!(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
-        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const newDescription = interaction.options.getString('value', false) || undefined;
         if (newDescription && newDescription.length > 1024) return replyError(interaction, 'Channel descriptions must be less than 32 characters long.');

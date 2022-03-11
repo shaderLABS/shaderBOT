@@ -11,7 +11,7 @@ export const event: Event = {
         const channel = reaction.message.channel;
         if (!(channel instanceof TextChannel) || user.bot || !channel.parentId) return;
 
-        if (!settings.archiveCategoryIDs.includes(channel.parentId) && (await isProjectOwner(user.id, channel.id))) {
+        if (!settings.archive.categoryIDs.includes(channel.parentId) && (await isProjectOwner(user.id, channel.id))) {
             // PROJECT CHANNEL
 
             if (reaction.emoji.name === '📌') {
