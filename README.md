@@ -33,7 +33,11 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "guildID": "",
-    "archiveCategoryIDs": [""], // categories which are used for archiving projects
+    "archive": {
+        "categoryIDs": [""], // categories which are used for archiving projects
+        "minimumMessageCount": 0, // a project will be eligible for archiving if less than minimumMessageCount (must be between 1 and 100) messages...
+        "maximumMessageAge": 0 // ...were sent in maximumMessageAge milliseconds
+    },
     "warnings": {
         "decay": [0, 0, 0], // days, severity 1-3
         "punishment": {
