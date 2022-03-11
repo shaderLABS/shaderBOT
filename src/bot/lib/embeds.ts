@@ -7,6 +7,7 @@ import {
     Message,
     MessageActionRow,
     MessageButton,
+    MessageContextMenuInteraction,
     MessageEmbed,
     Permissions,
     TextChannel,
@@ -37,7 +38,7 @@ export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, de
     return channel.send({ embeds: [embed] });
 }
 
-export function replySuccess(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
+export function replySuccess(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
     const embed = new MessageEmbed()
         .setAuthor({ name: title || 'Success', iconURL: embedIcon.success })
         .setDescription(description)
@@ -63,7 +64,7 @@ export function sendError(channel: TextChannel | DMChannel | ThreadChannel, desc
     return channel.send({ embeds: [embed] });
 }
 
-export function replyError(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
+export function replyError(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
     const embed = new MessageEmbed()
         .setAuthor({ name: title || 'Error', iconURL: embedIcon.error })
         .setDescription(description)
@@ -90,7 +91,7 @@ export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, descr
     return channel.send({ content: message, embeds: [embed] });
 }
 
-export function replyInfo(interaction: CommandInteraction | ButtonInteraction, description: any, title?: string, message?: string, footer?: string, ephemeral: boolean | undefined = false) {
+export function replyInfo(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, message?: string, footer?: string, ephemeral: boolean | undefined = false) {
     const embed = new MessageEmbed()
         .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
         .setDescription(description)

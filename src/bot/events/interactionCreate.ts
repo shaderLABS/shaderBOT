@@ -1,8 +1,9 @@
-import { Collection, CommandInteraction, Guild, GuildMember, Interaction, TextChannel, ThreadChannel } from 'discord.js';
-import { cooldowns } from '../bot.js';
+import { Collection, CommandInteraction, Guild, GuildMember, Interaction, Message, MessageContextMenuInteraction, TextChannel, ThreadChannel } from 'discord.js';
+import { cooldowns, settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
-import { replyError } from '../lib/embeds.js';
+import { replyError, replySuccess } from '../lib/embeds.js';
 import { isTextOrThreadChannel } from '../lib/misc.js';
+import { isProjectOwner } from '../lib/project.js';
 import { handleSpamInteraction } from '../lib/spamProtection.js';
 import { ApplicationCommandCallback, slashCommands } from '../slashCommandHandler.js';
 
@@ -28,10 +29,33 @@ function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChanne
     return true;
 }
 
+async function handleMessageContextMenu(interaction: MessageContextMenuInteraction) {
+    if (interaction.commandName === 'Pin/Unpin Message') {
+        const { targetMessage, channel } = interaction;
+        if (!(targetMessage instanceof Message)) return replyError(interaction, 'The message could not be resolved.');
+        if (!(channel instanceof TextChannel)) return replyError(interaction, 'The message was not sent in a text channel.');
+
+        if (!(await isProjectOwner(interaction.user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        if (channel.parentId && settings.archiveCategoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+
+        const wasPinned = targetMessage.pinned;
+
+        try {
+            if (wasPinned) await targetMessage.unpin();
+            else await targetMessage.pin();
+        } catch {
+            replyError(interaction, wasPinned ? 'Failed to unpin message.' : 'Failed to pin message. You can only pin up to 50 messages.');
+        }
+
+        replySuccess(interaction, wasPinned ? 'Successfully unpinned message.' : 'Successfully pinned message.', undefined, true);
+    }
+}
+
 export const event: Event = {
     name: 'interactionCreate',
     callback: async (interaction: Interaction) => {
         if (interaction.isButton()) return handleSpamInteraction(interaction);
+        if (interaction.isMessageContextMenu()) return handleMessageContextMenu(interaction);
 
         if (!interaction.isCommand() || !isGuildInteraction(interaction)) return;
 
