@@ -1,4 +1,4 @@
-import { MessageEmbed, Snowflake, TextChannel } from 'discord.js';
+import { MessageEmbed, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { GuildCommandInteraction } from '../../events/interactionCreate.js';
@@ -10,8 +10,8 @@ export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         await interaction.deferReply();
 
-        const projectChannels = (await db.query(/*SQL*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`)).rows;
-        const eligibleProjectChannelPromises: Promise<Snowflake | undefined>[] = [];
+        const projectChannels = (await db.query(/*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`)).rows;
+        const eligibleProjectChannelPromises: Promise<TextChannel | undefined>[] = [];
 
         for (const { channel_id } of projectChannels) {
             const channel = interaction.guild.channels.cache.get(channel_id);
@@ -20,12 +20,12 @@ export const command: ApplicationCommandCallback = {
             eligibleProjectChannelPromises.push(
                 channel.messages.fetch({ limit: settings.archive.minimumMessageCount }).then((messages) => {
                     const oldestMessage = messages.last();
-                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.archive.maximumMessageAge) return channel.id;
+                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.archive.maximumMessageAge) return channel;
                 })
             );
         }
 
-        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter(Boolean);
+        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter(Boolean) as TextChannel[];
 
         interaction.editReply({
             embeds: [
@@ -38,7 +38,9 @@ export const command: ApplicationCommandCallback = {
                     description:
                         eligibleProjectChannels.length === 0
                             ? 'No project channels are currently eligible for archiving.'
-                            : eligibleProjectChannels.reduce((prev, curr) => prev + '<#' + curr + '>\n', ''),
+                            : eligibleProjectChannels
+                                  .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
+                                  .reduce((prev, curr) => prev + curr.toString() + '\n', ''),
                 }),
             ],
         });
