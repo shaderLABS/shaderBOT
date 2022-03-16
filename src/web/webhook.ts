@@ -4,10 +4,10 @@ import { embedColor, embedIcon } from '../bot/lib/embeds.js';
 import { formatBytes, getGuild, isTextOrThreadChannel } from '../bot/lib/misc.js';
 
 function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
-    return `sha1=${crypto.createHmac('sha1', key).update(data).digest('hex')}`;
+    return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
 }
 
-export function verifySignature(signature: string, data: string, key: crypto.BinaryLike) {
+export function verifySignature(signature: string, data: Buffer, key: crypto.BinaryLike) {
     const signatureBuffer = Buffer.from(signature);
     const signedDataBuffer = Buffer.from(signData(data, key));
 

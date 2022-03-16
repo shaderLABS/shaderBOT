@@ -28,7 +28,14 @@ export async function startWebserver() {
         })
     );
 
-    app.use(bodyParser.json());
+    app.use(
+        bodyParser.json({
+            verify: (req, _, buffer) => {
+                //@ts-ignore
+                req.rawBody = buffer.toString();
+            },
+        })
+    );
 
     if (!process.env.SESSION_SECRET) return Promise.reject("The 'SESSION_SECRET' environment variable is required.");
 
@@ -155,7 +162,7 @@ export async function startWebserver() {
             return res.end('Bad Request');
         }
 
-        const signature = req.headers['x-hub-signature'];
+        const signature = req.headers['x-hub-signature-256'];
         if (!signature || Array.isArray(signature)) {
             res.statusCode = 400;
             return res.end('Bad Request');
@@ -167,7 +174,8 @@ export async function startWebserver() {
             return res.end('Not Found');
         }
 
-        if (!verifySignature(signature, JSON.stringify(req.body), project.webhook_secret)) {
+        //@ts-ignore
+        if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
             res.statusCode = 403;
             return res.end('Unauthorized');
         }
