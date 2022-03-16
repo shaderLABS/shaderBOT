@@ -7,6 +7,7 @@ import polka from 'polka';
 import { createBanAppeal, getBanInformation } from '../bot/lib/banAppeal.js';
 import { db } from '../db/postgres.js';
 import './strategies/discord.js';
+import { releaseNotification, verifySignature } from './webhook.js';
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
 const PORT = Number(process.env.PORT) || 3001;
@@ -145,6 +146,36 @@ export async function startWebserver() {
 
         res.statusCode = 200;
         return res.end('OK');
+    });
+
+    app.post('/api/webhook/release/:id', async (req, res) => {
+        const channelID = req.params.id;
+        if (/\D/.test(channelID)) {
+            res.statusCode = 400;
+            return res.end('Bad Request');
+        }
+
+        const signature = req.headers['x-hub-signature'];
+        if (!signature || Array.isArray(signature)) {
+            res.statusCode = 400;
+            return res.end('Bad Request');
+        }
+
+        const project = (await db.query(/*sql*/ `SELECT role_id, webhook_secret FROM project WHERE channel_id = $1;`, [channelID])).rows[0];
+        if (!project || !project.webhook_secret || !project.role_id) {
+            res.statusCode = 404;
+            return res.end('Not Found');
+        }
+
+        if (!verifySignature(signature, JSON.stringify(req.body), project.webhook_secret)) {
+            res.statusCode = 403;
+            return res.end('Unauthorized');
+        }
+
+        await releaseNotification(channelID, project.role_id, req);
+
+        res.statusCode = 204;
+        return res.end('No Content');
     });
 
     /*********

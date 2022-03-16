@@ -12,7 +12,8 @@ CREATE TABLE "project" (
     owners NUMERIC(20)[] NOT NULL,
     role_id NUMERIC(20) UNIQUE,
     banner_url TEXT,
-    banner_last_timestamp TIMESTAMP WITH TIME ZONE
+    banner_last_timestamp TIMESTAMP WITH TIME ZONE,
+    webhook_secret BYTEA UNIQUE
 );
 
 DROP TABLE IF EXISTS "warn";

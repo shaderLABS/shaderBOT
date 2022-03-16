@@ -71,6 +71,11 @@
             "name": "ping",
             "description": "Ping all users that are subscribed to this project.",
             "type": "SUB_COMMAND"
+        },
+        {
+            "name": "webhook",
+            "description": "Set up webhooks for your project and (re)generate a secret key for signing them.",
+            "type": "SUB_COMMAND"
         }
     ]
 }
