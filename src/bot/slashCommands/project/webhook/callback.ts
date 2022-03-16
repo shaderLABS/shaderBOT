@@ -30,7 +30,7 @@ export const command: ApplicationCommandCallback = {
                         'hex'
                     )}\`\n**Release Endpoint**\n\`${endpoint}\`\n\nDO NOT SHARE THIS KEY WITH ANYONE! YOU CAN REGENERATE IT AND INVALIDATE THE OLD ONE BY RUNNING THIS COMMAND AGAIN.`,
                     author: {
-                        name: 'Webhook',
+                        name: 'Project Webhook',
                         iconURL: embedIcon.success,
                     },
                     color: embedColor.green,
@@ -39,6 +39,6 @@ export const command: ApplicationCommandCallback = {
             ephemeral: true,
         });
 
-        log(`${parseUser(user)} (re)generated the webhook secret key for their project <#${channel.id}>.`);
+        log(`${parseUser(user)} (re)generated the webhook secret key for their project <#${channel.id}>.`, 'Project Webhook');
     },
 };
