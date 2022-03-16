@@ -15,15 +15,19 @@ export function verifySignature(signature: string, data: Buffer, key: crypto.Bin
     return crypto.timingSafeEqual(signatureBuffer, signedDataBuffer);
 }
 
-export async function releaseNotification(channelID: string, roleID: string, req: any) {
+export async function releaseNotification(channelID: string, roleID: string, req: any): Promise<number> {
     const guild = getGuild();
-    if (!guild) return Promise.reject('Guild not found.');
+    if (!guild) return 500;
 
     const channel = guild.channels.cache.get(channelID);
-    if (!channel || !isTextOrThreadChannel(channel)) return Promise.reject('Channel not found.');
+    if (!channel || !isTextOrThreadChannel(channel)) return 500;
 
     if (req.headers['x-github-event'] === 'release') {
         // GitHub Release Event
+
+        // 4 actions: created, released, published, edited
+        const action = req.body.action;
+        if (!action || action !== 'published') return 204;
 
         let description = `A new release has been published: [${req.body.release?.name || 'Unknown Name'}](${req.body.release?.html_url})`;
 
@@ -67,4 +71,6 @@ export async function releaseNotification(channelID: string, roleID: string, req
             ],
         });
     }
+
+    return 200;
 }

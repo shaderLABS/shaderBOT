@@ -32,7 +32,7 @@ export async function startWebserver() {
         bodyParser.json({
             verify: (req, _, buffer) => {
                 //@ts-ignore
-                req.rawBody = buffer.toString();
+                req.rawBody = buffer;
             },
         })
     );
@@ -159,31 +159,29 @@ export async function startWebserver() {
         const channelID = req.params.id;
         if (/\D/.test(channelID)) {
             res.statusCode = 400;
-            return res.end('Bad Request');
+            return res.end();
         }
 
         const signature = req.headers['x-hub-signature-256'];
         if (!signature || Array.isArray(signature)) {
             res.statusCode = 400;
-            return res.end('Bad Request');
+            return res.end();
         }
 
-        const project = (await db.query(/*sql*/ `SELECT role_id, webhook_secret FROM project WHERE channel_id = $1;`, [channelID])).rows[0];
+        const project = (await db.query(/*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`, [channelID])).rows[0];
         if (!project || !project.webhook_secret || !project.role_id) {
             res.statusCode = 404;
-            return res.end('Not Found');
+            return res.end();
         }
 
         //@ts-ignore
         if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
             res.statusCode = 403;
-            return res.end('Unauthorized');
+            return res.end();
         }
 
-        await releaseNotification(channelID, project.role_id, req);
-
-        res.statusCode = 204;
-        return res.end('No Content');
+        res.statusCode = await releaseNotification(channelID, project.role_id, req);
+        return res.end();
     });
 
     /*********
