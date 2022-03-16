@@ -1,8 +1,9 @@
 import crypto from 'crypto';
+import { MessageEmbed } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { settings } from '../../../bot.js';
 import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
+import { embedColor, embedIcon, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { ensureTextChannel, parseUser } from '../../../lib/misc.js';
 import { isProjectOwner } from '../../../lib/project.js';
@@ -21,14 +22,22 @@ export const command: ApplicationCommandCallback = {
 
         await db.query(/*sql*/ `UPDATE project SET webhook_secret = $1 WHERE channel_id = $2;`, [secret, channel.id]);
 
-        replySuccess(
-            interaction,
-            `**Secret Key**\n\`${secret.toString(
-                'hex'
-            )}\`\n**Release Endpoint**\n\`${endpoint}\`\n\nDO NOT SHARE THIS KEY WITH ANYONE! YOU CAN REGENERATE IT AND INVALIDATE THE OLD ONE BY RUNNING THIS COMMAND AGAIN.`,
-            'Webhook',
-            true
-        );
+        // don't use helper function, must stay ephemeral
+        interaction.reply({
+            embeds: [
+                new MessageEmbed({
+                    description: `**Secret Key**\n\`${secret.toString(
+                        'hex'
+                    )}\`\n**Release Endpoint**\n\`${endpoint}\`\n\nDO NOT SHARE THIS KEY WITH ANYONE! YOU CAN REGENERATE IT AND INVALIDATE THE OLD ONE BY RUNNING THIS COMMAND AGAIN.`,
+                    author: {
+                        name: 'Webhook',
+                        iconURL: embedIcon.success,
+                    },
+                    color: embedColor.green,
+                }),
+            ],
+            ephemeral: true,
+        });
 
         log(`${parseUser(user)} (re)generated the webhook secret key for their project <#${channel.id}>.`);
     },
