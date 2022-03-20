@@ -14,7 +14,9 @@ const PORT = Number(process.env.PORT) || 3001;
 
 const app = polka();
 
-export async function startWebserver() {
+export function startWebserver() {
+    if (process.env.BOT_ONLY !== 'true') return;
+
     /**************
      * MIDDLEWARE *
      **************/
@@ -31,13 +33,13 @@ export async function startWebserver() {
     app.use(
         bodyParser.json({
             verify: (req, _, buffer) => {
-                //@ts-ignore
+                // @ts-ignore
                 req.rawBody = buffer;
             },
         })
     );
 
-    if (!process.env.SESSION_SECRET) return Promise.reject("The 'SESSION_SECRET' environment variable is required.");
+    if (!process.env.SESSION_SECRET) throw "The 'SESSION_SECRET' environment variable is required.";
 
     app.use(
         session({
@@ -174,7 +176,7 @@ export async function startWebserver() {
             return res.end();
         }
 
-        //@ts-ignore
+        // @ts-ignore
         if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
             res.statusCode = 403;
             return res.end();

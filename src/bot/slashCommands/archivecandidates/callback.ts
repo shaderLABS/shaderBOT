@@ -1,8 +1,8 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { GuildCommandInteraction } from '../../events/interactionCreate.js';
-import { embedColor, embedIcon } from '../../lib/embeds.js';
+import { replyInfo } from '../../lib/embeds.js';
 import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -27,22 +27,14 @@ export const command: ApplicationCommandCallback = {
 
         const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter(Boolean) as TextChannel[];
 
-        interaction.editReply({
-            embeds: [
-                new MessageEmbed({
-                    author: {
-                        iconURL: embedIcon.info,
-                        name: 'Archive Candidates',
-                    },
-                    color: embedColor.blue,
-                    description:
-                        eligibleProjectChannels.length === 0
-                            ? 'No project channels are currently eligible for archiving.'
-                            : eligibleProjectChannels
-                                  .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
-                                  .reduce((prev, curr) => prev + curr.toString() + '\n', ''),
-                }),
-            ],
-        });
+        replyInfo(
+            interaction,
+            eligibleProjectChannels.length === 0
+                ? 'No project channels are currently eligible for archiving.'
+                : eligibleProjectChannels
+                      .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
+                      .reduce((prev, curr) => prev + curr.toString() + '\n', ''),
+            'Archive Candidates'
+        );
     },
 };

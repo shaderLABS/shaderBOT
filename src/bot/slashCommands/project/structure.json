@@ -30,14 +30,38 @@
         },
         {
             "name": "banner",
-            "description": "Change or remove the image that will be used as the server banner.",
-            "type": "SUB_COMMAND",
+            "description": "Set or remove the image that can be used as the server banner.",
+            "type": "SUB_COMMAND_GROUP",
             "options": [
                 {
-                    "name": "value",
-                    "description": "The URL pointing to the image.",
-                    "type": "STRING",
-                    "required": false
+                    "name": "set",
+                    "description": "Set the image that can be used as the server banner.",
+                    "type": "SUB_COMMAND",
+                    "options": [
+                        {
+                            "name": "url",
+                            "description": "The URL pointing to the image.",
+                            "type": "STRING",
+                            "required": true
+                        },
+                        {
+                            "name": "label",
+                            "description": "Add a label to the image.",
+                            "type": "BOOLEAN",
+                            "required": true
+                        },
+                        {
+                            "name": "label_text",
+                            "description": "The text of the added label, if enabled. Defaults to the channel name.",
+                            "type": "STRING",
+                            "required": false
+                        }
+                    ]
+                },
+                {
+                    "name": "remove",
+                    "description": "Remove the image that can be used as the server banner.",
+                    "type": "SUB_COMMAND"
                 }
             ]
         },

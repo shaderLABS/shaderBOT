@@ -25,9 +25,8 @@ export async function releaseNotification(channelID: string, roleID: string, req
     if (req.headers['x-github-event'] === 'release') {
         // GitHub Release Event
 
-        // 4 actions: created, released, published, edited
-        const action = req.body.action;
-        if (!action || action !== 'published') return 204;
+        // published: a release, pre-release, or draft of a release is published
+        if (req.body.action !== 'published') return 204;
 
         let description = `A new release has been published: [${req.body.release?.name || 'Unknown Name'}](${req.body.release?.html_url})`;
 

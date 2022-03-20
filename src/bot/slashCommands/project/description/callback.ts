@@ -9,9 +9,8 @@ import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, user } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return;
 
-        if (!(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        if (!ensureTextChannel(channel, interaction) || !(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
         if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const newDescription = interaction.options.getString('value', false) || undefined;

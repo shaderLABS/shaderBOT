@@ -12,7 +12,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, guild } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return;
+        if (!ensureTextChannel(channel, interaction)) return replyError(interaction, 'You can not turn thread channels into projects.');
 
         if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
         if (await isProject(channel.id)) return replyError(interaction, 'This channel is already linked to a project.');

@@ -44,7 +44,7 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
         .setDescription(description)
         .setColor(embedColor.green);
 
-    return interaction.reply({ embeds: [embed], ephemeral }).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
@@ -70,7 +70,7 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
         .setDescription(description)
         .setColor(embedColor.red);
 
-    return interaction.reply({ embeds: [embed], ephemeral }).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
@@ -98,7 +98,7 @@ export function replyInfo(interaction: CommandInteraction | ButtonInteraction | 
         .setColor(embedColor.blue)
         .setFooter({ text: footer || '' });
 
-    return interaction.reply({ content: message, embeds: [embed], ephemeral }).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({

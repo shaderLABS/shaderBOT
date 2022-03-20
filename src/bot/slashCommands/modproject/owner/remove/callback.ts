@@ -11,8 +11,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return;
-        if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
+        if (!ensureTextChannel(channel, interaction) || !(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
         if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const targetUser = interaction.options.getUser('user', true);

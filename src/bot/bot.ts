@@ -7,6 +7,7 @@ import { rotateBanner } from './lib/banner.js';
 import { loadTimeouts } from './lib/punishments.js';
 import { Pasta, pastaPath, registerPastas } from './pastaHandler.js';
 import * as settingsFile from './settings/settings.js';
+import { registerSlashCommands } from './slashCommandHandler.js';
 
 export let client: Client;
 export let events: Collection<string, Event>;
@@ -46,6 +47,7 @@ export async function startBot() {
     settings = await settingsFile.read();
 
     registerEvents('./build/bot/events');
+    registerSlashCommands('./build/bot/slashCommands');
     registerPastas(pastaPath);
     registerAutoResponses(autoResponsePath);
     cleanBackups();

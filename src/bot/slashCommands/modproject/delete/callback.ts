@@ -9,7 +9,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['MANAGE_CHANNELS'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return;
+        if (!ensureTextChannel(channel, interaction)) return replyError(interaction, 'You can not turn thread channels into projects.');
 
         const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING id, role_id;`, [channel.id])).rows[0];
         if (!project) return replyError(interaction, 'No project has been set up for this channel.');

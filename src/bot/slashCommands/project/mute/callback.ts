@@ -9,7 +9,7 @@ import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, user } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return;
+        if (!ensureTextChannel(channel, interaction)) return replyError(interaction, 'You do not have permission to run this command.');
 
         const project = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, user.id])).rows[0];
         if (!project) return replyError(interaction, 'You do not have permission to run this command.');
