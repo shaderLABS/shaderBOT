@@ -7,7 +7,7 @@ import { settings } from '../../../../bot.js';
 import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import log from '../../../../lib/log.js';
-import { ensureTextChannel, isValidUrl, parseUser } from '../../../../lib/misc.js';
+import { ensureTextChannel, escapeXml, isValidUrl, parseUser } from '../../../../lib/misc.js';
 import { isProjectOwner } from '../../../../lib/project.js';
 import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
 
@@ -20,14 +20,14 @@ export const command: ApplicationCommandCallback = {
 
         let banner = interaction.options.getString('url', true);
         const label = interaction.options.getBoolean('label', true);
-        const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
+        const labelText = escapeXml(interaction.options.getString('label_text', false)?.trim() || channel.name);
 
         if (!isValidUrl(banner)) return replyError(interaction, 'The specified URL is invalid.');
 
         await interaction.deferReply();
 
         try {
-            const bannerRequest = await fetch(banner, { size: 8388608 });
+            const bannerRequest = await fetch(banner, { size: 52428800 });
             const bannerContentType = bannerRequest.headers.get('content-type');
             if (!bannerContentType || !['image/jpeg', 'image/png', 'image/webp'].includes(bannerContentType)) {
                 return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
@@ -65,7 +65,7 @@ export const command: ApplicationCommandCallback = {
             if (!cachedAttachmentURL) throw new Error();
             banner = cachedAttachmentURL;
         } catch (error) {
-            return replyError(interaction, 'Failed to process and cache the banner image. Make sure that it is smaller than 8 MB.');
+            return replyError(interaction, 'Failed to process and cache the banner image.');
         }
 
         await db.query(/*sql*/ `UPDATE project SET banner_url = $1 WHERE channel_id = $2;`, [banner, channel.id]);

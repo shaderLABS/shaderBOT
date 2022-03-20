@@ -81,6 +81,25 @@ export function formatBytes(bytes: number, decimals: number = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
 }
 
+export function escapeXml(unsafe: string) {
+    return unsafe.replace(/[<>&'"]/g, (c) => {
+        switch (c) {
+            case '<':
+                return '&lt;';
+            case '>':
+                return '&gt;';
+            case '&':
+                return '&amp;';
+            case "'":
+                return '&apos;';
+            case '"':
+                return '&quot;';
+            default:
+                return '';
+        }
+    });
+}
+
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {
