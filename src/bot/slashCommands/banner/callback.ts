@@ -21,7 +21,7 @@ export const command: ApplicationCommandCallback = {
             )
         ).rows[0];
 
-        const banner = guild.bannerURL();
+        const banner = guild.bannerURL({ size: 1024 });
         if (!currentBannerProject || !banner) return replyError(interaction, 'There is no banner at the moment.');
 
         interaction.reply({
