@@ -14,6 +14,7 @@ export const command: ApplicationCommandCallback = {
                 /*sql*/ `
                 SELECT channel_id
                 FROM project
+                WHERE banner_last_timestamp IS NOT NULL
                 ORDER BY banner_last_timestamp DESC
                 LIMIT 1;`,
                 []
