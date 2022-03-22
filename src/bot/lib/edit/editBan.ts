@@ -49,7 +49,7 @@ export async function editBanDuration(uuid: string, time: number, modID: Snowfla
 
     if (expireTime < editTime) {
         unban(result.user_id).catch(() => undefined);
-    } else if (expireTime < editTimestamp.setHours(23, 55, 0, 0)) {
+    } else if (expireTime < editTimestamp.setHours(24, 0, 0, 0)) {
         const timeout = setTimeout(() => {
             unban(result.user_id).catch(() => undefined);
         }, expireTime - editTime);

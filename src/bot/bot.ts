@@ -16,7 +16,7 @@ export let autoResponses: Collection<string, AutoResponse>;
 export let cooldowns: Map<string, boolean>;
 export let settings: settingsFile.Settings;
 
-cron.schedule('55 23 * * *', () => {
+cron.schedule('59 23 * * *', () => {
     loadTimeouts(true);
     cleanBackups();
     rotateBanner();
