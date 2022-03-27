@@ -15,7 +15,7 @@ const PORT = Number(process.env.PORT) || 3001;
 const app = polka();
 
 export function startWebserver() {
-    if (process.env.BOT_ONLY !== 'true') return;
+    if (process.env.BOT_ONLY === 'true') return;
 
     /**************
      * MIDDLEWARE *
