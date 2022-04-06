@@ -28,6 +28,8 @@ export const command: ApplicationCommandCallback = {
 
             if (!appeal) return replyError(interaction, 'The specified user does not have a pending ban appeal.');
 
+            await interaction.deferReply();
+
             const appealChannel = interaction.guild.channels.cache.get(settings.appealChannelID);
             if (appealChannel instanceof TextChannel) {
                 const appealMessage = await appealChannel.messages.fetch(appeal.message_id).catch(() => undefined);

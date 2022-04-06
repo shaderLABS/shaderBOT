@@ -155,20 +155,28 @@ export async function sendButtonPages(
     });
 
     const collector = message.createMessageComponentCollector({
-        // TODO: handle APIInteractionGuildMember if there are any issues
-        filter: (interaction) => interaction.user.id === author.id || (interaction.member instanceof GuildMember && interaction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
+        filter: (buttonInteraction) =>
+            buttonInteraction.user.id === author.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
         idle: 600000,
     });
 
     let index = 0;
-    collector.on('collect', async (interaction) => {
-        if (interaction.customId === 'backward') {
-            await message.edit({ embeds: [embed.setDescription(pages[--index])] });
-        } else if (interaction.customId === 'forward') {
-            await message.edit({ embeds: [embed.setDescription(pages[++index])] });
+    collector.on('collect', async (buttonInteraction) => {
+        if (buttonInteraction.customId === 'backward') {
+            const content = pages[index - 1];
+            if (!content) return;
+
+            --index;
+            await message.edit({ embeds: [embed.setDescription(content)] });
+        } else if (buttonInteraction.customId === 'forward') {
+            const content = pages[index + 1];
+            if (!content) return;
+
+            ++index;
+            await message.edit({ embeds: [embed.setDescription(content)] });
         }
 
-        interaction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+        buttonInteraction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
     });
 
     collector.on('end', () => {
@@ -217,7 +225,6 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
     if (!(message instanceof Message)) return;
 
     const collector = message.createMessageComponentCollector({
-        // TODO: handle APIInteractionGuildMember if there are any issues
         filter: (buttonInteraction) =>
             buttonInteraction.user.id === interaction.user.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
         idle: 600000,
@@ -226,9 +233,17 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
     let index = 0;
     collector.on('collect', async (buttonInteraction) => {
         if (buttonInteraction.customId === 'backward') {
-            await interaction.editReply({ embeds: [embed.setDescription(pages[--index])] });
+            const content = pages[index - 1];
+            if (!content) return;
+
+            --index;
+            await message.edit({ embeds: [embed.setDescription(content)] });
         } else if (buttonInteraction.customId === 'forward') {
-            await interaction.editReply({ embeds: [embed.setDescription(pages[++index])] });
+            const content = pages[index + 1];
+            if (!content) return;
+
+            ++index;
+            await message.edit({ embeds: [embed.setDescription(content)] });
         }
 
         buttonInteraction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });

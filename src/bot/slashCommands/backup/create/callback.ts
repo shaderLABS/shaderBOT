@@ -14,7 +14,7 @@ export const command: ApplicationCommandCallback = {
         const limit = interaction.options.getInteger('limit', false) || undefined;
         if (limit && limit < 1) return replyError(interaction, 'The message limit must be bigger than one.');
 
-        const backupMessages = await backupChannel.messages.fetch({ limit: limit });
+        const backupMessages = await backupChannel.messages.fetch({ limit });
 
         try {
             await createBackup(backupChannel, backupMessages);
