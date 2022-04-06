@@ -17,7 +17,7 @@
     "type": "module",
     "license": "MIT",
     "dependencies": {
-        "body-parser": "^1.19.2",
+        "body-parser": "^1.20.0",
         "connect-pg-simple": "^7.0.0",
         "cors": "^2.8.5",
         "discord.js": "^13.6.0",
@@ -40,9 +40,9 @@
         "@types/passport-discord": "^0.1.5",
         "@types/pg": "^8.6.5",
         "@types/polka": "^0.5.4",
-        "@types/sharp": "^0.30.0",
+        "@types/sharp": "^0.30.1",
         "dotenv": "^16.0.0",
-        "tsc-watch": "^4.6.2",
+        "tsc-watch": "^5.0.2",
         "typescript": "^4.6.3"
     }
 }
