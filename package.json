@@ -42,7 +42,7 @@
         "@types/polka": "^0.5.4",
         "@types/sharp": "^0.30.1",
         "dotenv": "^16.0.0",
-        "tsc-watch": "^5.0.2",
+        "tsc-watch": "^5.0.3",
         "typescript": "^4.6.3"
     }
 }
