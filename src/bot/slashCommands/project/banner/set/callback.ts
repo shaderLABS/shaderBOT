@@ -20,7 +20,7 @@ export const command: ApplicationCommandCallback = {
 
         let banner = interaction.options.getString('url', true);
         const label = interaction.options.getBoolean('label', true);
-        const labelText = escapeXml(interaction.options.getString('label_text', false)?.trim() || channel.name);
+        const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
 
         if (!isValidUrl(banner)) return replyError(interaction, 'The specified URL is invalid.');
 
@@ -42,19 +42,25 @@ export const command: ApplicationCommandCallback = {
             bannerSharp.resize(bannerWidth, bannerHeight);
 
             if (label) {
+                const escapedLabelText = escapeXml(labelText);
+
                 const overlayFontAspectRatio = 0.55;
                 const overlayMaxFontSize = 58;
 
-                const overlayFontSize = (bannerWidth - 20) / overlayFontAspectRatio / Math.max(labelText.length + 2, Math.ceil((bannerWidth + 20) / overlayFontAspectRatio / overlayMaxFontSize));
+                const overlayFontSize = (bannerWidth - 80) / overlayFontAspectRatio / Math.max(labelText.length + 2, Math.ceil((bannerWidth + 80) / overlayFontAspectRatio / overlayMaxFontSize));
+
+                const overlayHeight = overlayFontSize * 1.35;
+                const overlayWidth = Math.min(bannerWidth, 30 + overlayFontSize * overlayFontAspectRatio * (labelText.length + 2));
+
                 const overlay = Buffer.from(
-                    `<svg width="${bannerWidth}" height="${overlayFontSize * 1.35}">
-                        <rect x="${bannerWidth - 30 - overlayFontSize * overlayFontAspectRatio * (labelText.length + 2)}" y="0" width="150%" height="100%" style="fill: rgba(0, 0, 0, 50%)" />
-                        <text x="100%" y="100%" dx="-7.50" dy="-.30em" text-anchor="end" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900" style="fill: black">#${labelText};</text>
-                        <text x="100%" y="100%" dx="-10.0" dy="-.35em" text-anchor="end" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900"><tspan style="fill: #b676c7">#</tspan><tspan style="fill: #63b1dc">${labelText}</tspan><tspan style="fill: #afb2bc">;</tspan></text>
+                    `<svg width="${overlayWidth}" height="${overlayHeight}">
+                        <rect x="0" y="0" width="100%" height="100%" style="fill: rgba(0, 0, 0, 50%)" />
+                        <text x="50%" y="100%" dy="-0.30em" text-anchor="middle" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900" style="fill: black">#${escapedLabelText};</text>
+                        <text x="50%" y="100%" dy="-0.35em" text-anchor="middle" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900"><tspan style="fill: #b676c7">#</tspan><tspan style="fill: #63b1dc">${escapedLabelText}</tspan><tspan style="fill: #afb2bc">;</tspan></text>
                     </svg>`
                 );
 
-                bannerSharp.composite([{ input: overlay, gravity: 'south' }]);
+                bannerSharp.composite([{ input: overlay, top: Math.round(bannerHeight - 20.0 - overlayHeight), left: Math.round((bannerWidth - overlayWidth) * 0.5) }]);
             }
 
             const reply = await channel.send({
@@ -65,6 +71,7 @@ export const command: ApplicationCommandCallback = {
             if (!cachedAttachmentURL) throw new Error();
             banner = cachedAttachmentURL;
         } catch (error) {
+            console.error(error);
             return replyError(interaction, 'Failed to process and cache the banner image.');
         }
 
