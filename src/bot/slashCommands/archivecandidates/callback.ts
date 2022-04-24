@@ -1,12 +1,11 @@
 import { TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { replyInfo } from '../../lib/embeds.js';
-import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         await interaction.deferReply();
 
@@ -15,12 +14,12 @@ export const command: ApplicationCommandCallback = {
 
         for (const { channel_id } of projectChannels) {
             const channel = interaction.guild.channels.cache.get(channel_id);
-            if (!(channel instanceof TextChannel)) continue;
+            if (!channel?.isText()) continue;
 
             eligibleProjectChannelPromises.push(
-                channel.messages.fetch({ limit: settings.archive.minimumMessageCount }).then((messages) => {
+                channel.messages.fetch({ limit: settings.data.archive.minimumMessageCount }).then((messages) => {
                     const oldestMessage = messages.last();
-                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.archive.maximumMessageAge) return channel;
+                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.data.archive.maximumMessageAge) return channel;
                 })
             );
         }

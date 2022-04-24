@@ -1,8 +1,8 @@
-import { GuildMember, User } from 'discord.js';
-import { db } from '../../../db/postgres.js';
+import { AuditLogEvent, GuildMember } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
 import { getGuild, parseUser, sleep } from '../../lib/misc.js';
+import { PastPunishment } from '../../lib/punishment.js';
 
 export const event: Event = {
     name: 'guildMemberRemove',
@@ -15,28 +15,20 @@ export const event: Event = {
 
         const auditLog = (
             await guild.fetchAuditLogs({
-                type: 'MEMBER_KICK',
+                type: AuditLogEvent.MemberKick,
                 limit: 1,
             })
         ).entries.first();
 
-        if (!auditLog?.executor || !(auditLog.target instanceof User) || auditLog.target.id !== member.id || auditLog.executor.bot) return;
-        const { createdAt, executor } = auditLog;
+        if (!auditLog?.executor || !auditLog.target || auditLog.target.id !== member.id || auditLog.executor.bot) return;
+        const { executor } = auditLog;
         const reason = auditLog.reason || 'No reason provided.';
 
         try {
-            await db.query(
-                /*sql*/ `
-                INSERT INTO past_punishment (user_id, "type", mod_id, reason, timestamp)
-                VALUES ($1, 'kick', $2, $3, $4)
-                RETURNING id;`,
-                [member.id, executor.id, reason, createdAt]
-            );
+            await PastPunishment.createKick(member, reason, executor.id);
         } catch (error) {
             console.error(error);
-            log(`Failed to add kick entry for ${parseUser(member.user)}: an error occurred while accessing the database.`, 'Kick');
+            log(`Failed to add kick entry for ${parseUser(member.user)}.`, 'Kick');
         }
-
-        log(`${parseUser(executor)} kicked ${parseUser(member.user)}:\n\`${reason}\``, 'Kick');
     },
 };

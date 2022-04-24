@@ -1,47 +1,36 @@
-import { CategoryChannel, Channel, Guild, Message, Snowflake, TextBasedChannel, TextChannel, ThreadChannel, User, Util } from 'discord.js';
+import { CategoryChannel, Channel, Guild, Message, TextBasedChannel, TextChannel, ThreadChannel, User, UserResolvable, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
-import { GuildCommandInteraction } from '../events/interactionCreate.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { replyError } from './embeds.js';
 
 export function getGuild() {
-    return client.guilds.cache.get(settings.guildID);
+    return client.guilds.cache.get(settings.data.guildID);
 }
 
 export function isTextOrThreadChannel(channel: Channel | TextBasedChannel): channel is TextChannel | ThreadChannel {
-    return channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_PUBLIC_THREAD' || channel.type === 'GUILD_PRIVATE_THREAD';
+    return channel.isText() || channel.isThread();
 }
 
 export function isGuildMessage(message: Message): message is GuildMessage {
     return isTextOrThreadChannel(message.channel) && !!message.guild && !!message.member;
 }
 
-export function userToMember(guild: Guild, id: Snowflake) {
-    return guild.members.fetch(id).catch(() => undefined);
-}
-
-export function ensureTextChannel(channel: TextChannel | ThreadChannel, interaction: GuildCommandInteraction): channel is TextChannel {
-    if (channel.type !== 'GUILD_TEXT') {
-        replyError(interaction, 'This command is not usable in thread channels.');
-        return false;
-    }
-
-    return true;
+export function userToMember(guild: Guild, userResolvable: UserResolvable) {
+    return guild.members.fetch(userResolvable).catch(() => undefined);
 }
 
 export function getAlphabeticalChannelPosition(channel: TextChannel, parent: CategoryChannel | null) {
     if (!parent) return 0;
 
-    const totalChannels = parent.children
-        .filter((channel) => channel.type === 'GUILD_TEXT')
+    const totalChannels = parent.children.cache
+        .filter((channel) => channel.isText())
         .set(channel.id, channel)
         .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
 
     return [...totalChannels.keys()].indexOf(channel.id);
 }
 
-export function parseUser(user: User | Snowflake) {
+export function parseUser(user: User | string) {
     let target: User | null;
     if (user instanceof User) {
         target = user;
@@ -66,7 +55,7 @@ export function isValidUrl(value: string): boolean {
     try {
         const url = new URL(value);
         return url.protocol === 'http:' || url.protocol === 'https:';
-    } catch (_) {
+    } catch {
         return false;
     }
 }

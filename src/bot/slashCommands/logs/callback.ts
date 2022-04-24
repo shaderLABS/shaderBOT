@@ -1,144 +1,69 @@
-import { db } from '../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
+import { BanAppeal } from '../../lib/banAppeal.js';
 import { replyButtonPages } from '../../lib/embeds.js';
-import { formatContextURL, parseUser, trimString } from '../../lib/misc.js';
-import { punishmentTypeAsString } from '../../lib/punishments.js';
-import { formatTimeDate } from '../../lib/time.js';
-import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
+import { Note } from '../../lib/note.js';
+import { PastPunishment, Punishment } from '../../lib/punishment.js';
+import { Warning } from '../../lib/warning.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KICK_MEMBERS'],
+    requiredPermissions: ['KickMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
 
-        const warnQuery = db.query(
-            /*sql*/ `
-            SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
+        const warningQuery = Warning.getAllByUserID(targetUser.id);
+        const punishmentQuery = Punishment.getAllByUserID(targetUser.id);
+        const noteQuery = Note.getAllByUserID(targetUser.id);
+        const pastPunishmentQuery = PastPunishment.getAllByUserID(targetUser.id);
+        const appealQuery = BanAppeal.getAllByUserID(targetUser.id);
 
-        const punishmentQuery = db.query(
-            /*sql*/ `
-            SELECT * FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
-
-        const noteQuery = db.query(
-            /*sql*/ `
-            SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
-
-        const pastPunishmentQuery = db.query(
-            /*sql*/ `
-            SELECT * FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
-
-        const appealQuery = db.query(
-            /*sql*/ `
-            SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
-
-        const queries = await Promise.all([warnQuery, punishmentQuery, noteQuery, pastPunishmentQuery, appealQuery]);
+        const queries = await Promise.all([warningQuery, punishmentQuery, noteQuery, pastPunishmentQuery, appealQuery]);
 
         let pages: string[] = [];
         function pageCategory(title: string, content: string[]) {
             content.reduce((prev, curr, i, arr) => {
                 const isLast = i === arr.length - 1;
                 if ((i + 1) % 3 === 0 || isLast) {
-                    pages.push(isLast ? prev + '\n' + curr : prev + '\n' + curr + '\n\n_(continued on next page)_');
+                    pages.push(isLast ? prev + '\n\n' + curr : prev + '\n\n' + curr + '\n\n_(continued on next page)_');
                     return '';
                 }
 
-                return prev + '\n' + curr;
+                return prev + '\n\n' + curr;
             }, `**${title}**`);
         }
 
-        if (queries[0].rowCount !== 0) {
+        if (queries[0].length) {
             pageCategory(
-                `Warnings (${queries[0].rowCount})`,
-                queries[0].rows.map(
-                    (row) =>
-                        `\n**Severity:** ${row.severity}` +
-                        `\n**Reason:** ${row.reason}` +
-                        `\n**Moderator:** ${parseUser(row.mod_id)}` +
-                        `\n**Context:** ${formatContextURL(row.context_url)}` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`
-                )
+                `Warnings (${queries[0].length})`,
+                queries[0].map((warning) => warning.toString(false))
             );
         }
 
-        if (queries[1].rowCount !== 0) {
+        if (queries[1].length) {
             pageCategory(
-                `Punishments (${queries[1].rowCount})`,
-                queries[1].rows.map(
-                    (row) =>
-                        `\n**Type:** ${punishmentTypeAsString[row.type]}` +
-                        `\n**Reason:** ${row.reason}` +
-                        `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
-                        `\n**Context:** ${formatContextURL(row.context_url)}` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
-                        `\n**Expiring At:** ${row.expire_timestamp ? formatTimeDate(new Date(row.expire_timestamp)) : 'Permanent'}` +
-                        (row.edited_timestamp ? `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
-                )
+                `Punishments (${queries[1].length})`,
+                queries[1].map((punishment) => punishment.toString(false, true))
             );
         }
 
-        if (queries[2].rowCount !== 0) {
+        if (queries[2].length) {
             pageCategory(
-                `Notes (${queries[2].rowCount})`,
-                queries[2].rows.map(
-                    (row) =>
-                        `\n**Content:** ${row.content}` +
-                        `\n**Moderator:** ${parseUser(row.mod_id)}` +
-                        `\n**Context:** ${formatContextURL(row.context_url)}` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` +
-                        (row.edited_timestamp ? `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*` : '')
-                )
+                `Notes (${queries[2].length})`,
+                queries[2].map((note) => note.toString(false))
             );
         }
 
-        if (queries[3].rowCount !== 0) {
+        if (queries[3].length) {
             pageCategory(
-                `Past Punishments (${queries[3].rowCount})`,
-                queries[3].rows.map((row) => {
-                    let content =
-                        `\n**Type:** ${punishmentTypeAsString[row.type]}` +
-                        `\n**Reason:** ${row.reason}` +
-                        `\n**Moderator:** ${row.mod_id ? parseUser(row.mod_id) : 'System'}` +
-                        `\n**Context:** ${formatContextURL(row.context_url)}` +
-                        `\n**ID:** ${row.id}` +
-                        `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}`;
-
-                    if (row.lifted_timestamp) content += `\n**Lifted At:** ${formatTimeDate(new Date(row.lifted_timestamp))}`;
-                    if (row.lifted_mod_id) content += `\n**Lifted By:** ${parseUser(row.lifted_mod_id)}`;
-                    if (row.edited_timestamp) content += `\n*(last edited by ${parseUser(row.edited_mod_id)} at ${formatTimeDate(new Date(row.edited_timestamp))})*`;
-
-                    return content;
-                })
+                `Past Punishments (${queries[3].length})`,
+                queries[3].map((pastPunishment) => pastPunishment.toString(false, true))
             );
         }
 
-        if (queries[4].rowCount !== 0) {
+        if (queries[4].length) {
             pageCategory(
-                `Ban Appeals (${queries[4].rowCount})`,
-                queries[4].rows.map((row) => {
-                    let content =
-                        `\n**Reason:** ${trimString(row.reason, 150)}` + `\n**Created At:** ${formatTimeDate(new Date(row.timestamp))}` + `\n**ID:** ${row.id}` + `\n**Result:** ${row.result}`;
-
-                    if (row.result_reason) content += `\n**Result Reason:** ${trimString(row.result_reason, 150)}`;
-                    if (row.result_mod_id) content += `\n**Result Moderator:** ${parseUser(row.result_mod_id)}`;
-                    if (row.result_timestamp) content += `\n**Result Created At:** ${formatTimeDate(new Date(row.result_timestamp))}`;
-                    if (row.result_edit_timestamp) content += `\n*(last edited by ${parseUser(row.result_edit_mod_id)} at ${formatTimeDate(new Date(row.result_edit_timestamp))})*`;
-
-                    return content;
-                })
+                `Ban Appeals (${queries[4].length})`,
+                queries[4].map((banAppeal) => banAppeal.toString(false))
             );
         }
 

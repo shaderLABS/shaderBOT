@@ -1,20 +1,19 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { settings } from '../../../bot.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { embedColor, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { ensureTextChannel, parseUser } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
 import { isProject } from '../../../lib/project.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, guild } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return replyError(interaction, 'You can not turn thread channels into projects.');
+        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
 
-        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
+        if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
         if (await isProject(channel.id)) return replyError(interaction, 'This channel is already linked to a project.');
 
         const role = await guild.roles.create({
@@ -35,11 +34,11 @@ export const command: ApplicationCommandCallback = {
 
         interaction.reply({
             embeds: [
-                new MessageEmbed()
+                new EmbedBuilder()
                     .setAuthor({ name: channel.name })
                     .setFooter({ text: 'ID: ' + projectID })
                     .setColor(embedColor.green)
-                    .addField('Notification Role', role.toString()),
+                    .addFields([{ name: 'Notification Role', value: role.toString() }]),
             ],
         });
         log(`${parseUser(interaction.user)} created a project linked to <#${channel.id}>.`, 'Create Project');

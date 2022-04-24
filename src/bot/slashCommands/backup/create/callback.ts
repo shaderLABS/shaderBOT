@@ -1,12 +1,11 @@
 import { GuildChannel } from 'discord.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { createBackup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import { isTextOrThreadChannel } from '../../../lib/misc.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_MESSAGES'],
+    requiredPermissions: ['ManageMessages'],
     callback: async (interaction: GuildCommandInteraction) => {
         const backupChannel = (interaction.options.getChannel('channel', false) as GuildChannel | null) || interaction.channel;
         if (!isTextOrThreadChannel(backupChannel)) return replyError(interaction, 'You must specify a text or thread channel.');

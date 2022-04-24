@@ -1,25 +1,26 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
     ButtonInteraction,
-    ColorResolvable,
+    ButtonStyle,
     CommandInteraction,
     DMChannel,
+    EmbedBuilder,
     GuildMember,
     Message,
-    MessageActionRow,
-    MessageButton,
-    MessageContextMenuInteraction,
-    MessageEmbed,
-    Permissions,
+    ModalSubmitInteraction,
+    PermissionFlagsBits,
     TextChannel,
     ThreadChannel,
     User,
 } from 'discord.js';
-import { GuildCommandInteraction } from '../events/interactionCreate';
+import { GuildCommandInteraction } from '../slashCommandHandler.js';
 
 export const embedColor = {
     green: 0x4caf50,
     red: 0xf44336,
     blue: 0x2196f3,
+    yellow: 0xffc107,
 };
 
 export const embedIcon = {
@@ -30,19 +31,22 @@ export const embedIcon = {
     note: 'https://img.icons8.com/color/48/000000/note.png',
 };
 
-export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || 'Success', iconURL: embedIcon.success })
-        .setDescription(description)
-        .setColor(embedColor.green);
+export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string) {
+    const embed = new EmbedBuilder({
+        author: { name: title || 'Success', iconURL: embedIcon.success },
+        description,
+        color: embedColor.green,
+    });
+
     return channel.send({ embeds: [embed] });
 }
 
-export function replySuccess(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || 'Success', iconURL: embedIcon.success })
-        .setDescription(description)
-        .setColor(embedColor.green);
+export function replySuccess(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
+    const embed = new EmbedBuilder({
+        author: { name: title || 'Success', iconURL: embedIcon.success },
+        description,
+        color: embedColor.green,
+    });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
@@ -56,19 +60,22 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
     );
 }
 
-export function sendError(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || 'Error', iconURL: embedIcon.error })
-        .setDescription(description)
-        .setColor(embedColor.red);
+export function sendError(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string) {
+    const embed = new EmbedBuilder({
+        author: { name: title || 'Error', iconURL: embedIcon.error },
+        description,
+        color: embedColor.red,
+    });
+
     return channel.send({ embeds: [embed] });
 }
 
-export function replyError(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || 'Error', iconURL: embedIcon.error })
-        .setDescription(description)
-        .setColor(embedColor.red);
+export function replyError(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
+    const embed = new EmbedBuilder({
+        author: { name: title || 'Error', iconURL: embedIcon.error },
+        description,
+        color: embedColor.red,
+    });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
@@ -82,21 +89,31 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
     );
 }
 
-export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel, description: any, title?: string, message?: string, footer?: string) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
-        .setDescription(description)
-        .setColor(embedColor.blue)
-        .setFooter({ text: footer || '' });
+export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string, message?: string, footer?: string) {
+    const embed = new EmbedBuilder({
+        author: title ? { name: title, iconURL: embedIcon.info } : undefined,
+        description,
+        color: embedColor.blue,
+        footer: footer ? { text: footer } : undefined,
+    });
+
     return channel.send({ content: message, embeds: [embed] });
 }
 
-export function replyInfo(interaction: CommandInteraction | ButtonInteraction | MessageContextMenuInteraction, description: any, title?: string, message?: string, footer?: string, ephemeral: boolean | undefined = false) {
-    const embed = new MessageEmbed()
-        .setAuthor({ name: title || '', iconURL: title ? embedIcon.info : undefined })
-        .setDescription(description)
-        .setColor(embedColor.blue)
-        .setFooter({ text: footer || '' });
+export function replyInfo(
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction,
+    description: any,
+    title?: string,
+    message?: string,
+    footer?: string,
+    ephemeral: boolean | undefined = false
+) {
+    const embed = new EmbedBuilder({
+        author: title ? { name: title, iconURL: embedIcon.info } : undefined,
+        description,
+        color: embedColor.blue,
+        footer: footer ? { text: footer } : undefined,
+    });
 
     return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(() =>
         interaction.channel?.send({
@@ -111,14 +128,14 @@ export function replyInfo(interaction: CommandInteraction | ButtonInteraction | 
 }
 
 export async function sendButtonPages(
-    channel: TextChannel | ThreadChannel | DMChannel,
-    author: User,
+    channel: TextChannel | ThreadChannel | User | GuildMember,
+    authorID: string,
     pages: string[],
-    title?: string,
-    color: ColorResolvable = embedColor.blue,
+    title: string,
+    color: number = embedColor.blue,
     iconURL: string = embedIcon.info
 ) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
         color,
         description: pages[0],
         author: {
@@ -132,23 +149,23 @@ export async function sendButtonPages(
         return;
     }
 
-    const backwardButton = new MessageButton({
+    const backwardButton = new ButtonBuilder({
         customId: 'backward',
-        style: 'SECONDARY',
-        emoji: '⬅️',
+        style: ButtonStyle.Secondary,
+        emoji: { name: '⬅️' },
         disabled: true,
     });
 
-    const forwardButton = new MessageButton({
+    const forwardButton = new ButtonBuilder({
         customId: 'forward',
-        style: 'SECONDARY',
-        emoji: '➡️',
+        style: ButtonStyle.Secondary,
+        emoji: { name: '➡️' },
     });
 
     const message = await channel.send({
         embeds: [embed],
         components: [
-            new MessageActionRow({
+            new ActionRowBuilder<ButtonBuilder>({
                 components: [backwardButton, forwardButton],
             }),
         ],
@@ -156,7 +173,7 @@ export async function sendButtonPages(
 
     const collector = message.createMessageComponentCollector({
         filter: (buttonInteraction) =>
-            buttonInteraction.user.id === author.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
+            buttonInteraction.user.id === authorID || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)),
         idle: 600000,
     });
 
@@ -176,7 +193,7 @@ export async function sendButtonPages(
             await message.edit({ embeds: [embed.setDescription(content)] });
         }
 
-        buttonInteraction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+        buttonInteraction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
     });
 
     collector.on('end', () => {
@@ -184,8 +201,8 @@ export async function sendButtonPages(
     });
 }
 
-export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title?: string, color: ColorResolvable = embedColor.blue, iconURL: string = embedIcon.info) {
-    const embed = new MessageEmbed({
+export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = embedColor.blue, iconURL: string = embedIcon.info) {
+    const embed = new EmbedBuilder({
         color,
         description: pages[0],
         author: {
@@ -199,23 +216,23 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
         return;
     }
 
-    const backwardButton = new MessageButton({
+    const backwardButton = new ButtonBuilder({
         customId: 'backward',
-        style: 'SECONDARY',
-        emoji: '⬅️',
+        style: ButtonStyle.Secondary,
+        emoji: { name: '⬅️' },
         disabled: true,
     });
 
-    const forwardButton = new MessageButton({
+    const forwardButton = new ButtonBuilder({
         customId: 'forward',
-        style: 'SECONDARY',
-        emoji: '➡️',
+        style: ButtonStyle.Secondary,
+        emoji: { name: '➡️' },
     });
 
     await interaction.reply({
         embeds: [embed],
         components: [
-            new MessageActionRow({
+            new ActionRowBuilder<ButtonBuilder>({
                 components: [backwardButton, forwardButton],
             }),
         ],
@@ -226,7 +243,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
 
     const collector = message.createMessageComponentCollector({
         filter: (buttonInteraction) =>
-            buttonInteraction.user.id === interaction.user.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)),
+            buttonInteraction.user.id === interaction.user.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)),
         idle: 600000,
     });
 
@@ -246,7 +263,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
             await message.edit({ embeds: [embed.setDescription(content)] });
         }
 
-        buttonInteraction.update({ components: [new MessageActionRow({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+        buttonInteraction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
     });
 
     collector.on('end', () => {

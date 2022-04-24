@@ -1,12 +1,11 @@
-import { MessageAttachment } from 'discord.js';
+import { Attachment } from 'discord.js';
 import { autoResponses } from '../../../bot.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { replyError, replyInfo } from '../../../lib/embeds.js';
 import { autoResponseToJSON, stringToFileName } from '../../../lib/pastaAutoResponse.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_GUILD'],
+    requiredPermissions: ['ManageGuild'],
     callback: async (interaction: GuildCommandInteraction) => {
         const alias = interaction.options.getString('alias', false);
 
@@ -15,7 +14,7 @@ export const command: ApplicationCommandCallback = {
             if (!autoResponse) return replyError(interaction, 'The specified automatic response does not exist.');
 
             try {
-                const attachment = new MessageAttachment(Buffer.from(autoResponseToJSON(autoResponse)), stringToFileName(alias));
+                const attachment = new Attachment(Buffer.from(autoResponseToJSON(autoResponse)), stringToFileName(alias));
                 interaction.reply({ files: [attachment] });
             } catch {
                 replyError(interaction, 'Failed to send automatic response.');

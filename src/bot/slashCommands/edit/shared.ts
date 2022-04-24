@@ -1,36 +1,15 @@
-import { Guild, MessageEmbed, User } from 'discord.js';
+import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
-import { editAppealReason } from '../../lib/edit/editAppeal.js';
-import { editBanDuration, editBanReason } from '../../lib/edit/editBan.js';
-import { editContext } from '../../lib/edit/editContext.js';
-import { editKick } from '../../lib/edit/editKick.js';
-import { editMuteDuration, editMuteReason } from '../../lib/edit/editMute.js';
-import { editNote } from '../../lib/edit/editNote.js';
-import { editWarnReason, editWarnSeverity } from '../../lib/edit/editWarning.js';
-import { embedIcon, replyError, replySuccess } from '../../lib/embeds.js';
-import { isTextOrThreadChannel, parseUser } from '../../lib/misc.js';
-import { formatTimeDate, secondsToString, splitString, stringToSeconds } from '../../lib/time.js';
-
-function requireTime(value: string) {
-    const time = stringToSeconds(splitString(value));
-
-    if (isNaN(time)) throw 'The specified time exceeds the range of UNIX time.';
-    if (time < 10) throw 'The specified time must be greater than 10 seconds.';
-    if (time > 2419200) throw 'The specified time must be less than 28 days.';
-
-    return time;
-}
-
-function requireReason(value: string) {
-    if (value.length > 500) throw 'The reason must not be more than 500 characters long.';
-    return value;
-}
-
-function requireContent(value: string) {
-    if (value.length < 1 || value.length > 500) throw 'The content must be between 1 and 500 characters long.';
-    return value;
-}
+import { BanAppeal } from '../../lib/banAppeal.js';
+import { editContextURL } from '../../lib/context.js';
+import { replyError, replySuccess } from '../../lib/embeds.js';
+import { isTextOrThreadChannel } from '../../lib/misc.js';
+import { Note } from '../../lib/note.js';
+import { PastPunishment, Punishment } from '../../lib/punishment.js';
+import { hasPermissionForTarget } from '../../lib/searchMessage.js';
+import { splitString, stringToSeconds } from '../../lib/time.js';
+import { Warning } from '../../lib/warning.js';
+import { GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 async function requireContext(value: string, guild: Guild) {
     const IDs = value.split('/');
@@ -53,178 +32,110 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
     try {
         switch (aspect) {
             case 'banduration': {
-                const time = requireTime(value);
+                const time = stringToSeconds(splitString(value));
 
-                const uuid: string | undefined =
-                    target instanceof User
-                        ? (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'ban' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id
-                        : target;
+                const ban = target instanceof User ? await Punishment.getByUserID(target.id, 'ban') : await Punishment.getByUUID(target, 'ban');
+                if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
+                const logString = await ban.editDuration(time, interaction.user.id);
 
-                if (!uuid) return replyError(interaction, 'The specified user does not have any active bans.');
-
-                const { user_id, expire_timestamp } = await editBanDuration(uuid, time, interaction.user.id);
-                replySuccess(
-                    interaction,
-                    `Successfully edited the duration of ${parseUser(user_id)}'s ban (${uuid}) to ${secondsToString(time)}. They will be unbanned at ${formatTimeDate(new Date(expire_timestamp))}.`,
-                    'Edit Ban Duration'
-                );
+                replySuccess(interaction, logString, 'Edit Ban Duration');
                 break;
             }
 
             case 'banreason': {
-                const reason = requireReason(value);
-
-                let uuid: string;
-                let isPastPunishment: boolean;
+                let ban: Punishment | PastPunishment | undefined;
                 if (target instanceof User) {
-                    const latestEntry = (
-                        await db.query(
-                            /*sql*/ `
-                            WITH entries AS (
-                                (SELECT id, timestamp, 'p' AS db FROM punishment WHERE "type" = 'ban' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION
-                                (SELECT id, timestamp, 'pp' AS db FROM past_punishment WHERE "type" = 'ban' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                            )
-                            SELECT id, db FROM entries ORDER BY timestamp DESC LIMIT 1;`,
-                            [target.id]
-                        )
-                    ).rows[0];
-                    if (!latestEntry) return replyError(interaction, 'The specified user does not have any bans.');
+                    ban = await Punishment.getByUserID(target.id, 'ban').catch(() => undefined);
+                    ban ??= await PastPunishment.getLatestByUserID(target.id, 'ban').catch(() => undefined);
 
-                    uuid = latestEntry.id;
-                    isPastPunishment = latestEntry.db === 'pp';
+                    if (!ban) return replyError(interaction, 'The specified user does not have any bans.');
                 } else {
-                    uuid = target;
-                    isPastPunishment = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [uuid])).rows[0];
+                    ban = await Punishment.getByUUID(target, 'ban').catch(() => undefined);
+                    ban ??= await PastPunishment.getByUUID(target, 'ban').catch(() => undefined);
+
+                    if (!ban) return replyError(interaction, 'A ban with the specified UUID does not exist.');
                 }
 
-                const { user_id } = await editBanReason(uuid, reason, interaction.user.id, isPastPunishment);
-                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s ban (${uuid}).`, 'Edit Ban Reason');
+                if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
+                const logString = await ban.editReason(value, interaction.user.id);
+
+                replySuccess(interaction, logString, 'Edit Ban Reason');
                 break;
             }
 
             case 'kickreason': {
-                const reason = requireReason(value);
+                const kick = target instanceof User ? await PastPunishment.getLatestByUserID(target.id, 'kick') : await PastPunishment.getByUUID(target, 'kick');
+                if (!(await hasPermissionForTarget(interaction, kick.userID))) return;
+                const logString = await kick.editReason(value, interaction.user.id);
 
-                const uuid: string | undefined =
-                    target instanceof User
-                        ? (await db.query(/*sql*/ `SELECT id FROM past_punishment WHERE "type" = 'kick' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id
-                        : target;
-
-                if (!uuid) return replyError(interaction, 'The specified user does not have any kicks.');
-
-                const { user_id } = await editKick(uuid, reason, interaction.user.id);
-                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s kick (${uuid}).`, 'Edit Kick Reason');
+                replySuccess(interaction, logString, 'Edit Kick Reason');
                 break;
             }
 
             case 'muteduration': {
-                const time = requireTime(value);
+                const time = stringToSeconds(splitString(value));
 
-                const uuid: string | undefined =
-                    target instanceof User
-                        ? (await db.query(/*sql*/ `SELECT id FROM punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id
-                        : target;
+                const mute = target instanceof User ? await Punishment.getByUserID(target.id, 'mute') : await Punishment.getByUUID(target, 'mute');
+                if (!(await hasPermissionForTarget(interaction, mute.userID, 'moderatable'))) return;
+                const logString = await mute.editDuration(time, interaction.user.id);
 
-                if (!uuid) return replyError(interaction, 'The specified user does not have any active mutes.');
-
-                const { user_id, expire_timestamp } = await editMuteDuration(uuid, time, interaction.user.id);
-                replySuccess(
-                    interaction,
-                    `Successfully edited the duration of ${parseUser(user_id)}'s mute (${uuid}) to ${secondsToString(time)}. They will be unmuted at ${formatTimeDate(new Date(expire_timestamp))}.`,
-                    'Edit Mute Duration'
-                );
+                replySuccess(interaction, logString, 'Edit Mute Duration');
                 break;
             }
 
             case 'mutereason': {
-                const reason = requireReason(value);
-
-                let uuid: string;
-                let isPastPunishment: boolean;
+                let mute: Punishment | PastPunishment | undefined;
                 if (target instanceof User) {
-                    const latestEntry = (
-                        await db.query(
-                            /*sql*/ `
-                            WITH entries AS (
-                                (SELECT id, timestamp, 'p' AS db FROM punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION
-                                (SELECT id, timestamp, 'pp' AS db FROM past_punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                            )
-                            SELECT id, db FROM entries ORDER BY timestamp DESC LIMIT 1;`,
-                            [target.id]
-                        )
-                    ).rows[0];
-                    if (!latestEntry) return replyError(interaction, 'The specified user does not have any mutes.');
+                    mute = await Punishment.getByUserID(target.id, 'mute').catch(() => undefined);
+                    mute ??= await PastPunishment.getLatestByUserID(target.id, 'mute').catch(() => undefined);
 
-                    uuid = latestEntry.id;
-                    isPastPunishment = latestEntry.db === 'pp';
+                    if (!mute) return replyError(interaction, 'The specified user does not have any mutes.');
                 } else {
-                    uuid = target;
-                    isPastPunishment = !!(await db.query(/*sql*/ `SELECT 1 FROM past_punishment WHERE id = $1;`, [uuid])).rows[0];
+                    mute = await Punishment.getByUUID(target, 'mute').catch(() => undefined);
+                    mute ??= await PastPunishment.getByUUID(target, 'mute').catch(() => undefined);
+
+                    if (!mute) return replyError(interaction, 'A mute with the specified UUID does not exist.');
                 }
 
-                const { user_id } = await editMuteReason(uuid, reason, interaction.user.id, isPastPunishment);
-                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s mute (${uuid}).`, 'Edit Mute Reason');
+                if (!(await hasPermissionForTarget(interaction, mute.userID))) return;
+                const logString = await mute.editReason(value, interaction.user.id);
+
+                replySuccess(interaction, logString, 'Edit Mute Reason');
                 break;
             }
 
             case 'note': {
-                const content = requireContent(value);
+                const note = target instanceof User ? await Note.getLatestByUserID(target.id) : await Note.getByUUID(target);
+                const logString = await note.editContent(value, interaction.user.id);
 
-                const uuid: string | undefined =
-                    target instanceof User ? (await db.query(/*sql*/ `SELECT id FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id : target;
-
-                if (!uuid) return replyError(interaction, 'The specified user does not have any notes.');
-
-                const { user_id } = await editNote(uuid, content, interaction.user.id);
-                interaction.reply({
-                    embeds: [
-                        new MessageEmbed()
-                            .setAuthor({ name: 'Edited Note', iconURL: embedIcon.note })
-                            .setColor('#ffc107')
-                            .setDescription(`Successfully edited the content of ${parseUser(user_id)}'s note.`)
-                            .setFooter({ text: 'ID: ' + uuid }),
-                    ],
-                });
+                interaction.reply({ embeds: [Note.toEmbed('Edit Note', logString)] });
                 break;
             }
 
             case 'warnreason': {
-                const reason = requireReason(value);
+                const warning = target instanceof User ? await Warning.getLatestByUserID(target.id) : await Warning.getByUUID(target);
+                if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
 
-                const uuid: string | undefined =
-                    target instanceof User ? (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id : target;
-
-                if (!uuid) return replyError(interaction, 'The specified user does not have any warnings.');
-
-                const { user_id } = await editWarnReason(reason, uuid, interaction.user.id);
-                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s warning (${uuid}).`, 'Edit Warning Reason');
+                const logString = await warning.editReason(value, interaction.user.id);
+                replySuccess(interaction, logString, 'Edit Warning Reason');
                 break;
             }
 
             case 'warnseverity': {
-                const severity = Number.parseInt(value);
-                if (severity < 0 || severity > 3) throw 'The severity must be an integer between 0 and 3.';
+                const warning = target instanceof User ? await Warning.getLatestByUserID(target.id) : await Warning.getByUUID(target);
+                if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
 
-                const uuid: string | undefined =
-                    target instanceof User ? (await db.query(/*sql*/ `SELECT id FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0]?.id : target;
-
-                if (!uuid) return replyError(interaction, 'The specified user does not have any warnings.');
-
-                const user_id = await editWarnSeverity(severity, uuid, interaction.user.id);
-                replySuccess(interaction, `Successfully edited the severity of ${parseUser(user_id)}'s warning (${uuid}).`, 'Edit Warning Severity');
+                const logString = await warning.editSeverity(Number.parseInt(value), interaction.user.id);
+                replySuccess(interaction, logString, 'Edit Warning Severity');
                 break;
             }
 
             case 'appealreason': {
-                const uuid: string | undefined =
-                    target instanceof User ? (await db.query(/*sql*/ `SELECT id FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1`, [target.id])).rows[0].id : target;
+                const appeal = target instanceof User ? await BanAppeal.getLatestByUserID(target.id) : await BanAppeal.getByUUID(target);
+                if (!(await hasPermissionForTarget(interaction, appeal.userID))) return;
 
-                if (!uuid) return replyError(interaction, 'The specified user does not have any ban appeals');
-
-                const user_id = await editAppealReason(value, uuid, interaction.user.id);
-                replySuccess(interaction, `Successfully edited the reason of ${parseUser(user_id)}'s ban appeal (${uuid}).`, 'Edit Ban Appeal Reason');
+                const logString = await appeal.editResultReason(value, interaction.user.id);
+                replySuccess(interaction, logString, 'Edit Ban Appeal Result Reason');
                 break;
             }
 
@@ -234,47 +145,52 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
                 let uuid: string;
                 let table: 'warn' | 'punishment' | 'past_punishment' | 'note';
                 if (target instanceof User) {
-                    const latestEntry = (
+                    const entry = (
                         await db.query(
                             /*sql*/ `
                             WITH entries AS (
-                                (SELECT id, timestamp, 'punishment' AS db FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION
-                                (SELECT id, timestamp, 'past_punishment' AS db FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION
-                                (SELECT id, timestamp, 'note' AS db FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION
-                                (SELECT id, timestamp, 'warn' AS db FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                (SELECT id, timestamp, 'punishment' AS table_name FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                UNION ALL
+                                (SELECT id, timestamp, 'past_punishment' AS table_name FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                UNION ALL
+                                (SELECT id, timestamp, 'note' AS table_name FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                UNION ALL
+                                (SELECT id, timestamp, 'warn' AS table_name FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
                             )
-                            SELECT id, db FROM entries ORDER BY timestamp DESC LIMIT 1;`,
+                            SELECT id, table_name FROM entries ORDER BY timestamp DESC LIMIT 1;`,
                             [target.id]
                         )
                     ).rows[0];
-                    if (!latestEntry) return replyError(interaction, 'The specified user does not have any entries.');
 
-                    uuid = latestEntry.id;
-                    table = latestEntry.db;
+                    if (!entry) return replyError(interaction, 'The specified user does not have any entries.');
+                    if (!(await hasPermissionForTarget(interaction, target))) return;
+
+                    uuid = entry.id;
+                    table = entry.table_name;
                 } else {
-                    uuid = target;
-                    table = (
+                    const entry = (
                         await db.query(
                             /*sql*/ `
-                            (SELECT 'punishment' AS db FROM punishment WHERE id = $1)
-                            UNION
-                            (SELECT 'past_punishment' AS db FROM past_punishment WHERE id = $1)
-                            UNION
-                            (SELECT 'note' AS db FROM note WHERE id = $1)
-                            UNION
-                            (SELECT 'warn' AS db FROM warn WHERE id = $1)`,
-                            [uuid]
+                            (SELECT user_id, 'punishment' AS table_name FROM punishment WHERE id = $1)
+                            UNION ALL
+                            (SELECT user_id, 'past_punishment' AS table_name FROM past_punishment WHERE id = $1)
+                            UNION ALL
+                            (SELECT user_id, 'note' AS table_name FROM note WHERE id = $1)
+                            UNION ALL
+                            (SELECT user_id, 'warn' AS table_name FROM warn WHERE id = $1)`,
+                            [target]
                         )
-                    ).rows[0].db;
+                    ).rows[0];
 
-                    if (!table) return replyError(interaction, 'There is no entry with the specified UUID.');
+                    if (!entry) return replyError(interaction, 'There is no entry with the specified UUID.');
+                    if (!(await hasPermissionForTarget(interaction, entry.user_id))) return;
+
+                    uuid = target;
+                    table = entry.table_name;
                 }
 
-                const { user_id, tableString } = await editContext(uuid, context, interaction.user.id, table);
-                replySuccess(interaction, `Successfully edited the context of ${parseUser(user_id)}'s ${tableString} (${uuid}).`, 'Edit Context');
+                const logString = await editContextURL(uuid, context, interaction.user.id, table);
+                replySuccess(interaction, logString, 'Edit Context');
                 break;
             }
         }

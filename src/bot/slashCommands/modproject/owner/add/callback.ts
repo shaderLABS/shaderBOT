@@ -1,21 +1,21 @@
 import { GuildMember } from 'discord.js';
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
-import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import log from '../../../../lib/log.js';
-import { ensureTextChannel, parseUser } from '../../../../lib/misc.js';
+import { parseUser } from '../../../../lib/misc.js';
 import { isProject, ownerOverwrites } from '../../../../lib/project.js';
-import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!ensureTextChannel(channel, interaction) || !(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
-        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
+        if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
+        if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
-        const targetMember = interaction.options.getMember('user', false);
+        const targetMember = interaction.options.getMember('user');
         if (!(targetMember instanceof GuildMember)) return replyError(interaction, 'The specified user is not a member of this guild.');
 
         const owners: string[] = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.owners || [];

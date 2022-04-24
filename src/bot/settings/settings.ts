@@ -1,14 +1,28 @@
 import { Snowflake } from 'discord.js';
+import fssync from 'fs';
 import fs from 'fs/promises';
 
-const settingsFile = './src/bot/settings/settings.json';
+export class SettingsFile<Data> {
+    public data: Data;
+    public path: string;
 
-export interface Settings {
+    public async save() {
+        return fs.writeFile(this.path, JSON.stringify(this.data, null, 4), 'utf-8');
+    }
+
+    constructor(path: string) {
+        this.path = path;
+        this.data = JSON.parse(fssync.readFileSync(path, 'utf-8'));
+    }
+}
+
+export interface BotSettings {
     logging: {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;
     };
     moderatorRoleID: Snowflake;
+    threadRoleID?: Snowflake;
     appealChannelID: Snowflake;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
@@ -40,17 +54,4 @@ export interface Settings {
         timeThreshold: number;
         similarityThreshold: number;
     };
-}
-
-export function write(data: Object) {
-    fs.writeFile(settingsFile, JSON.stringify(data, null, 4), 'utf-8');
-}
-
-export async function update() {
-    const { settings } = await import('../bot.js');
-    fs.writeFile(settingsFile, JSON.stringify(settings, null, 4), 'utf-8');
-}
-
-export async function read() {
-    return JSON.parse(await fs.readFile(settingsFile, 'utf-8'));
 }

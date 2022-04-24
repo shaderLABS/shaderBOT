@@ -1,9 +1,8 @@
-import { MessageAttachment, MessageEmbed } from 'discord.js';
+import { Attachment, EmbedBuilder } from 'discord.js';
 import { pastas } from '../../bot.js';
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { replyError, replyInfo, sendError } from '../../lib/embeds.js';
 import { similarityLevenshtein } from '../../lib/misc.js';
-import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
@@ -14,11 +13,11 @@ export const command: ApplicationCommandCallback = {
             if (!pasta || similarityLevenshtein(pasta.alias, alias) < 0.5) return replyError(interaction, 'Pasta not found.');
 
             try {
-                const responseEmbed = pasta.embed ? [new MessageEmbed(pasta.embed)] : [];
+                const responseEmbed = pasta.embed ? [new EmbedBuilder(pasta.embed)] : [];
 
-                const responseFiles: MessageAttachment[] = [];
+                const responseFiles: Attachment[] = [];
                 if (pasta.attachments) {
-                    responseFiles.push(...pasta.attachments.map((attachment) => new MessageAttachment(attachment)));
+                    responseFiles.push(...pasta.attachments.map((attachment) => new Attachment(attachment)));
                 }
 
                 await interaction.reply({ content: pasta.message, embeds: responseEmbed, files: responseFiles });

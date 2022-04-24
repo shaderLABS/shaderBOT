@@ -2,8 +2,8 @@ import { PermissionOverwriteOptions, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
 
 export const ownerOverwrites: PermissionOverwriteOptions = {
-    MANAGE_WEBHOOKS: true,
-    MANAGE_THREADS: true,
+    ManageWebhooks: true,
+    ManageThreads: true,
 };
 
 export async function isProjectOwner(userID: Snowflake, channelID: Snowflake): Promise<Boolean> {

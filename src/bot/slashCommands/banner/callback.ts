@@ -1,13 +1,12 @@
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
 import { embedColor, embedIcon, replyError } from '../../lib/embeds.js';
-import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { guild } = interaction;
-        if (guild.premiumTier === 'NONE' || guild.premiumTier === 'TIER_1') return replyError(interaction, 'The banner feature requires a boost level of 2.');
+        if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return replyError(interaction, 'The banner feature requires a boost level of 2.');
 
         const currentBannerProject = (
             await db.query(
@@ -26,7 +25,7 @@ export const command: ApplicationCommandCallback = {
 
         interaction.reply({
             embeds: [
-                new MessageEmbed({
+                new EmbedBuilder({
                     color: embedColor.blue,
                     author: {
                         iconURL: embedIcon.info,

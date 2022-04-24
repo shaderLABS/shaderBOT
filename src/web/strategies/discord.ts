@@ -3,7 +3,6 @@ import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { client } from '../../bot/bot.js';
 import { getGuild } from '../../bot/lib/misc.js';
-import { isSnowflake } from '../../bot/lib/searchMessage.js';
 
 passport.serializeUser((user: any, done) => {
     done(undefined, user.id);
@@ -42,8 +41,6 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
-            if (!isSnowflake(profile.id)) return done(undefined, undefined, { error: 0 });
-
             const user = await client.users.fetch(profile.id)?.catch(() => undefined);
             if (!user) return done(undefined, undefined, { error: 0 });
 

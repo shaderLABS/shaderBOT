@@ -29,6 +29,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "messageChannelID": ""
     },
     "moderatorRoleID": "", // moderator role, e.g. mentioned in ban appeal threads
+    "threadRoleID": "", // role that will be automatically added to new threads
     "appealChannelID": "", // channel for listing ban appeals
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
@@ -77,7 +78,7 @@ Environment variables are read from `.env` and specifiy sensitive information li
 | `NODE_ENV`                  | `development` | The environment this is being run in. Can be either `development` or `production` and should always be set accordingly.                              |
 | `PORT`                      |    `3001`     | The port that the REST API will run on.                                                                                                              |
 | `DOMAIN`                    |  `localhost`  | The domain that the REST API will run on.                                                                                                            |
-| `BOT_ONLY`                  |    `false`    | Run the server in bot-only mode, which disables the Polka and Apollo/GraphQL server.                                                                 |
+| `BOT_ONLY`                  |    `false`    | Run the server in bot-only mode, which disables the Polka server (REST API).                                                                         |
 | `PG_USER`                   |  `postgres`   | The name used for accessing the PostgreSQL database.                                                                                                 |
 | `PG_PASSWORD`               |  `postgres`   | The password used for accessing the PostgreSQL database.                                                                                             |
 | `PG_HOST`                   |  `localhost`  | The hostname used for connecting to the PostgreSQL server.                                                                                           |

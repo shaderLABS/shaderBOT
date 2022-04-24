@@ -1,9 +1,8 @@
-import { GuildBan, User } from 'discord.js';
-import { db } from '../../../db/postgres.js';
+import { AuditLogEvent, GuildBan } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
 import { parseUser, sleep } from '../../lib/misc.js';
-import { store } from '../../lib/punishments.js';
+import { Punishment } from '../../lib/punishment.js';
 
 export const event: Event = {
     name: 'guildBanRemove',
@@ -13,37 +12,20 @@ export const event: Event = {
 
         const auditLog = (
             await ban.guild.fetchAuditLogs({
-                type: 'MEMBER_BAN_REMOVE',
+                type: AuditLogEvent.MemberBanRemove,
                 limit: 1,
             })
         ).entries.first();
 
-        if (!auditLog?.executor || !(auditLog.target instanceof User) || auditLog.target.id !== ban.user.id || auditLog.executor.bot) return;
-        const { createdAt, executor } = auditLog;
+        if (!auditLog?.executor || !auditLog.target || auditLog.target.id !== ban.user.id || auditLog.executor.bot) return;
+        const { executor } = auditLog;
 
         try {
-            await db.query(
-                /*sql*/ `
-                WITH moved_rows AS (
-                    DELETE FROM punishment
-                    WHERE "type" = 'ban' AND user_id = $1
-                    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
-                )
-                INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
-                SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-                [ban.user.id, createdAt, executor.id]
-            );
+            const punishment = await Punishment.getByUserID(ban.user.id, 'ban');
+            await punishment.move(executor.id);
         } catch (error) {
             console.error(error);
-            log(`Failed to remove ban entry of ${parseUser(ban.user)}: an error occurred while accessing the database.`, 'Unban');
+            log(`Failed to remove ban entry of ${parseUser(ban.user)}.`, 'Unban');
         }
-
-        const timeout = store.tempbans.get(ban.user.id);
-        if (timeout) {
-            clearTimeout(timeout);
-            store.tempbans.delete(ban.user.id);
-        }
-
-        log(`${parseUser(executor)} unbanned ${parseUser(ban.user)}.`, 'Unban');
     },
 };

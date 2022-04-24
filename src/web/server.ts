@@ -4,7 +4,7 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import polka from 'polka';
-import { createBanAppeal, getBanInformation } from '../bot/lib/banAppeal.js';
+import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.js';
 import { db } from '../db/postgres.js';
 import './strategies/discord.js';
 import { releaseNotification, verifySignature } from './webhook.js';
@@ -122,11 +122,11 @@ export function startWebserver() {
             return res.end('Unauthorized');
         }
 
-        // @ts-ignore
+        // @ts-expect-error
         const userID = req.user?.id;
 
         try {
-            const ban = await getBanInformation(userID);
+            const ban = await getUserAppealData(userID);
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 200;
             return res.end(JSON.stringify(ban));
@@ -142,12 +142,12 @@ export function startWebserver() {
             return res.end('Unauthorized');
         }
 
-        // @ts-ignore
-        const { id, username, discriminator, avatarURL } = req.user;
+        // @ts-expect-error
+        const userID = req.user?.id;
         const reason = req.body?.reason;
 
         try {
-            await createBanAppeal(id, username, discriminator, avatarURL, reason);
+            await BanAppeal.create(userID, reason);
         } catch {
             res.statusCode = 400;
             return res.end('Bad Request');

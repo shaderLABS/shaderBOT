@@ -1,15 +1,14 @@
 import { db } from '../../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { ensureTextChannel, parseUser } from '../../../lib/misc.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { parseUser } from '../../../lib/misc.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!ensureTextChannel(channel, interaction)) return replyError(interaction, 'You can not turn thread channels into projects.');
+        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
 
         const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING id, role_id;`, [channel.id])).rows[0];
         if (!project) return replyError(interaction, 'No project has been set up for this channel.');

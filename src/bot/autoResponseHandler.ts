@@ -1,8 +1,8 @@
-import { DMChannel, MessageAttachment, MessageEmbed, MessageEmbedOptions } from 'discord.js';
+import { Attachment, EmbedBuilder, EmbedData } from 'discord.js';
 import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import { autoResponses, cooldowns, settings } from './bot.js';
+import { autoResponses, cooldownStore, settings } from './bot.js';
 import { GuildMessage } from './events/message/messageCreate.js';
 import { sendInfo } from './lib/embeds.js';
 import log from './lib/log.js';
@@ -16,7 +16,7 @@ export interface AutoResponse {
     regex: RegExp;
     flags?: string;
     message?: string;
-    embed?: MessageEmbedOptions;
+    embed?: EmbedData;
     attachments?: string[];
     directMessage?: boolean;
     deleteAfter?: number;
@@ -48,7 +48,7 @@ export async function sendAutoResponse(message: GuildMessage) {
         if (autoResponse.regex.test(message.content)) {
             if (
                 (autoResponse.maxMemberDuration && message.member.joinedAt && autoResponse.maxMemberDuration < (Date.now() - message.member.joinedAt.getTime()) / 1000) ||
-                (autoResponse.cooldown && cooldowns.has(`${message.member.id}:${alias}`))
+                (autoResponse.cooldown && cooldownStore.has(alias, message.member))
             )
                 return;
 
@@ -56,15 +56,15 @@ export async function sendAutoResponse(message: GuildMessage) {
 
             try {
                 const responseContent = fillVariables(message, autoResponse.message || '');
-                const responseFiles: MessageAttachment[] = [];
-                const responseEmbed = autoResponse.embed ? [new MessageEmbed(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed))))] : [];
+                const responseFiles: Attachment[] = [];
+                const responseEmbed = autoResponse.embed ? [new EmbedBuilder(JSON.parse(fillVariables(message, JSON.stringify(autoResponse.embed))))] : [];
 
                 if (autoResponse.attachments) {
-                    responseFiles.push(...autoResponse.attachments.map((attachment) => new MessageAttachment(attachment)));
+                    responseFiles.push(...autoResponse.attachments.map((attachment) => new Attachment(attachment)));
                 }
 
                 const response = await channel.send({ content: responseContent, embeds: responseEmbed, files: responseFiles }).catch(async () => {
-                    let botChannel = message.guild.channels.cache.get(settings.botChannelID);
+                    let botChannel = message.guild.channels.cache.get(settings.data.botChannelID);
                     if (!botChannel || !isTextOrThreadChannel(botChannel)) return;
                     channel = botChannel;
 
@@ -78,13 +78,11 @@ export async function sendAutoResponse(message: GuildMessage) {
                 }
 
                 if (autoResponse.cooldown) {
-                    const cooldownID = `${message.member.id}:${alias}`;
-                    cooldowns.set(cooldownID, true);
-                    setTimeout(() => cooldowns.delete(cooldownID), autoResponse.cooldown * 1000);
+                    cooldownStore.add(alias, message.member, autoResponse.cooldown * 1000);
                 }
 
                 if (autoResponse.directMessage && channel.id !== message.channel.id) {
-                    sendInfo(message.channel, channel instanceof DMChannel ? `${message.author.toString()} check your DMs!` : `${message.author.toString()} go to <#${settings.botChannelID}>!`);
+                    sendInfo(message.channel, channel.isDM() ? `${message.author.toString()} check your DMs!` : `${message.author.toString()} go to <#${settings.data.botChannelID}>!`);
                 }
             } catch (error) {
                 log(`Failed to send automatic response \`${alias}\`: \`${error}\``);

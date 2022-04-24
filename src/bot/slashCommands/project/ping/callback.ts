@@ -1,7 +1,6 @@
 import { db } from '../../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {

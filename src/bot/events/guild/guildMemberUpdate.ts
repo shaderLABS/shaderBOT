@@ -1,7 +1,7 @@
-import { GuildMember } from 'discord.js';
+import { AuditLogEvent, GuildMember } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { sleep } from '../../lib/misc.js';
-import { mute, unmute } from '../../lib/muteUser.js';
+import { Punishment } from '../../lib/punishment.js';
 
 export const event: Event = {
     name: 'guildMemberUpdate',
@@ -16,7 +16,7 @@ export const event: Event = {
 
         const auditLog = (
             await newMember.guild.fetchAuditLogs({
-                type: 'MEMBER_UPDATE',
+                type: AuditLogEvent.MemberUpdate,
                 limit: 1,
             })
         ).entries.first();
@@ -25,10 +25,11 @@ export const event: Event = {
 
         if (wasCommunicationDisabled) {
             // manual unmute
-            unmute(newMember.id, auditLog.executor.id);
+            const mute = await Punishment.getByUserID(newMember.id, 'mute').catch(() => undefined);
+            mute?.move(auditLog.executor.id);
         } else if (isCommunicationDisabled) {
             // manual mute
-            mute(newMember.id, (newMember.communicationDisabledUntilTimestamp - auditLog.createdAt.getTime()) / 1000, auditLog.executor.id, auditLog.reason || 'No reason provided.');
+            Punishment.createMute(newMember, auditLog.reason || 'No reason provided.', (newMember.communicationDisabledUntilTimestamp - auditLog.createdAt.getTime()) / 1000, auditLog.executor.id);
         }
     },
 };

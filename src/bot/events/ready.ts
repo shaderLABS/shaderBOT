@@ -1,6 +1,6 @@
 import { client } from '../bot.js';
 import { Event } from '../eventHandler.js';
-import { loadTimeouts } from '../lib/punishments.js';
+import { loadTimeouts } from '../lib/timeoutStore.js';
 
 export const event: Event = {
     name: 'ready',

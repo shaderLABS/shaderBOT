@@ -1,10 +1,7 @@
-import { Permissions } from 'discord.js';
-import { db } from '../../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
+import { PermissionFlagsBits } from 'discord.js';
 import { replyButtonPages, replyError, replyInfo, replySuccess, sendButtonPages } from '../../../lib/embeds.js';
-import { formatContextURL, parseUser } from '../../../lib/misc.js';
-import { formatTimeDate } from '../../../lib/time.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { Warning } from '../../../lib/warning.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
@@ -13,32 +10,19 @@ export const command: ApplicationCommandCallback = {
         const targetUser = interaction.options.getUser('user', false) || interaction.user;
         const isSelfTarget = targetUser.id === interaction.user.id;
 
-        if (!isSelfTarget && !member.permissions.has(Permissions.FLAGS.KICK_MEMBERS)) return replyError(interaction, 'You do not have permission to view the warnings of other users.');
+        if (!isSelfTarget && !member.permissions.has(PermissionFlagsBits.KickMembers)) {
+            return replyError(interaction, 'You do not have permission to view the warnings of other users.');
+        }
 
-        const warnings = await db.query(
-            /*sql*/ `
-            SELECT id::TEXT, reason, context_url, severity, mod_id::TEXT, timestamp, edited_timestamp::TEXT, edited_mod_id::TEXT
-            FROM warn
-            WHERE user_id = $1
-            ORDER BY timestamp DESC;`,
-            [targetUser.id]
-        );
+        const warnings = await Warning.getAllByUserID(targetUser.id);
 
-        if (warnings.rowCount === 0) {
-            return replyInfo(interaction, `${isSelfTarget ? 'You do' : '<@' + targetUser.id + '> does'} not have any warnings.`, undefined, undefined, undefined, isSelfTarget);
+        if (warnings.length === 0) {
+            return replyInfo(interaction, `${isSelfTarget ? 'You do' : '<@' + targetUser.id + '> does'} not have any warnings.`, 'List Warnings', undefined, undefined, isSelfTarget);
         }
 
         const pages: string[] = [];
-        warnings.rows.reduce((prev, curr, i, { length }) => {
-            const page =
-                `**User:** ${parseUser(targetUser)}` +
-                `\n**Severity:** ${curr.severity}` +
-                `\n**Reason:** ${curr.reason}` +
-                `\n**Moderator:** ${parseUser(curr.mod_id)}` +
-                `\n**Context:** ${formatContextURL(curr.context_url)}` +
-                `\n**ID:** ${curr.id}` +
-                `\n**Created At:** ${formatTimeDate(new Date(curr.timestamp))}` +
-                (curr.edited_timestamp ? `\n*(last edited by ${parseUser(curr.edited_mod_id)} at ${formatTimeDate(new Date(curr.edited_timestamp))})*` : '');
+        warnings.reduce((prev, curr, i, { length }) => {
+            const page = curr.toString(false);
 
             if ((i + 1) % 3 === 0 || i === length - 1) {
                 pages.push(prev + '\n\n' + page);
@@ -51,16 +35,14 @@ export const command: ApplicationCommandCallback = {
         if (isSelfTarget) {
             // DM
             try {
-                const dmChannel = await member.createDM();
-                sendButtonPages(dmChannel, member.user, pages, 'Warnings');
-
-                replySuccess(interaction, 'Successfully sent you your warnings in a DM.', 'List Warnings', true);
+                sendButtonPages(member, member.id, pages, 'Warnings');
+                replySuccess(interaction, 'Your warnings have been sent to you in a DM.', 'List Warnings', true);
             } catch {
-                replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.", undefined, true);
+                replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.", 'List Warnings', true);
             }
         } else {
             // public
-            replyButtonPages(interaction, pages, 'Warnings');
+            replyButtonPages(interaction, pages, `Warnings - ${targetUser.tag}`);
         }
     },
 };

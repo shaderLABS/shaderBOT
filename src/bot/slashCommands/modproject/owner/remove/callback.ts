@@ -1,18 +1,18 @@
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
-import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import log from '../../../../lib/log.js';
-import { ensureTextChannel, parseUser, userToMember } from '../../../../lib/misc.js';
+import { parseUser, userToMember } from '../../../../lib/misc.js';
 import { isProject } from '../../../../lib/project.js';
-import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_CHANNELS'],
+    requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!ensureTextChannel(channel, interaction) || !(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
-        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
+        if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
+        if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const targetUser = interaction.options.getUser('user', true);
         const targetMember = await userToMember(interaction.guild, targetUser.id);

@@ -1,19 +1,23 @@
 import uuid from 'uuid-random';
-import { db } from '../../../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
-import { replyError } from '../../../../lib/embeds.js';
-import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
-import { deleteWarning } from '../shared.js';
+import { replyError, replySuccess } from '../../../../lib/embeds.js';
+import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
+import { Warning } from '../../../../lib/warning.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KICK_MEMBERS'],
+    requiredPermissions: ['KickMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) return replyError(interaction, 'The specified UUID is invalid.');
 
-        const warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, context_url, severity, reason FROM warn WHERE id = $1;`, [id])).rows[0];
-        if (!warning) return replyError(interaction, 'There is no warning with the specified UUID.');
+        try {
+            const warning = await Warning.getByUUID(id);
+            if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
 
-        deleteWarning(interaction, warning);
+            const logString = await warning.delete(interaction.member.id);
+            replySuccess(interaction, logString, 'Delete Warning');
+        } catch (error) {
+            replyError(interaction, error);
+        }
     },
 };

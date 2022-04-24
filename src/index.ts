@@ -5,7 +5,7 @@ import { startWebserver } from './web/server.js';
 export function shutdown(code: number = 0) {
     console.log('Shutting down...');
     db.end().catch(() => undefined);
-    client.destroy();
+    client?.destroy();
     process.exit(code);
 }
 

@@ -1,4 +1,4 @@
-import { Message, MessageAttachment, MessageEmbed, TextChannel } from 'discord.js';
+import { Attachment, EmbedBuilder, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { embedColor } from '../../lib/embeds.js';
@@ -11,10 +11,10 @@ export const event: Event = {
         const { channel } = message;
         if (!isTextOrThreadChannel(channel) || (!message.partial && message.author.bot)) return;
 
-        const logChannel = getGuild()?.channels.cache.get(settings.logging.messageChannelID);
-        if (logChannel instanceof TextChannel) {
-            const attachments: MessageAttachment[] = [];
-            const logEmbed = new MessageEmbed({
+        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+        if (logChannel?.isText()) {
+            const attachments: Attachment[] = [];
+            const logEmbed = new EmbedBuilder({
                 color: embedColor.red,
             });
 
@@ -28,7 +28,7 @@ export const event: Event = {
 
                 for (const attachment of message.attachments.values()) {
                     if (attachment.size > 8388608) content += attachment.url + '\n';
-                    else attachments.push(new MessageAttachment(attachment.url, attachment.name || undefined));
+                    else attachments.push(new Attachment(attachment.url, attachment.name || undefined));
                 }
 
                 let metadata = `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(

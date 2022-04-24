@@ -1,17 +1,16 @@
-import { GuildCommandInteraction } from '../../events/interactionCreate.js';
-import { unban } from '../../lib/banUser.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
-import { parseUser } from '../../lib/misc.js';
-import { ApplicationCommandCallback } from '../../slashCommandHandler.js';
+import { Punishment } from '../../lib/punishment.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['BAN_MEMBERS'],
+    requiredPermissions: ['BanMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
 
         try {
-            await unban(targetUser.id, interaction.user.id);
-            replySuccess(interaction, `${parseUser(targetUser)} has been unbanned.`, 'Unban');
+            const ban = await Punishment.getByUserID(targetUser.id, 'ban');
+            const logString = await ban.move(interaction.user.id);
+            replySuccess(interaction, logString, 'Unban');
         } catch (error) {
             replyError(interaction, error);
         }

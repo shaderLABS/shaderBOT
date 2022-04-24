@@ -1,17 +1,21 @@
-import { db } from '../../../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
-import { replyError } from '../../../../lib/embeds.js';
-import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
-import { deleteWarning } from '../shared.js';
+import { replyError, replySuccess } from '../../../../lib/embeds.js';
+import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
+import { Warning } from '../../../../lib/warning.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KICK_MEMBERS'],
+    requiredPermissions: ['KickMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
 
-        const warning = (await db.query(/*sql*/ `SELECT id, user_id, mod_id, context_url, severity, reason FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [targetUser.id])).rows[0];
-        if (!warning) return replyError(interaction, 'The specified user does not have any warnings.');
+        try {
+            const warning = await Warning.getLatestByUserID(targetUser.id);
+            if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
 
-        deleteWarning(interaction, warning);
+            const logString = await warning.delete(interaction.member.id);
+            replySuccess(interaction, logString, 'Delete Warning');
+        } catch (error) {
+            replyError(interaction, error);
+        }
     },
 };

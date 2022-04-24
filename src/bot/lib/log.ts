@@ -1,15 +1,15 @@
-import { MessageEmbed, TextChannel } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { settings } from '../bot.js';
 import { embedColor, embedIcon } from './embeds.js';
 import { getGuild } from './misc.js';
 
-export default function (content: string | MessageEmbed, title?: string) {
+export default function (content: string | EmbedBuilder, title?: string) {
     const guild = getGuild();
     if (!guild) return;
 
-    const logChannel = guild.channels.cache.get(settings.logging.moderationChannelID);
-    if (logChannel instanceof TextChannel) {
-        if (content instanceof MessageEmbed) return logChannel.send({ embeds: [content] });
-        else return logChannel.send({ embeds: [new MessageEmbed({ author: { name: 'Log', iconURL: embedIcon.log }, title, color: embedColor.blue, description: content })] });
-    }
+    const logChannel = guild.channels.cache.get(settings.data.logging.moderationChannelID);
+    if (!logChannel?.isText()) return;
+
+    if (content instanceof EmbedBuilder) return logChannel.send({ embeds: [content] });
+    else return logChannel.send({ embeds: [new EmbedBuilder({ author: { name: 'Log', iconURL: embedIcon.log }, title, color: embedColor.blue, description: content })] });
 }

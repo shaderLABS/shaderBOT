@@ -1,14 +1,12 @@
-import { ButtonInteraction, Message, MessageActionRow, MessageButton, MessageEmbed, Permissions, TextChannel } from 'discord.js';
-import { db } from '../../db/postgres.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, Message, PermissionFlagsBits, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { embedColor, replyError, replyInfo } from './embeds.js';
-import { kickSpammer } from './kickUser.js';
+import { embedColor, replyError, replyInfo, sendInfo } from './embeds.js';
 import log from './log.js';
-import { isTextOrThreadChannel, parseUser, similarityLevenshtein, userToMember } from './misc.js';
-import { mute, unmute } from './muteUser.js';
+import { getGuild, isTextOrThreadChannel, parseUser, similarityLevenshtein } from './misc.js';
+import { PastPunishment, Punishment } from './punishment.js';
 
-type cachedMessage = {
+type CachedMessage = {
     id: string;
     authorID: string;
     channelID: string;
@@ -16,25 +14,25 @@ type cachedMessage = {
     createdTimestamp: number;
 };
 
-const cache: (cachedMessage | undefined)[] = new Array(settings.spamProtection.cacheLength);
+const cache: (CachedMessage | undefined)[] = new Array(settings.data.spamProtection.cacheLength);
 
 export async function handleSpamInteraction(interaction: ButtonInteraction) {
-    if (!interaction.guild || (!interaction.customId.startsWith('kickSpam') && !interaction.customId.startsWith('forgiveSpam')) || !interaction.memberPermissions?.has(Permissions.FLAGS.KICK_MEMBERS))
-        return;
+    if (!interaction.guild || !interaction.memberPermissions?.has(PermissionFlagsBits.KickMembers)) return;
 
     const id = interaction.customId.split(':')[1];
     if (!id) return;
 
     const targetUser = await client.users.fetch(id).catch(() => undefined);
     if (!targetUser) return replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
-    const targetMember = await userToMember(interaction.guild, id);
+
+    const mute = await Punishment.getByUserID(id, 'mute').catch(() => undefined);
 
     if (interaction.customId.startsWith('kickSpam')) {
-        const { dmed } = await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
-        unmute(id, interaction.user.id).catch(() => undefined);
-        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)} for spamming. ${dmed ? '' : '\n\n*The target could not be DMed.*'}`, 'Kick Spammer');
+        const logString = await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
+        mute?.move(interaction.user.id).catch(() => undefined);
+        replyInfo(interaction, logString, 'Kick Spammer');
     } else {
-        unmute(id, interaction.user.id, targetMember).catch(() => undefined);
+        mute?.move(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
     }
 
@@ -44,12 +42,12 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
 
 export async function checkSpam(message: GuildMessage) {
     // don't handle message where spam is unlikely
-    if (message.attachments.size || message.content.length < settings.spamProtection.characterThreshold) return false;
+    if (message.attachments.size || message.content.length < settings.data.spamProtection.characterThreshold) return false;
 
     // mentions everyone and contains a link
     let isSpamSingleMessage =
         !message.member.roles.color &&
-        !message.member.permissions.has(Permissions.FLAGS.MENTION_EVERYONE) &&
+        !message.member.permissions.has(PermissionFlagsBits.MentionEveryone) &&
         (message.content.includes('@everyone') || message.content.includes('@here')) &&
         message.content.includes('http');
 
@@ -68,41 +66,34 @@ export async function checkSpam(message: GuildMessage) {
             (previousMessage) =>
                 previousMessage &&
                 currentMessage.authorID === previousMessage.authorID &&
-                similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.spamProtection.similarityThreshold &&
+                similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.data.spamProtection.similarityThreshold &&
                 currentMessage.channelID !== previousMessage.channelID &&
-                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.spamProtection.timeThreshold * 1000
+                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000
         );
 
-        isSpamSimilarMessage = potentialSpam.length >= settings.spamProtection.messageThreshold - 1;
+        isSpamSimilarMessage = potentialSpam.length >= settings.data.spamProtection.messageThreshold - 1;
     }
 
     // if message is flagged as spam, mute and delete messages
     if (isSpamSingleMessage || isSpamSimilarMessage) {
-        const isPunished = !!(await db.query(/*sql*/ `SELECT 1 FROM punishment WHERE user_id = $1 LIMIT 1;`, [message.author.id])).rows[0];
+        if (!(await Punishment.has(message.author.id, 'mute'))) {
+            Punishment.createMute(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch(
+                (e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute')
+            );
 
-        if (!isPunished) {
-            mute(
-                message.author.id,
-                settings.spamProtection.muteDuration,
-                null,
-                isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.',
-                null,
-                message.member
-            ).catch((e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute'));
-
-            const kickButton = new MessageButton({
+            const kickButton = new ButtonBuilder({
                 customId: 'kickSpam:' + message.author.id,
-                style: 'DANGER',
+                style: ButtonStyle.Danger,
                 label: 'Kick',
             });
 
-            const forgiveButton = new MessageButton({
+            const forgiveButton = new ButtonBuilder({
                 customId: 'forgiveSpam:' + message.author.id,
-                style: 'SUCCESS',
+                style: ButtonStyle.Success,
                 label: 'Forgive',
             });
 
-            const logEmbed = new MessageEmbed({
+            const logEmbed = new EmbedBuilder({
                 author: {
                     name: 'Potential Spam',
                     iconURL: message.author.displayAvatarURL(),
@@ -111,12 +102,12 @@ export async function checkSpam(message: GuildMessage) {
                 color: embedColor.red,
             });
 
-            const logChannel = message.guild.channels.cache.get(settings.logging.moderationChannelID);
-            if (logChannel && logChannel instanceof TextChannel) {
+            const logChannel = message.guild.channels.cache.get(settings.data.logging.moderationChannelID);
+            if (logChannel?.isText()) {
                 logChannel.send({
                     embeds: [logEmbed],
                     components: [
-                        new MessageActionRow({
+                        new ActionRowBuilder<ButtonBuilder>({
                             components: [kickButton, forgiveButton],
                         }),
                     ],
@@ -124,7 +115,7 @@ export async function checkSpam(message: GuildMessage) {
             }
         }
 
-        const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as cachedMessage[];
+        const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as CachedMessage[];
 
         message.delete().catch(() => undefined);
         for (const spam of spamMessages) {
@@ -140,4 +131,25 @@ export async function checkSpam(message: GuildMessage) {
     cache.pop();
 
     return isSpamSingleMessage || isSpamSimilarMessage;
+}
+
+export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {
+    const guild = getGuild();
+    if (!guild) return Promise.reject('No guild found.');
+
+    await sendInfo(
+        user,
+        'Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin shaderLABS using [this invite link](https://discord.gg/RpzWN9S "Invite for shaderLABS").',
+        'Your account has been compromised.',
+        undefined,
+        "DON'T FALL FOR PHISHING LINKS! ALWAYS CHECK THE URL BEFORE SIGNING IN."
+    );
+
+    try {
+        const logString = await PastPunishment.createKick(user, 'Phished account used for spam.', moderatorID, contextURL, 1);
+        return logString;
+    } catch (error) {
+        console.error(error);
+        return `Failed to kick ${parseUser(user)}.`;
+    }
 }

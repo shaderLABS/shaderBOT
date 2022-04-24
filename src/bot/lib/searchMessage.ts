@@ -1,57 +1,33 @@
-import { Snowflake } from 'discord.js';
+import { UserResolvable } from 'discord.js';
 import { settings } from '../bot.js';
-import { GuildCommandInteraction } from '../events/interactionCreate.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
+import { GuildCommandInteraction } from '../slashCommandHandler.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
-import { isTextOrThreadChannel, parseUser } from './misc.js';
-import { mute } from './muteUser.js';
+import { parseUser, userToMember } from './misc.js';
+import { Punishment } from './punishment.js';
 
-export function isSnowflake(potentialSnowflake: Snowflake | string): potentialSnowflake is Snowflake {
-    return !isNaN(+potentialSnowflake) && potentialSnowflake.length >= 17 && potentialSnowflake.length <= 19;
-}
+export async function hasPermissionForTarget(interaction: GuildCommandInteraction, targetResolvable: UserResolvable, checkProperty?: 'bannable' | 'kickable' | 'manageable' | 'moderatable') {
+    const targetMember = await userToMember(interaction.guild, targetResolvable);
+    if (!targetMember) return true;
 
-export async function getContextURL(interaction: GuildCommandInteraction, targetID?: Snowflake) {
-    const customURL = interaction.options.getString('context', false);
-
-    if (customURL) {
-        const IDs = customURL.split('/');
-        const messageID = IDs.pop();
-        const channelID = IDs.pop();
-
-        if (!messageID || !channelID) {
-            replyError(interaction, 'The specified message URL is invalid.');
-            return;
-        }
-
-        const channel = interaction.guild.channels.cache.get(channelID);
-        if (!channel || !isTextOrThreadChannel(channel)) {
-            replyError(interaction, 'The specified message URL points to an invalid channel.');
-            return;
-        }
-
-        const message = await channel.messages.fetch(messageID);
-        if (!message) {
-            replyError(interaction, 'The specified message URL points to an invalid message.');
-            return;
-        }
-
-        return message.url;
-    } else {
-        const targetLastMessage = interaction.channel.messages.cache.filter((message) => message?.author?.id == targetID).last()?.url;
-        if (targetLastMessage) return targetLastMessage;
-
-        const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
-        if (channelLastMessage) return channelLastMessage;
-
-        replyError(interaction, 'Failed to fetch a context URL. Please specify it manually using the `context` argument.');
+    if (interaction.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0) {
+        replyError(interaction, 'The role of the targetted user is higher than or equal to yours.', 'Insufficient Permissions');
+        return false;
     }
+
+    if (checkProperty && targetMember[checkProperty] === false) {
+        replyError(interaction, `The targetted user is not ${checkProperty}.`, 'Insufficient Permissions');
+        return false;
+    }
+
+    return true;
 }
 
 export function matchBlacklist(message: GuildMessage) {
-    if (settings.blacklist.strings.some((str) => message.content.includes(str))) {
+    if (settings.data.blacklist.strings.some((str) => message.content.includes(str))) {
         if (message.deletable) message.delete();
-        mute(message.author.id, settings.blacklist.muteDuration, null, 'Sent message containing blacklisted content.', null, message.member).catch((e) =>
+        Punishment.createMute(message.author, 'Sent message containing blacklisted content.', settings.data.blacklist.muteDuration).catch((e) =>
             log(`Failed to mute ${parseUser(message.author)} due to blacklisted content: ${e}`, 'Mute')
         );
 

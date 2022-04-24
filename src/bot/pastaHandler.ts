@@ -1,4 +1,4 @@
-import { MessageEmbedOptions } from 'discord.js';
+import { EmbedData } from 'discord.js';
 import { Dirent } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
@@ -9,7 +9,7 @@ export const pastaPath = 'customContent/pastas';
 export interface Pasta {
     alias: string;
     message?: string;
-    embed?: MessageEmbedOptions;
+    embed?: EmbedData;
     attachments?: string[];
 }
 

@@ -1,4 +1,4 @@
-import { MessageReaction, TextChannel, User } from 'discord.js';
+import { MessageReaction, User } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
@@ -9,9 +9,9 @@ export const event: Event = {
     callback: async (reaction: MessageReaction, user: User) => {
         // *always* safe to access, even if partial
         const channel = reaction.message.channel;
-        if (!(channel instanceof TextChannel) || user.bot || !channel.parentId) return;
+        if (!channel.isText() || user.bot || !channel.parentId) return;
 
-        if (!settings.archive.categoryIDs.includes(channel.parentId) && (await isProjectOwner(user.id, channel.id))) {
+        if (!settings.data.archive.categoryIDs.includes(channel.parentId) && (await isProjectOwner(user.id, channel.id))) {
             // PROJECT CHANNEL
 
             if (reaction.emoji.name === '📌') {

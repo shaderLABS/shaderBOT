@@ -1,14 +1,13 @@
-import { Message, MessageActionRow, MessageAttachment, MessageButton, MessageSelectMenu } from 'discord.js';
+import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonStyle, Message, SelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
 import { backupPath, readBackup } from '../../../lib/backup.js';
 import { replyInfo, sendError } from '../../../lib/embeds.js';
 import { formatTimeDateString } from '../../../lib/time.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['MANAGE_MESSAGES'],
+    requiredPermissions: ['ManageMessages'],
     callback: async (interaction: GuildCommandInteraction) => {
         // read backup dir & sort by creation time
         const files: string[] = await fs.readdir(backupPath).catch((error) => {
@@ -33,35 +32,35 @@ export const command: ApplicationCommandCallback = {
 
         const menu = backupChunks.map(
             (chunk, index) =>
-                new MessageSelectMenu({
+                new SelectMenuBuilder({
                     customId: 'select-backup',
                     placeholder: `${backups.length} backups available. Page ${index + 1} out of ${backupChunks.length}.`,
                     options: chunk.map((backup, index) => {
                         return {
                             label: backup.name.substring(0, backup.name.lastIndexOf(' - ')),
                             value: index.toString(),
-                            emoji: '📝',
+                            emoji: { name: '📝' },
                             description: formatTimeDateString(new Date(backup.createdAt)),
                         };
                     }),
                 })
         );
 
-        const backwardButton = new MessageButton({
+        const backwardButton = new ButtonBuilder({
             customId: 'backward',
-            style: 'SECONDARY',
-            emoji: '⬅️',
+            style: ButtonStyle.Secondary,
+            emoji: { name: '⬅️' },
             disabled: true,
         });
 
-        const forwardButton = new MessageButton({
+        const forwardButton = new ButtonBuilder({
             customId: 'forward',
-            style: 'SECONDARY',
-            emoji: '➡️',
+            style: ButtonStyle.Secondary,
+            emoji: { name: '➡️' },
         });
 
-        const components = [new MessageActionRow({ components: [menu[0]] })];
-        if (backupChunks.length > 1) components.push(new MessageActionRow({ components: [backwardButton, forwardButton] }));
+        const components = [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[0]] })];
+        if (backupChunks.length > 1) components.push(new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
 
         await interaction.reply({ content: '**Select a Backup**', components });
         const selectionMessage = await interaction.fetchReply();
@@ -80,8 +79,8 @@ export const command: ApplicationCommandCallback = {
 
                 messageInteraction.update({
                     components: [
-                        new MessageActionRow({ components: [menu[index]] }),
-                        new MessageActionRow({ components: [backwardButton.setDisabled(!backupChunks[index - 1]), forwardButton.setDisabled(!backupChunks[index + 1])] }),
+                        new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index]] }),
+                        new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton.setDisabled(!backupChunks[index - 1]), forwardButton.setDisabled(!backupChunks[index + 1])] }),
                     ],
                 });
             } else if (messageInteraction.isSelectMenu()) {
@@ -89,18 +88,18 @@ export const command: ApplicationCommandCallback = {
 
                 try {
                     const data = await readBackup(backup.name);
-                    interaction.channel.send({ files: [new MessageAttachment(Buffer.from(data), backup.name)] });
+                    interaction.channel.send({ files: [new Attachment(Buffer.from(data), backup.name)] });
                 } catch (error) {
                     sendError(interaction.channel, error);
                 }
 
-                messageInteraction.update({ components: [new MessageActionRow({ components: [menu[index].setPlaceholder(backup.name).setDisabled(true)] })] });
+                messageInteraction.update({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setPlaceholder(backup.name).setDisabled(true)] })] });
                 collector.stop('selected');
             }
         });
 
         collector.on('end', (_, reason) => {
-            if (reason !== 'selected') selectionMessage.edit({ components: [new MessageActionRow({ components: [menu[index].setDisabled(true)] })] });
+            if (reason !== 'selected') selectionMessage.edit({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] });
         });
     },
 };

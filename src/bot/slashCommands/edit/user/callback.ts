@@ -1,9 +1,8 @@
-import { GuildCommandInteraction } from '../../../events/interactionCreate.js';
-import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 import { editApsect } from '../shared.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KICK_MEMBERS'],
+    requiredPermissions: ['KickMembers'],
     callback: (interaction: GuildCommandInteraction) => {
         const user = interaction.options.getUser('user', true);
         editApsect(interaction, user);

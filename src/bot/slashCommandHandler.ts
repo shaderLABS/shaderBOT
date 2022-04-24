@@ -1,17 +1,77 @@
-import { Collection, PermissionString } from 'discord.js';
+import { ChatInputCommandInteraction, Collection, Guild, GuildMember, PermissionsString, TextChannel, ThreadChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { GuildCommandInteraction } from './events/interactionCreate.js';
+import { replyError } from './lib/embeds.js';
+import { isTextOrThreadChannel } from './lib/misc.js';
 
 export type ApplicationCommandCallback = {
-    readonly cooldownDuration?: number;
     readonly channelWhitelist?: string[];
-    readonly ticketChannels?: boolean;
-    readonly requiredPermissions?: PermissionString[];
+    readonly requiredPermissions?: PermissionsString[];
     readonly permissionOverwrites?: boolean;
     readonly callback: (interaction: GuildCommandInteraction) => void;
 };
+
+export interface GuildCommandInteraction extends ChatInputCommandInteraction {
+    channel: TextChannel | ThreadChannel;
+    guild: Guild;
+    member: GuildMember;
+}
+
+/***********
+ * EXECUTE *
+ ***********/
+
+function isGuildInteraction(interaction: ChatInputCommandInteraction): interaction is GuildCommandInteraction {
+    return !!interaction.channel && isTextOrThreadChannel(interaction.channel) && !!interaction.guild && !!interaction.member;
+}
+
+function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChannel, command: ApplicationCommandCallback) {
+    if (command.requiredPermissions) {
+        if (command.permissionOverwrites === true) {
+            if (command.requiredPermissions.some((permission) => !member.permissionsIn(channel).has(permission))) return false;
+        } else {
+            if (command.requiredPermissions.some((permission) => !member.permissions.has(permission))) return false;
+        }
+    }
+
+    return true;
+}
+
+export function handleChatInputCommand(interaction: ChatInputCommandInteraction) {
+    if (!isGuildInteraction(interaction)) return;
+
+    let command = slashCommands.get(interaction.commandName);
+    if (!command) return;
+
+    const subcommandGroup = interaction.options.getSubcommandGroup(false);
+    if (command instanceof Collection && subcommandGroup) command = command.get(subcommandGroup);
+
+    const subcommand = interaction.options.getSubcommand(false);
+    if (command instanceof Collection && subcommand) command = command.get(subcommand);
+
+    if (!command || command instanceof Collection) return;
+
+    const { channel, member } = interaction;
+
+    /************************************
+     * VALIDATE COMMAND AND PERMISSIONS *
+     ************************************/
+
+    if (!hasPermissions(member, channel, command)) {
+        return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+    }
+
+    if (command.channelWhitelist && !command.channelWhitelist.includes(channel.id)) {
+        return replyError(interaction, `This command is only usable in <#${command.channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
+    }
+
+    command.callback(interaction);
+}
+
+/************
+ * REGISTER *
+ ************/
 
 type SlashCommandCollection = Collection<string, SlashCommandCollection | ApplicationCommandCallback>;
 export const slashCommands: SlashCommandCollection = new Collection();

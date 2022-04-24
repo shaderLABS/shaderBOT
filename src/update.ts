@@ -1,7 +1,8 @@
 import { ApplicationCommandData, Client } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import * as settingsFile from './bot/settings/settings.js';
+import url from 'url';
+import { BotSettings, SettingsFile } from './bot/settings/settings.js';
 
 const slashCommandStructure: ApplicationCommandData[] = [];
 async function stitchCommandStructure(dir: string) {
@@ -12,25 +13,25 @@ async function stitchCommandStructure(dir: string) {
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await stitchCommandStructure(path.join(dir, dirEntry.name));
-            } else if (dirEntry.name === 'structure.json') {
-                const structure = JSON.parse(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
+            } else if (dirEntry.name === 'structure.js') {
+                const structure: ApplicationCommandData = (await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href)).default;
                 slashCommandStructure.push(structure);
             }
         })
     );
 }
 
-const settings: settingsFile.Settings = await settingsFile.read();
+const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
 const client = new Client({
     intents: [],
 });
 
 client.on('ready', async () => {
-    const guild = client.guilds.cache.get(settings.guildID);
+    const guild = client.guilds.cache.get(settings.data.guildID);
     if (!guild) return console.error('Failed to update slash commands: the specified guild was not found.');
 
-    await stitchCommandStructure('./src/bot/slashCommands');
-    await stitchCommandStructure('./src/bot/contextMenuEntries');
+    await stitchCommandStructure('./build/bot/slashCommands');
+    await stitchCommandStructure('./build/bot/contextMenuEntries');
     await guild.commands.set(slashCommandStructure);
 
     console.log('Successfully updated slash commands!');

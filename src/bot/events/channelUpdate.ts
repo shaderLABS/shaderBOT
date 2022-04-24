@@ -1,4 +1,4 @@
-import { Channel, Snowflake, TextChannel } from 'discord.js';
+import { Channel, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
@@ -8,7 +8,7 @@ import { ownerOverwrites } from '../lib/project.js';
 export const event: Event = {
     name: 'channelUpdate',
     callback: async (oldChannel: Channel, newChannel: Channel) => {
-        if (!(oldChannel instanceof TextChannel) || !(newChannel instanceof TextChannel) || !oldChannel.parentId || !newChannel.parentId) return;
+        if (!oldChannel.isText() || !newChannel.isText() || !oldChannel.parentId || !newChannel.parentId) return;
 
         if (oldChannel.name !== newChannel.name) {
             /******************
@@ -27,7 +27,7 @@ export const event: Event = {
             }
         }
 
-        if (!settings.archive.categoryIDs.includes(oldChannel.parentId) && settings.archive.categoryIDs.includes(newChannel.parentId)) {
+        if (!settings.data.archive.categoryIDs.includes(oldChannel.parentId) && settings.data.archive.categoryIDs.includes(newChannel.parentId)) {
             /***********
              * ARCHIVE *
              ***********/
@@ -49,7 +49,7 @@ export const event: Event = {
             } catch {
                 log(`<#${newChannel.id}> has been archived, but the notification role could not be deleted.`, 'Archive Project');
             }
-        } else if (settings.archive.categoryIDs.includes(oldChannel.parentId) && !settings.archive.categoryIDs.includes(newChannel.parentId)) {
+        } else if (settings.data.archive.categoryIDs.includes(oldChannel.parentId) && !settings.data.archive.categoryIDs.includes(newChannel.parentId)) {
             /*************
              * UNARCHIVE *
              *************/

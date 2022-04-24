@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { MessageEmbed } from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 import { embedColor, embedIcon } from '../bot/lib/embeds.js';
 import { formatBytes, getGuild, isTextOrThreadChannel } from '../bot/lib/misc.js';
 
@@ -43,7 +43,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
         await channel.send({
             content: '<@&' + roleID + '>',
             embeds: [
-                new MessageEmbed({
+                new EmbedBuilder({
                     author: {
                         name: req.body.release?.author?.login || 'Unknown Author',
                         iconURL: req.body.release?.author?.avatar_url,
@@ -60,7 +60,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
         await channel.send({
             content: '<@&' + roleID + '>',
             embeds: [
-                new MessageEmbed({
+                new EmbedBuilder({
                     author: {
                         name: 'A new release has been published!',
                         iconURL: embedIcon.info,

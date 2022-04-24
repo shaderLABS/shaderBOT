@@ -1,40 +1,37 @@
-import { MessageAttachment } from 'discord.js';
-import fetch from 'node-fetch';
+import { Attachment, DataResolver } from 'discord.js';
 import sharp from 'sharp';
 import { pipeline } from 'stream/promises';
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
-import { GuildCommandInteraction } from '../../../../events/interactionCreate.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import log from '../../../../lib/log.js';
-import { ensureTextChannel, escapeXml, isValidUrl, parseUser } from '../../../../lib/misc.js';
+import { escapeXml, parseUser } from '../../../../lib/misc.js';
 import { isProjectOwner } from '../../../../lib/project.js';
-import { ApplicationCommandCallback } from '../../../../slashCommandHandler.js';
+import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, user } = interaction;
 
-        if (!ensureTextChannel(channel, interaction) || !(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
-        if (channel.parentId && settings.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
+        if (!(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
-        let banner = interaction.options.getString('url', true);
+        const banner = interaction.options.getAttachment('image', true);
         const label = interaction.options.getBoolean('label', true);
         const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
 
-        if (!isValidUrl(banner)) return replyError(interaction, 'The specified URL is invalid.');
-
         await interaction.deferReply();
 
+        let bannerURL: string;
+
         try {
-            const bannerRequest = await fetch(banner, { size: 52428800 });
-            const bannerContentType = bannerRequest.headers.get('content-type');
-            if (!bannerContentType || !['image/jpeg', 'image/png', 'image/webp'].includes(bannerContentType)) {
+            if (!banner.contentType || !['image/jpeg', 'image/png', 'image/webp'].includes(banner.contentType)) {
                 return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
             }
 
             const bannerSharp = sharp({ failOnError: false });
-            pipeline(bannerRequest.body, bannerSharp);
+            pipeline([DataResolver.resolveFile(banner.attachment)], bannerSharp);
 
             const bannerWidth = 960;
             const bannerHeight = 540;
@@ -64,20 +61,20 @@ export const command: ApplicationCommandCallback = {
             }
 
             const reply = await channel.send({
-                files: [new MessageAttachment(await bannerSharp.toBuffer())],
+                files: [new Attachment(await bannerSharp.toBuffer())],
             });
 
             const cachedAttachmentURL = reply.attachments.first()?.url;
-            if (!cachedAttachmentURL) throw new Error();
-            banner = cachedAttachmentURL;
+            if (!cachedAttachmentURL) throw new Error('Failed to cache attachment.');
+            bannerURL = cachedAttachmentURL;
         } catch (error) {
             console.error(error);
             return replyError(interaction, 'Failed to process and cache the banner image.');
         }
 
-        await db.query(/*sql*/ `UPDATE project SET banner_url = $1 WHERE channel_id = $2;`, [banner, channel.id]);
+        await db.query(/*sql*/ `UPDATE project SET banner_url = $1 WHERE channel_id = $2;`, [bannerURL, channel.id]);
 
         replySuccess(interaction, 'Successfully set the banner image.');
-        log(`${parseUser(interaction.user)} set the banner image of their project <#${channel.id}> to: ${banner}`);
+        log(`${parseUser(interaction.user)} set the banner image of their project <#${channel.id}> to: ${bannerURL}`);
     },
 };

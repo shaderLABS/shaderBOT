@@ -1,20 +1,22 @@
-import { Client, Collection, Intents } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
 import cron from 'node-cron';
 import { AutoResponse, autoResponsePath, registerAutoResponses } from './autoResponseHandler.js';
 import { Event, registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { rotateBanner } from './lib/banner.js';
-import { loadTimeouts } from './lib/punishments.js';
+import { CooldownStore } from './lib/cooldownStore.js';
+import { loadTimeouts, TimeoutStore } from './lib/timeoutStore.js';
 import { Pasta, pastaPath, registerPastas } from './pastaHandler.js';
-import * as settingsFile from './settings/settings.js';
+import { BotSettings, SettingsFile } from './settings/settings.js';
 import { registerSlashCommands } from './slashCommandHandler.js';
 
 export let client: Client;
 export let events: Collection<string, Event>;
 export let pastas: Collection<string, Pasta>;
 export let autoResponses: Collection<string, AutoResponse>;
-export let cooldowns: Map<string, boolean>;
-export let settings: settingsFile.Settings;
+export let cooldownStore: CooldownStore;
+export let timeoutStore: TimeoutStore;
+export let settings: SettingsFile<BotSettings>;
 
 cron.schedule('59 23 * * *', () => {
     loadTimeouts(true);
@@ -28,23 +30,25 @@ export async function startBot() {
             parse: ['roles', 'users'],
             repliedUser: false,
         },
-        partials: ['MESSAGE', 'REACTION', 'GUILD_MEMBER'],
+        partials: [Partials.Message, Partials.Reaction, Partials.GuildMember],
         intents: [
-            Intents.FLAGS.GUILDS,
-            Intents.FLAGS.GUILD_MEMBERS,
-            Intents.FLAGS.GUILD_BANS,
-            Intents.FLAGS.GUILD_MESSAGES,
-            Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-            Intents.FLAGS.DIRECT_MESSAGES,
-            Intents.FLAGS.GUILD_INTEGRATIONS,
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.GuildBans,
+            GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMessageReactions,
+            GatewayIntentBits.DirectMessages,
+            GatewayIntentBits.GuildIntegrations,
+            GatewayIntentBits.MessageContent,
         ],
     });
 
     events = new Collection<string, Event>();
     pastas = new Collection<string, Pasta>();
     autoResponses = new Collection<string, AutoResponse>();
-    cooldowns = new Map<string, boolean>();
-    settings = await settingsFile.read();
+    cooldownStore = new CooldownStore();
+    timeoutStore = new TimeoutStore();
+    settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
 
     registerEvents('./build/bot/events');
     registerSlashCommands('./build/bot/slashCommands');
