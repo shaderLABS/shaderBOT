@@ -28,9 +28,9 @@ export async function handleSpamInteraction(interaction: ButtonInteraction) {
     const mute = await Punishment.getByUserID(id, 'mute').catch(() => undefined);
 
     if (interaction.customId.startsWith('kickSpam')) {
-        const logString = await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
+        await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
         mute?.move(interaction.user.id).catch(() => undefined);
-        replyInfo(interaction, logString, 'Kick Spammer');
+        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
     } else {
         mute?.move(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
