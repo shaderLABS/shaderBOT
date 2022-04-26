@@ -1,3 +1,4 @@
+import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
 import { EmbedBuilder, User, Util } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
@@ -104,7 +105,7 @@ export class BanAppeal {
         const message = await appealChannel.send({ embeds: [appeal.toAppealEmbed(user)] });
         const thread = await message.startThread({
             name: user.username + "'s Ban Appeal",
-            autoArchiveDuration: 'MAX',
+            autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
         });
 
         thread.send(`<@&${settings.data.moderatorRoleID}>`);
