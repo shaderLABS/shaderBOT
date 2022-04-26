@@ -12,8 +12,6 @@ export const command: ApplicationCommandCallback = {
         if (!(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
         if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
-        // const modal = new ModalBuilder().setCustomId('editProjectChannel:' + channel.id).setTitle('Edit Project Channel');
-
         const nameInput = new TextInputBuilder({
             customId: 'nameInput',
             label: 'Channel Name',
@@ -28,13 +26,11 @@ export const command: ApplicationCommandCallback = {
             customId: 'descriptionInput',
             label: 'Channel Description',
             value: channel.topic || undefined,
+            placeholder: 'No description.',
             style: TextInputStyle.Paragraph,
             maxLength: 1024,
             required: false,
         });
-
-        // const modal = new ModalBuilder().setCustomId('editProjectChannel:' + channel.id).setTitle('Edit Project Channel');
-        // modal.setComponents([new ActionRowBuilder<TextInputBuilder>({ components: [nameInput] }), new ActionRowBuilder<TextInputBuilder>({ components: [descriptionInput] })]);
 
         const modal = new ModalBuilder({
             customId: 'editProjectChannel:' + channel.id,
