@@ -20,7 +20,7 @@
         "body-parser": "^1.20.0",
         "connect-pg-simple": "^7.0.0",
         "cors": "^2.8.5",
-        "discord.js": "14.0.0-dev.1650672498-3617093",
+        "discord.js": "14.0.0-dev.1650931749-df64d3e",
         "express-session": "^1.17.2",
         "node-cron": "^3.0.0",
         "passport": "^0.5.2",
