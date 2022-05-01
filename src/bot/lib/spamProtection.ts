@@ -143,7 +143,7 @@ export async function kickSpammer(user: User, moderatorID?: string, contextURL?:
         'Your account has been compromised.',
         undefined,
         "DON'T FALL FOR PHISHING LINKS! ALWAYS CHECK THE URL BEFORE SIGNING IN."
-    );
+    ).catch(() => undefined);
 
     try {
         const logString = await PastPunishment.createKick(user, 'Phished account used for spam.', moderatorID, contextURL, 1);
