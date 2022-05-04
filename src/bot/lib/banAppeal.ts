@@ -270,13 +270,13 @@ export async function getUserAppealData(userID: string) {
         },
         appeal: {
             result: appeal.result,
-            result_reason: appeal.resultReason,
-            result_timestamp: appeal.resultTimestamp,
+            resultReason: appeal.resultReason,
+            resultTimestamp: appeal.resultTimestamp,
             timestamp: appeal.timestamp,
         },
         reason: ban.reason,
-        context_url: ban.contextURL,
-        expire_timestamp: ban.expireTimestamp,
+        contextURL: ban.contextURL,
+        expireTimestamp: ban.expireTimestamp,
         timestamp: ban.timestamp,
     };
 }

@@ -1,4 +1,3 @@
-import { Snowflake } from 'discord.js';
 import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { client } from '../../bot/bot.js';
@@ -8,9 +7,9 @@ passport.serializeUser((user: any, done) => {
     done(undefined, user.id);
 });
 
-passport.deserializeUser(async (user_id: Snowflake, done) => {
+passport.deserializeUser(async (userID: string, done) => {
     try {
-        const user = await client.users.fetch(user_id)?.catch(() => undefined);
+        const user = await client.users.fetch(userID)?.catch(() => undefined);
         if (!user) return done(null);
 
         const guild = getGuild();
