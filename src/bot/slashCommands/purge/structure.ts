@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'purge',
     description: 'Bulk delete messages in the current channel.',
+    defaultMemberPermissions: PermissionFlagsBits.ManageMessages,
     options: [
         {
             name: 'amount',

@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'modpasta',
     description: 'Manage pastas.',
+    defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
     options: [
         {
             name: 'create',

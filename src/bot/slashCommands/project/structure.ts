@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'project',
     description: 'Manage and configure a project. This command only works in your project channel(s).',
+    defaultMemberPermissions: PermissionFlagsBits.ManageWebhooks,
     options: [
         {
             name: 'edit',

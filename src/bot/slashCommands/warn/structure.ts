@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'warn',
     description: 'Manage the warnings of a user.',
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'create',
@@ -83,19 +84,6 @@ export default {
                             required: true,
                         },
                     ],
-                },
-            ],
-        },
-        {
-            name: 'list',
-            description: "List another user's warnings.",
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: 'user',
-                    description: 'The user you want to list the warnings of.',
-                    type: ApplicationCommandOptionType.User,
-                    required: false,
                 },
             ],
         },

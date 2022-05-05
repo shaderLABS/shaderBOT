@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'configuration',
     description: "Manage the bot's configuration.",
+    defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
     options: [
         {
             name: 'list',

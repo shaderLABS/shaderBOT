@@ -1,10 +1,23 @@
-import { ApplicationCommandData, Client } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
+import { ApplicationCommandData, ApplicationCommandManager, PermissionsBitField } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
 import { BotSettings, SettingsFile } from './bot/settings/settings.js';
 
-const slashCommandStructure: ApplicationCommandData[] = [];
+const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
+const slashCommandStructure: Omit<APIApplicationCommand, 'id' | 'application_id' | 'guild_id'>[] = [];
+
+function structureToAPI(structure: ApplicationCommandData) {
+    return {
+        // @ts-expect-error
+        ...ApplicationCommandManager.transformCommand(structure),
+        // @ts-expect-error
+        default_member_permissions: structure.defaultMemberPermissions === undefined ? undefined : new PermissionsBitField(structure.defaultMemberPermissions).toJSON(),
+    };
+}
+
 async function stitchCommandStructure(dir: string) {
     const dirPath = path.join(path.resolve(), dir);
     const dirEntries = await fs.readdir(dirPath, { withFileTypes: true });
@@ -15,27 +28,22 @@ async function stitchCommandStructure(dir: string) {
                 await stitchCommandStructure(path.join(dir, dirEntry.name));
             } else if (dirEntry.name === 'structure.js') {
                 const structure: ApplicationCommandData = (await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href)).default;
-                slashCommandStructure.push(structure);
+                slashCommandStructure.push(structureToAPI(structure));
             }
         })
     );
 }
 
-const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
-const client = new Client({
-    intents: [],
+await stitchCommandStructure('./build/bot/slashCommands');
+await stitchCommandStructure('./build/bot/contextMenuEntries');
+
+if (!process.env.TOKEN) throw 'TOKEN not set.';
+if (!process.env.APPLICATION_CLIENT_ID) throw 'APPLICATION_CLIENT_ID not set.';
+
+const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
+
+await rest.put(Routes.applicationGuildCommands(process.env.APPLICATION_CLIENT_ID, settings.data.guildID), {
+    body: slashCommandStructure,
 });
 
-client.on('ready', async () => {
-    const guild = client.guilds.cache.get(settings.data.guildID);
-    if (!guild) return console.error('Failed to update slash commands: the specified guild was not found.');
-
-    await stitchCommandStructure('./build/bot/slashCommands');
-    await stitchCommandStructure('./build/bot/contextMenuEntries');
-    await guild.commands.set(slashCommandStructure);
-
-    console.log('Successfully updated slash commands!');
-    client.destroy();
-});
-
-client.login(process.env.TOKEN);
+console.log('Successfully updated slash commands!');

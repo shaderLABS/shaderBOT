@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'spam',
     description: 'Kick an account used for spam and delete its recent messages.',
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'user',

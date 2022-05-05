@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'edit',
     description: 'Edit a certain aspect of everything related to moderation.',
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'user',

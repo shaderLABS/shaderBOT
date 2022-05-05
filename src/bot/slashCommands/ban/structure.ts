@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'ban',
     description: 'Ban a user temporarily or permanently.',
+    defaultMemberPermissions: PermissionFlagsBits.BanMembers,
     options: [
         {
             name: 'user',

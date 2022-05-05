@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'punishment',
     description: 'Manage entries of (past) punishments.',
+    defaultMemberPermissions: PermissionFlagsBits.BanMembers,
     options: [
         {
             name: 'delete',

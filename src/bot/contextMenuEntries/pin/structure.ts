@@ -1,6 +1,7 @@
-import { ApplicationCommand, ApplicationCommandType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'Pin/Unpin Message',
     type: ApplicationCommandType.Message,
-} as ApplicationCommand;
+    defaultMemberPermissions: PermissionFlagsBits.ManageWebhooks,
+} as ApplicationCommandData;

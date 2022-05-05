@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'logs',
     description: 'Sends all moderation-related logs of a user.',
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'user',

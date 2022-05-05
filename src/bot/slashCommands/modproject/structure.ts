@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'modproject',
     description: 'Create and manage projects.',
+    defaultMemberPermissions: PermissionFlagsBits.ManageChannels,
     options: [
         {
             name: 'create',

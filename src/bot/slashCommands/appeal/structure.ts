@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'appeal',
     description: 'Accept or decline ban appeals.',
+    defaultMemberPermissions: PermissionFlagsBits.BanMembers,
     options: [
         {
             name: 'accept',

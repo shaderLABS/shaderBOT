@@ -1,8 +1,9 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'note',
     description: 'Manage the notes of a user.',
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'create',
@@ -59,19 +60,6 @@ export default {
                             required: true,
                         },
                     ],
-                },
-            ],
-        },
-        {
-            name: 'list',
-            description: 'List all notes of a user.',
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
-                {
-                    name: 'user',
-                    description: 'The user you want to list the notes of.',
-                    type: ApplicationCommandOptionType.User,
-                    required: true,
                 },
             ],
         },
