@@ -395,7 +395,8 @@ export class Punishment {
         const member = await userToMember(guild, this.userID).catch(() => undefined);
         if (member) member.disableCommunicationUntil(this.expireTimestamp);
 
-        timeoutStore.set(this);
+        timeoutStore.delete(this);
+        timeoutStore.set(this, true);
 
         const logString = `${parseUser(this.editModeratorID)} edited the expiry date of ${parseUser(this.userID)}'s ${this.type} (${this.id}).\n\n**Before**\n${
             oldExpireTimestamp ? formatTimeDate(oldExpireTimestamp) + ` (${secondsToString((oldExpireTimestamp.getTime() - this.timestamp.getTime()) / 1000)})` : 'Permanent'
@@ -499,7 +500,7 @@ export class Punishment {
             await guild.members.ban(user, { reason, deleteMessageDays });
         }
 
-        if (duration) timeoutStore.set(punishment);
+        if (duration) timeoutStore.set(punishment, true);
 
         let logString = `${parseUser(user)} has been ${duration ? `temporarily banned for ${secondsToString(duration)}.` : 'permanently banned.'}\n\n${punishment.toString()}`;
         if (overwrittenPunishment) logString += '\n\nTheir previous ban has been overwritten:\n' + overwrittenPunishment.toString();
@@ -532,8 +533,7 @@ export class Punishment {
         });
 
         if (member && !member.isCommunicationDisabled()) member.timeout(duration * 1000, reason);
-
-        if (duration) timeoutStore.set(punishment);
+        timeoutStore.set(punishment, true);
 
         let logString = `${parseUser(user)} has been muted for ${secondsToString(duration)}.\n\n${punishment.toString()}`;
         if (overwrittenPunishment) logString += `\n\nTheir previous mute has been overwritten:\n` + overwrittenPunishment.toString();

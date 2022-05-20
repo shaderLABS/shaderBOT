@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Collection, Guild, GuildMember, PermissionsString, TextChannel, ThreadChannel } from 'discord.js';
+import { ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, ThreadChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -12,18 +12,16 @@ export type ApplicationCommandCallback = {
     readonly callback: (interaction: GuildCommandInteraction) => void;
 };
 
-export interface GuildCommandInteraction extends ChatInputCommandInteraction {
+export interface GuildCommandInteraction extends ChatInputCommandInteraction<'cached'> {
     channel: TextChannel | ThreadChannel;
-    guild: Guild;
-    member: GuildMember;
 }
 
 /***********
  * EXECUTE *
  ***********/
 
-function isGuildInteraction(interaction: ChatInputCommandInteraction): interaction is GuildCommandInteraction {
-    return !!interaction.channel && isTextOrThreadChannel(interaction.channel) && !!interaction.guild && !!interaction.member;
+function isGuildInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildCommandInteraction {
+    return !!interaction.channel && isTextOrThreadChannel(interaction.channel);
 }
 
 function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChannel, command: ApplicationCommandCallback) {
@@ -38,7 +36,7 @@ function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChanne
     return true;
 }
 
-export function handleChatInputCommand(interaction: ChatInputCommandInteraction) {
+export function handleChatInputCommand(interaction: ChatInputCommandInteraction<'cached'>) {
     if (!isGuildInteraction(interaction)) return;
 
     let command = slashCommands.get(interaction.commandName);

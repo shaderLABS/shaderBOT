@@ -171,9 +171,10 @@ export async function sendButtonPages(
         ],
     });
 
+    if (!message.inGuild()) return;
+
     const collector = message.createMessageComponentCollector({
-        filter: (buttonInteraction) =>
-            buttonInteraction.user.id === authorID || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)),
+        filter: (buttonInteraction) => buttonInteraction.user.id === authorID || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages),
         idle: 600000,
     });
 
@@ -242,8 +243,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
     if (!(message instanceof Message)) return;
 
     const collector = message.createMessageComponentCollector({
-        filter: (buttonInteraction) =>
-            buttonInteraction.user.id === interaction.user.id || (buttonInteraction.member instanceof GuildMember && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)),
+        filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages),
         idle: 600000,
     });
 

@@ -16,8 +16,8 @@ type CachedMessage = {
 
 const cache: (CachedMessage | undefined)[] = new Array(settings.data.spamProtection.cacheLength);
 
-export async function handleSpamInteraction(interaction: ButtonInteraction) {
-    if (!interaction.guild || !interaction.memberPermissions?.has(PermissionFlagsBits.KickMembers)) return;
+export async function handleSpamInteraction(interaction: ButtonInteraction<'cached'>) {
+    if (!interaction.memberPermissions.has(PermissionFlagsBits.KickMembers)) return;
 
     const id = interaction.customId.split(':')[1];
     if (!id) return;

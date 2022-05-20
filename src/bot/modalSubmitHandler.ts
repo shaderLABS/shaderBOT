@@ -3,12 +3,12 @@ import { replyError, replyInfo, replySuccess } from './lib/embeds.js';
 import log from './lib/log.js';
 import { getAlphabeticalChannelPosition, parseUser } from './lib/misc.js';
 
-export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
+export async function handleModalSubmit(interaction: ModalSubmitInteraction<'cached'>) {
     if (interaction.customId.startsWith('editProjectChannel')) {
         const channelID = interaction.customId.split(':')[1];
         if (!channelID) return;
 
-        const channel = interaction.guild?.channels.cache.get(channelID);
+        const channel = interaction.guild.channels.cache.get(channelID);
         if (!channel?.isText()) return;
 
         const oldChannelName = channel.name;

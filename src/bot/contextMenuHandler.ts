@@ -1,12 +1,11 @@
-import { Message, MessageContextMenuCommandInteraction } from 'discord.js';
+import { MessageContextMenuCommandInteraction } from 'discord.js';
 import { settings } from './bot.js';
 import { replyError, replySuccess } from './lib/embeds.js';
 import { isProjectOwner } from './lib/project.js';
 
-export async function handleMessageContextMenuCommand(interaction: MessageContextMenuCommandInteraction) {
+export async function handleMessageContextMenuCommand(interaction: MessageContextMenuCommandInteraction<'cached'>) {
     if (interaction.commandName === 'Pin/Unpin Message') {
         const { targetMessage, channel } = interaction;
-        if (!(targetMessage instanceof Message)) return replyError(interaction, 'The message could not be resolved.');
         if (!channel?.isText()) return replyError(interaction, 'The message was not sent in a text channel.');
 
         if (!(await isProjectOwner(interaction.user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
