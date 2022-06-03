@@ -1,13 +1,13 @@
 import { Snowflake } from 'discord.js';
 import fssync from 'fs';
-import fs from 'fs/promises';
+import fsasync from 'fs/promises';
 
 export class SettingsFile<Data> {
     public data: Data;
     public path: string;
 
     public async save() {
-        return fs.writeFile(this.path, JSON.stringify(this.data, null, 4), 'utf-8');
+        return fsasync.writeFile(this.path, JSON.stringify(this.data, null, 4), 'utf-8');
     }
 
     constructor(path: string) {
@@ -16,7 +16,7 @@ export class SettingsFile<Data> {
     }
 }
 
-export interface BotSettings {
+export type BotSettings = {
     logging: {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;
@@ -54,4 +54,4 @@ export interface BotSettings {
         timeThreshold: number;
         similarityThreshold: number;
     };
-}
+};

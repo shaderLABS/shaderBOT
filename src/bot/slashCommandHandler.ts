@@ -1,9 +1,8 @@
-import { ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, ThreadChannel } from 'discord.js';
+import { ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, ThreadChannel, VoiceChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
 import { replyError } from './lib/embeds.js';
-import { isTextOrThreadChannel } from './lib/misc.js';
 
 export type ApplicationCommandCallback = {
     readonly channelWhitelist?: string[];
@@ -12,19 +11,19 @@ export type ApplicationCommandCallback = {
     readonly callback: (interaction: GuildCommandInteraction) => void;
 };
 
-export interface GuildCommandInteraction extends ChatInputCommandInteraction<'cached'> {
-    channel: TextChannel | ThreadChannel;
-}
+export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
+    channel: TextChannel | ThreadChannel | VoiceChannel;
+};
 
 /***********
  * EXECUTE *
  ***********/
 
 function isGuildInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildCommandInteraction {
-    return !!interaction.channel && isTextOrThreadChannel(interaction.channel);
+    return !!interaction.channel && (interaction.channel.isText() || interaction.channel.isThread() || interaction.channel.isVoice());
 }
 
-function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChannel, command: ApplicationCommandCallback) {
+function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChannel | VoiceChannel, command: ApplicationCommandCallback) {
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
             if (command.requiredPermissions.some((permission) => !member.permissionsIn(channel).has(permission))) return false;

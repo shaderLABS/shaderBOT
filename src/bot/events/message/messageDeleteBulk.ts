@@ -2,7 +2,6 @@ import { Collection, Message, Snowflake } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
-import { isTextOrThreadChannel } from '../../lib/misc.js';
 
 export const event: Event = {
     name: 'messageDeleteBulk',
@@ -12,7 +11,7 @@ export const event: Event = {
         if (!firstMessage) return;
 
         const { channel } = firstMessage;
-        if (!isTextOrThreadChannel(channel)) return;
+        if (!channel.isText() && !channel.isThread() && !channel.isVoice()) return;
 
         createBackup(channel, backupMessages, `Created after ${messages.size} messages were purged.`).then((messageCount) => {
             if (messageCount > 0) {

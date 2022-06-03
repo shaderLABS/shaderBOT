@@ -4,38 +4,36 @@ import {
     ButtonInteraction,
     ButtonStyle,
     CommandInteraction,
-    DMChannel,
     EmbedBuilder,
     GuildMember,
     Message,
     ModalSubmitInteraction,
     PermissionFlagsBits,
-    TextChannel,
-    ThreadChannel,
+    TextBasedChannel,
     User,
 } from 'discord.js';
 import { GuildCommandInteraction } from '../slashCommandHandler.js';
 
-export const embedColor = {
-    green: 0x4caf50,
-    red: 0xf44336,
-    blue: 0x2196f3,
-    yellow: 0xffc107,
-};
+export const enum EmbedColor {
+    green = 0x4caf50,
+    red = 0xf44336,
+    blue = 0x2196f3,
+    yellow = 0xffc107,
+}
 
-export const embedIcon = {
-    success: 'https://img.icons8.com/color/48/000000/ok--v1.png',
-    error: 'https://img.icons8.com/color/48/000000/cancel--v1.png',
-    info: 'https://img.icons8.com/color/48/000000/info--v1.png',
-    log: 'https://img.icons8.com/officexs/48/000000/clock.png',
-    note: 'https://img.icons8.com/color/48/000000/note.png',
-};
+export const enum EmbedIcon {
+    success = 'https://img.icons8.com/color/48/000000/ok--v1.png',
+    error = 'https://img.icons8.com/color/48/000000/cancel--v1.png',
+    info = 'https://img.icons8.com/color/48/000000/info--v1.png',
+    log = 'https://img.icons8.com/officexs/48/000000/clock.png',
+    note = 'https://img.icons8.com/color/48/000000/note.png',
+}
 
-export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string) {
+export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: embedIcon.success },
+        author: { name: title || 'Success', iconURL: EmbedIcon.success },
         description,
-        color: embedColor.green,
+        color: EmbedColor.green,
     });
 
     return channel.send({ embeds: [embed] });
@@ -43,9 +41,9 @@ export function sendSuccess(channel: TextChannel | DMChannel | ThreadChannel | U
 
 export function replySuccess(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: embedIcon.success },
+        author: { name: title || 'Success', iconURL: EmbedIcon.success },
         description,
-        color: embedColor.green,
+        color: EmbedColor.green,
     });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
@@ -60,11 +58,11 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
     );
 }
 
-export function sendError(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string) {
+export function sendError(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: embedIcon.error },
+        author: { name: title || 'Error', iconURL: EmbedIcon.error },
         description,
-        color: embedColor.red,
+        color: EmbedColor.red,
     });
 
     return channel.send({ embeds: [embed] });
@@ -72,9 +70,9 @@ export function sendError(channel: TextChannel | DMChannel | ThreadChannel | Use
 
 export function replyError(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: embedIcon.error },
+        author: { name: title || 'Error', iconURL: EmbedIcon.error },
         description,
-        color: embedColor.red,
+        color: EmbedColor.red,
     });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
@@ -89,11 +87,11 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
     );
 }
 
-export function sendInfo(channel: TextChannel | DMChannel | ThreadChannel | User | GuildMember, description: any, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: TextBasedChannel | User | GuildMember, description: any, title?: string, message?: string, footer?: string) {
     const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: embedIcon.info } : undefined,
+        author: title ? { name: title, iconURL: EmbedIcon.info } : undefined,
         description,
-        color: embedColor.blue,
+        color: EmbedColor.blue,
         footer: footer ? { text: footer } : undefined,
     });
 
@@ -109,9 +107,9 @@ export function replyInfo(
     ephemeral: boolean | undefined = false
 ) {
     const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: embedIcon.info } : undefined,
+        author: title ? { name: title, iconURL: EmbedIcon.info } : undefined,
         description,
-        color: embedColor.blue,
+        color: EmbedColor.blue,
         footer: footer ? { text: footer } : undefined,
     });
 
@@ -128,12 +126,12 @@ export function replyInfo(
 }
 
 export async function sendButtonPages(
-    channel: TextChannel | ThreadChannel | User | GuildMember,
+    channel: TextBasedChannel | User | GuildMember,
     authorID: string,
     pages: string[],
     title: string,
-    color: number = embedColor.blue,
-    iconURL: string = embedIcon.info
+    color: number = EmbedColor.blue,
+    iconURL: string = EmbedIcon.info
 ) {
     const embed = new EmbedBuilder({
         color,
@@ -202,7 +200,7 @@ export async function sendButtonPages(
     });
 }
 
-export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = embedColor.blue, iconURL: string = embedIcon.info) {
+export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = EmbedColor.blue, iconURL: string = EmbedIcon.info) {
     const embed = new EmbedBuilder({
         color,
         description: pages[0],

@@ -10,13 +10,14 @@ export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { member } = interaction;
 
-        const reason = interaction.options.getString('reason', true);
         const targetUser = interaction.options.getUser('user', true);
+        const reason = interaction.options.getString('reason', true);
+        const durationString = interaction.options.getString('duration', true);
 
         if (!(await hasPermissionForTarget(interaction, targetUser, 'moderatable'))) return;
 
         try {
-            var time = stringToSeconds(splitString(interaction.options.getString('time', true)));
+            var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
             return replyError(interaction, error);
         }
@@ -25,7 +26,7 @@ export const command: ApplicationCommandCallback = {
         if (!contextURL) return;
 
         try {
-            const logString = await Punishment.createMute(targetUser, reason, time, member.id, contextURL);
+            const logString = await Punishment.createMute(targetUser, reason, duration, member.id, contextURL);
             replySuccess(interaction, logString, 'Mute');
         } catch (error) {
             if (error) replyError(interaction, error);

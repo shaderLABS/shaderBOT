@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import os from 'os';
 import { client } from '../../bot.js';
-import { embedColor, embedIcon } from '../../lib/embeds.js';
+import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
 import { formatBytes } from '../../lib/misc.js';
 import { secondsToString } from '../../lib/time.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
@@ -23,9 +23,9 @@ export const command: ApplicationCommandCallback = {
                 new EmbedBuilder({
                     author: {
                         name: 'Latency',
-                        iconURL: embedIcon.info,
+                        iconURL: EmbedIcon.info,
                     },
-                    color: embedColor.blue,
+                    color: EmbedColor.blue,
                     fields: [
                         {
                             name: 'Bot Latency',

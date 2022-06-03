@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { embedColor, embedIcon } from '../../lib/embeds.js';
+import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
 import { userToMember } from '../../lib/misc.js';
 import { formatRelativeTime } from '../../lib/time.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
@@ -12,9 +12,9 @@ export const command: ApplicationCommandCallback = {
         const embed = new EmbedBuilder({
             author: {
                 name: targetUser.tag,
-                iconURL: embedIcon.info,
+                iconURL: EmbedIcon.info,
             },
-            color: embedColor.blue,
+            color: EmbedColor.blue,
             description: targetUser.toString(),
             fields: [
                 {

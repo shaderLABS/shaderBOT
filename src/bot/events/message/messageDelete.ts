@@ -1,21 +1,21 @@
 import { Attachment, EmbedBuilder, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
-import { embedColor } from '../../lib/embeds.js';
-import { getGuild, isTextOrThreadChannel, parseUser, trimString } from '../../lib/misc.js';
+import { EmbedColor } from '../../lib/embeds.js';
+import { getGuild, parseUser, trimString } from '../../lib/misc.js';
 import { formatLongTimeDate } from '../../lib/time.js';
 
 export const event: Event = {
     name: 'messageDelete',
     callback: async (message: Message) => {
         const { channel } = message;
-        if (!isTextOrThreadChannel(channel) || (!message.partial && message.author.bot)) return;
+        if ((!channel.isText() && !channel.isThread() && !channel.isVoice()) || (!message.partial && message.author.bot)) return;
 
         const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.isText()) {
             const attachments: Attachment[] = [];
             const logEmbed = new EmbedBuilder({
-                color: embedColor.red,
+                color: EmbedColor.red,
             });
 
             if (message.partial) {

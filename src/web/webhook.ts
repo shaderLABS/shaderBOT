@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { EmbedBuilder } from 'discord.js';
-import { embedColor, embedIcon } from '../bot/lib/embeds.js';
-import { formatBytes, getGuild, isTextOrThreadChannel } from '../bot/lib/misc.js';
+import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.js';
+import { formatBytes, getGuild } from '../bot/lib/misc.js';
 
 function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
     return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
@@ -20,7 +20,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
     if (!guild) return 500;
 
     const channel = guild.channels.cache.get(channelID);
-    if (!channel || !isTextOrThreadChannel(channel)) return 500;
+    if (!channel?.isText()) return 500;
 
     if (req.headers['x-github-event'] === 'release') {
         // GitHub Release Event
@@ -51,7 +51,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
                     },
                     title: req.body.repository?.full_name,
                     description,
-                    color: embedColor.blue,
+                    color: EmbedColor.blue,
                 }),
             ],
         });
@@ -63,9 +63,9 @@ export async function releaseNotification(channelID: string, roleID: string, req
                 new EmbedBuilder({
                     author: {
                         name: 'A new release has been published!',
-                        iconURL: embedIcon.info,
+                        iconURL: EmbedIcon.info,
                     },
-                    color: embedColor.blue,
+                    color: EmbedColor.blue,
                 }),
             ],
         });

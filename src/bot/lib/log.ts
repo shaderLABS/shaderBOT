@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { settings } from '../bot.js';
-import { embedColor, embedIcon } from './embeds.js';
+import { EmbedColor, EmbedIcon } from './embeds.js';
 import { getGuild } from './misc.js';
 
 export default function (content: string | EmbedBuilder, title?: string) {
@@ -11,5 +11,5 @@ export default function (content: string | EmbedBuilder, title?: string) {
     if (!logChannel?.isText()) return;
 
     if (content instanceof EmbedBuilder) return logChannel.send({ embeds: [content] });
-    else return logChannel.send({ embeds: [new EmbedBuilder({ author: { name: 'Log', iconURL: embedIcon.log }, title, color: embedColor.blue, description: content })] });
+    else return logChannel.send({ embeds: [new EmbedBuilder({ author: { name: 'Log', iconURL: EmbedIcon.log }, title, color: EmbedColor.blue, description: content })] });
 }

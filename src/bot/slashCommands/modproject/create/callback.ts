@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { settings } from '../../../bot.js';
-import { embedColor, replyError } from '../../../lib/embeds.js';
+import { EmbedColor, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
 import { isProject } from '../../../lib/project.js';
@@ -11,7 +11,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, guild } = interaction;
-        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
+        if (!channel.isText()) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
 
         if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This channel is archived.');
         if (await isProject(channel.id)) return replyError(interaction, 'This channel is already linked to a project.');
@@ -37,7 +37,7 @@ export const command: ApplicationCommandCallback = {
                 new EmbedBuilder()
                     .setAuthor({ name: channel.name })
                     .setFooter({ text: 'ID: ' + projectID })
-                    .setColor(embedColor.green)
+                    .setColor(EmbedColor.green)
                     .addFields([{ name: 'Notification Role', value: role.toString() }]),
             ],
         });

@@ -12,7 +12,7 @@ export default {
             required: true,
         },
         {
-            name: 'time',
+            name: 'duration',
             description: 'The amount of time that the user will be muted for.',
             type: ApplicationCommandOptionType.String,
             required: true,

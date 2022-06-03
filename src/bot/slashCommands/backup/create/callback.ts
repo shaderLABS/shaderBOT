@@ -1,14 +1,12 @@
-import { GuildChannel } from 'discord.js';
 import { createBackup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
-import { isTextOrThreadChannel } from '../../../lib/misc.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     requiredPermissions: ['ManageMessages'],
     callback: async (interaction: GuildCommandInteraction) => {
-        const backupChannel = (interaction.options.getChannel('channel', false) as GuildChannel | null) || interaction.channel;
-        if (!isTextOrThreadChannel(backupChannel)) return replyError(interaction, 'You must specify a text or thread channel.');
+        const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
+        if (!backupChannel.isText() && !backupChannel.isThread() && !backupChannel.isVoice()) return replyError(interaction, 'You must specify a text, thread or voice channel.');
 
         const limit = interaction.options.getInteger('limit', false) || undefined;
         if (limit && limit < 1) return replyError(interaction, 'The message limit must be bigger than one.');

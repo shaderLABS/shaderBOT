@@ -3,12 +3,11 @@ import { db } from '../../db/postgres.js';
 import { Event } from '../eventHandler.js';
 import { createBackup } from '../lib/backup.js';
 import log from '../lib/log.js';
-import { isTextOrThreadChannel } from '../lib/misc.js';
 
 export const event: Event = {
     name: 'channelDelete',
     callback: async (channel: Channel) => {
-        if (!isTextOrThreadChannel(channel)) return;
+        if (!channel.isText() && !channel.isThread() && !channel.isVoice()) return;
 
         let logContent = `The channel #${channel.name} has been deleted. `;
 

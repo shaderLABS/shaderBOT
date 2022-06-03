@@ -2,7 +2,7 @@ import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
 import { EmbedBuilder, User, Util } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
-import { embedColor, embedIcon } from './embeds.js';
+import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
 import { parseUser, trimString } from './misc.js';
 import { Punishment } from './punishment.js';
@@ -184,7 +184,7 @@ export class BanAppeal {
                 iconURL: user.displayAvatarURL(),
             },
             title: 'Ban Appeal',
-            color: embedColor.blue,
+            color: EmbedColor.blue,
             description: `**User:** ${parseUser(user)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${Util.escapeMarkdown(this.reason)}`,
         });
     }
@@ -194,9 +194,9 @@ export class BanAppeal {
             return new EmbedBuilder({
                 author: {
                     name: 'Pending...',
-                    iconURL: embedIcon.info,
+                    iconURL: EmbedIcon.info,
                 },
-                color: embedColor.blue,
+                color: EmbedColor.blue,
             });
         } else {
             if (!this.resultModeratorID || !this.resultTimestamp) throw 'The ban appeal result is invalid.';
@@ -214,15 +214,15 @@ export class BanAppeal {
             if (this.result === 'declined') {
                 embed.setAuthor({
                     name: 'Declined',
-                    iconURL: embedIcon.error,
+                    iconURL: EmbedIcon.error,
                 });
-                embed.setColor(embedColor.red);
+                embed.setColor(EmbedColor.red);
             } else {
                 embed.setAuthor({
                     name: 'Accepted',
-                    iconURL: embedIcon.success,
+                    iconURL: EmbedIcon.success,
                 });
-                embed.setColor(embedColor.green);
+                embed.setColor(EmbedColor.green);
             }
 
             return embed;

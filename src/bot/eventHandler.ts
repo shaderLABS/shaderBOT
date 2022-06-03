@@ -4,10 +4,10 @@ import path from 'path';
 import url from 'url';
 import { client, events } from './bot.js';
 
-export interface Event {
+export type Event = {
     readonly name: keyof ClientEvents;
     readonly callback: Function;
-}
+};
 
 export async function registerEvents(dir: string) {
     const dirPath = path.join(path.resolve(), dir);

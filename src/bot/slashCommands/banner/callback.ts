@@ -1,6 +1,6 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { embedColor, embedIcon, replyError } from '../../lib/embeds.js';
+import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -26,9 +26,9 @@ export const command: ApplicationCommandCallback = {
         interaction.reply({
             embeds: [
                 new EmbedBuilder({
-                    color: embedColor.blue,
+                    color: EmbedColor.blue,
                     author: {
-                        iconURL: embedIcon.info,
+                        iconURL: EmbedIcon.info,
                         name: 'Current Banner',
                     },
                     description: `The current banner was submitted by <#${currentBannerProject.channel_id}>.`,

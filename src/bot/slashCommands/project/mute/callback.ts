@@ -8,7 +8,7 @@ import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../sl
 export const command: ApplicationCommandCallback = {
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel, user } = interaction;
-        if (!channel.isText()) return replyError(interaction, 'This command is not usable in thread channels.');
+        if (!channel.isText()) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
 
         const project = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1;`, [channel.id, user.id])).rows[0];
         if (!project) return replyError(interaction, 'You do not have permission to run this command.');

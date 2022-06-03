@@ -1,9 +1,9 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, Message, PermissionFlagsBits, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { embedColor, replyError, replyInfo, sendInfo } from './embeds.js';
+import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
 import log from './log.js';
-import { getGuild, isTextOrThreadChannel, parseUser, similarityLevenshtein } from './misc.js';
+import { getGuild, parseUser, similarityLevenshtein } from './misc.js';
 import { PastPunishment, Punishment } from './punishment.js';
 
 type CachedMessage = {
@@ -42,7 +42,7 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
 
 export async function checkSpam(message: GuildMessage) {
     // don't handle message where spam is unlikely
-    if (message.attachments.size || message.content.length < settings.data.spamProtection.characterThreshold) return false;
+    if (message.attachments.size || message.content.length < settings.data.spamProtection.characterThreshold) return;
 
     // mentions everyone and contains a link
     let isSpamSingleMessage =
@@ -99,7 +99,7 @@ export async function checkSpam(message: GuildMessage) {
                     iconURL: message.author.displayAvatarURL(),
                 },
                 description: `**User:** ${parseUser(message.author)}\n\n\`\`\`${message.content}\`\`\``,
-                color: embedColor.red,
+                color: EmbedColor.red,
             });
 
             const logChannel = message.guild.channels.cache.get(settings.data.logging.moderationChannelID);
@@ -120,7 +120,7 @@ export async function checkSpam(message: GuildMessage) {
         message.delete().catch(() => undefined);
         for (const spam of spamMessages) {
             const spamChannel = message.guild.channels.cache.get(spam.channelID);
-            if (spamChannel && isTextOrThreadChannel(spamChannel)) {
+            if (spamChannel && (spamChannel.isText() || spamChannel.isThread() || spamChannel.isVoice())) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
         }
@@ -129,8 +129,6 @@ export async function checkSpam(message: GuildMessage) {
     // rotate cache
     cache.unshift(currentMessage);
     cache.pop();
-
-    return isSpamSingleMessage || isSpamSimilarMessage;
 }
 
 export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {

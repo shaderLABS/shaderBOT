@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { embedColor, embedIcon } from './embeds.js';
+import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
 import { formatContextURL, parseUser } from './misc.js';
 import { formatTimeDate } from './time.js';
@@ -119,9 +119,9 @@ export class Note {
         return new EmbedBuilder({
             author: {
                 name: title,
-                iconURL: embedIcon.note,
+                iconURL: EmbedIcon.note,
             },
-            color: embedColor.yellow,
+            color: EmbedColor.yellow,
             description,
         });
     }

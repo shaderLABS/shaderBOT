@@ -1,18 +1,9 @@
-import { CategoryChannel, Channel, Guild, Message, TextBasedChannel, TextChannel, ThreadChannel, User, UserResolvable, Util } from 'discord.js';
+import { CategoryChannel, Guild, TextChannel, User, UserResolvable, Util } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
-import { GuildMessage } from '../events/message/messageCreate.js';
 
 export function getGuild() {
     return client.guilds.cache.get(settings.data.guildID);
-}
-
-export function isTextOrThreadChannel(channel: Channel | TextBasedChannel): channel is TextChannel | ThreadChannel {
-    return channel.isText() || channel.isThread();
-}
-
-export function isGuildMessage(message: Message): message is GuildMessage {
-    return isTextOrThreadChannel(message.channel) && !!message.guild && !!message.member;
 }
 
 export function userToMember(guild: Guild, userResolvable: UserResolvable) {
@@ -42,6 +33,10 @@ export function parseUser(user: User | string) {
     return `<@${target.id}> (${Util.escapeMarkdown(target.tag)} | ${target.id})`;
 }
 
+export function stringToFileName(alias: string) {
+    return alias.replace(/[^a-z0-9]/gi, '_') + '.json';
+}
+
 export function formatContextURL(context: string | null | undefined) {
     return context ? `[click here](${context})` : 'No context exists.';
 }
@@ -61,10 +56,10 @@ export function isValidUrl(value: string): boolean {
 }
 
 export function formatBytes(bytes: number, decimals: number = 2) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 B';
 
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
@@ -106,7 +101,7 @@ export function similarityLevenshtein(s1: string, s2: string) {
 }
 
 function levenshteinDist(s: string, t: string) {
-    let d: any = [];
+    let d: number[][] = [];
 
     const n = s.length;
     const m = t.length;

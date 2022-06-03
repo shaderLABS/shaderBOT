@@ -9,9 +9,8 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['BanMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
-
         const reason = interaction.options.getString('reason', true);
-        const durationString = interaction.options.getString('time', false);
+        const durationString = interaction.options.getString('duration', false);
         const deleteMessages = interaction.options.getBoolean('delete_messages', false) || false;
 
         if (!(await hasPermissionForTarget(interaction, targetUser, 'bannable'))) return;

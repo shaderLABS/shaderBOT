@@ -3,7 +3,6 @@ import { db } from '../../../db/postgres.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
 import { editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
-import { isTextOrThreadChannel } from '../../lib/misc.js';
 import { Note } from '../../lib/note.js';
 import { PastPunishment, Punishment } from '../../lib/punishment.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
@@ -17,8 +16,10 @@ async function requireContext(value: string, guild: Guild) {
     const channelID = IDs.pop();
 
     if (!messageID || !channelID) return Promise.reject('The specified message URL is invalid.');
+
     const channel = guild.channels.cache.get(channelID);
-    if (!channel || !isTextOrThreadChannel(channel)) return Promise.reject('The specified message URL points to an invalid channel.');
+    if (!channel?.isTextBased()) return Promise.reject('The specified message URL points to an invalid channel.');
+
     const message = await channel.messages.fetch(messageID);
     if (!message) return Promise.reject('The specified message URL points to an invalid message.');
 
