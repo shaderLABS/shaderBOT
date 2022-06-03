@@ -1,6 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { APIApplicationCommand, Routes } from 'discord-api-types/v10';
-import { ApplicationCommandData, ApplicationCommandManager, PermissionsBitField } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandManager, PermissionResolvable, PermissionsBitField } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -9,12 +9,11 @@ import { BotSettings, SettingsFile } from './bot/settings/settings.js';
 const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
 const slashCommandStructure: Omit<APIApplicationCommand, 'id' | 'application_id' | 'guild_id'>[] = [];
 
-function structureToAPI(structure: ApplicationCommandData) {
+function structureToAPI(structure: ApplicationCommandData & { defaultMemberPermissions?: PermissionResolvable[] }) {
     return {
         // @ts-expect-error
         ...ApplicationCommandManager.transformCommand(structure),
-        // @ts-expect-error
-        default_member_permissions: structure.defaultMemberPermissions === undefined ? undefined : new PermissionsBitField(structure.defaultMemberPermissions).toJSON(),
+        default_member_permissions: structure.defaultMemberPermissions === undefined ? null : new PermissionsBitField(structure.defaultMemberPermissions).toJSON(),
     };
 }
 
