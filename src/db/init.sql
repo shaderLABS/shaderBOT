@@ -70,6 +70,15 @@ CREATE TABLE "note" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP TABLE IF EXISTS "lock_slowmode";
+CREATE TABLE "lock_slowmode" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    channel_id NUMERIC(20) NOT NULL,
+    type TEXT NOT NULL, -- lock, slowmode
+    previous_state SMALLINT NOT NULL, -- SMALLINT = 2 bytes, currently needs 6 bits
+    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 DROP TABLE IF EXISTS "appeal";
 CREATE TABLE "appeal" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
