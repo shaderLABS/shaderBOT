@@ -1,7 +1,6 @@
 import { Attachment } from 'discord.js';
-import { autoResponses } from '../../../bot.js';
+import { automaticResponseStore } from '../../../bot.js';
 import { replyError, replyInfo } from '../../../lib/embeds.js';
-import { autoResponseToJSON, stringToFileName } from '../../../lib/pastaAutoResponse.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -10,18 +9,18 @@ export const command: ApplicationCommandCallback = {
         const alias = interaction.options.getString('alias', false);
 
         if (alias) {
-            const autoResponse = autoResponses.get(alias);
-            if (!autoResponse) return replyError(interaction, 'The specified automatic response does not exist.');
+            const automaticResponse = automaticResponseStore.get(alias);
+            if (!automaticResponse) return replyError(interaction, 'The specified automatic response does not exist.');
 
             try {
-                const attachment = new Attachment(Buffer.from(autoResponseToJSON(autoResponse)), stringToFileName(alias));
+                const attachment = new Attachment(Buffer.from(automaticResponse.toJSON()), automaticResponse.getFileName());
                 interaction.reply({ files: [attachment] });
             } catch {
                 replyError(interaction, 'Failed to send automatic response.');
             }
         } else {
-            if (autoResponses.size === 0) return replyInfo(interaction, 'There are no automatic responses.');
-            replyInfo(interaction, '`' + [...autoResponses.keys()].join('`, `') + '`', 'All Automatic Responses');
+            if (automaticResponseStore.size === 0) return replyInfo(interaction, 'There are no automatic responses.');
+            replyInfo(interaction, '`' + [...automaticResponseStore.keys()].join('`, `') + '`', 'All Automatic Responses');
         }
     },
 };

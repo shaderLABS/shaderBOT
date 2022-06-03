@@ -1,10 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { pastas } from '../../../bot.js';
+import { pastaStore } from '../../../bot.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
-import { stringToFileName, writePasta } from '../../../lib/pastaAutoResponse.js';
+import { parseUser, stringToFileName } from '../../../lib/misc.js';
+import { Pasta } from '../../../lib/pasta.js';
 import { pastaPath } from '../../../pastaHandler.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
@@ -25,22 +25,25 @@ export const command: ApplicationCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         try {
-            const pasta = pastas.get(alias);
-            if (!pasta) return replyError(interaction, 'The specified pasta does not exist.');
+            const pastaData = pastaStore.get(alias)?.toData();
+            if (!pastaData) return replyError(interaction, 'The specified pasta does not exist.');
 
             const objPath = interaction.options.getString('path', true).split('.');
-
             const rawValue = interaction.options.getString('value', false);
             const jsonValue = rawValue ? JSON.parse(rawValue) : undefined;
 
-            setValue(pasta, objPath, jsonValue);
+            setValue(pastaData, objPath, jsonValue);
 
-            pastas.set(pasta.alias, pasta);
-            await writePasta(pasta);
+            const pasta = new Pasta(pastaData);
+
+            await pasta.save();
+            pastaStore.set(pasta.alias, pasta);
 
             if (alias !== pasta.alias) {
-                pastas.delete(alias);
-                await fs.rm(path.join(pastaPath, stringToFileName(alias)));
+                pastaStore.delete(alias);
+
+                const oldFileName = stringToFileName(alias);
+                if (oldFileName !== pasta.getFileName()) await fs.rm(path.join(pastaPath, oldFileName));
             }
 
             replySuccess(interaction, `Successfully updated the pasta \`${pasta.alias}\`.`, 'Update Pasta');

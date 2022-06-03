@@ -1,7 +1,7 @@
 import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
 
 export default {
-    name: 'autoresponse',
+    name: 'automaticresponse',
     description: 'Manage automatic responses.',
     defaultMemberPermissions: PermissionFlagsBits.ManageGuild,
     options: [

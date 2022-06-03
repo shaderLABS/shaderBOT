@@ -1,52 +1,93 @@
 import { client, timeoutStore } from '../bot.js';
+import { LockSlowmode } from './lockSlowmode.js';
 import { Punishment } from './punishment.js';
 
 export class TimeoutStore {
-    private mutes: Map<string, NodeJS.Timeout> = new Map();
-    private bans: Map<string, NodeJS.Timeout> = new Map();
+    private mutes = new Map<string, NodeJS.Timeout>();
+    private bans = new Map<string, NodeJS.Timeout>();
 
-    public set(punishment: Punishment, onlyExpiringToday: boolean) {
-        if (!punishment.expireTimestamp || (onlyExpiringToday && punishment.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;
+    private locks = new Map<string, NodeJS.Timeout>();
+    private slowmodes = new Map<string, NodeJS.Timeout>();
 
-        const timeout = setTimeout(async () => {
-            (await Punishment.getByUUID(punishment.id, punishment.type)).expire();
+    public set(entry: Punishment | LockSlowmode, onlyExpiringToday: boolean) {
+        if (!entry.expireTimestamp || (onlyExpiringToday && entry.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;
 
-            if (punishment.type === 'ban') this.bans.delete(punishment.userID);
-            else this.mutes.delete(punishment.userID);
-        }, punishment.expireTimestamp.getTime() - Date.now());
+        if (entry instanceof Punishment) {
+            const timeout = setTimeout(async () => {
+                (await Punishment.getByUUID(entry.id, entry.type)).expire();
 
-        if (punishment.type === 'ban') {
-            const previousTimeout = this.bans.get(punishment.userID);
-            if (previousTimeout) clearTimeout(previousTimeout);
-            this.bans.set(punishment.userID, timeout);
-        } else {
-            const previousTimeout = this.mutes.get(punishment.userID);
-            if (previousTimeout) clearTimeout(previousTimeout);
-            this.mutes.set(punishment.userID, timeout);
+                if (entry.type === 'ban') this.bans.delete(entry.userID);
+                else this.mutes.delete(entry.userID);
+            }, entry.expireTimestamp.getTime() - Date.now());
+
+            if (entry.type === 'ban') {
+                const previousTimeout = this.bans.get(entry.userID);
+                if (previousTimeout) clearTimeout(previousTimeout);
+                this.bans.set(entry.userID, timeout);
+            } else {
+                const previousTimeout = this.mutes.get(entry.userID);
+                if (previousTimeout) clearTimeout(previousTimeout);
+                this.mutes.set(entry.userID, timeout);
+            }
+        } else if (entry instanceof LockSlowmode) {
+            const timeout = setTimeout(async () => {
+                entry.expire();
+
+                if (entry.type === 'lock') this.locks.delete(entry.channelID);
+                else this.slowmodes.delete(entry.channelID);
+            }, entry.expireTimestamp.getTime() - Date.now());
+
+            if (entry.type === 'lock') {
+                const previousTimeout = this.locks.get(entry.channelID);
+                if (previousTimeout) clearTimeout(previousTimeout);
+                this.locks.set(entry.channelID, timeout);
+            } else {
+                const previousTimeout = this.slowmodes.get(entry.channelID);
+                if (previousTimeout) clearTimeout(previousTimeout);
+                this.slowmodes.set(entry.channelID, timeout);
+            }
         }
     }
 
-    public delete(punishment: Punishment) {
-        if (punishment.type === 'ban') {
-            const timeout = this.bans.get(punishment.userID);
+    public delete(entry: Punishment | LockSlowmode) {
+        if (entry.type === 'ban') {
+            const timeout = this.bans.get(entry.userID);
             if (timeout) {
                 clearTimeout(timeout);
-                this.bans.delete(punishment.userID);
+                this.bans.delete(entry.userID);
             }
-        } else {
-            const timeout = this.mutes.get(punishment.userID);
+        } else if (entry.type === 'mute') {
+            const timeout = this.mutes.get(entry.userID);
             if (timeout) {
                 clearTimeout(timeout);
-                this.mutes.delete(punishment.userID);
+                this.mutes.delete(entry.userID);
+            }
+        } else if (entry.type === 'lock') {
+            const timeout = this.locks.get(entry.channelID);
+            if (timeout) {
+                clearTimeout(timeout);
+                this.locks.delete(entry.channelID);
+            }
+        } else if (entry.type === 'slowmode') {
+            const timeout = this.slowmodes.get(entry.channelID);
+            if (timeout) {
+                clearTimeout(timeout);
+                this.slowmodes.delete(entry.channelID);
             }
         }
     }
 }
 
-export async function loadTimeouts(includeTomorrow: boolean) {
-    if (!client.user) return Promise.reject('The client is not logged in.');
-    console.log('Loading punishments...');
+export function loadTimeouts(includeTomorrow: boolean) {
+    if (!client.user) throw 'The client is not logged in.';
 
-    const expiringPunishments = includeTomorrow ? await Punishment.getExpiringTomorrow() : await Punishment.getExpiringToday();
-    expiringPunishments.forEach((punishment) => timeoutStore.set(punishment, false));
+    console.log('Loading expiring punishments...');
+    const expiringPunishments = includeTomorrow ? Punishment.getExpiringTomorrow() : Punishment.getExpiringToday();
+    expiringPunishments.then((punishments) => punishments.forEach((punishment) => timeoutStore.set(punishment, false)));
+
+    console.log('Loading expiring locks and slowmodes...');
+    const expiringLockSlowmodes = includeTomorrow ? LockSlowmode.getExpiringTomorrow() : LockSlowmode.getExpiringToday();
+    expiringLockSlowmodes.then((lockSlowmodes) => lockSlowmodes.forEach((lockSlowmode) => timeoutStore.set(lockSlowmode, false)));
+
+    // return Promise.all([expiringPunishments, expiringLockSlowmodes]);
 }

@@ -1,8 +1,8 @@
-import { pastas } from '../../../bot.js';
+import { pastaStore } from '../../../bot.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
-import { writePasta } from '../../../lib/pastaAutoResponse.js';
+import { Pasta } from '../../../lib/pasta.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
@@ -11,10 +11,10 @@ export const command: ApplicationCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         try {
-            const pasta = { alias };
+            const pasta = new Pasta({ alias });
 
-            await writePasta(pasta);
-            pastas.set(pasta.alias, pasta);
+            await pasta.save();
+            pastaStore.set(pasta.alias, pasta);
 
             replySuccess(interaction, `Successfully created the pasta \`${pasta.alias}\`.`, 'Create Pasta');
             log(`${parseUser(interaction.user)} created the pasta \`${pasta.alias}\`.`, 'Create Pasta');

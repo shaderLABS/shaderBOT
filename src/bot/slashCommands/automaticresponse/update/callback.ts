@@ -1,11 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { autoResponsePath } from '../../../autoResponseHandler.js';
-import { autoResponses } from '../../../bot.js';
+import { automaticResponsePath } from '../../../automaticResponseHandler.js';
+import { automaticResponseStore } from '../../../bot.js';
+import { AutomaticResponse } from '../../../lib/automaticResponse.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
-import { stringToFileName, writeAutoResponse } from '../../../lib/pastaAutoResponse.js';
+import { parseUser, stringToFileName } from '../../../lib/misc.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 function setValue(obj: any, path: string[], value: any) {
@@ -25,27 +25,25 @@ export const command: ApplicationCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         try {
-            let autoResponse = autoResponses.get(alias);
-            if (!autoResponse) return replyError(interaction, 'The specified automatic response does not exist.');
+            let automaticResponseData = automaticResponseStore.get(alias)?.toData();
+            if (!automaticResponseData) return replyError(interaction, 'The specified automatic response does not exist.');
 
             const objPath = interaction.options.getString('path', true).split('.');
-
             const rawValue = interaction.options.getString('value', false);
             const jsonValue = rawValue ? JSON.parse(rawValue) : undefined;
 
-            setValue(autoResponse, objPath, jsonValue);
+            setValue(automaticResponseData, objPath, jsonValue);
 
-            // always recreate because it's a string if it got updated (and the flags might have been changed)
-            autoResponse.regex = new RegExp(autoResponse.regex instanceof RegExp ? autoResponse.regex.source : autoResponse.regex, autoResponse.flags);
+            const automaticResponse = new AutomaticResponse(automaticResponseData);
 
-            autoResponses.set(autoResponse.alias, autoResponse);
-            await writeAutoResponse(autoResponse);
+            await automaticResponse.save();
+            automaticResponseStore.set(automaticResponse.alias, automaticResponse);
 
-            if (alias !== autoResponse.alias) {
-                autoResponses.delete(alias);
+            if (alias !== automaticResponse.alias) {
+                automaticResponseStore.delete(alias);
 
                 const oldFileName = stringToFileName(alias);
-                if (oldFileName !== stringToFileName(autoResponse.alias)) await fs.rm(path.join(autoResponsePath, oldFileName));
+                if (oldFileName !== automaticResponse.getFileName()) await fs.rm(path.join(automaticResponsePath, oldFileName));
             }
 
             replySuccess(interaction, `Successfully updated the automatic response \`${alias}\`.`, 'Update Automatic Response');
