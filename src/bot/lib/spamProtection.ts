@@ -76,9 +76,12 @@ export async function checkSpam(message: GuildMessage) {
 
     // if message is flagged as spam, mute and delete messages
     if (isSpamSingleMessage || isSpamSimilarMessage) {
+        const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID).reverse() as CachedMessage[];
+        spamMessages.push(currentMessage);
+
         if (!(await Punishment.has(message.author.id, 'mute'))) {
             Punishment.createMute(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch(
-                (e) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${e}`, 'Mute')
+                (error) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute')
             );
 
             const kickButton = new ButtonBuilder({
@@ -98,7 +101,7 @@ export async function checkSpam(message: GuildMessage) {
                     name: 'Potential Spam',
                     iconURL: message.author.displayAvatarURL(),
                 },
-                description: `**User:** ${parseUser(message.author)}\n\n\`\`\`${message.content}\`\`\``,
+                description: `**User:** ${parseUser(message.author)}\n**Channels:** <#${spamMessages.map((message) => message.channelID).join('>, <#')}>\n\n\`\`\`${message.content}\`\`\``,
                 color: EmbedColor.red,
             });
 
@@ -115,9 +118,6 @@ export async function checkSpam(message: GuildMessage) {
             }
         }
 
-        const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID) as CachedMessage[];
-
-        message.delete().catch(() => undefined);
         for (const spam of spamMessages) {
             const spamChannel = message.guild.channels.cache.get(spam.channelID);
             if (spamChannel && (spamChannel.isText() || spamChannel.isThread() || spamChannel.isVoice())) {
