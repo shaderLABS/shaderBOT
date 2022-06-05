@@ -1,5 +1,6 @@
 import { client } from '../bot.js';
 import { Event } from '../eventHandler.js';
+import { setRandomPresence } from '../lib/presence.js';
 import { loadTimeouts } from '../lib/timeoutStore.js';
 
 export const event: Event = {
@@ -9,5 +10,6 @@ export const event: Event = {
         console.log(`Logged in as '${client.user.tag}'.`);
 
         loadTimeouts(false);
+        setRandomPresence();
     },
 };

@@ -7,6 +7,7 @@ import { cleanBackups } from './lib/backup.js';
 import { rotateBanner } from './lib/banner.js';
 import { CooldownStore } from './lib/cooldownStore.js';
 import { Pasta } from './lib/pasta.js';
+import { setRandomPresence } from './lib/presence.js';
 import { loadTimeouts, TimeoutStore } from './lib/timeoutStore.js';
 import { pastaPath, registerPastas } from './pastaHandler.js';
 import { BotSettings, SettingsFile } from './settings/settings.js';
@@ -24,6 +25,7 @@ cron.schedule('59 23 * * *', () => {
     loadTimeouts(true);
     cleanBackups();
     rotateBanner();
+    setRandomPresence();
 });
 
 export async function startBot() {
