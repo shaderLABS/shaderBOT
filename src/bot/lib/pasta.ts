@@ -1,9 +1,10 @@
-import { Attachment, EmbedBuilder, EmbedData } from 'discord.js';
+import { Attachment, AutocompleteInteraction, EmbedBuilder, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
+import { pastaStore } from '../bot.js';
 import { pastaPath } from '../pastaHandler.js';
 import { GuildCommandInteraction } from '../slashCommandHandler.js';
-import { stringToFileName } from './misc.js';
+import { stringToFileName, trimString } from './misc.js';
 
 type PastaData = {
     alias: string;
@@ -11,6 +12,25 @@ type PastaData = {
     embedData?: EmbedData;
     attachmentURLs?: string[];
 };
+
+export function handlePastaAutocomplete(interaction: AutocompleteInteraction<'cached'>) {
+    const value = `${interaction.options.getFocused()}`;
+    const filtered = pastaStore.filter(
+        (pasta) =>
+            pasta.alias.includes(value) ||
+            pasta.content?.includes(value) ||
+            (
+                pasta.embedData &&
+                (
+                    pasta.embedData.description?.includes(value) ||
+                    pasta.embedData.footer?.text.includes(value) ||
+                    pasta.embedData.fields?.some((field) => field.value.includes(value))
+                )
+            ) ||
+            false
+    );
+    interaction.respond(filtered.map((pasta) => ({ name: trimString(`${pasta.alias} - ${pasta.content || pasta.embedData?.description || 'No description found.'}`, 100), value: pasta.alias })));
+}
 
 export class Pasta {
     public alias: string;
