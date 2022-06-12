@@ -4,7 +4,7 @@ import path from 'path';
 import { pastaStore } from '../bot.js';
 import { pastaPath } from '../pastaHandler.js';
 import { GuildCommandInteraction } from '../slashCommandHandler.js';
-import { stringToFileName, trimString } from './misc.js';
+import { stringToFileName } from './misc.js';
 
 type PastaData = {
     alias: string;
@@ -29,7 +29,7 @@ export function handlePastaAutocomplete(interaction: AutocompleteInteraction<'ca
             ) ||
             false
     );
-    interaction.respond(filtered.map((pasta) => ({ name: trimString(`${pasta.alias} - ${pasta.content || pasta.embedData?.description || 'No description found.'}`, 100), value: pasta.alias })));
+    interaction.respond(filtered.map((_, alias) => ({ name: alias, value: alias })));
 }
 
 export class Pasta {
