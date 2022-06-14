@@ -43,6 +43,7 @@ export async function startBot() {
             GatewayIntentBits.GuildMessageReactions,
             GatewayIntentBits.DirectMessages,
             GatewayIntentBits.GuildIntegrations,
+            GatewayIntentBits.GuildVoiceStates,
             GatewayIntentBits.MessageContent,
         ],
     });
