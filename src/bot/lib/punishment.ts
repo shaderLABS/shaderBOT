@@ -357,9 +357,23 @@ export class Punishment {
     }
 
     public async expire() {
+        const guild = getGuild();
+        if (!guild) return Promise.reject('No guild found.');
+
         try {
             await this.moveEntry();
-            log(`${parseUser(this.userID)}'s ${this.type} (${this.id}) has expired.`, this.type === 'ban' ? 'Expire Ban' : 'Expire Mute');
+
+            if (this.type === 'ban') {
+                // ban
+                await guild.members.unban(this.userID).catch(() => undefined);
+
+                log(`${parseUser(this.userID)}'s temporary ban (${this.id}) has expired.`, 'Expire Temporary Ban');
+            } else {
+                // mute
+                // timeout is lifted by discord
+
+                log(`${parseUser(this.userID)}'s mute (${this.id}) has expired.`, 'Expire Mute');
+            }
         } catch (error) {
             console.error(error);
             log(`An error occurred while trying to expire ${parseUser(this.userID)}'s ${this.type} (${this.id}).`, this.type === 'ban' ? 'Expire Ban' : 'Expire Mute');
