@@ -87,9 +87,9 @@ export function escapeXml(unsafe: string) {
 export const sleep = promisify(setTimeout);
 
 export function similarityLevenshtein(s1: string, s2: string) {
-    // case insensitive
-    let longer = s1.toLowerCase();
-    let shorter = s2.toLowerCase();
+    // normalization form compatibility decomposition
+    let longer = s1.normalize('NFKD');
+    let shorter = s2.normalize('NFKD');
 
     if (s1.length < s2.length) {
         longer = s2;
@@ -97,17 +97,17 @@ export function similarityLevenshtein(s1: string, s2: string) {
     }
 
     if (longer.length === 0.0) return 1.0;
-    return (longer.length - levenshteinDist(longer, shorter)) / longer.length;
+    return (longer.length - levenshteinDistance(longer, shorter)) / longer.length;
 }
 
-function levenshteinDist(s: string, t: string) {
+function levenshteinDistance(s: string, t: string) {
     let d: number[][] = [];
 
     const n = s.length;
     const m = t.length;
 
-    if (n == 0) return m;
-    if (m == 0) return n;
+    if (n === 0) return m;
+    if (m === 0) return n;
 
     for (let i = n; i >= 0; i--) d[i] = [];
 
@@ -118,24 +118,21 @@ function levenshteinDist(s: string, t: string) {
         const s_i = s.charAt(i - 1);
 
         for (let j = 1; j <= m; j++) {
-            if (i == j && d[i][j] > 4) return n;
+            if (i === j && d[i][j] > 4) return n;
 
             const t_j = t.charAt(j - 1);
-            const cost = s_i == t_j ? 0 : 1;
+            const cost = s_i === t_j ? 0 : 1;
 
-            let mi = d[i - 1][j] + 1;
-            const b = d[i][j - 1] + 1;
-            const c = d[i - 1][j - 1] + cost;
+            d[i][j] = Math.min(
+                d[i - 1][j] + 1, // deletion
+                d[i][j - 1] + 1, // insertion
+                d[i - 1][j - 1] + cost // substitution
+            );
 
-            if (b < mi) mi = b;
-            if (c < mi) mi = c;
-
-            d[i][j] = mi;
-
-            // Damerau transposition
-            // if (i > 1 && j > 1 && s_i == t.charAt(j - 2) && s.charAt(i - 2) == t_j) {
-            //     d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + cost);
-            // }
+            // transposition
+            if (i > 1 && j > 1 && s_i === t.charAt(j - 2) && s.charAt(i - 2) === t_j) {
+                d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + cost);
+            }
         }
     }
 

@@ -54,4 +54,10 @@ export type BotSettings = {
         timeThreshold: number;
         similarityThreshold: number;
     };
+    raidProtection: {
+        cacheLength: number;
+        creationTimeThreshold: number;
+        usernameSimilarityThreshold: number;
+        userThreshold: number;
+    };
 };
