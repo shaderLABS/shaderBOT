@@ -57,9 +57,15 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "cacheLength": 0, // length of the spam protection cache
         "characterThreshold": 0, // minimum characters after which messages will be checked for spam
         "muteDuration": 0, // duration of the mute in seconds
-        "messageThreshold": 0, // number of similar messages after which the mute protection will be triggered
+        "messageThreshold": 0, // number of similar messages after which the spam protection will be triggered
         "timeThreshold": 0, // maximum delay between similar messages in seconds (after which they won't be counted)
         "similarityThreshold": 0 // threshold that determines how similar messages must be in order to get flagged as spam (between 0 and 1)
+    },
+    "raidProtection": {
+        "cacheLength": 0, // length of the raid protection cache
+        "creationTimeThreshold": 0, // maximum time between the creation of accounts in seconds (if less, then accounts will be flagged)
+        "usernameSimilarityThreshold": 0, // threshold that determines how similar usernames must be in order to get flagged as bots (between 0 and 1)
+        "userThreshold": 0 // number of similar users after which the raid protection will be triggered
     }
 }
 ```
