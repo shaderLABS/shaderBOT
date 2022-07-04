@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, ThreadChannel, VoiceChannel } from 'discord.js';
+import { AnyThreadChannel, ChannelType, ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, VoiceChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -12,7 +12,7 @@ export type ApplicationCommandCallback = {
 };
 
 export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
-    channel: TextChannel | ThreadChannel | VoiceChannel;
+    channel: TextChannel | AnyThreadChannel | VoiceChannel;
 };
 
 /***********
@@ -20,10 +20,10 @@ export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
  ***********/
 
 function isGuildInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildCommandInteraction {
-    return !!interaction.channel && (interaction.channel.isText() || interaction.channel.isThread() || interaction.channel.isVoice());
+    return !!interaction.channel && (interaction.channel.type === ChannelType.GuildText || interaction.channel.type === ChannelType.GuildVoice || interaction.channel.isThread());
 }
 
-function hasPermissions(member: GuildMember, channel: TextChannel | ThreadChannel | VoiceChannel, command: ApplicationCommandCallback) {
+function hasPermissions(member: GuildMember, channel: TextChannel | AnyThreadChannel | VoiceChannel, command: ApplicationCommandCallback) {
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
             if (command.requiredPermissions.some((permission) => !member.permissionsIn(channel).has(permission))) return false;
@@ -49,17 +49,15 @@ export function handleChatInputCommand(interaction: ChatInputCommandInteraction<
 
     if (!command || command instanceof Collection) return;
 
-    const { channel, member } = interaction;
-
     /************************************
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
 
-    if (!hasPermissions(member, channel, command)) {
+    if (!hasPermissions(interaction.member, interaction.channel, command)) {
         return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
     }
 
-    if (command.channelWhitelist && !command.channelWhitelist.includes(channel.id)) {
+    if (command.channelWhitelist && !command.channelWhitelist.includes(interaction.channel.id)) {
         return replyError(interaction, `This command is only usable in <#${command.channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
     }
 

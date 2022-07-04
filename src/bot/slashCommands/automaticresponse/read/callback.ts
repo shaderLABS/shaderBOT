@@ -1,4 +1,4 @@
-import { Attachment } from 'discord.js';
+import { AttachmentBuilder } from 'discord.js';
 import { automaticResponseStore } from '../../../bot.js';
 import { replyError, replyInfo } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
@@ -13,7 +13,7 @@ export const command: ApplicationCommandCallback = {
             if (!automaticResponse) return replyError(interaction, 'The specified automatic response does not exist.');
 
             try {
-                const attachment = new Attachment(Buffer.from(automaticResponse.toJSON()), automaticResponse.getFileName());
+                const attachment = new AttachmentBuilder(Buffer.from(automaticResponse.toJSON()), { name: automaticResponse.getFileName() });
                 interaction.reply({ files: [attachment] });
             } catch {
                 replyError(interaction, 'Failed to send automatic response.');

@@ -1,4 +1,4 @@
-import { Attachment, AutocompleteInteraction, EmbedBuilder, EmbedData } from 'discord.js';
+import { AttachmentBuilder, AutocompleteInteraction, EmbedBuilder, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { pastaStore } from '../bot.js';
@@ -40,7 +40,7 @@ export class Pasta {
     public attachmentURLs?: string[];
 
     private embeds?: EmbedBuilder[];
-    private attachments: Attachment[];
+    private attachments: AttachmentBuilder[];
 
     constructor(data: PastaData) {
         this.alias = data.alias;
@@ -50,7 +50,7 @@ export class Pasta {
         this.attachmentURLs = data.attachmentURLs;
 
         this.embeds = data.embedData ? [new EmbedBuilder(data.embedData)] : undefined;
-        this.attachments = data.attachmentURLs ? data.attachmentURLs.map((url) => new Attachment(url)) : [];
+        this.attachments = data.attachmentURLs ? data.attachmentURLs.map((url) => new AttachmentBuilder(url)) : [];
     }
 
     public static fromJSON(json: string) {

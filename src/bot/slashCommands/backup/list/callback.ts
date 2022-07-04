@@ -1,4 +1,4 @@
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonStyle, Message, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Message, SelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { backupPath, readBackup } from '../../../lib/backup.js';
@@ -88,7 +88,7 @@ export const command: ApplicationCommandCallback = {
 
                 try {
                     const data = await readBackup(backup.name);
-                    interaction.channel.send({ files: [new Attachment(Buffer.from(data), backup.name)] });
+                    interaction.channel.send({ files: [new AttachmentBuilder(Buffer.from(data), { name: backup.name })] });
                 } catch (error) {
                     sendError(interaction.channel, error);
                 }

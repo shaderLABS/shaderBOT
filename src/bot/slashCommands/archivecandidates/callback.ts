@@ -1,4 +1,4 @@
-import { TextChannel } from 'discord.js';
+import { ChannelType, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { replyInfo } from '../../lib/embeds.js';
@@ -14,7 +14,7 @@ export const command: ApplicationCommandCallback = {
 
         for (const { channel_id } of projectChannels) {
             const channel = interaction.guild.channels.cache.get(channel_id);
-            if (!channel?.isText()) continue;
+            if (channel?.type !== ChannelType.GuildText) continue;
 
             eligibleProjectChannelPromises.push(
                 channel.messages.fetch({ limit: settings.data.archive.minimumMessageCount }).then((messages) => {

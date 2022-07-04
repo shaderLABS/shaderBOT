@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord.js';
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
@@ -10,7 +11,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!channel.isText()) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+        if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
         if (!(await isProject(channel.id))) return replyError(interaction, 'No project has been set up for this channel.');
         if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 

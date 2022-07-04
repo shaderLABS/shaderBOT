@@ -1,10 +1,10 @@
-import { ThreadChannel } from 'discord.js';
+import { AnyThreadChannel } from 'discord.js';
 import { settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
 
 export const event: Event = {
     name: 'threadCreate',
-    callback: async (thread: ThreadChannel) => {
+    callback: async (thread: AnyThreadChannel) => {
         if (!settings.data.threadRoleID) return;
 
         const message = await thread.send('Adding users to thread...');

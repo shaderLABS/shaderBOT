@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, Message, PermissionFlagsBits, User } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, Message, PermissionFlagsBits, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
@@ -106,7 +106,7 @@ export async function checkSpam(message: GuildMessage) {
             });
 
             const logChannel = message.guild.channels.cache.get(settings.data.logging.moderationChannelID);
-            if (logChannel?.isText()) {
+            if (logChannel?.type === ChannelType.GuildText) {
                 logChannel.send({
                     embeds: [logEmbed],
                     components: [
@@ -120,7 +120,7 @@ export async function checkSpam(message: GuildMessage) {
 
         for (const spam of spamMessages) {
             const spamChannel = message.guild.channels.cache.get(spam.channelID);
-            if (spamChannel && (spamChannel.isText() || spamChannel.isThread() || spamChannel.isVoice())) {
+            if (spamChannel && (spamChannel.type === ChannelType.GuildText || spamChannel.type === ChannelType.GuildVoice || spamChannel.isThread())) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
         }

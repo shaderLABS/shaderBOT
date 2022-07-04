@@ -1,4 +1,4 @@
-import { Channel } from 'discord.js';
+import { Channel, ChannelType } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { Event } from '../eventHandler.js';
 import { createBackup } from '../lib/backup.js';
@@ -7,7 +7,7 @@ import log from '../lib/log.js';
 export const event: Event = {
     name: 'channelDelete',
     callback: async (channel: Channel) => {
-        if (!channel.isText() && !channel.isThread() && !channel.isVoice()) return;
+        if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) return;
 
         let logContent = `The channel #${channel.name} has been deleted. `;
 

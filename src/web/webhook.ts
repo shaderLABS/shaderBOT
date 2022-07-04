@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { EmbedBuilder } from 'discord.js';
+import { ChannelType, EmbedBuilder } from 'discord.js';
 import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.js';
 import { formatBytes, getGuild } from '../bot/lib/misc.js';
 
@@ -20,7 +20,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
     if (!guild) return 500;
 
     const channel = guild.channels.cache.get(channelID);
-    if (!channel?.isText()) return 500;
+    if (channel?.type !== ChannelType.GuildText) return 500;
 
     if (req.headers['x-github-event'] === 'release') {
         // GitHub Release Event

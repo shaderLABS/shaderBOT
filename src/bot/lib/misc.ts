@@ -1,4 +1,4 @@
-import { CategoryChannel, Guild, TextChannel, User, UserResolvable, Util } from 'discord.js';
+import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, UserResolvable } from 'discord.js';
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
@@ -14,7 +14,7 @@ export function getAlphabeticalChannelPosition(channel: TextChannel, parent: Cat
     if (!parent) return 0;
 
     const totalChannels = parent.children.cache
-        .filter((channel) => channel.isText())
+        .filter((channel) => channel.type === ChannelType.GuildText)
         .set(channel.id, channel)
         .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
 
@@ -30,7 +30,7 @@ export function parseUser(user: User | string) {
         if (!target) return `<@${user}> (${user})`;
     }
 
-    return `<@${target.id}> (${Util.escapeMarkdown(target.tag)} | ${target.id})`;
+    return `<@${target.id}> (${escapeMarkdown(target.tag)} | ${target.id})`;
 }
 
 export function stringToFileName(alias: string) {

@@ -1,4 +1,4 @@
-import { Attachment, EmbedBuilder, Message } from 'discord.js';
+import { AttachmentBuilder, ChannelType, EmbedBuilder, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
@@ -9,11 +9,11 @@ export const event: Event = {
     name: 'messageDelete',
     callback: async (message: Message) => {
         const { channel } = message;
-        if ((!channel.isText() && !channel.isThread() && !channel.isVoice()) || (!message.partial && message.author.bot)) return;
+        if ((channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) || (!message.partial && message.author.bot)) return;
 
         const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
-        if (logChannel?.isText()) {
-            const attachments: Attachment[] = [];
+        if (logChannel?.type === ChannelType.GuildText) {
+            const attachments: AttachmentBuilder[] = [];
             const logEmbed = new EmbedBuilder({
                 color: EmbedColor.red,
             });
@@ -28,7 +28,7 @@ export const event: Event = {
 
                 for (const attachment of message.attachments.values()) {
                     if (attachment.size > 8388608) content += attachment.url + '\n';
-                    else attachments.push(new Attachment(attachment.url, attachment.name || undefined));
+                    else attachments.push(new AttachmentBuilder(attachment.url, { name: attachment.name || undefined }));
                 }
 
                 let metadata = `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(

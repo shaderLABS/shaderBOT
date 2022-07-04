@@ -1,3 +1,4 @@
+import { ChannelType } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
@@ -8,7 +9,7 @@ export const command: ApplicationCommandCallback = {
     requiredPermissions: ['ManageChannels'],
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
-        if (!channel.isText()) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+        if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
 
         const project = (await db.query(/*sql*/ `DELETE FROM project WHERE channel_id = $1 RETURNING id, role_id;`, [channel.id])).rows[0];
         if (!project) return replyError(interaction, 'No project has been set up for this channel.');

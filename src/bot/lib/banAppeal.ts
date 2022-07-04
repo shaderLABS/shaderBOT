@@ -1,5 +1,5 @@
 import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
-import { EmbedBuilder, User, Util } from 'discord.js';
+import { ChannelType, EmbedBuilder, escapeMarkdown, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
@@ -85,7 +85,7 @@ export class BanAppeal {
         if (await BanAppeal.hasPending(userID)) return Promise.reject('The specified user already has a pending ban appeal.');
 
         const appealChannel = client.channels.cache.get(settings.data.appealChannelID);
-        if (!appealChannel?.isText()) return Promise.reject('The ban appeal channel was not found.');
+        if (appealChannel?.type !== ChannelType.GuildText) return Promise.reject('The ban appeal channel was not found.');
 
         const timestamp = new Date();
 
@@ -145,7 +145,7 @@ export class BanAppeal {
         if (this.result !== 'pending') return Promise.reject('The ban appeal is already closed.');
 
         const appealChannel = client.channels.cache.get(settings.data.appealChannelID);
-        if (!appealChannel?.isText()) return Promise.reject('The ban appeal channel was not found.');
+        if (appealChannel?.type !== ChannelType.GuildText) return Promise.reject('The ban appeal channel was not found.');
 
         const timestamp = new Date();
 
@@ -185,7 +185,7 @@ export class BanAppeal {
             },
             title: 'Ban Appeal',
             color: EmbedColor.blue,
-            description: `**User:** ${parseUser(user)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${Util.escapeMarkdown(this.reason)}`,
+            description: `**User:** ${parseUser(user)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${escapeMarkdown(this.reason)}`,
         });
     }
 
@@ -201,7 +201,7 @@ export class BanAppeal {
         } else {
             if (!this.resultModeratorID || !this.resultTimestamp) throw 'The ban appeal result is invalid.';
 
-            let description = `**Moderator:** ${parseUser(this.resultModeratorID)}\n**Created At:** ${formatTimeDate(this.resultTimestamp)}\n\n${Util.escapeMarkdown(
+            let description = `**Moderator:** ${parseUser(this.resultModeratorID)}\n**Created At:** ${formatTimeDate(this.resultTimestamp)}\n\n${escapeMarkdown(
                 this.resultReason || 'No reason provided.'
             )}`;
 

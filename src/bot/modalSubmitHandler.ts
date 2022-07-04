@@ -1,4 +1,4 @@
-import { ModalSubmitInteraction } from 'discord.js';
+import { ChannelType, ModalSubmitInteraction } from 'discord.js';
 import { replyError, replyInfo, replySuccess } from './lib/embeds.js';
 import log from './lib/log.js';
 import { getAlphabeticalChannelPosition, parseUser } from './lib/misc.js';
@@ -9,7 +9,7 @@ export async function handleModalSubmit(interaction: ModalSubmitInteraction<'cac
         if (!channelID) return;
 
         const channel = interaction.guild.channels.cache.get(channelID);
-        if (!channel?.isText()) return;
+        if (channel?.type !== ChannelType.GuildText) return;
 
         const oldChannelName = channel.name;
         channel.name = interaction.fields.getTextInputValue('nameInput').trim();

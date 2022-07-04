@@ -1,5 +1,5 @@
 import { EmbedBuilder } from '@discordjs/builders';
-import { Attachment, EmbedData } from 'discord.js';
+import { AttachmentBuilder, ChannelType, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { automaticResponsePath } from '../automaticResponseHandler.js';
@@ -30,7 +30,7 @@ export class AutomaticResponse {
     public attachmentURLs?: string[];
 
     private embedRaw?: string;
-    private attachments: Attachment[];
+    private attachments: AttachmentBuilder[];
 
     public directMessage?: boolean;
     public deleteAfter?: number;
@@ -46,7 +46,7 @@ export class AutomaticResponse {
         this.attachmentURLs = data.attachmentURLs;
 
         this.embedRaw = data.embedData ? JSON.stringify(data.embedData) : undefined;
-        this.attachments = data.attachmentURLs ? data.attachmentURLs.map((url) => new Attachment(url)) : [];
+        this.attachments = data.attachmentURLs ? data.attachmentURLs.map((url) => new AttachmentBuilder(url)) : [];
 
         this.directMessage = data.directMessage;
         this.deleteAfter = data.deleteAfter;
@@ -103,7 +103,7 @@ export class AutomaticResponse {
 
         const response = await channel.send({ content, embeds, files: this.attachments }).catch(async () => {
             let botChannel = message.guild.channels.cache.get(settings.data.botChannelID);
-            if (!botChannel?.isText()) return Promise.reject('Failed to resolve bot channel.');
+            if (botChannel?.type !== ChannelType.GuildText) return Promise.reject('Failed to resolve bot channel.');
             channel = botChannel;
 
             return channel.send({ content, embeds, files: this.attachments });
@@ -113,7 +113,7 @@ export class AutomaticResponse {
         if (this.cooldown) cooldownStore.add(this.alias, message.member, this.cooldown * 1000);
 
         if (this.directMessage && channel.id !== message.channel.id) {
-            sendInfo(message.channel, channel.isDM() ? `${message.author.toString()}, check your DMs!` : `${message.author.toString()}, go to <#${settings.data.botChannelID}>!`);
+            sendInfo(message.channel, channel.type === ChannelType.DM ? `${message.author.toString()}, check your DMs!` : `${message.author.toString()}, go to <#${settings.data.botChannelID}>!`);
         }
     }
 

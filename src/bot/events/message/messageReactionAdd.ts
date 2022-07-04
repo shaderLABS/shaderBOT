@@ -1,4 +1,4 @@
-import { MessageReaction, User } from 'discord.js';
+import { ChannelType, MessageReaction, User } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { sendError } from '../../lib/embeds.js';
@@ -9,7 +9,7 @@ export const event: Event = {
     callback: async (reaction: MessageReaction, user: User) => {
         // *always* safe to access, even if partial
         const channel = reaction.message.channel;
-        if (!channel.isText() || user.bot || !channel.parentId) return;
+        if (channel.type !== ChannelType.GuildText || user.bot || !channel.parentId) return;
 
         if (!settings.data.archive.categoryIDs.includes(channel.parentId) && (await isProjectOwner(user.id, channel.id))) {
             // PROJECT CHANNEL

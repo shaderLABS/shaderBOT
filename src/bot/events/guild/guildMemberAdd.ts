@@ -1,4 +1,4 @@
-import { GuildMember, LimitedCollection } from 'discord.js';
+import { ChannelType, GuildMember, LimitedCollection } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
@@ -72,7 +72,7 @@ export const event: Event = {
 
         for (const project of projects.rows) {
             const channel = member.guild.channels.cache.get(project.channel_id);
-            if (!channel?.isText()) {
+            if (channel?.type !== ChannelType.GuildText) {
                 log(`Failed to restore permissions for ${parseUser(member.user)}'s project channel <#${project.channel_id}>. The channel does not exist or is not cached.`, 'Restore Permissions');
                 continue;
             }

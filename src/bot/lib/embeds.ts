@@ -1,12 +1,13 @@
 import {
     ActionRowBuilder,
+    ApplicationCommandType,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
     GuildMember,
-    Message,
+    InteractionType,
     ModalSubmitInteraction,
     PermissionFlagsBits,
     TextBasedChannel,
@@ -27,6 +28,15 @@ export const enum EmbedIcon {
     info = 'https://img.icons8.com/color/48/000000/info--v1.png',
     log = 'https://img.icons8.com/officexs/48/000000/clock.png',
     note = 'https://img.icons8.com/color/48/000000/note.png',
+}
+
+function getInteractionName(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction) {
+    if (interaction.type === InteractionType.ApplicationCommand) {
+        if (interaction.commandType === ApplicationCommandType.ChatInput) return '/' + interaction.commandName;
+        return interaction.commandName;
+    }
+
+    return 'Unknown Interaction';
 }
 
 export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
@@ -51,7 +61,7 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                    text: `${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })
@@ -80,7 +90,7 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                    text: `${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })
@@ -118,7 +128,7 @@ export function replyInfo(
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${footer ? footer + '\n' : ''}${interaction.user.tag} (${interaction.user.id}) used ${interaction.isCommand() ? '/' + interaction.commandName : 'Unknown Interaction'}`,
+                    text: `${footer ? footer + '\n' : ''}${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })
@@ -238,7 +248,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
     });
 
     const message = await interaction.fetchReply();
-    if (!(message instanceof Message)) return;
+    if (!message.inGuild()) return;
 
     const collector = message.createMessageComponentCollector({
         filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages),

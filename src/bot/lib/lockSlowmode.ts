@@ -1,4 +1,4 @@
-import { BitField, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, ThreadChannel, VoiceChannel } from 'discord.js';
+import { AnyThreadChannel, BitField, ChannelType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { timeoutStore } from '../bot.js';
 import log from './log.js';
@@ -88,12 +88,12 @@ export class LockSlowmode {
         if (overwrite.allow.has(PermissionFlagsBits.SendMessages)) state.add(LockPermissionFlagBits.AllowSendMessages);
         if (overwrite.deny.has(PermissionFlagsBits.SendMessages)) state.add(LockPermissionFlagBits.DenySendMessages);
 
-        if (channel.isText()) {
+        if (channel.type === ChannelType.GuildText) {
             if (overwrite.allow.has(PermissionFlagsBits.CreatePublicThreads)) state.add(LockPermissionFlagBits.AllowCreatePublicThreads);
             if (overwrite.deny.has(PermissionFlagsBits.CreatePublicThreads)) state.add(LockPermissionFlagBits.DenyCreatePublicThreads);
             if (overwrite.allow.has(PermissionFlagsBits.CreatePrivateThreads)) state.add(LockPermissionFlagBits.AllowCreatePrivateThreads);
             if (overwrite.deny.has(PermissionFlagsBits.CreatePrivateThreads)) state.add(LockPermissionFlagBits.DenyCreatePrivateThreads);
-        } else if (channel.isVoice()) {
+        } else if (channel.type === ChannelType.GuildVoice) {
             if (overwrite.allow.has(PermissionFlagsBits.Speak)) state.add(LockPermissionFlagBits.AllowSpeak);
             if (overwrite.deny.has(PermissionFlagsBits.Speak)) state.add(LockPermissionFlagBits.DenySpeak);
         }
@@ -108,7 +108,7 @@ export class LockSlowmode {
         if (bitfield.has(LockPermissionFlagBits.AllowSendMessages)) overwrite.SendMessages = true;
         if (bitfield.has(LockPermissionFlagBits.DenySendMessages)) overwrite.SendMessages = false;
 
-        if (channel.isText()) {
+        if (channel.type === ChannelType.GuildText) {
             overwrite.CreatePublicThreads = null;
             if (bitfield.has(LockPermissionFlagBits.AllowCreatePublicThreads)) overwrite.CreatePublicThreads = true;
             if (bitfield.has(LockPermissionFlagBits.DenyCreatePublicThreads)) overwrite.CreatePublicThreads = false;
@@ -116,7 +116,7 @@ export class LockSlowmode {
             overwrite.CreatePrivateThreads = null;
             if (bitfield.has(LockPermissionFlagBits.AllowCreatePrivateThreads)) overwrite.CreatePrivateThreads = true;
             if (bitfield.has(LockPermissionFlagBits.DenyCreatePrivateThreads)) overwrite.CreatePrivateThreads = false;
-        } else if (channel.isVoice()) {
+        } else if (channel.type === ChannelType.GuildVoice) {
             overwrite.Speak = null;
             if (bitfield.has(LockPermissionFlagBits.AllowSpeak)) overwrite.Speak = true;
             if (bitfield.has(LockPermissionFlagBits.DenySpeak)) overwrite.Speak = false;
@@ -168,7 +168,7 @@ export class LockSlowmode {
         return logString;
     }
 
-    public static async createSlowmode(moderatorID: string, channel: TextChannel | ThreadChannel, duration: number, length: number): Promise<string> {
+    public static async createSlowmode(moderatorID: string, channel: TextChannel | AnyThreadChannel, duration: number, length: number): Promise<string> {
         if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
         if (duration < 10) return Promise.reject("You can't slow a channel for less than 10 seconds.");
 
@@ -220,10 +220,11 @@ export class LockSlowmode {
 
         try {
             if (this.type === 'lock') {
-                if (!channel || (!channel.isText() && !channel.isVoice())) return log(`Failed to expire lock. The channel <#${this.channelID}> could not be resolved.`, 'Expire Lock');
+                if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice))
+                    return log(`Failed to expire lock. The channel <#${this.channelID}> could not be resolved.`, 'Expire Lock');
                 await LockSlowmode.applyLockState(this.previousState, channel);
             } else {
-                if (!channel || (!channel.isText() && !channel.isThread())) {
+                if (!channel || (channel.type !== ChannelType.GuildText && !channel.isThread())) {
                     return log(`Failed to expire slowmode. The channel <#${this.channelID}> could not be resolved.`, 'Expire Slowmode');
                 }
                 await channel.setRateLimitPerUser(this.previousState);
@@ -242,10 +243,10 @@ export class LockSlowmode {
         const channel = getGuild()?.channels.cache.get(this.channelID);
 
         if (this.type === 'lock') {
-            if (!channel || (!channel.isText() && !channel.isVoice())) return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);
+            if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);
             await LockSlowmode.applyLockState(this.previousState, channel);
         } else {
-            if (!channel || (!channel.isText() && !channel.isThread())) {
+            if (!channel || (channel.type !== ChannelType.GuildText && !channel.isThread())) {
                 return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);
             }
             await channel.setRateLimitPerUser(this.previousState);

@@ -1,4 +1,4 @@
-import { Collection, Message, Snowflake } from 'discord.js';
+import { ChannelType, Collection, Message, Snowflake } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
@@ -11,7 +11,7 @@ export const event: Event = {
         if (!firstMessage) return;
 
         const { channel } = firstMessage;
-        if (!channel.isText() && !channel.isThread() && !channel.isVoice()) return;
+        if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) return;
 
         createBackup(channel, backupMessages, `Created after ${messages.size} messages were purged.`).then((messageCount) => {
             if (messageCount > 0) {
