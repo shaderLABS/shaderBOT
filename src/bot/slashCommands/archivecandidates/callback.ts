@@ -19,7 +19,7 @@ export const command: ApplicationCommandCallback = {
             eligibleProjectChannelPromises.push(
                 channel.messages.fetch({ limit: settings.data.archive.minimumMessageCount }).then((messages) => {
                     const oldestMessage = messages.last();
-                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.data.archive.maximumMessageAge) return channel;
+                    if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.data.archive.maximumMessageAge * 1000) return channel;
                 })
             );
         }
