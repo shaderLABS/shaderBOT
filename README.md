@@ -30,6 +30,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     },
     "moderatorRoleID": "", // moderator role, e.g. mentioned in ban appeal threads
     "threadRoleID": "", // role that will be automatically added to new threads
+    "stickyThreadChannelIDs": [""], // channels whose threads will be automatically sticky upon creation
     "appealChannelID": "", // channel for listing ban appeals
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
