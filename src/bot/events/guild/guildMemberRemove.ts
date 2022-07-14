@@ -7,25 +7,25 @@ import { PastPunishment } from '../../lib/punishment.js';
 export const event: Event = {
     name: 'guildMemberRemove',
     callback: async (member: GuildMember) => {
+        const memberKickTimestamp = Date.now();
+
         // wait 1 second because discord api sucks
         await sleep(1000);
 
-        const guild = member.partial ? getGuild() : member.guild;
+        const guild = getGuild();
         if (!guild) return;
 
-        const auditLog = (
+        const auditLogEntry = (
             await guild.fetchAuditLogs({
                 type: AuditLogEvent.MemberKick,
-                limit: 1,
+                limit: 5,
             })
-        ).entries.first();
+        ).entries.find((entry) => entry.target?.id === member.id && entry.executor !== null && !entry.executor.bot && Math.abs(entry.createdTimestamp - memberKickTimestamp) < 5000);
 
-        if (!auditLog?.executor || !auditLog.target || auditLog.target.id !== member.id || auditLog.executor.bot) return;
-        const { executor } = auditLog;
-        const reason = auditLog.reason || 'No reason provided.';
+        if (!auditLogEntry) return;
 
         try {
-            await PastPunishment.createKick(member, reason, executor.id);
+            await PastPunishment.createKick(member, auditLogEntry.reason || 'No reason provided.', auditLogEntry.executor?.id);
         } catch (error) {
             console.error(error);
             log(`Failed to add kick entry for ${parseUser(member.user)}.`, 'Kick');

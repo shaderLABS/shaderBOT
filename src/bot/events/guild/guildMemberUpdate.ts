@@ -1,7 +1,11 @@
-import { AuditLogEvent, GuildMember } from 'discord.js';
+import { APIOverwrite, APIRole, AuditLogEvent, GuildMember } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { sleep } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
+
+function parseChangeTimestamp(timestamp: string | number | boolean | APIRole[] | APIOverwrite[] | undefined) {
+    return typeof timestamp === 'string' ? Date.parse(timestamp) : 0;
+}
 
 export const event: Event = {
     name: 'guildMemberUpdate',
@@ -11,25 +15,58 @@ export const event: Event = {
 
         if ((!wasCommunicationDisabled && !isCommunicationDisabled) || (wasCommunicationDisabled && isCommunicationDisabled)) return;
 
+        const memberUpdateTimestamp = Date.now();
+
         // wait 1 second because discord api sucks
         await sleep(1000);
 
-        const auditLog = (
+        const auditLogEntries = (
             await newMember.guild.fetchAuditLogs({
                 type: AuditLogEvent.MemberUpdate,
-                limit: 1,
+                limit: 5,
             })
-        ).entries.first();
-
-        if (!auditLog || !auditLog.executor || !auditLog.target || auditLog.target.id !== newMember.id || auditLog.executor.bot) return;
+        ).entries;
 
         if (wasCommunicationDisabled) {
+            const auditLogEntry = auditLogEntries.find(
+                (entry) =>
+                    entry.target?.id === newMember.id &&
+                    entry.executor !== null &&
+                    !entry.executor.bot &&
+                    entry.changes.some(
+                        (change) =>
+                            change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) > memberUpdateTimestamp && parseChangeTimestamp(change.new) <= memberUpdateTimestamp
+                    ) &&
+                    Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
+            );
+
+            if (!auditLogEntry) return;
+
             // manual unmute
             const mute = await Punishment.getByUserID(newMember.id, 'mute').catch(() => undefined);
-            mute?.move(auditLog.executor.id);
+            mute?.move(auditLogEntry.executor?.id);
         } else if (isCommunicationDisabled) {
+            const auditLogEntry = auditLogEntries.find(
+                (entry) =>
+                    entry.target?.id === newMember.id &&
+                    entry.executor !== null &&
+                    !entry.executor.bot &&
+                    entry.changes.some(
+                        (change) =>
+                            change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) <= memberUpdateTimestamp && parseChangeTimestamp(change.new) > memberUpdateTimestamp
+                    ) &&
+                    Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
+            );
+
+            if (!auditLogEntry) return;
+
             // manual mute
-            Punishment.createMute(newMember, auditLog.reason || 'No reason provided.', (newMember.communicationDisabledUntilTimestamp - auditLog.createdAt.getTime()) / 1000, auditLog.executor.id);
+            Punishment.createMute(
+                newMember,
+                auditLogEntry.reason || 'No reason provided.',
+                (newMember.communicationDisabledUntilTimestamp - auditLogEntry.createdAt.getTime()) / 1000,
+                auditLogEntry.executor?.id
+            );
         }
     },
 };

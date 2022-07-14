@@ -23,6 +23,7 @@ export type BotSettings = {
     };
     moderatorRoleID: Snowflake;
     threadRoleID?: Snowflake;
+    stickyThreadChannelIDs: Snowflake[];
     appealChannelID: Snowflake;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];

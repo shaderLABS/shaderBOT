@@ -3,6 +3,7 @@ import { Event } from '../eventHandler.js';
 import { cleanBackups } from '../lib/backup.js';
 import { rotateBanner } from '../lib/banner.js';
 import { setRandomPresence } from '../lib/presence.js';
+import { StickyThread } from '../lib/stickyThread.js';
 import { loadTimeouts } from '../lib/timeoutStore.js';
 
 function runDailyTasks() {
@@ -33,5 +34,6 @@ export const event: Event = {
         setRandomPresence();
 
         scheduleDailyTasks();
+        StickyThread.checkAllStickyThreads();
     },
 };

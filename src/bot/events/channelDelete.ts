@@ -2,6 +2,7 @@ import { Channel, ChannelType } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { Event } from '../eventHandler.js';
 import { createBackup } from '../lib/backup.js';
+import { LockSlowmode } from '../lib/lockSlowmode.js';
 import log from '../lib/log.js';
 
 export const event: Event = {
@@ -19,7 +20,13 @@ export const event: Event = {
         }
 
         const backupSize = await createBackup(channel).catch(() => undefined);
-        logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved.` : 'There were no cached messages to save.';
+        logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved. ` : 'There were no cached messages to save. ';
+
+        const lockSlowmodes = await LockSlowmode.getAllByChannelID(channel.id);
+        if (lockSlowmodes.length > 0) {
+            lockSlowmodes.forEach((lockSlowmode) => lockSlowmode.delete());
+            logContent += 'The existing locks and slowmodes have been deleted. ';
+        }
 
         log(logContent, 'Delete Channel');
     },

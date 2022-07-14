@@ -260,7 +260,7 @@ export class LockSlowmode {
         return logString;
     }
 
-    private async delete() {
+    public async delete() {
         const result = await db.query(/*sql*/ `DELETE FROM lock_slowmode WHERE id = $1 RETURNING id;`, [this.id]);
         if (result.rowCount === 0) return Promise.reject(`Failed to delete channel ${this.type}.`);
     }
