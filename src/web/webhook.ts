@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.js';
-import { formatBytes, getGuild } from '../bot/lib/misc.js';
+import { formatBytes, getGuild, trimString } from '../bot/lib/misc.js';
 
 function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
     return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
@@ -35,10 +35,13 @@ export async function releaseNotification(channelID: string, roleID: string, req
             description += '\n\n> ' + body.replaceAll('\n', '\n> ');
         }
 
+        let assetsDescription = '';
         const assets = req.body.release?.assets;
         if (assets && Array.isArray(assets)) {
-            description += assets.reduce((prev, curr) => prev + `[${curr.name}](${curr.browser_download_url}) (${formatBytes(curr.size)})` + '\n', '\n\n');
+            assetsDescription = assets.reduce((prev, curr) => prev + `[${curr.name}](${curr.browser_download_url}) (${formatBytes(curr.size)})` + '\n', '\n\n');
         }
+
+        description = trimString(description, 4096 - assetsDescription.length) + assetsDescription;
 
         await channel.send({
             content: '<@&' + roleID + '>',
