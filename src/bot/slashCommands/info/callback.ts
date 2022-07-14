@@ -12,9 +12,9 @@ export const command: ApplicationCommandCallback = {
         const embed = new EmbedBuilder({
             author: {
                 name: targetUser.tag,
-                iconURL: EmbedIcon.info,
+                iconURL: EmbedIcon.Info,
             },
-            color: EmbedColor.blue,
+            color: EmbedColor.Blue,
             description: targetUser.toString(),
             fields: [
                 {

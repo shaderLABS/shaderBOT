@@ -23,9 +23,9 @@ export const command: ApplicationCommandCallback = {
                 new EmbedBuilder({
                     author: {
                         name: 'Latency',
-                        iconURL: EmbedIcon.info,
+                        iconURL: EmbedIcon.Info,
                     },
-                    color: EmbedColor.blue,
+                    color: EmbedColor.Blue,
                     fields: [
                         {
                             name: 'Bot Latency',

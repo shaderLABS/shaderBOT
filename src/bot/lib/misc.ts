@@ -101,7 +101,7 @@ export function similarityLevenshtein(s1: string, s2: string) {
 }
 
 function levenshteinDistance(s: string, t: string) {
-    let d: number[][] = [];
+    const d: number[][] = [];
 
     const n = s.length;
     const m = t.length;

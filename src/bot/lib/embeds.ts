@@ -16,18 +16,18 @@ import {
 import { GuildCommandInteraction } from '../slashCommandHandler.js';
 
 export const enum EmbedColor {
-    green = 0x4caf50,
-    red = 0xf44336,
-    blue = 0x2196f3,
-    yellow = 0xffc107,
+    Green = 0x4caf50,
+    Red = 0xf44336,
+    Blue = 0x2196f3,
+    Yellow = 0xffc107,
 }
 
 export const enum EmbedIcon {
-    success = 'https://img.icons8.com/color/48/000000/ok--v1.png',
-    error = 'https://img.icons8.com/color/48/000000/cancel--v1.png',
-    info = 'https://img.icons8.com/color/48/000000/info--v1.png',
-    log = 'https://img.icons8.com/officexs/48/000000/clock.png',
-    note = 'https://img.icons8.com/color/48/000000/note.png',
+    Success = 'https://img.icons8.com/color/48/000000/ok--v1.png',
+    Error = 'https://img.icons8.com/color/48/000000/cancel--v1.png',
+    Info = 'https://img.icons8.com/color/48/000000/info--v1.png',
+    Log = 'https://img.icons8.com/officexs/48/000000/clock.png',
+    Note = 'https://img.icons8.com/color/48/000000/note.png',
 }
 
 function getInteractionName(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction) {
@@ -41,9 +41,9 @@ function getInteractionName(interaction: CommandInteraction | ButtonInteraction 
 
 export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: EmbedIcon.success },
+        author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
-        color: EmbedColor.green,
+        color: EmbedColor.Green,
     });
 
     return channel.send({ embeds: [embed] });
@@ -51,9 +51,9 @@ export function sendSuccess(channel: TextBasedChannel | User | GuildMember, desc
 
 export function replySuccess(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: EmbedIcon.success },
+        author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
-        color: EmbedColor.green,
+        color: EmbedColor.Green,
     });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
@@ -70,9 +70,9 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
 
 export function sendError(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: EmbedIcon.error },
+        author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
-        color: EmbedColor.red,
+        color: EmbedColor.Red,
     });
 
     return channel.send({ embeds: [embed] });
@@ -80,9 +80,9 @@ export function sendError(channel: TextBasedChannel | User | GuildMember, descri
 
 export function replyError(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: EmbedIcon.error },
+        author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
-        color: EmbedColor.red,
+        color: EmbedColor.Red,
     });
 
     return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
@@ -99,9 +99,9 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
 
 export function sendInfo(channel: TextBasedChannel | User | GuildMember, description: any, title?: string, message?: string, footer?: string) {
     const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: EmbedIcon.info } : undefined,
+        author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
         description,
-        color: EmbedColor.blue,
+        color: EmbedColor.Blue,
         footer: footer ? { text: footer } : undefined,
     });
 
@@ -117,9 +117,9 @@ export function replyInfo(
     ephemeral: boolean | undefined = false
 ) {
     const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: EmbedIcon.info } : undefined,
+        author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
         description,
-        color: EmbedColor.blue,
+        color: EmbedColor.Blue,
         footer: footer ? { text: footer } : undefined,
     });
 
@@ -140,8 +140,8 @@ export async function sendButtonPages(
     authorID: string,
     pages: string[],
     title: string,
-    color: number = EmbedColor.blue,
-    iconURL: string = EmbedIcon.info
+    color: number = EmbedColor.Blue,
+    iconURL: string = EmbedIcon.Info
 ) {
     const embed = new EmbedBuilder({
         color,
@@ -210,7 +210,7 @@ export async function sendButtonPages(
     });
 }
 
-export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = EmbedColor.blue, iconURL: string = EmbedIcon.info) {
+export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = EmbedColor.Blue, iconURL: string = EmbedIcon.Info) {
     const embed = new EmbedBuilder({
         color,
         description: pages[0],

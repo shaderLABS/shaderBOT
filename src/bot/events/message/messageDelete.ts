@@ -15,7 +15,7 @@ export const event: Event = {
         if (logChannel?.type === ChannelType.GuildText) {
             const attachments: AttachmentBuilder[] = [];
             const logEmbed = new EmbedBuilder({
-                color: EmbedColor.red,
+                color: EmbedColor.Red,
             });
 
             if (message.partial) {

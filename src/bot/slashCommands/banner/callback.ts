@@ -26,9 +26,9 @@ export const command: ApplicationCommandCallback = {
         interaction.reply({
             embeds: [
                 new EmbedBuilder({
-                    color: EmbedColor.blue,
+                    color: EmbedColor.Blue,
                     author: {
-                        iconURL: EmbedIcon.info,
+                        iconURL: EmbedIcon.Info,
                         name: 'Current Banner',
                     },
                     description: `The current banner was submitted by <#${currentBannerProject.channel_id}>.`,

@@ -51,7 +51,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
                     },
                     title: req.body.repository?.full_name,
                     description,
-                    color: EmbedColor.blue,
+                    color: EmbedColor.Blue,
                 }),
             ],
         });
@@ -63,9 +63,9 @@ export async function releaseNotification(channelID: string, roleID: string, req
                 new EmbedBuilder({
                     author: {
                         name: 'A new release has been published!',
-                        iconURL: EmbedIcon.info,
+                        iconURL: EmbedIcon.Info,
                     },
-                    color: EmbedColor.blue,
+                    color: EmbedColor.Blue,
                 }),
             ],
         });

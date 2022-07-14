@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ChannelType, DataResolver } from 'discord.js';
+import { AttachmentBuilder, ChannelType, DataResolver, EmbedBuilder } from 'discord.js';
 import sharp from 'sharp';
 import { pipeline } from 'stream/promises';
 import { db } from '../../../../../db/postgres.js';
@@ -75,6 +75,12 @@ export const command: ApplicationCommandCallback = {
         await db.query(/*sql*/ `UPDATE project SET banner_url = $1 WHERE channel_id = $2;`, [bannerURL, channel.id]);
 
         replySuccess(interaction, 'Successfully set the banner image.');
-        log(`${parseUser(interaction.user)} set the banner image of their project <#${channel.id}> to: ${bannerURL}`);
+        log(
+            new EmbedBuilder({
+                title: 'Set Project Banner',
+                description: `${parseUser(interaction.user)} set the banner image of their project <#${channel.id}>.`,
+                image: { url: bannerURL },
+            })
+        );
     },
 };

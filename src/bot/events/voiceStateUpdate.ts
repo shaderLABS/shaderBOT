@@ -16,7 +16,7 @@ export const event: Event = {
                 logChannel.send({
                     embeds: [
                         new EmbedBuilder({
-                            color: EmbedColor.blue,
+                            color: EmbedColor.Blue,
                             author: {
                                 name: 'Join Voice Channel',
                                 iconURL: member.displayAvatarURL(),
@@ -35,7 +35,7 @@ export const event: Event = {
                 logChannel.send({
                     embeds: [
                         new EmbedBuilder({
-                            color: EmbedColor.blue,
+                            color: EmbedColor.Blue,
                             author: {
                                 name: 'Leave Voice Channel',
                                 iconURL: member.displayAvatarURL(),

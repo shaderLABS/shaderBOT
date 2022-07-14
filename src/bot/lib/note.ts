@@ -119,9 +119,9 @@ export class Note {
         return new EmbedBuilder({
             author: {
                 name: title,
-                iconURL: EmbedIcon.note,
+                iconURL: EmbedIcon.Note,
             },
-            color: EmbedColor.yellow,
+            color: EmbedColor.Yellow,
             description,
         });
     }

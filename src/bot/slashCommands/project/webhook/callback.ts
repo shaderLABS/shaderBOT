@@ -30,9 +30,9 @@ export const command: ApplicationCommandCallback = {
                     )}\`\n**Release Endpoint**\n\`${endpoint}\`\n\nDO NOT SHARE THIS KEY WITH ANYONE! YOU CAN REGENERATE IT AND INVALIDATE THE OLD ONE BY RUNNING THIS COMMAND AGAIN.`,
                     author: {
                         name: 'Project Webhook',
-                        iconURL: EmbedIcon.success,
+                        iconURL: EmbedIcon.Success,
                     },
-                    color: EmbedColor.green,
+                    color: EmbedColor.Green,
                 }),
             ],
             ephemeral: true,

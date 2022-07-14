@@ -102,7 +102,7 @@ export async function checkSpam(message: GuildMessage) {
                     iconURL: message.author.displayAvatarURL(),
                 },
                 description: `**User:** ${parseUser(message.author)}\n**Channels:** <#${spamMessages.map((message) => message.channelID).join('>, <#')}>\n\n\`\`\`${message.content}\`\`\``,
-                color: EmbedColor.red,
+                color: EmbedColor.Red,
             });
 
             const logChannel = message.guild.channels.cache.get(settings.data.logging.moderationChannelID);

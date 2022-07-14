@@ -37,7 +37,7 @@ export const command: ApplicationCommandCallback = {
                 new EmbedBuilder()
                     .setAuthor({ name: channel.name })
                     .setFooter({ text: 'ID: ' + projectID })
-                    .setColor(EmbedColor.green)
+                    .setColor(EmbedColor.Green)
                     .addFields([{ name: 'Notification Role', value: role.toString() }]),
             ],
         });

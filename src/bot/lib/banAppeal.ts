@@ -184,7 +184,7 @@ export class BanAppeal {
                 iconURL: user.displayAvatarURL(),
             },
             title: 'Ban Appeal',
-            color: EmbedColor.blue,
+            color: EmbedColor.Blue,
             description: `**User:** ${parseUser(user)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${escapeMarkdown(this.reason)}`,
         });
     }
@@ -194,9 +194,9 @@ export class BanAppeal {
             return new EmbedBuilder({
                 author: {
                     name: 'Pending...',
-                    iconURL: EmbedIcon.info,
+                    iconURL: EmbedIcon.Info,
                 },
-                color: EmbedColor.blue,
+                color: EmbedColor.Blue,
             });
         } else {
             if (!this.resultModeratorID || !this.resultTimestamp) throw 'The ban appeal result is invalid.';
@@ -214,15 +214,15 @@ export class BanAppeal {
             if (this.result === 'declined') {
                 embed.setAuthor({
                     name: 'Declined',
-                    iconURL: EmbedIcon.error,
+                    iconURL: EmbedIcon.Error,
                 });
-                embed.setColor(EmbedColor.red);
+                embed.setColor(EmbedColor.Red);
             } else {
                 embed.setAuthor({
                     name: 'Accepted',
-                    iconURL: EmbedIcon.success,
+                    iconURL: EmbedIcon.Success,
                 });
-                embed.setColor(EmbedColor.green);
+                embed.setColor(EmbedColor.Green);
             }
 
             return embed;

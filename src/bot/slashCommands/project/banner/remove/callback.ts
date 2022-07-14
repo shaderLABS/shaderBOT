@@ -19,6 +19,6 @@ export const command: ApplicationCommandCallback = {
         if (rowCount === 0) return replyError(interaction, 'There is no banner image set.');
 
         replySuccess(interaction, 'Successfully removed the banner image.');
-        log(`${parseUser(interaction.user)} removed the banner image from their project <#${channel.id}>.`);
+        log(`${parseUser(interaction.user)} removed the banner image from their project <#${channel.id}>.`, 'Remove Project Banner');
     },
 };
