@@ -1,5 +1,4 @@
-import { EmbedBuilder } from '@discordjs/builders';
-import { AttachmentBuilder, ChannelType, EmbedData } from 'discord.js';
+import { AttachmentBuilder, ChannelType, EmbedBuilder, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { automaticResponsePath } from '../automaticResponseHandler.js';
