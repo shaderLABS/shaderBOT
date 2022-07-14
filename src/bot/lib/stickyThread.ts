@@ -1,6 +1,5 @@
 import { AnyThreadChannel, ChannelType, ThreadAutoArchiveDuration } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { sendInfo } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser } from './misc.js';
 
@@ -8,14 +7,12 @@ export class StickyThread {
     public readonly id: string;
     public readonly channelID: string;
     public readonly threadID: string;
-    public readonly messageID: string;
     public readonly moderatorID?: string;
 
-    constructor(data: { id: string; channel_id: string; thread_id: string; message_id: string; mod_id?: string }) {
+    constructor(data: { id: string; channel_id: string; thread_id: string; mod_id?: string }) {
         this.id = data.id;
         this.channelID = data.channel_id;
         this.threadID = data.thread_id;
-        this.messageID = data.message_id;
         this.moderatorID = data.mod_id;
     }
 
@@ -39,6 +36,8 @@ export class StickyThread {
     public static async checkAllStickyThreads() {
         const guild = getGuild();
         if (!guild) return Promise.reject('No guild found.');
+
+        console.log('Checking for archived sticky threads...');
 
         return Promise.all(
             (await StickyThread.getAllStickyThreads()).map(async (stickyThread) => {
@@ -67,19 +66,12 @@ export class StickyThread {
     public static async create(thread: AnyThreadChannel, moderatorID?: string): Promise<string> {
         if (await StickyThread.isSticky(thread.id)) return Promise.reject('The specified thread is already marked as sticky.');
 
-        const message = await sendInfo(thread, undefined, 'This thread is sticky.');
-        message.pin('Create Sticky Thread');
-        // .then(async () => {
-        //     const messages = await thread.messages.fetch({ limit: 5 });
-        //     messages?.find((message) => message.type === MessageType.ChannelPinnedMessage)?.delete();
-        // });
-
         const result = await db.query(
             /*sql*/ `
-            INSERT INTO sticky_thread (channel_id, thread_id, message_id, mod_id)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO sticky_thread (channel_id, thread_id, mod_id)
+            VALUES ($1, $2, $3)
             RETURNING id;`,
-            [thread.parentId, thread.id, message.id, moderatorID]
+            [thread.parentId, thread.id, moderatorID]
         );
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert sticky thread.');
@@ -108,13 +100,12 @@ export class StickyThread {
 
         this.delete();
 
-        const message = await thread.messages.fetch(this.messageID).catch(() => undefined);
-        if (message) message.delete();
-
-        thread.edit({
-            archived: true,
-            reason: 'Lift Sticky Thread',
-        });
+        if (!thread.archived) {
+            thread.edit({
+                archived: true,
+                reason: 'Lift Sticky Thread',
+            });
+        }
 
         const logString = `${moderatorID ? parseUser(moderatorID) : 'System'} marked ${thread.toString()} as non-sticky.`;
 

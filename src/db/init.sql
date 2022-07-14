@@ -99,7 +99,6 @@ CREATE TABLE "sticky_thread" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     channel_id NUMERIC(20) NOT NULL,
     thread_id NUMERIC(20) UNIQUE NOT NULL,
-    message_id NUMERIC(20) NOT NULL,
     mod_id NUMERIC(20)
 );
 
