@@ -2,6 +2,7 @@ import { GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import { handleAutomaticResponse } from '../../automaticResponseHandler.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
+import { checkFilePreview } from '../../lib/filePreview.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
 import { checkSpam } from '../../lib/spamProtection.js';
 
@@ -19,7 +20,7 @@ export const event: Event = {
         if (message.author.bot || !isGuildMessage(message)) return;
 
         checkSpam(message);
-        matchBlacklist(message) || checkMediaOnly(message) || handleAutomaticResponse(message);
+        matchBlacklist(message) || checkMediaOnly(message) || handleAutomaticResponse(message) || checkFilePreview(message);
     },
 };
 

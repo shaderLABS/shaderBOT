@@ -2,6 +2,9 @@ import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User,
 import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
+// https://www.unicode.org/reports/tr18/#Line_Boundaries
+export const unicodeLineBoundaries = /\r\n|[\n\v\f\r\x85\u2028\u2029]/;
+
 export function getGuild() {
     return client.guilds.cache.get(settings.data.guildID);
 }
@@ -86,17 +89,27 @@ export function escapeXml(unsafe: string) {
 
 export const sleep = promisify(setTimeout);
 
+export function makeBoldUnicode(str: string) {
+    return [...str]
+        .map((char) => {
+            const n = char.charCodeAt(0);
+            if (n >= 65 && n < 91) return String.fromCodePoint(n + 120211);
+            if (n >= 97 && n < 123) return String.fromCodePoint(n + 120205);
+            return char;
+        })
+        .join('');
+}
+
 export function similarityLevenshtein(s1: string, s2: string) {
     // normalization form compatibility decomposition
     let longer = s1.normalize('NFKD');
     let shorter = s2.normalize('NFKD');
 
-    if (s1.length < s2.length) {
-        longer = s2;
-        shorter = s1;
+    if (longer.length < shorter.length) {
+        [longer, shorter] = [shorter, longer];
     }
 
-    if (longer.length === 0.0) return 1.0;
+    if (longer.length === 0) return 1;
     return (longer.length - levenshteinDistance(longer, shorter)) / longer.length;
 }
 

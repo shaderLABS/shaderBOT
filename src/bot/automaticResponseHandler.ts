@@ -7,7 +7,7 @@ import { AutomaticResponse } from './lib/automaticResponse.js';
 export const automaticResponsePath = 'customContent/automaticResponse';
 
 export function handleAutomaticResponse(message: GuildMessage) {
-    for (const automaticResponse of automaticResponseStore.values()) {
+    for (const [, automaticResponse] of automaticResponseStore) {
         if (automaticResponse.regex.test(message.content)) {
             automaticResponse.send(message);
             return true;
