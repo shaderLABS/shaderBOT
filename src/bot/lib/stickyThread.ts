@@ -102,7 +102,7 @@ export class StickyThread {
 
         if (!thread.archived) {
             thread.edit({
-                archived: true,
+                autoArchiveDuration: ThreadAutoArchiveDuration.OneDay,
                 reason: 'Lift Sticky Thread',
             });
         }
