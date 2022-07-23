@@ -8,7 +8,7 @@ export async function handleMessageContextMenuCommand(interaction: MessageContex
         const { targetMessage, channel } = interaction;
         if (channel?.type !== ChannelType.GuildText) return replyError(interaction, 'The message was not sent in a text channel.');
 
-        if (!(await isProjectOwner(interaction.user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        if (!(await isProjectOwner(interaction.user.id, channel.id))) return replyError(interaction, undefined, 'Insufficient Permissions');
         if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
 
         const wasPinned = targetMessage.pinned;

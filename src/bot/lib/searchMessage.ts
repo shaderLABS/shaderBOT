@@ -12,12 +12,12 @@ export async function hasPermissionForTarget(interaction: GuildCommandInteractio
     if (!targetMember) return true;
 
     if (interaction.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0) {
-        replyError(interaction, 'The role of the targetted user is higher than or equal to yours.', 'Insufficient Permissions');
+        replyError(interaction, 'The role of the targeted user is higher than or equal to yours.', 'Insufficient Permissions');
         return false;
     }
 
     if (checkProperty && targetMember[checkProperty] === false) {
-        replyError(interaction, `The targetted user is not ${checkProperty}.`, 'Insufficient Permissions');
+        replyError(interaction, `The targeted user is not ${checkProperty}.`, 'Insufficient Permissions');
         return false;
     }
 

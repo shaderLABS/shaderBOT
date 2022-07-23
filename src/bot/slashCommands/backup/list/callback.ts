@@ -1,8 +1,8 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Message, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { backupPath, readBackup } from '../../../lib/backup.js';
-import { replyInfo, sendError } from '../../../lib/embeds.js';
+import { replyError, replyInfo, sendError } from '../../../lib/embeds.js';
 import { formatTimeDateString } from '../../../lib/time.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
@@ -62,12 +62,15 @@ export const command: ApplicationCommandCallback = {
         const components = [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[0]] })];
         if (backupChunks.length > 1) components.push(new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
 
-        await interaction.reply({ content: '**Select a Backup**', components });
-        const selectionMessage = await interaction.fetchReply();
-        if (!(selectionMessage instanceof Message)) return;
+        const selectionMessage = await interaction.reply({ content: '**Select a Backup**', components, fetchReply: true });
 
         const collector = selectionMessage.createMessageComponentCollector({
-            filter: (messageInteraction) => messageInteraction.user.id === interaction.user.id,
+            filter: (messageInteraction) => {
+                if (messageInteraction.user.id === interaction.user.id) return true;
+
+                replyError(messageInteraction, undefined, 'Insufficient Permissions');
+                return false;
+            },
             idle: 300000,
         });
 

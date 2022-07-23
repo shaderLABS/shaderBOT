@@ -1,5 +1,6 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, Message } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, Message, PermissionFlagsBits } from 'discord.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
+import { replyError } from './embeds.js';
 import { unicodeLineBoundaries } from './misc.js';
 
 const gitHubFileURLs = /https:\/\/github\.com(?:\/[^\/\s]+){2}\/blob(?:\/[^\/\s]+)+#[^\/\s]+/;
@@ -152,13 +153,19 @@ export async function checkFilePreview(message: GuildMessage) {
         reply = await message.reply({ content: metadataContent + '\n```' + fileExtension + '\n' + fileContent + '```', components: [buttonActionRow] });
     }
 
+    if (!reply.inGuild()) return;
     message.suppressEmbeds();
 
     reply
         .awaitMessageComponent({
-            filter: (messageInteraction) => messageInteraction.user.id === message.member.id && messageInteraction.customId === 'deleteFilePreview',
-            time: 300000,
             componentType: ComponentType.Button,
+            filter: (buttonInteraction) => {
+                if (buttonInteraction.user.id === message.member.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return true;
+
+                replyError(buttonInteraction, undefined, 'Insufficient Permissions');
+                return false;
+            },
+            time: 300000,
         })
         .then(() => {
             reply.delete();

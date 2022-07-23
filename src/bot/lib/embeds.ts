@@ -5,11 +5,13 @@ import {
     ButtonInteraction,
     ButtonStyle,
     CommandInteraction,
+    ComponentType,
     EmbedBuilder,
     GuildMember,
     InteractionType,
     ModalSubmitInteraction,
     PermissionFlagsBits,
+    SelectMenuInteraction,
     TextBasedChannel,
     User,
 } from 'discord.js';
@@ -30,7 +32,7 @@ export const enum EmbedIcon {
     Note = 'https://img.icons8.com/color/48/000000/note.png',
 }
 
-function getInteractionName(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction) {
+function getInteractionName(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction) {
     if (interaction.type === InteractionType.ApplicationCommand) {
         if (interaction.commandType === ApplicationCommandType.ChatInput) return '/' + interaction.commandName;
         return interaction.commandName;
@@ -49,7 +51,12 @@ export function sendSuccess(channel: TextBasedChannel | User | GuildMember, desc
     return channel.send({ embeds: [embed] });
 }
 
-export function replySuccess(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = false) {
+export function replySuccess(
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    description: any,
+    title?: string,
+    ephemeral: boolean | undefined = false
+) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
@@ -78,7 +85,12 @@ export function sendError(channel: TextBasedChannel | User | GuildMember, descri
     return channel.send({ embeds: [embed] });
 }
 
-export function replyError(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction, description: any, title?: string, ephemeral: boolean | undefined = true) {
+export function replyError(
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    description: any,
+    title?: string,
+    ephemeral: boolean | undefined = true
+) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
@@ -109,7 +121,7 @@ export function sendInfo(channel: TextBasedChannel | User | GuildMember, descrip
 }
 
 export function replyInfo(
-    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction,
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
     description: any,
     title?: string,
     message?: string,
@@ -182,7 +194,13 @@ export async function sendButtonPages(
     if (!message.inGuild()) return;
 
     const collector = message.createMessageComponentCollector({
-        filter: (buttonInteraction) => buttonInteraction.user.id === authorID || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages),
+        componentType: ComponentType.Button,
+        filter: (buttonInteraction) => {
+            if (buttonInteraction.user.id === authorID || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return true;
+
+            replyError(buttonInteraction, undefined, 'Insufficient Permissions');
+            return false;
+        },
         idle: 600000,
     });
 
@@ -238,20 +256,26 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
         emoji: { name: '➡️' },
     });
 
-    await interaction.reply({
+    const message = await interaction.reply({
         embeds: [embed],
         components: [
             new ActionRowBuilder<ButtonBuilder>({
                 components: [backwardButton, forwardButton],
             }),
         ],
+        fetchReply: true,
     });
 
-    const message = await interaction.fetchReply();
     if (!message.inGuild()) return;
 
     const collector = message.createMessageComponentCollector({
-        filter: (buttonInteraction) => buttonInteraction.user.id === interaction.user.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages),
+        componentType: ComponentType.Button,
+        filter: (buttonInteraction) => {
+            if (buttonInteraction.user.id === interaction.user.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return true;
+
+            replyError(buttonInteraction, undefined, 'Insufficient Permissions');
+            return false;
+        },
         idle: 600000,
     });
 
