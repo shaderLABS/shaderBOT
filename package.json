@@ -33,7 +33,7 @@
         "@types/connect-pg-simple": "^7.0.0",
         "@types/cors": "^2.8.12",
         "@types/express-session": "^1.17.5",
-        "@types/node": "^18.0.4",
+        "@types/node": "^18.0.6",
         "@types/node-cron": "^3.0.2",
         "@types/passport": "^1.0.9",
         "@types/passport-discord": "^0.1.6",
