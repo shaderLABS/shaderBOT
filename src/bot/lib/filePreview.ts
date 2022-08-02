@@ -136,6 +136,7 @@ export async function checkFilePreview(message: GuildMessage) {
     });
 
     const buttonActionRow = new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] });
+    fileExtension = additionalAliases[fileExtension] || fileExtension;
 
     let reply: Message;
     if (fileContent.length + metadataContent.length > 1900 || selectedContent.length > 6) {
@@ -195,6 +196,16 @@ function binarySearchSupportedLanguages(value: string) {
 
     return false;
 }
+
+const additionalAliases: { [key: string]: string } = {
+    vsh: 'glsl',
+    fsh: 'glsl',
+    gsh: 'glsl',
+    csh: 'glsl',
+    vert: 'glsl',
+    frag: 'glsl',
+    inc: 'glsl',
+};
 
 // all aliases supported by highlight.js, sorted for binary search
 const supportedLanguages = [
