@@ -1,4 +1,4 @@
-import { Formatters } from 'discord.js';
+import { time, TimestampStyles } from 'discord.js';
 
 function getSeconds(time: string) {
     switch (time.replace(/[^a-z]/g, '')) {
@@ -106,11 +106,11 @@ export function secondsToString(seconds: number) {
 }
 
 export function formatTimeDate(date: Date) {
-    return Formatters.time(date, Formatters.TimestampStyles.LongDateTime);
+    return time(date, TimestampStyles.LongDateTime);
 }
 
 export function formatLongTimeDate(date: Date) {
-    return Formatters.time(date, Formatters.TimestampStyles.LongDate) + ' ' + Formatters.time(date, Formatters.TimestampStyles.LongTime);
+    return time(date, TimestampStyles.LongDate) + ' ' + time(date, TimestampStyles.LongTime);
 }
 
 export function formatTimeDateString(date: Date) {
@@ -126,9 +126,9 @@ export function formatTimeDateString(date: Date) {
 }
 
 export function formatDate(date: Date) {
-    return Formatters.time(date, Formatters.TimestampStyles.LongDate);
+    return time(date, TimestampStyles.LongDate);
 }
 
 export function formatRelativeTime(date: Date) {
-    return Formatters.time(date, Formatters.TimestampStyles.RelativeTime);
+    return time(date, TimestampStyles.RelativeTime);
 }
