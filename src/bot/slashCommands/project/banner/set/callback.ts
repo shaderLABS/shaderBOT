@@ -1,6 +1,5 @@
 import { AttachmentBuilder, ChannelType, DataResolver, EmbedBuilder } from 'discord.js';
 import sharp from 'sharp';
-import { pipeline } from 'stream/promises';
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
@@ -30,8 +29,7 @@ export const command: ApplicationCommandCallback = {
                 return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
             }
 
-            const bannerSharp = sharp({ failOnError: false });
-            pipeline([DataResolver.resolveFile(banner.attachment)], bannerSharp);
+            const bannerSharp = sharp((await DataResolver.resolveFile(banner.attachment)).data, { failOnError: false });
 
             const bannerWidth = 960;
             const bannerHeight = 540;
