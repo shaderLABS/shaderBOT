@@ -258,22 +258,26 @@ export class BanAppeal {
 }
 
 export async function getUserAppealData(userID: string) {
-    const [ban, appeal] = await Promise.all([Punishment.getByUserID(userID, 'ban'), BanAppeal.getLatestByUserID(userID)]);
+    const [ban, appeal] = await Promise.all([Punishment.getByUserID(userID, 'ban'), BanAppeal.getLatestByUserID(userID).catch(() => undefined)]);
     const banModerator = ban.moderatorID ? await client.users.fetch(ban.moderatorID).catch(() => undefined) : undefined;
 
     return {
         id: ban.id,
-        moderator: {
-            id: banModerator?.id,
-            username: banModerator?.username,
-            discriminator: banModerator?.discriminator,
-        },
-        appeal: {
-            result: appeal.result,
-            resultReason: appeal.resultReason,
-            resultTimestamp: appeal.resultTimestamp,
-            timestamp: appeal.timestamp,
-        },
+        moderator: banModerator
+            ? {
+                  id: banModerator.id,
+                  username: banModerator.username,
+                  discriminator: banModerator.discriminator,
+              }
+            : undefined,
+        appeal: appeal
+            ? {
+                  result: appeal.result,
+                  resultReason: appeal.resultReason,
+                  resultTimestamp: appeal.resultTimestamp,
+                  timestamp: appeal.timestamp,
+              }
+            : undefined,
         reason: ban.reason,
         contextURL: ban.contextURL,
         expireTimestamp: ban.expireTimestamp,
