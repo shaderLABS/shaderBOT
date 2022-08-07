@@ -1,4 +1,4 @@
-import { APIOverwrite, APIRole, AuditLogEvent, GuildMember } from 'discord.js';
+import { APIOverwrite, APIRole, AuditLogEvent, GuildAuditLogsEntry, GuildMember, User } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { sleep } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
@@ -38,13 +38,13 @@ export const event: Event = {
                             change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) > memberUpdateTimestamp && parseChangeTimestamp(change.new) <= memberUpdateTimestamp
                     ) &&
                     Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
-            );
+            ) as (GuildAuditLogsEntry<AuditLogEvent.MemberUpdate, 'Update', 'User'> & { executor: User }) | undefined;
 
             if (!auditLogEntry) return;
 
             // manual unmute
             const mute = await Punishment.getByUserID(newMember.id, 'mute').catch(() => undefined);
-            mute?.move(auditLogEntry.executor?.id);
+            mute?.move(auditLogEntry.executor.id);
         } else if (isCommunicationDisabled) {
             const auditLogEntry = auditLogEntries.find(
                 (entry) =>
@@ -56,7 +56,7 @@ export const event: Event = {
                             change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) <= memberUpdateTimestamp && parseChangeTimestamp(change.new) > memberUpdateTimestamp
                     ) &&
                     Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
-            );
+            ) as (GuildAuditLogsEntry<AuditLogEvent.MemberUpdate, 'Update', 'User'> & { executor: User }) | undefined;
 
             if (!auditLogEntry) return;
 
@@ -65,7 +65,7 @@ export const event: Event = {
                 newMember,
                 auditLogEntry.reason || 'No reason provided.',
                 (newMember.communicationDisabledUntilTimestamp - auditLogEntry.createdAt.getTime()) / 1000,
-                auditLogEntry.executor?.id
+                auditLogEntry.executor.id
             );
         }
     },
