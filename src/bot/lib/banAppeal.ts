@@ -6,6 +6,7 @@ import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
 import { parseUser, trimString } from './misc.js';
 import { Punishment } from './punishment.js';
+import { StickyThread } from './stickyThread.js';
 import { formatTimeDate } from './time.js';
 
 export class BanAppeal {
@@ -15,7 +16,7 @@ export class BanAppeal {
     public readonly timestamp: Date;
     public readonly messageID?: string;
 
-    public result: 'pending' | 'declined' | 'accepted';
+    public result: 'pending' | 'declined' | 'accepted' | 'expired';
     public resultReason?: string;
     public resultModeratorID?: string;
     public resultTimestamp?: Date;
@@ -26,7 +27,7 @@ export class BanAppeal {
         id: string;
         user_id: string;
         reason: string;
-        result: 'pending' | 'declined' | 'accepted';
+        result: 'pending' | 'declined' | 'accepted' | 'expired';
         result_reason?: string;
         result_mod_id?: string;
         result_timestamp?: string | number | Date;
@@ -116,6 +117,7 @@ export class BanAppeal {
 
     public async editResultReason(newResultReason: string, moderatorID: string) {
         if (this.result === 'pending') return Promise.reject('The ban appeal is still pending.');
+        if (this.result === 'expired') return Promise.reject('The ban appeal is expired.');
 
         const oldResultReason = this.resultReason;
         const timestamp = new Date();
@@ -166,7 +168,12 @@ export class BanAppeal {
         if (this.messageID) {
             const appealMessage = await appealChannel.messages.fetch(this.messageID).catch(() => undefined);
             if (appealMessage) {
-                appealMessage.thread?.setArchived(true).catch(() => undefined);
+                if (appealMessage.thread) {
+                    await appealMessage.thread.send({ embeds: [this.toAppealEmbed(await client.users.fetch(this.userID).catch(() => undefined)), this.toResultEmbed()] });
+                    const stickyThread = await StickyThread.getByThreadID(appealMessage.thread.id).catch(() => undefined);
+                    stickyThread?.lift();
+                }
+
                 appealMessage.delete().catch(() => undefined);
             }
         }
@@ -177,15 +184,56 @@ export class BanAppeal {
         return logString;
     }
 
-    public toAppealEmbed(user: User) {
+    public async expire() {
+        if (this.result !== 'pending') return Promise.reject('The ban appeal is already closed.');
+
+        const appealChannel = client.channels.cache.get(settings.data.appealChannelID);
+        if (appealChannel?.type !== ChannelType.GuildText) return Promise.reject('The ban appeal channel was not found.');
+
+        const timestamp = new Date();
+
+        const result = await db.query(
+            /*sql*/ `
+            UPDATE appeal
+            SET result = $1, result_timestamp = $2
+            WHERE id = $3;`,
+            ['expired', timestamp, this.id]
+        );
+        if (result.rowCount === 0) return Promise.reject('Failed to expire the ban appeal.');
+
+        this.result = 'expired';
+        this.resultTimestamp = timestamp;
+
+        if (this.messageID) {
+            const appealMessage = await appealChannel.messages.fetch(this.messageID).catch(() => undefined);
+            if (appealMessage) {
+                if (appealMessage.thread) {
+                    await appealMessage.thread.send({ embeds: [this.toAppealEmbed(await client.users.fetch(this.userID).catch(() => undefined)), this.toResultEmbed()] });
+                    const stickyThread = await StickyThread.getByThreadID(appealMessage.thread.id).catch(() => undefined);
+                    stickyThread?.lift();
+                }
+
+                appealMessage.delete().catch(() => undefined);
+            }
+        }
+
+        const logString = `${parseUser(this.userID)}'s ban appeal has expired.\n\n${this.toString()}`;
+
+        log(logString, 'Expire Ban Appeal');
+        return logString;
+    }
+
+    public toAppealEmbed(user: User | undefined) {
         return new EmbedBuilder({
-            author: {
-                name: user.tag,
-                iconURL: user.displayAvatarURL(),
-            },
+            author: user
+                ? {
+                      name: user.tag,
+                      iconURL: user.displayAvatarURL(),
+                  }
+                : undefined,
             title: 'Ban Appeal',
             color: EmbedColor.Blue,
-            description: `**User:** ${parseUser(user)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${escapeMarkdown(this.reason)}`,
+            description: `**User:** ${parseUser(user || this.userID)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${escapeMarkdown(this.reason)}`,
         });
     }
 
@@ -197,6 +245,16 @@ export class BanAppeal {
                     iconURL: EmbedIcon.Info,
                 },
                 color: EmbedColor.Blue,
+            });
+        } else if (this.result === 'expired') {
+            if (!this.resultTimestamp) throw 'The ban appeal result is invalid.';
+
+            return new EmbedBuilder({
+                author: {
+                    name: 'Expired',
+                    iconURL: EmbedIcon.Log,
+                },
+                description: `**Created At:** ${formatTimeDate(this.resultTimestamp)}`,
             });
         } else {
             if (!this.resultModeratorID || !this.resultTimestamp) throw 'The ban appeal result is invalid.';
@@ -238,7 +296,11 @@ export class BanAppeal {
 
         string += `**Reason:** ${trimString(this.reason, 150)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**Result:** ${this.result}\n`;
 
-        if (this.result !== 'pending') {
+        if (this.result === 'expired') {
+            if (!this.resultTimestamp) throw 'The ban appeal result is invalid.';
+
+            string += `**Result Created At:** ${formatTimeDate(this.resultTimestamp)}\n`;
+        } else if (this.result !== 'pending') {
             if (!this.resultModeratorID || !this.resultTimestamp) throw 'The ban appeal result is invalid.';
 
             string +=

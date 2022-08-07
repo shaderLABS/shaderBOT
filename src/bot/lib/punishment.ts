@@ -1,6 +1,7 @@
 import { UserResolvable } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, timeoutStore } from '../bot.js';
+import { BanAppeal } from './banAppeal.js';
 import { sendInfo } from './embeds.js';
 import log from './log.js';
 import { formatContextURL, getGuild, parseUser, userToMember } from './misc.js';
@@ -366,6 +367,9 @@ export class Punishment {
             if (this.type === 'ban') {
                 // ban
                 await guild.members.unban(this.userID).catch(() => undefined);
+
+                const appeal = await BanAppeal.getPendingByUserID(this.userID).catch(() => undefined);
+                if (appeal) await appeal.expire();
 
                 log(`${parseUser(this.userID)}'s temporary ban (${this.id}) has expired.`, 'Expire Temporary Ban');
             } else {
