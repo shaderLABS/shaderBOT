@@ -3,6 +3,10 @@ import { settings } from './bot.js';
 import { replyError, replySuccess } from './lib/embeds.js';
 import { isProjectOwner } from './lib/project.js';
 
+/***********
+ * EXECUTE *
+ ***********/
+
 export async function handleMessageContextMenuCommand(interaction: MessageContextMenuCommandInteraction<'cached'>) {
     if (interaction.commandName === 'Pin/Unpin Message') {
         const { targetMessage, channel } = interaction;

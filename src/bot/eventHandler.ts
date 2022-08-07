@@ -1,13 +1,19 @@
-import { ClientEvents } from 'discord.js';
+import { ClientEvents, Collection } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { client, events } from './bot.js';
+import { client } from './bot.js';
 
 export type Event = {
     readonly name: keyof ClientEvents;
     readonly callback: Function;
 };
+
+export const events = new Collection<string, Event>();
+
+/************
+ * REGISTER *
+ ************/
 
 export async function registerEvents(dir: string) {
     const dirPath = path.join(path.resolve(), dir);

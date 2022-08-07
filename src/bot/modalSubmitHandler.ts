@@ -1,48 +1,44 @@
-import { ChannelType, ModalSubmitInteraction } from 'discord.js';
-import { replyError, replyInfo, replySuccess } from './lib/embeds.js';
-import log from './lib/log.js';
-import { getAlphabeticalChannelPosition, parseUser } from './lib/misc.js';
+import { Collection, ModalSubmitInteraction } from 'discord.js';
+import fs from 'fs/promises';
+import path from 'path';
+import url from 'url';
+
+export type ModalSubmitCallback = {
+    readonly customID: string;
+    readonly callback: (interaction: ModalSubmitInteraction<'cached'>, state: string | undefined) => void;
+};
+
+export const modals = new Collection<string, ModalSubmitCallback>();
+
+/***********
+ * EXECUTE *
+ ***********/
 
 export async function handleModalSubmit(interaction: ModalSubmitInteraction<'cached'>) {
-    if (interaction.customId.startsWith('editProjectChannel')) {
-        const channelID = interaction.customId.split(':')[1];
-        if (!channelID) return;
-
-        const channel = interaction.guild.channels.cache.get(channelID);
-        if (channel?.type !== ChannelType.GuildText) return;
-
-        const oldChannelName = channel.name;
-        channel.name = interaction.fields.getTextInputValue('nameInput').trim();
-        const channelNameEdited = oldChannelName !== channel.name;
-
-        if (!channel.name) {
-            return replyError(interaction, 'The channel name must be at least one character long.', 'Edit Project Channel');
+    for (const [, modal] of modals) {
+        if (interaction.customId.startsWith(modal.customID)) {
+            modal.callback(interaction, interaction.customId.split(':')[1]);
+            return;
         }
-
-        const oldChannelDescription = channel.topic || '';
-        channel.topic = interaction.fields.getTextInputValue('descriptionInput').trim();
-        const channelDescriptionEdited = oldChannelDescription !== channel.topic;
-
-        if (!channelNameEdited && !channelDescriptionEdited) {
-            return replyInfo(interaction, 'The channel was not edited because neither the name nor the description have been changed.', 'Edit Project Channel', undefined, undefined, true);
-        }
-
-        try {
-            await channel.edit({
-                topic: channelDescriptionEdited ? channel.topic : undefined,
-                name: channelNameEdited ? channel.name : undefined,
-                position: channelNameEdited ? getAlphabeticalChannelPosition(channel, channel.parent) : undefined,
-            });
-        } catch {
-            return replyError(interaction, 'Failed to edit the channel.', 'Edit Project Channel', false);
-        }
-
-        replySuccess(interaction, 'Successfully edited the channel.', 'Edit Project Channel');
-        log(
-            `${parseUser(interaction.user)} edited the their project project channel (<#${channel.id}>).\n\n**Before**\nName: ${oldChannelName}\nDescription: ${
-                oldChannelDescription || 'No description.'
-            }\n\n**After**\nName: ${channel.name}\nDescription: ${channel.topic || 'No description.'}`,
-            'Edit Project Channel'
-        );
     }
+}
+
+/************
+ * REGISTER *
+ ************/
+
+export async function registerModals(dir: string, directories: string[] = []) {
+    const dirPath = path.join(path.resolve(), dir);
+    const dirEntries = await fs.readdir(dirPath, { withFileTypes: true });
+
+    await Promise.all(
+        dirEntries.map(async (dirEntry) => {
+            if (dirEntry.isDirectory()) {
+                await registerModals(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
+            } else if (dirEntry.name.endsWith('.js')) {
+                const { modal }: { modal: ModalSubmitCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
+                modals.set(modal.customID, modal);
+            }
+        })
+    );
 }

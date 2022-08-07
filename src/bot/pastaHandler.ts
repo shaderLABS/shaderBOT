@@ -1,9 +1,14 @@
+import { Collection } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { pastaStore } from './bot.js';
 import { Pasta } from './lib/pasta.js';
 
 export const pastaPath = 'customContent/pasta';
+export const pastaStore = new Collection<string, Pasta>();
+
+/************
+ * REGISTER *
+ ************/
 
 export async function registerPastas(dir: string) {
     const dirPath = path.join(path.resolve(), dir);

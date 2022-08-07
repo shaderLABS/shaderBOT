@@ -1,8 +1,7 @@
 import { AttachmentBuilder, AutocompleteInteraction, EmbedBuilder, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { pastaStore } from '../bot.js';
-import { pastaPath } from '../pastaHandler.js';
+import { pastaPath, pastaStore } from '../pastaHandler.js';
 import { GuildCommandInteraction } from '../slashCommandHandler.js';
 import { stringToFileName } from './misc.js';
 

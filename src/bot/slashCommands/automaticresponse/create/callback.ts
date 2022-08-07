@@ -1,4 +1,4 @@
-import { automaticResponseStore } from '../../../bot.js';
+import { automaticResponseStore } from '../../../automaticResponseHandler.js';
 import { AutomaticResponse } from '../../../lib/automaticResponse.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';

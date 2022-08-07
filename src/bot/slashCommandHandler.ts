@@ -11,6 +11,9 @@ export type ApplicationCommandCallback = {
     readonly callback: (interaction: GuildCommandInteraction) => void;
 };
 
+type SlashCommandCollection = Collection<string, SlashCommandCollection | ApplicationCommandCallback>;
+export const slashCommands: SlashCommandCollection = new Collection();
+
 export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
     channel: TextChannel | AnyThreadChannel | VoiceChannel;
 };
@@ -67,9 +70,6 @@ export function handleChatInputCommand(interaction: ChatInputCommandInteraction<
 /************
  * REGISTER *
  ************/
-
-type SlashCommandCollection = Collection<string, SlashCommandCollection | ApplicationCommandCallback>;
-export const slashCommands: SlashCommandCollection = new Collection();
 
 export async function registerSlashCommands(dir: string, directories: string[] = []) {
     const dirPath = path.join(path.resolve(), dir);

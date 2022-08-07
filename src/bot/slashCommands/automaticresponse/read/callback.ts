@@ -1,5 +1,5 @@
 import { AttachmentBuilder } from 'discord.js';
-import { automaticResponseStore } from '../../../bot.js';
+import { automaticResponseStore } from '../../../automaticResponseHandler.js';
 import { replyError, replyInfo } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 

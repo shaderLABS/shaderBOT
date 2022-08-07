@@ -1,5 +1,5 @@
-import { pastaStore } from '../../bot.js';
 import { replyError } from '../../lib/embeds.js';
+import { pastaStore } from '../../pastaHandler.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {

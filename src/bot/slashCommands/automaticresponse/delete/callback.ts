@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { automaticResponsePath } from '../../../automaticResponseHandler.js';
-import { automaticResponseStore } from '../../../bot.js';
+import { automaticResponsePath, automaticResponseStore } from '../../../automaticResponseHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser, stringToFileName } from '../../../lib/misc.js';

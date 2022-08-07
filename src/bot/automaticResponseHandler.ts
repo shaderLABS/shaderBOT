@@ -1,10 +1,15 @@
+import { Collection } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { automaticResponseStore } from './bot.js';
 import { GuildMessage } from './events/message/messageCreate.js';
 import { AutomaticResponse } from './lib/automaticResponse.js';
 
 export const automaticResponsePath = 'customContent/automaticResponse';
+export const automaticResponseStore = new Collection<string, AutomaticResponse>();
+
+/***********
+ * EXECUTE *
+ ***********/
 
 export function handleAutomaticResponse(message: GuildMessage) {
     for (const [, automaticResponse] of automaticResponseStore) {
@@ -16,6 +21,10 @@ export function handleAutomaticResponse(message: GuildMessage) {
 
     return false;
 }
+
+/************
+ * REGISTER *
+ ************/
 
 export async function registerAutomaticResponses(dir: string) {
     const dirPath = path.join(path.resolve(), dir);

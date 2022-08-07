@@ -1,20 +1,16 @@
-import { Client, Collection, GatewayIntentBits, Partials } from 'discord.js';
+import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 import { automaticResponsePath, registerAutomaticResponses } from './automaticResponseHandler.js';
-import { Event, registerEvents } from './eventHandler.js';
-import { AutomaticResponse } from './lib/automaticResponse.js';
+import { registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { CooldownStore } from './lib/cooldownStore.js';
-import { Pasta } from './lib/pasta.js';
 import { TimeoutStore } from './lib/timeoutStore.js';
+import { registerModals } from './modalSubmitHandler.js';
 import { pastaPath, registerPastas } from './pastaHandler.js';
 import { BotSettings, SettingsFile } from './settings/settings.js';
 import { registerSlashCommands } from './slashCommandHandler.js';
 
 export let client: Client;
-export let events: Collection<string, Event>;
-export let pastaStore: Collection<string, Pasta>;
-export let automaticResponseStore: Collection<string, AutomaticResponse>;
 export let cooldownStore: CooldownStore;
 export let timeoutStore: TimeoutStore;
 export let settings: SettingsFile<BotSettings>;
@@ -39,15 +35,13 @@ export async function startBot() {
         ],
     });
 
-    events = new Collection<string, Event>();
-    pastaStore = new Collection<string, Pasta>();
-    automaticResponseStore = new Collection<string, AutomaticResponse>();
     cooldownStore = new CooldownStore();
     timeoutStore = new TimeoutStore();
     settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
 
     registerEvents('./build/bot/events');
     registerSlashCommands('./build/bot/slashCommands');
+    registerModals('./build/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
     cleanBackups();
