@@ -15,12 +15,10 @@ export const modals = new Collection<string, ModalSubmitCallback>();
  ***********/
 
 export async function handleModalSubmit(interaction: ModalSubmitInteraction<'cached'>) {
-    for (const [, modal] of modals) {
-        if (interaction.customId.startsWith(modal.customID)) {
-            modal.callback(interaction, interaction.customId.split(':')[1]);
-            return;
-        }
-    }
+    const [customId, state] = interaction.customId.split(':');
+
+    const modal = modals.get(customId);
+    if (modal) modal.callback(interaction, state);
 }
 
 /************
