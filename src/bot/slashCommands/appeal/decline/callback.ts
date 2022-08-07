@@ -1,25 +1,28 @@
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
 import { BanAppeal } from '../../../lib/banAppeal.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
-import { hasPermissionForTarget } from '../../../lib/searchMessage.js';
+import { replyError } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
     requiredPermissions: ['BanMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
-        const reason = interaction.options.getString('reason', true);
 
-        try {
-            const appeal = await BanAppeal.getPendingByUserID(targetUser.id);
+        if (!(await BanAppeal.hasPending(targetUser.id))) return replyError(interaction, 'The specified user does not have any pending ban appeals.');
 
-            if (!(await hasPermissionForTarget(interaction, appeal.userID))) return;
-            await interaction.deferReply();
+        const reasonInput = new TextInputBuilder({
+            customId: 'reasonInput',
+            label: 'Reason',
+            style: TextInputStyle.Paragraph,
+            required: true,
+        });
 
-            const logString = await appeal.close('declined', reason, interaction.user.id);
+        const modal = new ModalBuilder({
+            customId: 'declineBanAppeal:' + targetUser.id,
+            title: 'Decline Ban Appeal',
+            components: [new ActionRowBuilder<TextInputBuilder>({ components: [reasonInput] })],
+        });
 
-            replySuccess(interaction, logString, 'Decline Ban Appeal');
-        } catch (error) {
-            replyError(interaction, error);
-        }
+        interaction.showModal(modal);
     },
 };

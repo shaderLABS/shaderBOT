@@ -16,12 +16,6 @@ export default {
                     type: ApplicationCommandOptionType.User,
                     required: true,
                 },
-                {
-                    name: 'reason',
-                    description: "The reason of the acceptation, which won't be displayed to the user.",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                },
             ],
         },
 
@@ -34,12 +28,6 @@ export default {
                     name: 'user',
                     description: 'The user with a pending ban appeal.',
                     type: ApplicationCommandOptionType.User,
-                    required: true,
-                },
-                {
-                    name: 'reason',
-                    description: 'The reason of the declination.',
-                    type: ApplicationCommandOptionType.String,
                     required: true,
                 },
             ],
