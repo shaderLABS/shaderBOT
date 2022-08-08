@@ -32,6 +32,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     "threadRoleID": "", // role that will be automatically added to new threads
     "stickyThreadChannelIDs": [""], // channels whose threads will be automatically sticky upon creation
     "appealChannelID": "", // channel for listing ban appeals
+    "appealCooldown": 0, // cooldown in seconds for submitting new appeals after the previous one has been declined
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
     "guildID": "",
