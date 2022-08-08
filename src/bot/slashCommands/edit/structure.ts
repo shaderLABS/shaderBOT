@@ -55,10 +55,6 @@ export default {
                             value: 'warnseverity',
                         },
                         {
-                            name: 'Ban Appeal Result Reason',
-                            value: 'appealreason',
-                        },
-                        {
                             name: 'Context',
                             value: 'context',
                         },
@@ -68,6 +64,7 @@ export default {
                     name: 'value',
                     description: 'The new value. Can be a new reason, amount of time, severity or message URL.',
                     type: ApplicationCommandOptionType.String,
+                    maxLength: 512,
                     required: true,
                 },
             ],
@@ -122,10 +119,6 @@ export default {
                             value: 'warnseverity',
                         },
                         {
-                            name: 'Ban Appeal Reason',
-                            value: 'appealreason',
-                        },
-                        {
                             name: 'Context',
                             value: 'context',
                         },
@@ -135,6 +128,7 @@ export default {
                     name: 'value',
                     description: 'The new value. Can be a new reason, content, amount of time or severity.',
                     type: ApplicationCommandOptionType.String,
+                    maxLength: 512,
                     required: true,
                 },
             ],

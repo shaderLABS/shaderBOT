@@ -1,6 +1,5 @@
 import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { BanAppeal } from '../../lib/banAppeal.js';
 import { editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { Note } from '../../lib/note.js';
@@ -128,15 +127,6 @@ export async function editApsect(interaction: GuildCommandInteraction, target: s
 
                 const logString = await warning.editSeverity(Number.parseInt(value), interaction.user.id);
                 replySuccess(interaction, logString, 'Edit Warning Severity');
-                break;
-            }
-
-            case 'appealreason': {
-                const appeal = target instanceof User ? await BanAppeal.getLatestByUserID(target.id) : await BanAppeal.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, appeal.userID))) return;
-
-                const logString = await appeal.editResultReason(value, interaction.user.id);
-                replySuccess(interaction, logString, 'Edit Ban Appeal Result Reason');
                 break;
             }
 

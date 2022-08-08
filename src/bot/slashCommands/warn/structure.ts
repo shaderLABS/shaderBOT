@@ -44,6 +44,7 @@ export default {
                     name: 'reason',
                     description: 'The reason of the warning.',
                     type: ApplicationCommandOptionType.String,
+                    maxLength: 512,
                     required: true,
                 },
                 {

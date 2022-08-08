@@ -15,6 +15,7 @@ export default {
             name: 'reason',
             description: 'The reason of the ban.',
             type: ApplicationCommandOptionType.String,
+            maxLength: 512,
             required: true,
         },
         {

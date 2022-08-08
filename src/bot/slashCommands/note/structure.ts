@@ -20,6 +20,7 @@ export default {
                     name: 'content',
                     description: 'The content of the note.',
                     type: ApplicationCommandOptionType.String,
+                    maxLength: 512,
                     required: true,
                 },
                 {
