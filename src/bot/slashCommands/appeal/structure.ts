@@ -12,9 +12,9 @@ export default {
             options: [
                 {
                     name: 'user',
-                    description: 'The user with a pending ban appeal.',
+                    description: 'The user with a pending ban appeal. Not specifying a value will default to the current thread.',
                     type: ApplicationCommandOptionType.User,
-                    required: true,
+                    required: false,
                 },
             ],
         },
@@ -26,22 +26,35 @@ export default {
             options: [
                 {
                     name: 'user',
-                    description: 'The user with a pending ban appeal.',
+                    description: 'The user with a pending ban appeal. Not specifying a value will default to the current thread.',
                     type: ApplicationCommandOptionType.User,
-                    required: true,
+                    required: false,
                 },
             ],
         },
         {
             name: 'read',
-            description: 'Read a ban appeal with the specified UUID and its current status.',
+            description: 'Read a ban appeal and its current status.',
             type: ApplicationCommandOptionType.Subcommand,
             options: [
                 {
                     name: 'id',
-                    description: 'The UUID of the ban appeal you want to read.',
+                    description: 'The UUID of the ban appeal. Not specifying a value will default to the current thread.',
                     type: ApplicationCommandOptionType.String,
-                    required: true,
+                    required: false,
+                },
+            ],
+        },
+        {
+            name: 'edit',
+            description: 'Edit the result reason of a ban appeal.',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'id',
+                    description: 'The UUID of the ban appeal. Not specifying a value will default to the current thread.',
+                    type: ApplicationCommandOptionType.String,
+                    required: false,
                 },
             ],
         },

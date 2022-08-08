@@ -61,15 +61,22 @@ export class BanAppeal {
         return new BanAppeal(result.rows[0]);
     }
 
-    static async getByUUID(uuid: string) {
+    public static async getByUUID(uuid: string) {
         const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE id = $1;`, [uuid]);
-        if (result.rowCount === 0) return Promise.reject(`A ban appeal with the specified UUID does not exist.`);
+        if (result.rowCount === 0) return Promise.reject('A ban appeal with the specified UUID does not exist.');
         return new BanAppeal(result.rows[0]);
     }
 
-    static async getAllByUserID(userID: string) {
+    public static async getAllByUserID(userID: string) {
         const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
         return result.rows.map((row) => new BanAppeal(row));
+    }
+
+    public static async getByThreadID(threadID: string) {
+        // thread channel ID === starter message ID
+        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE message_id = $1 LIMIT 1;`, [threadID]);
+        if (result.rowCount === 0) return Promise.reject('A ban appeal with the specified thread ID does not exist.');
+        return new BanAppeal(result.rows[0]);
     }
 
     public static async hasPending(userID: string) {
@@ -135,9 +142,12 @@ export class BanAppeal {
         this.resultModeratorID = moderatorID;
         this.resultEditTimestamp = timestamp;
 
-        const logString = `${parseUser(this.resultModeratorID)} edited the result reason of ${parseUser(this.userID)}'s ban appeal (${this.id}).\n\n**Before**\n${
-            oldResultReason || 'No reason provided.'
-        }\n\n**After**\n${newResultReason}`;
+        const logString = trimString(
+            `${parseUser(this.resultModeratorID)} edited the result reason of ${parseUser(this.userID)}'s ban appeal (${this.id}).\n\n**Before**\n${
+                oldResultReason || 'No reason provided.'
+            }\n\n**After**\n${newResultReason}`,
+            4096
+        );
 
         log(logString, 'Edit Ban Appeal Result Reason');
         return logString;

@@ -7,11 +7,17 @@ import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../sl
 export const command: ApplicationCommandCallback = {
     requiredPermissions: ['BanMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
-        const id = interaction.options.getString('id', true);
-        if (!uuid.test(id)) return replyError(interaction, 'The specified UUID is invalid.');
+        const appealID = interaction.options.getString('id', false);
 
         try {
-            const appeal = await BanAppeal.getByUUID(id);
+            let appeal: BanAppeal;
+            if (appealID) {
+                if (!uuid.test(appealID)) throw 'The specified UUID is invalid.';
+                appeal = await BanAppeal.getByUUID(appealID);
+            } else {
+                if (!interaction.channel.isThread()) throw 'You must either specify a UUID or use this command in the thread of a ban appeal.';
+                appeal = await BanAppeal.getByThreadID(interaction.channel.id);
+            }
 
             const targetUser = await client.users.fetch(appeal.userID).catch(() => undefined);
             if (!targetUser) return replyError(interaction, 'The user who sent the ban appeal could not be resolved.');

@@ -5,14 +5,14 @@ import { ModalSubmitCallback } from '../modalSubmitHandler.js';
 
 export const modal: ModalSubmitCallback = {
     customID: 'acceptBanAppeal',
-    callback: async (interaction, targetUserID) => {
-        if (!targetUserID) return;
+    callback: async (interaction, appealID) => {
+        if (!appealID) return;
 
         try {
-            const appeal = await BanAppeal.getPendingByUserID(targetUserID);
+            const appeal = await BanAppeal.getByUUID(appealID);
             const logString = await appeal.close('accepted', interaction.fields.getTextInputValue('reasonInput'), interaction.user.id);
 
-            const ban = await Punishment.getByUserID(targetUserID, 'ban');
+            const ban = await Punishment.getByUserID(appeal.userID, 'ban');
             await ban.move(interaction.user.id);
 
             replySuccess(interaction, logString, 'Accept Ban Appeal');

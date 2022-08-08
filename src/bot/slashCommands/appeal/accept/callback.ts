@@ -6,23 +6,36 @@ import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../sl
 export const command: ApplicationCommandCallback = {
     requiredPermissions: ['BanMembers'],
     callback: async (interaction: GuildCommandInteraction) => {
-        const targetUser = interaction.options.getUser('user', true);
+        const targetUser = interaction.options.getUser('user', false);
 
-        if (!(await BanAppeal.hasPending(targetUser.id))) return replyError(interaction, 'The specified user does not have any pending ban appeals.');
+        try {
+            let appeal: BanAppeal;
+            if (targetUser) {
+                appeal = await BanAppeal.getPendingByUserID(targetUser.id);
+            } else {
+                if (!interaction.channel.isThread()) throw 'You must either specify a user or use this command in the thread of a ban appeal.';
 
-        const reasonInput = new TextInputBuilder({
-            customId: 'reasonInput',
-            label: 'Reason',
-            style: TextInputStyle.Paragraph,
-            required: true,
-        });
+                appeal = await BanAppeal.getByThreadID(interaction.channel.id);
+                if (appeal.result !== 'pending') throw 'The specified ban appeal is already closed.';
+            }
 
-        const modal = new ModalBuilder({
-            customId: 'acceptBanAppeal:' + targetUser.id,
-            title: 'Accept Ban Appeal',
-            components: [new ActionRowBuilder<TextInputBuilder>({ components: [reasonInput] })],
-        });
+            const reasonInput = new TextInputBuilder({
+                customId: 'reasonInput',
+                label: 'Reason',
+                style: TextInputStyle.Paragraph,
+                maxLength: 2048,
+                required: true,
+            });
 
-        interaction.showModal(modal);
+            const modal = new ModalBuilder({
+                customId: 'acceptBanAppeal:' + appeal.id,
+                title: 'Accept Ban Appeal',
+                components: [new ActionRowBuilder<TextInputBuilder>({ components: [reasonInput] })],
+            });
+
+            interaction.showModal(modal);
+        } catch (error) {
+            replyError(interaction, error);
+        }
     },
 };
