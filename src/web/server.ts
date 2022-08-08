@@ -126,10 +126,10 @@ export function startWebserver() {
         const userID = req.user?.id;
 
         try {
-            const ban = await getUserAppealData(userID);
+            const banInformation = JSON.stringify(await getUserAppealData(userID));
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 200;
-            return res.end(JSON.stringify(ban));
+            return res.end(banInformation);
         } catch (error) {
             res.statusCode = 400;
             return res.end('Bad Request');

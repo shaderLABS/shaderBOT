@@ -25,6 +25,7 @@ export type BotSettings = {
     threadRoleID?: Snowflake;
     stickyThreadChannelIDs: Snowflake[];
     appealChannelID: Snowflake;
+    appealCooldown: number;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
     guildID: Snowflake;

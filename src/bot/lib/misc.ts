@@ -100,6 +100,14 @@ export function makeBoldUnicode(str: string) {
         .join('');
 }
 
+export function getNumberWithOrdinalSuffix(n: number) {
+    const mod10 = n % 10; // n >= 0
+    const mod100 = (n / 10) % 10;
+    if (mod100 == 1) return 'th'; // all numbers between 10 and 20 are "th"
+
+    return n + (['st', 'nd', 'rd'][mod10 - 1] ?? 'th');
+}
+
 export function similarityLevenshtein(s1: string, s2: string) {
     // normalization form compatibility decomposition
     let longer = s1.normalize('NFKD');

@@ -4,7 +4,7 @@ import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
-import { parseUser, trimString } from './misc.js';
+import { getNumberWithOrdinalSuffix, parseUser, trimString } from './misc.js';
 import { Punishment } from './punishment.js';
 import { StickyThread } from './stickyThread.js';
 import { formatTimeDate } from './time.js';
@@ -84,17 +84,32 @@ export class BanAppeal {
         return !!result.rows[0];
     }
 
+    public static async getNumberOfAppealsByUserID(userID: string) {
+        const result = await db.query(/*sql*/ `SELECT COUNT(*) FROM appeal WHERE user_id = $1;`, [userID]);
+        return +result.rows[0].count;
+    }
+
+    public static async getPreviousThreadsByUserID(userID: string) {
+        const result = await db.query(/*sql*/ `SELECT message_id FROM appeal WHERE user_id = $1 ORDER BY timestamp ASC;`, [userID]);
+        return result.rows.map((row) => row.message_id);
+    }
+
     public static async create(userID: string, reason: string) {
         if (reason.length < 1 || reason.length > 2000) return Promise.reject('The ban appeal reason must be between 1 and 2000 characters long.');
 
         const user = await client.users.fetch(userID).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
-        if (await BanAppeal.hasPending(userID)) return Promise.reject('The specified user already has a pending ban appeal.');
+        const lastAppeal = await BanAppeal.getLatestByUserID(user.id);
+        if (lastAppeal.result === 'pending') return Promise.reject('The specified user already has a pending ban appeal.');
+        if (lastAppeal.result === 'declined' && lastAppeal.resultTimestamp && Date.now() - lastAppeal.resultTimestamp.getTime() < settings.data.appealCooldown * 1000) {
+            return Promise.reject('The specified user can not submit another ban appeal as they are still on cooldown.');
+        }
 
         const appealChannel = client.channels.cache.get(settings.data.appealChannelID);
         if (appealChannel?.type !== ChannelType.GuildText) return Promise.reject('The ban appeal channel was not found.');
 
+        const previousThreads = await BanAppeal.getPreviousThreadsByUserID(user.id);
         const timestamp = new Date();
 
         const result = await db.query(
@@ -110,9 +125,12 @@ export class BanAppeal {
 
         const appeal = new BanAppeal({ id, reason, result: 'pending', timestamp, user_id: user.id });
 
-        const message = await appealChannel.send({ embeds: [appeal.toAppealEmbed(user)] });
+        const embed = appeal.toAppealEmbed(user);
+        if (previousThreads.length > 0) embed.addFields({ name: 'Previous Threads', value: '<#' + previousThreads.slice(0, 50).join('>\n<#') + '>' });
+        const message = await appealChannel.send({ embeds: [embed] });
+
         const thread = await message.startThread({
-            name: user.username + "'s Ban Appeal",
+            name: `${user.username}'s ${getNumberWithOrdinalSuffix(previousThreads.length + 1)} Ban Appeal`,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
         });
 
@@ -350,6 +368,7 @@ export async function getUserAppealData(userID: string) {
                   timestamp: appeal.timestamp,
               }
             : undefined,
+        appealCooldown: settings.data.appealCooldown,
         reason: ban.reason,
         contextURL: ban.contextURL,
         expireTimestamp: ban.expireTimestamp,
