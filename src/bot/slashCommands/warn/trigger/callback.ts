@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import automaticPunishment from '../../../lib/automaticPunishment.js';
 import { replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
@@ -8,7 +9,7 @@ import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../sl
 const actionToString = ['They did not get punished.', 'They have been muted.', 'They have been temporarily banned.', 'They have been permanently banned.'];
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KickMembers'],
+    requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
         if (!(await hasPermissionForTarget(interaction, targetUser))) return;

@@ -1,10 +1,11 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
 import { PastPunishment } from '../../../../lib/punishment.js';
 import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['BanMembers'],
+    requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: async (interaction: GuildCommandInteraction) => {
         const targetUser = interaction.options.getUser('user', true);
 

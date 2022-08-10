@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
 import uuid from 'uuid-random';
 import { BanAppeal } from '../../../lib/banAppeal.js';
 import { replyError } from '../../../lib/embeds.js';
@@ -6,7 +6,7 @@ import { hasPermissionForTarget } from '../../../lib/searchMessage.js';
 import { ApplicationCommandCallback } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['BanMembers'],
+    requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: async (interaction) => {
         const appealID = interaction.options.getString('id', false);
 

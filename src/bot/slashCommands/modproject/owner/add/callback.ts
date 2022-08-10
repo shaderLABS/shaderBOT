@@ -1,4 +1,4 @@
-import { ChannelType, GuildMember } from 'discord.js';
+import { ChannelType, GuildMember, PermissionFlagsBits } from 'discord.js';
 import { db } from '../../../../../db/postgres.js';
 import { settings } from '../../../../bot.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
@@ -8,7 +8,7 @@ import { isProject, ownerOverwrites } from '../../../../lib/project.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageChannels'],
+    requiredPermissions: PermissionFlagsBits.ManageChannels,
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
         if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');

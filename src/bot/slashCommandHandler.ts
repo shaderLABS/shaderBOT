@@ -1,12 +1,13 @@
-import { AnyThreadChannel, ChannelType, ChatInputCommandInteraction, Collection, GuildMember, PermissionsString, TextChannel, VoiceChannel } from 'discord.js';
+import { AnyThreadChannel, ChannelType, ChatInputCommandInteraction, Collection, GuildMember, PermissionResolvable, TextChannel, VoiceChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
+import { MessageContextMenuCommandCallback, UserContextMenuCommandCallback } from './contextMenuCommandHandler.js';
 import { replyError } from './lib/embeds.js';
 
 export type ApplicationCommandCallback = {
     readonly channelWhitelist?: string[];
-    readonly requiredPermissions?: PermissionsString[];
+    readonly requiredPermissions?: PermissionResolvable;
     readonly permissionOverwrites?: boolean;
     readonly callback: (interaction: GuildCommandInteraction) => void;
 };
@@ -26,12 +27,16 @@ function isGuildInteraction(interaction: ChatInputCommandInteraction<'cached'>):
     return !!interaction.channel && (interaction.channel.type === ChannelType.GuildText || interaction.channel.type === ChannelType.GuildVoice || interaction.channel.isThread());
 }
 
-function hasPermissions(member: GuildMember, channel: TextChannel | AnyThreadChannel | VoiceChannel, command: ApplicationCommandCallback) {
+export function hasPermissionsForCommand(
+    member: GuildMember,
+    channel: TextChannel | AnyThreadChannel | VoiceChannel | string,
+    command: ApplicationCommandCallback | MessageContextMenuCommandCallback | UserContextMenuCommandCallback
+) {
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
-            if (command.requiredPermissions.some((permission) => !member.permissionsIn(channel).has(permission))) return false;
+            if (!member.permissionsIn(channel).has(command.requiredPermissions)) return false;
         } else {
-            if (command.requiredPermissions.some((permission) => !member.permissions.has(permission))) return false;
+            if (!member.permissions.has(command.requiredPermissions)) return false;
         }
     }
 
@@ -56,7 +61,7 @@ export function handleChatInputCommand(interaction: ChatInputCommandInteraction<
      * VALIDATE COMMAND AND PERMISSIONS *
      ************************************/
 
-    if (!hasPermissions(interaction.member, interaction.channel, command)) {
+    if (!hasPermissionsForCommand(interaction.member, interaction.channel, command)) {
         return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
     }
 

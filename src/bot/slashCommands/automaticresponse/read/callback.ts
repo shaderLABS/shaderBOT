@@ -1,10 +1,10 @@
-import { AttachmentBuilder } from 'discord.js';
+import { AttachmentBuilder, PermissionFlagsBits } from 'discord.js';
 import { automaticResponseStore } from '../../../automaticResponseHandler.js';
 import { replyError, replyInfo } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageGuild'],
+    requiredPermissions: PermissionFlagsBits.ManageGuild,
     callback: async (interaction: GuildCommandInteraction) => {
         const alias = interaction.options.getString('alias', false);
 

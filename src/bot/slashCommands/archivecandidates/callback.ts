@@ -1,11 +1,11 @@
-import { ChannelType, TextChannel } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { replyInfo } from '../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageChannels'],
+    requiredPermissions: PermissionFlagsBits.ManageChannels,
     callback: async (interaction: GuildCommandInteraction) => {
         await interaction.deferReply();
 

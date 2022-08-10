@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { settings } from '../../../bot.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
@@ -22,7 +23,7 @@ function setValue(obj: any, path: string[], value: any) {
 }
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageGuild'],
+    requiredPermissions: PermissionFlagsBits.ManageGuild,
     callback: (interaction: GuildCommandInteraction) => {
         try {
             const path = interaction.options.getString('path', true);

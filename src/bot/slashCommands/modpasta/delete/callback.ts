@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
@@ -7,7 +8,7 @@ import { pastaPath, pastaStore } from '../../../pastaHandler.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageGuild'],
+    requiredPermissions: PermissionFlagsBits.ManageGuild,
     callback: async (interaction: GuildCommandInteraction) => {
         const alias = interaction.options.getString('alias', true);
 

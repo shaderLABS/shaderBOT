@@ -1,7 +1,7 @@
 import { ApplicationCommandType, ComponentType, Interaction, InteractionType } from 'discord.js';
 import { handleAutocomplete } from '../autocompleteHandler.js';
 import { handleButton } from '../buttonHandler.js';
-import { handleMessageContextMenuCommand } from '../contextMenuHandler.js';
+import { handleMessageContextMenuCommand, handleUserContextMenuCommand } from '../contextMenuCommandHandler.js';
 import { Event } from '../eventHandler.js';
 import { handleModalSubmit } from '../modalSubmitHandler.js';
 import { handleChatInputCommand } from '../slashCommandHandler.js';
@@ -15,6 +15,7 @@ export const event: Event = {
         if (interaction.type === InteractionType.ApplicationCommand) {
             if (interaction.commandType === ApplicationCommandType.ChatInput) return handleChatInputCommand(interaction);
             if (interaction.commandType === ApplicationCommandType.Message) return handleMessageContextMenuCommand(interaction);
+            if (interaction.commandType === ApplicationCommandType.User) return handleUserContextMenuCommand(interaction);
         }
         if (interaction.type === InteractionType.MessageComponent) {
             if (interaction.componentType === ComponentType.Button) return handleButton(interaction);

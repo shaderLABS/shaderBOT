@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { automaticResponseStore } from '../../../automaticResponseHandler.js';
 import { AutomaticResponse } from '../../../lib/automaticResponse.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
@@ -6,7 +7,7 @@ import { parseUser } from '../../../lib/misc.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageGuild'],
+    requiredPermissions: PermissionFlagsBits.ManageGuild,
     callback: async (interaction: GuildCommandInteraction) => {
         const alias = interaction.options.getString('alias', true);
         const regex = interaction.options.getString('regex', true);

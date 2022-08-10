@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { getContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { Punishment } from '../../lib/punishment.js';
@@ -6,7 +7,7 @@ import { splitString, stringToSeconds } from '../../lib/time.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['KickMembers'],
+    requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction: GuildCommandInteraction) => {
         const { member } = interaction;
 

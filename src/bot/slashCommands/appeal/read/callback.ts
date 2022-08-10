@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
 import { client } from '../../../bot.js';
 import { BanAppeal } from '../../../lib/banAppeal.js';
@@ -5,7 +6,7 @@ import { replyError } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['BanMembers'],
+    requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: async (interaction: GuildCommandInteraction) => {
         const appealID = interaction.options.getString('id', false);
 

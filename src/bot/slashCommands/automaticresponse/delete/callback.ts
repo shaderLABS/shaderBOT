@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { automaticResponsePath, automaticResponseStore } from '../../../automaticResponseHandler.js';
@@ -7,7 +8,7 @@ import { parseUser, stringToFileName } from '../../../lib/misc.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageGuild'],
+    requiredPermissions: PermissionFlagsBits.ManageGuild,
     callback: async (interaction: GuildCommandInteraction) => {
         const alias = interaction.options.getString('alias', true);
 

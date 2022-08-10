@@ -1,10 +1,11 @@
+import { PermissionFlagsBits } from 'discord.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageMessages'],
+    requiredPermissions: PermissionFlagsBits.ManageMessages,
     callback: async (interaction: GuildCommandInteraction) => {
         const { channel } = interaction;
 

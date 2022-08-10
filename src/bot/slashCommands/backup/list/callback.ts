@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, SelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { backupPath, readBackup } from '../../../lib/backup.js';
@@ -7,7 +7,7 @@ import { formatTimeDateString } from '../../../lib/time.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageMessages'],
+    requiredPermissions: PermissionFlagsBits.ManageMessages,
     callback: async (interaction: GuildCommandInteraction) => {
         // read backup dir & sort by creation time
         const files: string[] = await fs.readdir(backupPath).catch((error) => {

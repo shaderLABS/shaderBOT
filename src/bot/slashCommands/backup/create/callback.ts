@@ -1,10 +1,10 @@
-import { ChannelType } from 'discord.js';
+import { ChannelType, PermissionFlagsBits } from 'discord.js';
 import { createBackup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import { ApplicationCommandCallback, GuildCommandInteraction } from '../../../slashCommandHandler.js';
 
 export const command: ApplicationCommandCallback = {
-    requiredPermissions: ['ManageMessages'],
+    requiredPermissions: PermissionFlagsBits.ManageMessages,
     callback: async (interaction: GuildCommandInteraction) => {
         const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {
