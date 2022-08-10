@@ -1,7 +1,7 @@
-import { BanAppeal } from '../lib/banAppeal.js';
-import { replyError, replySuccess } from '../lib/embeds.js';
-import { Punishment } from '../lib/punishment.js';
-import { ModalSubmitCallback } from '../modalSubmitHandler.js';
+import { BanAppeal } from '../../lib/banAppeal.js';
+import { replyError, replySuccess } from '../../lib/embeds.js';
+import { Punishment } from '../../lib/punishment.js';
+import { ModalSubmitCallback } from '../../modalSubmitHandler.js';
 
 export const modal: ModalSubmitCallback = {
     customID: 'acceptBanAppeal',
