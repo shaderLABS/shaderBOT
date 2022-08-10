@@ -1,14 +1,14 @@
-import { ChannelType, MessageContextMenuCommandInteraction } from 'discord.js';
-import { settings } from './bot.js';
-import { replyError, replySuccess } from './lib/embeds.js';
-import { isProjectOwner } from './lib/project.js';
+import { ChannelType, PermissionFlagsBits } from 'discord.js';
+import { settings } from '../../../bot.js';
+import { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
+import { replyError, replySuccess } from '../../../lib/embeds.js';
+import { isProjectOwner } from '../../../lib/project.js';
 
-/***********
- * EXECUTE *
- ***********/
-
-export async function handleMessageContextMenuCommand(interaction: MessageContextMenuCommandInteraction<'cached'>) {
-    if (interaction.commandName === 'Pin/Unpin Message') {
+export const command: MessageContextMenuCommandCallback = {
+    commandName: 'Pin/Unpin',
+    requiredPermissions: PermissionFlagsBits.ManageWebhooks,
+    permissionOverwrites: true,
+    callback: async (interaction) => {
         const { targetMessage, channel } = interaction;
         if (channel?.type !== ChannelType.GuildText) return replyError(interaction, 'The message was not sent in a text channel.');
 
@@ -24,6 +24,6 @@ export async function handleMessageContextMenuCommand(interaction: MessageContex
             replyError(interaction, wasPinned ? 'Failed to unpin message.' : 'Failed to pin message. You can only pin up to 50 messages.');
         }
 
-        replySuccess(interaction, wasPinned ? 'Successfully unpinned message.' : 'Successfully pinned message.', undefined, true);
-    }
-}
+        replySuccess(interaction, undefined, `Successfully ${wasPinned ? 'unpinned' : 'pinned'} the message.`, true);
+    },
+};

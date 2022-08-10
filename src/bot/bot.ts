@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 import { automaticResponsePath, registerAutomaticResponses } from './automaticResponseHandler.js';
+import { registerMessageContextMenuCommands, registerUserContextMenuCommands } from './contextMenuCommandHandler.js';
 import { registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { CooldownStore } from './lib/cooldownStore.js';
@@ -41,6 +42,8 @@ export async function startBot() {
 
     registerEvents('./build/bot/events');
     registerSlashCommands('./build/bot/slashCommands');
+    registerMessageContextMenuCommands('./build/bot/contextMenu/message');
+    registerUserContextMenuCommands('./build/bot/contextMenu/user');
     registerModals('./build/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
