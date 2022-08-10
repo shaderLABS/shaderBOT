@@ -2,8 +2,8 @@ import { Collection, MessageContextMenuCommandInteraction, PermissionResolvable,
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
+import { hasPermissionsForCommand } from './chatInputCommandHandler.js';
 import { replyError } from './lib/embeds.js';
-import { hasPermissionsForCommand } from './slashCommandHandler.js';
 
 /***********
  * EXECUTE *

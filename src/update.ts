@@ -5,7 +5,7 @@ import url from 'url';
 import { BotSettings, SettingsFile } from './bot/settings/settings.js';
 
 const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
-const slashCommandStructure: ApplicationCommandData[] = [];
+const commandStructure: ApplicationCommandData[] = [];
 
 async function stitchCommandStructure(dir: string) {
     const dirPath = path.join(path.resolve(), dir);
@@ -17,7 +17,7 @@ async function stitchCommandStructure(dir: string) {
                 await stitchCommandStructure(path.join(dir, dirEntry.name));
             } else if (dirEntry.name === 'structure.js') {
                 const structure: ApplicationCommandData = (await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href)).default;
-                slashCommandStructure.push(structure);
+                commandStructure.push(structure);
             }
         })
     );
@@ -32,9 +32,9 @@ client.on('ready', async () => {
     const guild = client.guilds.cache.get(settings.data.guildID);
     if (!guild) return console.error('Failed to update slash commands: the specified guild was not found.');
 
-    await stitchCommandStructure('./build/bot/slashCommands');
-    await stitchCommandStructure('./build/bot/contextMenuEntries');
-    await guild.commands.set(slashCommandStructure);
+    await stitchCommandStructure('./build/bot/chatInputCommands');
+    await stitchCommandStructure('./build/bot/contextMenuCommands');
+    await guild.commands.set(commandStructure);
 
     console.log('Successfully updated slash commands!');
     client.destroy();

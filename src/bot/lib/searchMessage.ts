@@ -1,7 +1,7 @@
 import { UserResolvable } from 'discord.js';
 import { settings } from '../bot.js';
+import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { GuildCommandInteraction } from '../slashCommandHandler.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser, userToMember } from './misc.js';

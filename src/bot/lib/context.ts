@@ -1,5 +1,5 @@
 import { db } from '../../db/postgres.js';
-import { GuildCommandInteraction } from '../slashCommandHandler.js';
+import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser } from './misc.js';

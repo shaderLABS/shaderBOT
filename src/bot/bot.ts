@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 import { automaticResponsePath, registerAutomaticResponses } from './automaticResponseHandler.js';
+import { registerChatInputCommands } from './chatInputCommandHandler.js';
 import { registerMessageContextMenuCommands, registerUserContextMenuCommands } from './contextMenuCommandHandler.js';
 import { registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
@@ -9,7 +10,6 @@ import { TimeoutStore } from './lib/timeoutStore.js';
 import { registerModals } from './modalSubmitHandler.js';
 import { pastaPath, registerPastas } from './pastaHandler.js';
 import { BotSettings, SettingsFile } from './settings/settings.js';
-import { registerSlashCommands } from './slashCommandHandler.js';
 
 export let client: Client;
 export let cooldownStore: CooldownStore;
@@ -41,9 +41,9 @@ export async function startBot() {
     settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
 
     registerEvents('./build/bot/events');
-    registerSlashCommands('./build/bot/slashCommands');
-    registerMessageContextMenuCommands('./build/bot/contextMenu/message');
-    registerUserContextMenuCommands('./build/bot/contextMenu/user');
+    registerChatInputCommands('./build/bot/chatInputCommands');
+    registerMessageContextMenuCommands('./build/bot/contextMenuCommands/message');
+    registerUserContextMenuCommands('./build/bot/contextMenuCommands/user');
     registerModals('./build/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);

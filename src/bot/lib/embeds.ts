@@ -15,7 +15,7 @@ import {
     TextBasedChannel,
     User,
 } from 'discord.js';
-import { GuildCommandInteraction } from '../slashCommandHandler.js';
+import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
 
 export const enum EmbedColor {
     Green = 0x4caf50,
