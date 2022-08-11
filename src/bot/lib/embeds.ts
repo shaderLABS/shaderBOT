@@ -15,7 +15,6 @@ import {
     TextBasedChannel,
     User,
 } from 'discord.js';
-import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
 
 export const enum EmbedColor {
     Green = 0x4caf50,
@@ -51,12 +50,7 @@ export function sendSuccess(channel: TextBasedChannel | User | GuildMember, desc
     return channel.send({ embeds: [embed] });
 }
 
-export function replySuccess(
-    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
-    description: any,
-    title?: string,
-    ephemeral: boolean | undefined = false
-) {
+export function replySuccess(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, description: any, title?: string, ephemeral: boolean = false) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
@@ -85,12 +79,7 @@ export function sendError(channel: TextBasedChannel | User | GuildMember, descri
     return channel.send({ embeds: [embed] });
 }
 
-export function replyError(
-    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
-    description: any,
-    title?: string,
-    ephemeral: boolean | undefined = true
-) {
+export function replyError(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction, description: any, title?: string, ephemeral: boolean = true) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
@@ -126,7 +115,7 @@ export function replyInfo(
     title?: string,
     message?: string,
     footer?: string,
-    ephemeral: boolean | undefined = false
+    ephemeral: boolean = false
 ) {
     const embed = new EmbedBuilder({
         author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
@@ -228,7 +217,14 @@ export async function sendButtonPages(
     });
 }
 
-export async function replyButtonPages(interaction: GuildCommandInteraction, pages: string[], title: string, color: number = EmbedColor.Blue, iconURL: string = EmbedIcon.Info) {
+export async function replyButtonPages(
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    pages: string[],
+    title: string,
+    color: number = EmbedColor.Blue,
+    iconURL: string = EmbedIcon.Info,
+    ephemeral: boolean = false
+) {
     const embed = new EmbedBuilder({
         color,
         description: pages[0],
@@ -239,7 +235,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
     });
 
     if (pages.length <= 1) {
-        interaction.reply({ embeds: [embed] });
+        interaction.reply({ embeds: [embed], ephemeral });
         return;
     }
 
@@ -264,6 +260,7 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
             }),
         ],
         fetchReply: true,
+        ephemeral,
     });
 
     if (!message.inGuild()) return;
@@ -286,13 +283,13 @@ export async function replyButtonPages(interaction: GuildCommandInteraction, pag
             if (!content) return;
 
             --index;
-            await message.edit({ embeds: [embed.setDescription(content)] });
+            await interaction.editReply({ embeds: [embed.setDescription(content)] });
         } else if (buttonInteraction.customId === 'forward') {
             const content = pages[index + 1];
             if (!content) return;
 
             ++index;
-            await message.edit({ embeds: [embed.setDescription(content)] });
+            await interaction.editReply({ embeds: [embed.setDescription(content)] });
         }
 
         buttonInteraction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
