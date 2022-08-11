@@ -1,5 +1,5 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import pg from 'pg';
-import { sleep } from '../bot/lib/misc.js';
 import { shutdown } from '../index.js';
 
 export const db = new pg.Pool({

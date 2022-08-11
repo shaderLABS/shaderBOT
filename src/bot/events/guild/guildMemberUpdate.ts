@@ -1,6 +1,6 @@
 import { APIOverwrite, APIRole, AuditLogEvent, GuildAuditLogsEntry, GuildMember, User } from 'discord.js';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
-import { sleep } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
 
 function parseChangeTimestamp(timestamp: string | number | boolean | APIRole[] | APIOverwrite[] | undefined) {

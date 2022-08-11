@@ -1,5 +1,4 @@
 import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, UserResolvable } from 'discord.js';
-import { promisify } from 'util';
 import { client, settings } from '../bot.js';
 
 // https://www.unicode.org/reports/tr18/#Line_Boundaries
@@ -86,8 +85,6 @@ export function escapeXml(unsafe: string) {
         }
     });
 }
-
-export const sleep = promisify(setTimeout);
 
 export function makeBoldUnicode(str: string) {
     return [...str]

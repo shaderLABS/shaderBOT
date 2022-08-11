@@ -1,7 +1,7 @@
 import { AnyThreadChannel, AuditLogEvent, ThreadAutoArchiveDuration } from 'discord.js';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { sleep } from '../../lib/misc.js';
 import { StickyThread } from '../../lib/stickyThread.js';
 
 export const event: Event = {

@@ -1,7 +1,8 @@
 import { AuditLogEvent, GuildAuditLogsEntry, GuildMember, User } from 'discord.js';
+import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
-import { getGuild, parseUser, sleep } from '../../lib/misc.js';
+import { getGuild, parseUser } from '../../lib/misc.js';
 import { PastPunishment } from '../../lib/punishment.js';
 
 export const event: Event = {
