@@ -1,10 +1,10 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { guild } = interaction;
         if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return replyError(interaction, 'The banner feature requires a boost level of 2.');
 

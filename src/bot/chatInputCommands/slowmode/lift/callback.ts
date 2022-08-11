@@ -1,11 +1,11 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import { LockSlowmode } from '../../../lib/lockSlowmode.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && !channel.isThread()) return replyError(interaction, 'This command is only usable in text and thread channels.', 'Invalid Channel');
 

@@ -9,13 +9,13 @@ export type ChatInputCommandCallback = {
     readonly channelWhitelist?: string[];
     readonly requiredPermissions?: PermissionResolvable;
     readonly permissionOverwrites?: boolean;
-    readonly callback: (interaction: GuildCommandInteraction) => void;
+    readonly callback: (interaction: GuildChatInputCommandInteraction) => void;
 };
 
 type ChatInputCommandCollection = Collection<string, ChatInputCommandCollection | ChatInputCommandCallback>;
 export const chatInputCommands: ChatInputCommandCollection = new Collection();
 
-export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
+export type GuildChatInputCommandInteraction = ChatInputCommandInteraction<'cached'> & {
     channel: TextChannel | AnyThreadChannel | VoiceChannel;
 };
 
@@ -23,7 +23,7 @@ export type GuildCommandInteraction = ChatInputCommandInteraction<'cached'> & {
  * EXECUTE *
  ***********/
 
-function isGuildInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildCommandInteraction {
+function isGuildChatInputCommandInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildChatInputCommandInteraction {
     return !!interaction.channel && (interaction.channel.type === ChannelType.GuildText || interaction.channel.type === ChannelType.GuildVoice || interaction.channel.isThread());
 }
 
@@ -44,7 +44,7 @@ export function hasPermissionsForCommand(
 }
 
 export function handleChatInputCommand(interaction: ChatInputCommandInteraction<'cached'>) {
-    if (!isGuildInteraction(interaction)) return;
+    if (!isGuildChatInputCommandInteraction(interaction)) return;
 
     let command = chatInputCommands.get(interaction.commandName);
     if (!command) return;

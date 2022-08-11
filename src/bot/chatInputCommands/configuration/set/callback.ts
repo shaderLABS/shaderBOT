@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord.js';
 import { settings } from '../../../bot.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
@@ -24,7 +24,7 @@ function setValue(obj: any, path: string[], value: any) {
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,
-    callback: (interaction: GuildCommandInteraction) => {
+    callback: (interaction) => {
         try {
             const path = interaction.options.getString('path', true);
             const value = JSON.parse(interaction.options.getString('value', true));

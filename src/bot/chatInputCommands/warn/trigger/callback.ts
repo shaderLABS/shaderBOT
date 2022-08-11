@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import automaticPunishment from '../../../lib/automaticPunishment.js';
 import { replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
@@ -10,7 +10,7 @@ const actionToString = ['They did not get punished.', 'They have been muted.', '
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const targetUser = interaction.options.getUser('user', true);
         if (!(await hasPermissionForTarget(interaction, targetUser))) return;
 

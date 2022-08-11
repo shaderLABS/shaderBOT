@@ -1,9 +1,9 @@
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyError, replyInfo, replySuccess, sendButtonPages } from '../../lib/embeds.js';
 import { Warning } from '../../lib/warning.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { user } = interaction;
 
         const warnings = await Warning.getAllByUserID(user.id);

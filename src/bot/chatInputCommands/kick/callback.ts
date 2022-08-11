@@ -1,5 +1,5 @@
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { PastPunishment } from '../../lib/punishment.js';
@@ -7,7 +7,7 @@ import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const reason = interaction.options.getString('reason', true);
         const targetMember = interaction.options.getMember('member');
 

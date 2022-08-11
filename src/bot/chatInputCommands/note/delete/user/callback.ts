@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
 import { replyError } from '../../../../lib/embeds.js';
 import { Note } from '../../../../lib/note.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const targetUser = interaction.options.getUser('user', true);
 
         try {

@@ -1,13 +1,13 @@
 import { EmbedBuilder } from 'discord.js';
 import os from 'os';
 import { client } from '../../bot.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
 import { formatBytes } from '../../lib/misc.js';
 import { secondsToString } from '../../lib/time.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: (interaction: GuildCommandInteraction) => {
+    callback: (interaction) => {
         const latency = Date.now() - interaction.createdTimestamp;
 
         const uptime = process.uptime();

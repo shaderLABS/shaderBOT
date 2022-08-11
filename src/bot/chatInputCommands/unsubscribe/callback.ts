@@ -1,10 +1,10 @@
 import { ChannelType } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { member, guild } = interaction;
 
         const projectChannel = interaction.options.getChannel('project', false) || interaction.channel;

@@ -1,7 +1,6 @@
-import { AttachmentBuilder, AutocompleteInteraction, EmbedBuilder, EmbedData } from 'discord.js';
+import { AttachmentBuilder, AutocompleteInteraction, CommandInteraction, EmbedBuilder, EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
 import { pastaPath, pastaStore } from '../pastaHandler.js';
 import { stringToFileName } from './misc.js';
 
@@ -82,7 +81,7 @@ export class Pasta {
         fs.writeFile(path.join(pastaPath, this.getFileName()), this.toJSON());
     }
 
-    public async reply(interaction: GuildCommandInteraction) {
+    public async reply(interaction: CommandInteraction) {
         return interaction.reply({ content: this.content, embeds: this.embeds, files: this.attachments });
     }
 }

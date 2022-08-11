@@ -1,5 +1,5 @@
 import { EmbedBuilder, GuildMember, User } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
 import { userToMember } from '../../lib/misc.js';
 import { formatRelativeTime } from '../../lib/time.js';
@@ -40,7 +40,7 @@ export function getUserInfoEmbed(targetUser: User, targetMember?: GuildMember) {
 }
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const targetUser = interaction.options.getUser('user', false) || interaction.user;
         const targetMember = await userToMember(interaction.guild, targetUser.id);
 

@@ -1,11 +1,11 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { createBackup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageMessages,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {
             return replyError(interaction, 'You must specify a text, thread or voice channel.');

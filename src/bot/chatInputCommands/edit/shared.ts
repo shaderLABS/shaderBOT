@@ -1,6 +1,6 @@
 import { Guild, User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.js';
 import { editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { Note } from '../../lib/note.js';
@@ -25,7 +25,7 @@ async function requireContext(value: string, guild: Guild) {
     return message.url;
 }
 
-export async function editApsect(interaction: GuildCommandInteraction, target: string | User) {
+export async function editApsect(interaction: GuildChatInputCommandInteraction, target: string | User) {
     const aspect = interaction.options.getString('aspect', true);
     const value = interaction.options.getString('value', true);
 

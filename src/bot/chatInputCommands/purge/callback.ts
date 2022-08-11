@@ -1,12 +1,12 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageMessages,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { channel } = interaction;
 
         const count = interaction.options.getInteger('amount', true);

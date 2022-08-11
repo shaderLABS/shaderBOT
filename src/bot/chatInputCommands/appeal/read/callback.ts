@@ -1,13 +1,13 @@
 import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
 import { client } from '../../../bot.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { BanAppeal } from '../../../lib/banAppeal.js';
 import { replyError } from '../../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const appealID = interaction.options.getString('id', false);
 
         try {

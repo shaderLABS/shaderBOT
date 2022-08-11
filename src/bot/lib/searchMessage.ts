@@ -1,13 +1,13 @@
 import { UserResolvable } from 'discord.js';
 import { settings } from '../bot.js';
-import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
+import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser, userToMember } from './misc.js';
 import { Punishment } from './punishment.js';
 
-export async function hasPermissionForTarget(interaction: GuildCommandInteraction, targetResolvable: UserResolvable, checkProperty?: 'bannable' | 'kickable' | 'manageable' | 'moderatable') {
+export async function hasPermissionForTarget(interaction: GuildChatInputCommandInteraction, targetResolvable: UserResolvable, checkProperty?: 'bannable' | 'kickable' | 'manageable' | 'moderatable') {
     const targetMember = await userToMember(interaction.guild, targetResolvable);
     if (!targetMember) return true;
 

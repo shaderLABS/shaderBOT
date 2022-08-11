@@ -1,12 +1,12 @@
 import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyInfo } from '../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         await interaction.deferReply();
 
         const projectChannels = (await db.query(/*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`)).rows;

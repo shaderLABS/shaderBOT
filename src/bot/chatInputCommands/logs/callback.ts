@@ -1,5 +1,5 @@
 import { PermissionFlagsBits, User } from 'discord.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
 import { replyButtonPages } from '../../lib/embeds.js';
@@ -74,7 +74,7 @@ export async function getUserModerationLogPages(targetUser: User) {
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const targetUser = interaction.options.getUser('user', true);
 
         const pages = await getUserModerationLogPages(targetUser);

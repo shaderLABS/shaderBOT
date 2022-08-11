@@ -1,5 +1,5 @@
 import { db } from '../../db/postgres.js';
-import { GuildCommandInteraction } from '../chatInputCommandHandler.js';
+import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser } from './misc.js';
@@ -11,7 +11,7 @@ const tableToString = {
     note: 'note',
 };
 
-export async function getContextURL(interaction: GuildCommandInteraction, targetID?: string) {
+export async function getContextURL(interaction: GuildChatInputCommandInteraction, targetID?: string) {
     const customURL = interaction.options.getString('context', false);
 
     if (customURL) {

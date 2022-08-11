@@ -1,9 +1,9 @@
 import { db } from '../../../../db/postgres.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { channel } = interaction;
 
         const project = (await db.query(/*sql*/ `SELECT id, role_id FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, interaction.user.id])).rows[0];

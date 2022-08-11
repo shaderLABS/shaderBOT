@@ -1,14 +1,14 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, SelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { backupPath, readBackup } from '../../../lib/backup.js';
 import { replyError, replyInfo, sendError } from '../../../lib/embeds.js';
 import { formatTimeDateString } from '../../../lib/time.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageMessages,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         // read backup dir & sort by creation time
         const files: string[] = await fs.readdir(backupPath).catch((error) => {
             if (error.code !== 'ENOENT') console.error(error);

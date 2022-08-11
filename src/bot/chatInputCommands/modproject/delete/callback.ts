@@ -1,13 +1,13 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { channel } = interaction;
         if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
 

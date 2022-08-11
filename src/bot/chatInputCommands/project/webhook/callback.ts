@@ -2,14 +2,14 @@ import crypto from 'crypto';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { settings } from '../../../bot.js';
-import { ChatInputCommandCallback, GuildCommandInteraction } from '../../../chatInputCommandHandler.js';
+import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
 import { isProjectOwner } from '../../../lib/project.js';
 
 export const command: ChatInputCommandCallback = {
-    callback: async (interaction: GuildCommandInteraction) => {
+    callback: async (interaction) => {
         const { channel, user } = interaction;
 
         if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
