@@ -2,7 +2,7 @@ import { ChannelType, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { db } from '../../../../db/postgres.js';
 import { settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { EmbedColor, replyError } from '../../../lib/embeds.js';
+import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
 import { parseUser } from '../../../lib/misc.js';
 import { isProject } from '../../../lib/project.js';
@@ -34,11 +34,27 @@ export const command: ChatInputCommandCallback = {
 
         interaction.reply({
             embeds: [
-                new EmbedBuilder()
-                    .setAuthor({ name: channel.name })
-                    .setFooter({ text: 'ID: ' + projectID })
-                    .setColor(EmbedColor.Green)
-                    .addFields([{ name: 'Notification Role', value: role.toString() }]),
+                new EmbedBuilder({
+                    author: {
+                        name: 'Create Project',
+                        iconURL: EmbedIcon.Success,
+                    },
+                    color: EmbedColor.Green,
+                    title: '#' + channel.name,
+                    fields: [
+                        {
+                            name: 'Notification Role',
+                            value: role.toString(),
+                        },
+                        {
+                            name: 'Information',
+                            value: 'Please take a look at the [documentation](https://github.com/shaderLABS/shaderBOT-server/wiki/Projects) for more information about Projects and how to manage them.',
+                        },
+                    ],
+                    footer: {
+                        text: 'ID: ' + projectID,
+                    },
+                }),
             ],
         });
         log(`${parseUser(interaction.user)} created a project linked to <#${channel.id}>.`, 'Create Project');
