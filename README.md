@@ -1,6 +1,6 @@
 # shaderBOT Server
 
-![GitHub](https://img.shields.io/badge/license-MIT-%2391BF0A?style=flat-square)
+![GitHub](https://img.shields.io/badge/license-Apache-%2391BF0A?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
 The following information is for developers and contributors. If you're a user, please go to [the wiki](https://github.com/shaderLABS/shaderBOT-server/wiki) instead.
@@ -15,7 +15,7 @@ npm install
 
 ### Discord Application
 
-You must enable the "Server Members Intent" switch (below "Privileged Gateway Intents") under the "Bot" tab of your [Discord application](https://discord.com/developers/applications) in order for some features to work.
+You must enable the "Server Members Intent" and "Message Content Intent" switches in the "Bot" tab of your [Discord application](https://discord.com/developers/applications) in order for some features to work.
 
 ### Bot Settings
 
@@ -101,7 +101,7 @@ Environment variables are read from `.env` and specifiy sensitive information li
 npm run dev
 ```
 
-This will transpile the TypeScript files and run the server using [nodemon](https://www.npmjs.com/package/nodemon).
+This will transpile the TypeScript files, run the server and watch for changes.
 You can also manually transpile the TypeScript files with `npm run build` and then run the server using `npm run start`.
 
 ### PM2 (production)
@@ -157,4 +157,4 @@ This will hide the transpiled JavaScript files if there are corresponding TypeSc
 -   [SQL tagged template literals (syntax only)](https://marketplace.visualstudio.com/items?itemName=frigus02.vscode-sql-tagged-template-literals-syntax-only) - SQL syntax highlighting.
 
 \
-_Coded by [Niemand](https://github.com/Kneemund)_
+_Made by [Kneemund](https://github.com/Kneemund)_
