@@ -550,7 +550,7 @@ export class Punishment {
             sentDM = false;
         });
 
-        if (member && !member.isCommunicationDisabled()) member.timeout(duration * 1000, reason);
+        if (member) member.timeout(duration * 1000, reason);
         timeoutStore.set(punishment, true);
 
         let logString = `${parseUser(user)} has been muted for ${secondsToString(duration)}.\n\n${punishment.toString()}`;
