@@ -9,6 +9,7 @@ export const event: Event = {
     name: 'messageUpdate',
     callback: async (oldMessage: Message, newMessage: Message) => {
         const { channel } = newMessage;
+
         if (
             // message is neither in text/voice nor thread channel
             (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) ||
@@ -20,29 +21,34 @@ export const event: Event = {
             return;
         }
 
-        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
-        if (logChannel?.type !== ChannelType.GuildText) return;
+        if (newMessage.partial) newMessage = await newMessage.fetch();
 
         const embeds: Embed[] = [];
         let attachments: Attachment[] = [];
 
-        let content = `**Author:** ${parseUser(newMessage.author)}\n**Channel:** <#${newMessage.channelId}>\n**Sent At:** ${formatLongTimeDate(
+        const metadata = `**Author:** ${parseUser(newMessage.author)}\n**Channel:** <#${newMessage.channelId}>\n**Sent At:** ${formatLongTimeDate(
             newMessage.createdAt
         )}\n**Edited At:** ${formatLongTimeDate(new Date())}`;
 
-        if (newMessage.reference) {
-            content += `\n**Reference To:** [click here](https://discord.com/channels/${newMessage.reference.guildId}/${newMessage.reference.channelId}/${newMessage.reference.messageId})`;
-        }
+        let content = '';
+        if (oldMessage.partial) {
+            content += `\n\nThe message is a partial with limited information. All embeds are attached below, and all attachments are attached above this message.\n\n**New Flags**\n${
+                newMessage.flags.toArray().join(', ') || 'none'
+            }\n\n**New Content**\n${newMessage.content.trim()}`;
 
-        if (!oldMessage.flags.has(MessageFlags.SuppressEmbeds) && newMessage.flags.has(MessageFlags.SuppressEmbeds)) {
-            content +=
-                '\n\nThe message embeds have been suppressed. ' +
-                (oldMessage.partial ? "The suppressed embeds can't be attached below, because the message is a partial." : 'The suppressed embeds are attached below.');
-            embeds.push(...oldMessage.embeds);
-        } else if (oldMessage.partial) {
-            content += `\n\nThe message is a partial with limited information. All embeds are attached below, and all attachments are attached above this message.\n\n**New Content**\n${newMessage.content.trim()}`;
             attachments.push(...newMessage.attachments.values());
             embeds.push(...newMessage.embeds);
+        } else if (!oldMessage.flags.has(MessageFlags.SuppressEmbeds) && newMessage.flags.has(MessageFlags.SuppressEmbeds)) {
+            content += '\n\nThe message embeds have been suppressed. The suppressed embeds are attached below.';
+            embeds.push(...oldMessage.embeds);
+        } else if (!oldMessage.hasThread && newMessage.hasThread) {
+            content += '\n\nA thread attached to this message has been created.';
+        } else if (oldMessage.hasThread && !newMessage.hasThread) {
+            content += '\n\nThe thread attached to this message has been deleted.';
+        } else if (!oldMessage.pinned && newMessage.pinned) {
+            content += '\n\nThis message has been pinned.';
+        } else if (oldMessage.pinned && !newMessage.pinned) {
+            content += '\n\nThis message has been unpinned.';
         } else {
             if (oldMessage.attachments.size !== 0 || newMessage.attachments.size !== 0) {
                 const removedAttachments = oldMessage.attachments.filter((_, attachmentID) => !newMessage.attachments.has(attachmentID));
@@ -105,6 +111,8 @@ export const event: Event = {
             }
         }
 
+        if (!content) return;
+
         let totalAttachmentSize = 0;
         let overflowAttachmentURLs = '';
         const maxAttachmentSize = getMaximumUploadBytes(newMessage.guild);
@@ -130,11 +138,14 @@ export const event: Event = {
                 iconURL: newMessage.author.displayAvatarURL(),
                 url: newMessage.url,
             },
-            description: trimString(content, 4096 - overflowAttachmentURLs.length) + overflowAttachmentURLs,
+            description: trimString(metadata + content, 4096 - overflowAttachmentURLs.length) + overflowAttachmentURLs,
             footer: {
                 text: `ID: ${newMessage.id}`,
             },
         });
+
+        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+        if (logChannel?.type !== ChannelType.GuildText) return;
 
         logChannel.send({
             embeds: [logEmbed, ...embeds].slice(0, 10),
