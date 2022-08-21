@@ -1,8 +1,8 @@
-import { AttachmentBuilder, ChannelType, EmbedBuilder, Message } from 'discord.js';
+import { Attachment, ChannelType, EmbedBuilder, Message } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
-import { getGuild, parseUser, trimString } from '../../lib/misc.js';
+import { getGuild, getMaximumUploadBytes, parseUser, trimString } from '../../lib/misc.js';
 import { formatLongTimeDate } from '../../lib/time.js';
 
 export const event: Event = {
@@ -13,7 +13,7 @@ export const event: Event = {
 
         const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type === ChannelType.GuildText) {
-            const attachments: AttachmentBuilder[] = [];
+            let attachments: Attachment[] = [];
             const logEmbed = new EmbedBuilder({
                 color: EmbedColor.Red,
             });
@@ -26,10 +26,23 @@ export const event: Event = {
             } else {
                 let content = message.content + '\n\n';
 
-                for (const attachment of message.attachments.values()) {
-                    if (attachment.size > 8388608) content += attachment.url + '\n';
-                    else attachments.push(new AttachmentBuilder(attachment.url, { name: attachment.name || undefined }));
-                }
+                attachments.push(...message.attachments.values());
+
+                let totalAttachmentSize = 0;
+                let overflowAttachmentURLs = '';
+                const maxAttachmentSize = getMaximumUploadBytes(message.guild);
+
+                attachments = attachments.filter((attachment) => {
+                    totalAttachmentSize += attachment.size;
+                    if (totalAttachmentSize > maxAttachmentSize) {
+                        overflowAttachmentURLs += '\n' + attachment.url;
+                        return false;
+                    } else {
+                        return true;
+                    }
+                });
+
+                if (overflowAttachmentURLs) overflowAttachmentURLs = '\n\n**Overflow Attachments**' + overflowAttachmentURLs;
 
                 let metadata = `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(
                     new Date(message.createdTimestamp)
@@ -39,6 +52,10 @@ export const event: Event = {
                     metadata += `\n**Reference To:** [click here](https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId})`;
                 }
 
+                if (message.embeds.length > 0) {
+                    metadata += `\n**Embeds:** ${message.embeds.length} (attached below)`;
+                }
+
                 logEmbed
                     .setAuthor({
                         name: message.mentions.repliedUser
@@ -46,12 +63,12 @@ export const event: Event = {
                             : 'Deleted Message',
                         iconURL: message.author.displayAvatarURL(),
                     })
-                    .setDescription(trimString(`${metadata}\n\n${content.trim()}`, 4096))
+                    .setDescription(trimString(`${metadata}\n\n${content.trim()}`, 4096 - overflowAttachmentURLs.length) + overflowAttachmentURLs)
                     .setFooter({ text: 'ID: ' + message.id });
             }
 
             logChannel.send({
-                embeds: [logEmbed],
+                embeds: [logEmbed, ...message.embeds].slice(0, 10),
                 files: attachments,
                 allowedMentions: { parse: [] },
             });

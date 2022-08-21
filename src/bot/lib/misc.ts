@@ -86,6 +86,10 @@ export function escapeXml(unsafe: string) {
     });
 }
 
+export function getMaximumUploadBytes(guild: Guild | null | undefined) {
+    return [8388608, 52428800, 104857600][(guild?.premiumTier || 1) - 1] - 324;
+}
+
 export function makeBoldUnicode(str: string) {
     return [...str]
         .map((char) => {
