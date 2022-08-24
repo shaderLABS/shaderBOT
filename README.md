@@ -35,6 +35,7 @@ The file `src/bot/settings/settings.json` contains information specific to the b
     "appealCooldown": 0, // cooldown in seconds for submitting new appeals after the previous one has been declined
     "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
     "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
+    "serverLogPaths": [""], // paths to log files that are sent when /serverlogs is executed
     "guildID": "",
     "archive": {
         "categoryIDs": [""], // categories which are used for archiving projects
