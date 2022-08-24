@@ -57,7 +57,7 @@ export function replySuccess(interaction: CommandInteraction | ButtonInteraction
         color: EmbedColor.Green,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
@@ -86,7 +86,7 @@ export function replyError(interaction: CommandInteraction | ButtonInteraction |
         color: EmbedColor.Red,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
@@ -124,7 +124,7 @@ export function replyInfo(
         footer: footer ? { text: footer } : undefined,
     });
 
-    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(() =>
+    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(async () =>
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
