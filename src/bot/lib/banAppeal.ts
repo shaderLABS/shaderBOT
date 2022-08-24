@@ -100,10 +100,12 @@ export class BanAppeal {
         const user = await client.users.fetch(userID).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
-        const lastAppeal = await BanAppeal.getLatestByUserID(user.id);
-        if (lastAppeal.result === 'pending') return Promise.reject('The specified user already has a pending ban appeal.');
-        if (lastAppeal.result === 'declined' && lastAppeal.resultTimestamp && Date.now() - lastAppeal.resultTimestamp.getTime() < settings.data.appealCooldown * 1000) {
-            return Promise.reject('The specified user can not submit another ban appeal as they are still on cooldown.');
+        const lastAppeal = await BanAppeal.getLatestByUserID(user.id).catch(() => undefined);
+        if (lastAppeal) {
+            if (lastAppeal.result === 'pending') return Promise.reject('The specified user already has a pending ban appeal.');
+            if (lastAppeal.result === 'declined' && lastAppeal.resultTimestamp && Date.now() - lastAppeal.resultTimestamp.getTime() < settings.data.appealCooldown * 1000) {
+                return Promise.reject('The specified user can not submit another ban appeal as they are still on cooldown.');
+            }
         }
 
         const appealChannel = client.channels.cache.get(settings.data.appealChannelID);
