@@ -10,18 +10,18 @@ export const event: Event = {
     callback: async (oldMessage: Message, newMessage: Message) => {
         const { channel } = newMessage;
 
+        if (newMessage.partial) newMessage = await newMessage.fetch();
+
         if (
             // message is neither in text/voice nor thread channel
             (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) ||
             // message is sent by bot
-            newMessage.author.bot ||
+            newMessage.author?.bot ||
             // embeds were added due to links being resolved
             (!oldMessage.partial && oldMessage.embeds.length === 0 && newMessage.embeds.length > 0 && newMessage.editedTimestamp === null)
         ) {
             return;
         }
-
-        if (newMessage.partial) newMessage = await newMessage.fetch();
 
         const embeds: Embed[] = [];
         let attachments: Attachment[] = [];
