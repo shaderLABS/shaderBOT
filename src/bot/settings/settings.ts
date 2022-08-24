@@ -28,6 +28,7 @@ export type BotSettings = {
     appealCooldown: number;
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
+    serverLogPaths: string[];
     guildID: Snowflake;
     archive: {
         categoryIDs: Snowflake[];
