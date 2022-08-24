@@ -131,6 +131,7 @@ export function startWebserver() {
             res.statusCode = 200;
             return res.end(banInformation);
         } catch (error) {
+            console.error('/api/ban/me', userID, error);
             res.statusCode = 400;
             return res.end('Bad Request');
         }
@@ -148,7 +149,8 @@ export function startWebserver() {
 
         try {
             await BanAppeal.create(userID, reason);
-        } catch {
+        } catch (error) {
+            console.error('/api/appeal', userID, error);
             res.statusCode = 400;
             return res.end('Bad Request');
         }
