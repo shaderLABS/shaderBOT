@@ -1,6 +1,7 @@
-import { APIOverwrite, APIRole, AuditLogEvent, GuildAuditLogsEntry, GuildMember, User } from 'discord.js';
+import { APIOverwrite, APIRole, AuditLogEvent, Events } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
+import { NonNullableProperty } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
 
 function parseChangeTimestamp(timestamp: string | number | boolean | APIRole[] | APIOverwrite[] | undefined) {
@@ -8,8 +9,8 @@ function parseChangeTimestamp(timestamp: string | number | boolean | APIRole[] |
 }
 
 export const event: Event = {
-    name: 'guildMemberUpdate',
-    callback: async (oldMember: GuildMember, newMember: GuildMember) => {
+    name: Events.GuildMemberUpdate,
+    callback: async (oldMember, newMember) => {
         const wasCommunicationDisabled = oldMember.isCommunicationDisabled();
         const isCommunicationDisabled = newMember.isCommunicationDisabled();
 
@@ -29,7 +30,7 @@ export const event: Event = {
 
         if (wasCommunicationDisabled) {
             const auditLogEntry = auditLogEntries.find(
-                (entry) =>
+                (entry): entry is NonNullableProperty<typeof entry, 'executor'> =>
                     entry.target?.id === newMember.id &&
                     entry.executor !== null &&
                     !entry.executor.bot &&
@@ -38,7 +39,7 @@ export const event: Event = {
                             change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) > memberUpdateTimestamp && parseChangeTimestamp(change.new) <= memberUpdateTimestamp
                     ) &&
                     Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
-            ) as (GuildAuditLogsEntry<AuditLogEvent.MemberUpdate, 'Update', 'User'> & { executor: User }) | undefined;
+            );
 
             if (!auditLogEntry) return;
 
@@ -47,7 +48,7 @@ export const event: Event = {
             mute?.move(auditLogEntry.executor.id);
         } else if (isCommunicationDisabled) {
             const auditLogEntry = auditLogEntries.find(
-                (entry) =>
+                (entry): entry is NonNullableProperty<typeof entry, 'executor'> =>
                     entry.target?.id === newMember.id &&
                     entry.executor !== null &&
                     !entry.executor.bot &&
@@ -56,7 +57,7 @@ export const event: Event = {
                             change.key === 'communication_disabled_until' && parseChangeTimestamp(change.old) <= memberUpdateTimestamp && parseChangeTimestamp(change.new) > memberUpdateTimestamp
                     ) &&
                     Math.abs(entry.createdTimestamp - memberUpdateTimestamp) < 5000
-            ) as (GuildAuditLogsEntry<AuditLogEvent.MemberUpdate, 'Update', 'User'> & { executor: User }) | undefined;
+            );
 
             if (!auditLogEntry) return;
 

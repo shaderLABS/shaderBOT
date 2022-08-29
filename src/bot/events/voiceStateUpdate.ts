@@ -1,12 +1,12 @@
-import { ChannelType, EmbedBuilder, VoiceState } from 'discord.js';
+import { ChannelType, EmbedBuilder, Events } from 'discord.js';
 import { settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { EmbedColor } from '../lib/embeds.js';
 import { getGuild, parseUser } from '../lib/misc.js';
 
 export const event: Event = {
-    name: 'voiceStateUpdate',
-    callback: (oldVoiceState: VoiceState, newVoiceState: VoiceState) => {
+    name: Events.VoiceStateUpdate,
+    callback: (oldVoiceState, newVoiceState) => {
         if (!oldVoiceState.channel && newVoiceState.channel) {
             const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
             if (logChannel?.type === ChannelType.GuildText) {

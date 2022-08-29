@@ -62,11 +62,13 @@ export function handleChatInputCommand(interaction: ChatInputCommandInteraction<
      ************************************/
 
     if (!hasPermissionsForCommand(interaction.member, interaction.channel, command)) {
-        return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
+        return;
     }
 
     if (command.channelWhitelist && !command.channelWhitelist.includes(interaction.channel.id)) {
-        return replyError(interaction, `This command is only usable in <#${command.channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
+        replyError(interaction, `This command is only usable in <#${command.channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
+        return;
     }
 
     command.callback(interaction);

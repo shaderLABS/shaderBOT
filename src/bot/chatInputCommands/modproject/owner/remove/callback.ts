@@ -19,9 +19,9 @@ export const command: ChatInputCommandCallback = {
         const targetMember = await userToMember(interaction.guild, targetUser.id);
 
         const oldOwners: string[] = (await db.query(/*sql*/ `SELECT owners::TEXT[] FROM project WHERE channel_id = $1 LIMIT 1;`, [channel.id])).rows[0]?.owners || [];
-        const newOwners = oldOwners.filter((owner) => owner != targetUser.id);
+        const newOwners = oldOwners.filter((owner) => owner !== targetUser.id);
 
-        if (oldOwners.length == newOwners.length) return replyError(interaction, 'The specified user is not an owner.');
+        if (oldOwners.length === newOwners.length) return replyError(interaction, 'The specified user is not an owner.');
 
         await db.query(/*sql*/ `UPDATE project SET owners = $1 WHERE channel_id = $2;`, [newOwners, channel.id]);
         if (targetMember) channel.permissionOverwrites.delete(targetMember);

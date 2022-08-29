@@ -1,12 +1,12 @@
-import { ChannelType, Collection, Message, Snowflake } from 'discord.js';
+import { ChannelType, Events, PartialMessage } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
 
 export const event: Event = {
-    name: 'messageDeleteBulk',
-    callback: (messages: Collection<Snowflake, Message>) => {
-        const backupMessages = messages.filter((message) => !message.partial);
+    name: Events.MessageBulkDelete,
+    callback: (messages) => {
+        const backupMessages = messages.filter((message): message is Exclude<typeof message, PartialMessage> => !message.partial);
         const firstMessage = backupMessages.first();
         if (!firstMessage) return;
 

@@ -1,4 +1,4 @@
-import { Attachment, ChannelType, EmbedBuilder, Message } from 'discord.js';
+import { Attachment, ChannelType, EmbedBuilder, Events } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
@@ -6,8 +6,8 @@ import { getGuild, getMaximumUploadBytes, parseUser, trimString } from '../../li
 import { formatLongTimeDate } from '../../lib/time.js';
 
 export const event: Event = {
-    name: 'messageDelete',
-    callback: async (message: Message) => {
+    name: Events.MessageDelete,
+    callback: async (message) => {
         const { channel } = message;
         if ((channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) || (!message.partial && message.author.bot)) return;
 

@@ -1,4 +1,4 @@
-import { Attachment, ChannelType, Embed, EmbedBuilder, Message, MessageFlags } from 'discord.js';
+import { Attachment, ChannelType, Embed, EmbedBuilder, Events, MessageFlags } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
@@ -6,8 +6,8 @@ import { getGuild, getMaximumUploadBytes, getNumberWithOrdinalSuffix, parseUser,
 import { formatLongTimeDate } from '../../lib/time.js';
 
 export const event: Event = {
-    name: 'messageUpdate',
-    callback: async (oldMessage: Message, newMessage: Message) => {
+    name: Events.MessageUpdate,
+    callback: async (oldMessage, newMessage) => {
         const { channel } = newMessage;
 
         if (newMessage.partial) newMessage = await newMessage.fetch();

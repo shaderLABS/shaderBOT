@@ -1,12 +1,12 @@
-import { AnyThreadChannel, AuditLogEvent, ThreadAutoArchiveDuration } from 'discord.js';
+import { AuditLogEvent, Events, ThreadAutoArchiveDuration } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
 import { StickyThread } from '../../lib/stickyThread.js';
 
 export const event: Event = {
-    name: 'threadUpdate',
-    callback: async (oldThread: AnyThreadChannel, newThread: AnyThreadChannel) => {
+    name: Events.ThreadUpdate,
+    callback: async (oldThread, newThread) => {
         if (oldThread.archived || !newThread.archived) return;
 
         const { guild } = newThread;

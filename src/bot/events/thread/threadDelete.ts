@@ -1,12 +1,12 @@
-import { AnyThreadChannel } from 'discord.js';
+import { Events } from 'discord.js';
 import { Event } from '../../eventHandler.js';
 import { createBackup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
 import { StickyThread } from '../../lib/stickyThread.js';
 
 export const event: Event = {
-    name: 'threadDelete',
-    callback: async (thread: AnyThreadChannel) => {
+    name: Events.ThreadDelete,
+    callback: async (thread) => {
         let logContent = `The thread #${thread.name} has been deleted. `;
 
         const backupSize = await createBackup(thread).catch(() => undefined);

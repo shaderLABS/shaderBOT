@@ -1,3 +1,4 @@
+import { Events } from 'discord.js';
 import { client } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { cleanBackups } from '../lib/backup.js';
@@ -25,7 +26,7 @@ function scheduleDailyTasks() {
 }
 
 export const event: Event = {
-    name: 'ready',
+    name: Events.ClientReady,
     callback: () => {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as ${client.user.tag} (${client.user.id}).`);

@@ -1,14 +1,14 @@
-import { AuditLogEvent, GuildAuditLogsEntry, GuildBan, User } from 'discord.js';
+import { AuditLogEvent, Events } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
 import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
+import { NonNullableProperty, parseUser } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
 
 export const event: Event = {
-    name: 'guildBanRemove',
-    callback: async (ban: GuildBan) => {
+    name: Events.GuildBanRemove,
+    callback: async (ban) => {
         const banDeleteTimestamp = Date.now();
 
         // wait 1 second because discord api sucks
@@ -19,9 +19,10 @@ export const event: Event = {
                 type: AuditLogEvent.MemberBanRemove,
                 limit: 5,
             })
-        ).entries.find((entry) => entry.target?.id === ban.user.id && entry.executor !== null && !entry.executor.bot && Math.abs(entry.createdTimestamp - banDeleteTimestamp) < 5000) as
-            | (GuildAuditLogsEntry<AuditLogEvent.MemberBanRemove, 'Create', 'User'> & { executor: User })
-            | undefined;
+        ).entries.find(
+            (entry): entry is NonNullableProperty<typeof entry, 'executor'> =>
+                entry.target?.id === ban.user.id && entry.executor !== null && !entry.executor.bot && Math.abs(entry.createdTimestamp - banDeleteTimestamp) < 5000
+        );
 
         if (!auditLogEntry) return;
 

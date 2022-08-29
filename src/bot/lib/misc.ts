@@ -4,6 +4,11 @@ import { client, settings } from '../bot.js';
 // https://www.unicode.org/reports/tr18/#Line_Boundaries
 export const unicodeLineBoundaries = /\r\n|[\n\v\f\r\x85\u2028\u2029]/;
 
+// Create an object type containing the properties K from object type T.
+// Make the property types T[P] of that temporary object type NonNullable and all its properties P Required.
+// Return the intersection between the object type T and the temporary object type.
+export type NonNullableProperty<T, K extends keyof T> = T & Required<{ [P in keyof Pick<T, K>]: NonNullable<T[P]> }>;
+
 export function getGuild() {
     return client.guilds.cache.get(settings.data.guildID);
 }
@@ -104,7 +109,7 @@ export function makeBoldUnicode(str: string) {
 export function getNumberWithOrdinalSuffix(n: number) {
     const mod10 = n % 10; // n >= 0
     const mod100 = (n / 10) % 10;
-    if (mod100 == 1) return 'th'; // all numbers between 10 and 20 are "th"
+    if (mod100 === 1) return 'th'; // all numbers between 10 and 20 are "th"
 
     return n + (['st', 'nd', 'rd'][mod10 - 1] ?? 'th');
 }

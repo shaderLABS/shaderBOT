@@ -1,11 +1,11 @@
-import { AnyThreadChannel } from 'discord.js';
+import { Events } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { StickyThread } from '../../lib/stickyThread.js';
 
 export const event: Event = {
-    name: 'threadCreate',
-    callback: async (thread: AnyThreadChannel) => {
+    name: Events.ThreadCreate,
+    callback: async (thread) => {
         if (thread.parentId && settings.data.stickyThreadChannelIDs.includes(thread.parentId)) {
             StickyThread.create(thread);
         }

@@ -1,4 +1,4 @@
-import { ChannelType, GuildMember, LimitedCollection } from 'discord.js';
+import { ChannelType, Events, LimitedCollection } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
@@ -17,8 +17,8 @@ type CachedMember = {
 const cache = new LimitedCollection<string, CachedMember>({ maxSize: settings.data.raidProtection.cacheLength });
 
 export const event: Event = {
-    name: 'guildMemberAdd',
-    callback: async (member: GuildMember) => {
+    name: Events.GuildMemberAdd,
+    callback: async (member) => {
         /*******************
          * Raid Protection *
          *******************/

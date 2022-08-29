@@ -76,7 +76,10 @@ export async function checkSpam(message: GuildMessage) {
 
     // if message is flagged as spam, mute and delete messages
     if (isSpamSingleMessage || isSpamSimilarMessage) {
-        const spamMessages = cache.filter((previousMessage) => previousMessage && message.author.id === previousMessage.authorID).reverse() as CachedMessage[];
+        const spamMessages = cache
+            .filter((previousMessage): previousMessage is NonNullable<typeof previousMessage> => previousMessage !== undefined && message.author.id === previousMessage.authorID)
+            .reverse();
+
         spamMessages.push(currentMessage);
 
         if (!(await Punishment.has(message.author.id, 'mute'))) {

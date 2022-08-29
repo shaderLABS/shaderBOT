@@ -24,7 +24,7 @@ export const command: ChatInputCommandCallback = {
             );
         }
 
-        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter(Boolean) as TextChannel[];
+        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter((channel): channel is NonNullable<typeof channel> => channel !== undefined);
 
         replyInfo(
             interaction,

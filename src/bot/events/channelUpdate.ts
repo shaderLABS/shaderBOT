@@ -1,4 +1,4 @@
-import { Channel, ChannelType, Snowflake } from 'discord.js';
+import { ChannelType, Events, Snowflake } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { Event } from '../eventHandler.js';
@@ -6,8 +6,8 @@ import log from '../lib/log.js';
 import { ownerOverwrites } from '../lib/project.js';
 
 export const event: Event = {
-    name: 'channelUpdate',
-    callback: async (oldChannel: Channel, newChannel: Channel) => {
+    name: Events.ChannelUpdate,
+    callback: async (oldChannel, newChannel) => {
         if (oldChannel.type !== ChannelType.GuildText || newChannel.type !== ChannelType.GuildText || !oldChannel.parentId || !newChannel.parentId) return;
 
         if (oldChannel.name !== newChannel.name) {

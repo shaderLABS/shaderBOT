@@ -1,22 +1,21 @@
-import { GuildMember, Message, PermissionFlagsBits } from 'discord.js';
+import { Events, Message, PermissionFlagsBits } from 'discord.js';
 import { handleAutomaticResponse } from '../../automaticResponseHandler.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { checkFilePreview } from '../../lib/filePreview.js';
+import { NonNullableProperty } from '../../lib/misc.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
 import { checkSpam } from '../../lib/spamProtection.js';
 
-export type GuildMessage = Message<true> & {
-    member: GuildMember;
-};
+export type GuildMessage = NonNullableProperty<Message<true>, 'member'>;
 
 function isGuildMessage(message: Message): message is GuildMessage {
     return message.inGuild() && message.member !== null;
 }
 
 export const event: Event = {
-    name: 'messageCreate',
-    callback: (message: Message) => {
+    name: Events.MessageCreate,
+    callback: (message) => {
         if (message.author.bot || !isGuildMessage(message)) return;
 
         checkSpam(message);

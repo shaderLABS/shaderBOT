@@ -1,4 +1,4 @@
-import { ApplicationCommandType, ComponentType, Interaction, InteractionType } from 'discord.js';
+import { ApplicationCommandType, ComponentType, Events, InteractionType } from 'discord.js';
 import { handleAutocomplete } from '../autocompleteHandler.js';
 import { handleButton } from '../buttonHandler.js';
 import { handleChatInputCommand } from '../chatInputCommandHandler.js';
@@ -7,8 +7,8 @@ import { Event } from '../eventHandler.js';
 import { handleModalSubmit } from '../modalSubmitHandler.js';
 
 export const event: Event = {
-    name: 'interactionCreate',
-    callback: (interaction: Interaction) => {
+    name: Events.InteractionCreate,
+    callback: (interaction) => {
         if (!interaction.inCachedGuild()) return;
 
         if (interaction.type === InteractionType.ApplicationCommandAutocomplete) return handleAutocomplete(interaction);
