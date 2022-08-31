@@ -25,7 +25,7 @@ export const command: ChatInputCommandCallback = {
         }, '');
 
         try {
-            sendButtonPages(user, user.id, pages, 'Warnings');
+            await sendButtonPages(user, user.id, pages, 'Warnings');
             replySuccess(interaction, 'Your warnings have been sent to you in a DM.', 'Warnings', true);
         } catch {
             replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.", 'Warnings', true);

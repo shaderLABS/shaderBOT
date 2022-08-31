@@ -154,7 +154,7 @@ export async function sendButtonPages(
     });
 
     if (pages.length <= 1) {
-        channel.send({ embeds: [embed] });
+        await channel.send({ embeds: [embed] });
         return;
     }
 
@@ -235,7 +235,7 @@ export async function replyButtonPages(
     });
 
     if (pages.length <= 1) {
-        interaction.reply({ embeds: [embed], ephemeral });
+        await interaction.reply({ embeds: [embed], ephemeral });
         return;
     }
 
