@@ -69,6 +69,11 @@ The file `src/bot/settings/settings.json` contains information specific to the b
         "creationTimeThreshold": 0, // maximum time between the creation of accounts in seconds (if less, then accounts will be flagged)
         "usernameSimilarityThreshold": 0, // threshold that determines how similar usernames must be in order to get flagged as bots (between 0 and 1)
         "userThreshold": 0 // number of similar users after which the raid protection will be triggered
+    },
+    "messageTranslation": {
+        "cacheLength": 0, // length of the message translation cache
+        "fetchCooldownTimeThreshold": 0, // maximum age of fetches in seconds for them to be considered "recent"
+        "fetchCooldownCountThreshold": 0 // maximum amount of recently fetched messages
     }
 }
 ```
