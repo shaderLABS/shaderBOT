@@ -4,10 +4,7 @@ import { EmbedColor, EmbedIcon } from './embeds.js';
 import { getGuild } from './misc.js';
 
 export default function (content: string | EmbedBuilder, title?: string) {
-    const guild = getGuild();
-    if (!guild) return;
-
-    const logChannel = guild.channels.cache.get(settings.data.logging.moderationChannelID);
+    const logChannel = getGuild()?.channels.cache.get(settings.data.logging.moderationChannelID);
     if (logChannel?.type !== ChannelType.GuildText) return;
 
     if (content instanceof EmbedBuilder) {

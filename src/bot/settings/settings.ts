@@ -63,4 +63,9 @@ export type BotSettings = {
         usernameSimilarityThreshold: number;
         userThreshold: number;
     };
+    messageTranslation: {
+        cacheLength: number;
+        fetchCooldownTimeThreshold: number;
+        fetchCooldownCountThreshold: number;
+    };
 };
