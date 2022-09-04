@@ -18,7 +18,7 @@ export const event: Event = {
 
         if (message.partial) {
             logEmbed
-                .setAuthor({ name: 'Deleted Message' })
+                .setAuthor({ name: 'Delete Message' })
                 .setDescription(`**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(new Date(message.createdTimestamp))}\n**Deleted At:** ${formatLongTimeDate(new Date())}`)
                 .setFooter({ text: `ID: ${message.id} | This is a partial message with very limited information.` });
         } else {
@@ -57,8 +57,8 @@ export const event: Event = {
             logEmbed
                 .setAuthor({
                     name: message.mentions.repliedUser
-                        ? `Deleted Reply ${message.mentions.users.has(message.mentions.repliedUser.id) ? `(@${message.mentions.repliedUser.tag})` : ''}`
-                        : 'Deleted Message',
+                        ? `Delete Reply ${message.mentions.users.has(message.mentions.repliedUser.id) ? `(@${message.mentions.repliedUser.tag})` : ''}`
+                        : 'Delete Message',
                     iconURL: message.author.displayAvatarURL(),
                 })
                 .setDescription(trimString(`${metadata}\n\n${content.trim()}`, 4096 - overflowAttachmentURLs.length) + overflowAttachmentURLs)

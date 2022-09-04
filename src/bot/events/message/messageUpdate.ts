@@ -133,8 +133,8 @@ export const event: Event = {
             color: EmbedColor.Blue,
             author: {
                 name: newMessage.mentions.repliedUser
-                    ? `Edited Reply ${newMessage.mentions.users.has(newMessage.mentions.repliedUser.id) ? `(@${newMessage.mentions.repliedUser.tag})` : ''}`
-                    : 'Edited Message',
+                    ? `Edit Reply ${newMessage.mentions.users.has(newMessage.mentions.repliedUser.id) ? `(@${newMessage.mentions.repliedUser.tag})` : ''}`
+                    : 'Edit Message',
                 iconURL: newMessage.author.displayAvatarURL(),
                 url: newMessage.url,
             },

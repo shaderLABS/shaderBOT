@@ -32,6 +32,7 @@ export const enum EmbedIcon {
 }
 
 function getInteractionName(interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction) {
+    // TODO: use chatInputApplicationCommandMention formatter
     if (interaction.type === InteractionType.ApplicationCommand) {
         if (interaction.commandType === ApplicationCommandType.ChatInput) return '/' + interaction.commandName;
         return interaction.commandName;
