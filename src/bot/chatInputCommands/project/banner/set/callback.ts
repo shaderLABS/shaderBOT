@@ -72,7 +72,7 @@ export const command: ChatInputCommandCallback = {
 
         await db.query(/*sql*/ `UPDATE project SET banner_url = $1 WHERE channel_id = $2;`, [bannerURL, channel.id]);
 
-        replySuccess(interaction, 'Successfully set the banner image.');
+        replySuccess(interaction, 'Successfully set the banner image.', 'Set Project Banner');
         log(
             new EmbedBuilder({
                 title: 'Set Project Banner',

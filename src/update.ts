@@ -1,4 +1,4 @@
-import { ApplicationCommandData, Client } from 'discord.js';
+import { ApplicationCommandData, Client, Events } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
@@ -28,9 +28,14 @@ if (!process.env.APPLICATION_CLIENT_ID) throw 'APPLICATION_CLIENT_ID not set.';
 
 const client = new Client({ intents: [] });
 
-client.on('ready', async () => {
+client.once(Events.ClientReady, async () => {
     const guild = client.guilds.cache.get(settings.data.guildID);
-    if (!guild) return console.error('Failed to update slash commands: the specified guild was not found.');
+
+    if (!guild) {
+        console.error('Failed to update slash commands: the specified guild was not found.');
+        client.destroy();
+        return;
+    }
 
     await stitchCommandStructure('./build/bot/chatInputCommands');
     await stitchCommandStructure('./build/bot/contextMenuCommands');
