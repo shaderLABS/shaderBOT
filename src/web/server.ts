@@ -14,6 +14,10 @@ const PORT = Number(process.env.PORT) || 3001;
 
 const app = polka();
 
+function hasRawBody<T>(record: T & { rawBody?: Buffer }): record is T & { rawBody: Buffer } {
+    return Buffer.isBuffer(record.rawBody);
+}
+
 export function startWebserver() {
     if (process.env.BOT_ONLY === 'true') return;
 
@@ -33,8 +37,7 @@ export function startWebserver() {
     app.use(
         bodyParser.json({
             verify: (req, _, buffer) => {
-                // @ts-ignore
-                req.rawBody = buffer;
+                (req as typeof req & { rawBody?: Buffer }).rawBody = buffer;
             },
         })
     );
@@ -161,7 +164,7 @@ export function startWebserver() {
 
     app.post('/api/webhook/release/:id', async (req, res) => {
         const channelID = req.params.id;
-        if (/\D/.test(channelID)) {
+        if (/\D/.test(channelID) || !hasRawBody(req)) {
             res.statusCode = 400;
             return res.end();
         }
@@ -178,7 +181,6 @@ export function startWebserver() {
             return res.end();
         }
 
-        // @ts-ignore
         if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
             res.statusCode = 403;
             return res.end();
