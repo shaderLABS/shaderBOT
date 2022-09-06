@@ -6,10 +6,10 @@ import { registerMessageContextMenuCommands, registerUserContextMenuCommands } f
 import { registerEvents } from './eventHandler.js';
 import { cleanBackups } from './lib/backup.js';
 import { CooldownStore } from './lib/cooldownStore.js';
+import { BotSettings, SettingsFile } from './lib/settings.js';
 import { TimeoutStore } from './lib/timeoutStore.js';
 import { registerModals } from './modalSubmitHandler.js';
 import { pastaPath, registerPastas } from './pastaHandler.js';
-import { BotSettings, SettingsFile } from './settings/settings.js';
 
 export let client: Client;
 export let cooldownStore: CooldownStore;
@@ -35,13 +35,13 @@ export async function startBot() {
 
     cooldownStore = new CooldownStore();
     timeoutStore = new TimeoutStore();
-    settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
+    settings = new SettingsFile<BotSettings>('customContent/settings.json');
 
-    registerEvents('./build/bot/events');
-    registerChatInputCommands('./build/bot/chatInputCommands');
-    registerMessageContextMenuCommands('./build/bot/contextMenuCommands/message');
-    registerUserContextMenuCommands('./build/bot/contextMenuCommands/user');
-    registerModals('./build/bot/modals');
+    registerEvents('build/bot/events');
+    registerChatInputCommands('build/bot/chatInputCommands');
+    registerMessageContextMenuCommands('build/bot/contextMenuCommands/message');
+    registerUserContextMenuCommands('build/bot/contextMenuCommands/user');
+    registerModals('build/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
     cleanBackups();

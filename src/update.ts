@@ -2,9 +2,9 @@ import { ApplicationCommandData, Client, Events } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { BotSettings, SettingsFile } from './bot/settings/settings.js';
+import { BotSettings, SettingsFile } from './bot/lib/settings.js';
 
-const settings = new SettingsFile<BotSettings>('./src/bot/settings/settings.json');
+const settings = new SettingsFile<BotSettings>('customContent/settings.json');
 const commandStructure: ApplicationCommandData[] = [];
 
 async function stitchCommandStructure(dir: string) {
@@ -37,8 +37,8 @@ client.once(Events.ClientReady, async () => {
         return;
     }
 
-    await stitchCommandStructure('./build/bot/chatInputCommands');
-    await stitchCommandStructure('./build/bot/contextMenuCommands');
+    await stitchCommandStructure('build/bot/chatInputCommands');
+    await stitchCommandStructure('build/bot/contextMenuCommands');
     await guild.commands.set(commandStructure);
 
     console.log('Successfully updated slash commands!');
