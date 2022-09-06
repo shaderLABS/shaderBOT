@@ -1,12 +1,10 @@
 import { PermissionFlagsBits } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser, stringToFileName } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
 import { Pasta } from '../../../lib/pasta.js';
-import { pastaPath, pastaStore } from '../../../pastaHandler.js';
+import { pastaStore } from '../../../pastaHandler.js';
 
 function setValue(obj: any, path: string[], value: any) {
     path.reduce((a, b, i) => {
@@ -25,8 +23,10 @@ export const command: ChatInputCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         try {
-            const pastaData = pastaStore.get(alias)?.toData();
-            if (!pastaData) return replyError(interaction, 'The specified pasta does not exist.');
+            const oldPasta = pastaStore.get(alias);
+            if (!oldPasta) return replyError(interaction, 'The specified pasta does not exist.');
+
+            const pastaData = oldPasta.toData();
 
             const objPath = interaction.options.getString('path', true).split('.');
             const rawValue = interaction.options.getString('value', false);
@@ -34,20 +34,18 @@ export const command: ChatInputCommandCallback = {
 
             setValue(pastaData, objPath, jsonValue);
 
-            const pasta = new Pasta(pastaData);
+            const newPasta = new Pasta(pastaData);
 
-            await pasta.save();
-            pastaStore.set(pasta.alias, pasta);
+            await newPasta.save();
+            pastaStore.set(newPasta.alias, newPasta);
 
-            if (alias !== pasta.alias) {
+            if (alias !== newPasta.alias) {
                 pastaStore.delete(alias);
-
-                const oldFileName = stringToFileName(alias);
-                if (oldFileName !== pasta.getFileName()) await fs.rm(path.join(pastaPath, oldFileName));
+                if (oldPasta.getFileName() !== newPasta.getFileName()) await oldPasta.delete();
             }
 
-            replySuccess(interaction, `Successfully updated the pasta \`${pasta.alias}\`.`, 'Update Pasta');
-            log(`${parseUser(interaction.user)} updated the pasta \`${pasta.alias}\`.`, 'Update Pasta');
+            replySuccess(interaction, `Successfully updated the pasta \`${newPasta.alias}\`.`, 'Update Pasta');
+            log(`${parseUser(interaction.user)} updated the pasta \`${newPasta.alias}\`.`, 'Update Pasta');
         } catch (error) {
             replyError(interaction, 'Invalid JSON value.');
         }

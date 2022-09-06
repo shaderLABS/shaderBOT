@@ -78,7 +78,11 @@ export class Pasta {
             else throw error;
         });
 
-        fs.writeFile(path.join(pastaPath, this.getFileName()), this.toJSON());
+        await fs.writeFile(path.join(pastaPath, this.getFileName()), this.toJSON());
+    }
+
+    public async delete() {
+        await fs.rm(path.join(pastaPath, this.getFileName()));
     }
 
     public async reply(interaction: CommandInteraction) {
