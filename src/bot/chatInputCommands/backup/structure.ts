@@ -3,7 +3,7 @@ import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBi
 export default {
     name: 'backup',
     description: 'Manage message backups.',
-    defaultMemberPermissions: PermissionFlagsBits.ManageMessages,
+    defaultMemberPermissions: PermissionFlagsBits.KickMembers,
     options: [
         {
             name: 'create',

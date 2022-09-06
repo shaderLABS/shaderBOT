@@ -4,7 +4,7 @@ import { createBackup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
-    requiredPermissions: PermissionFlagsBits.ManageMessages,
+    requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
         const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {

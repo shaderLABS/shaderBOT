@@ -7,7 +7,7 @@ import { replyError, replyInfo, sendError } from '../../../lib/embeds.js';
 import { formatTimeDateString } from '../../../lib/time.js';
 
 export const command: ChatInputCommandCallback = {
-    requiredPermissions: PermissionFlagsBits.ManageMessages,
+    requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
         // read backup dir & sort by creation time
         const files: string[] = await fs.readdir(backupPath).catch((error) => {
