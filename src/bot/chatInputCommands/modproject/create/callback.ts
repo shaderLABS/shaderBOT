@@ -48,7 +48,7 @@ export const command: ChatInputCommandCallback = {
                         },
                         {
                             name: 'Information',
-                            value: 'Please take a look at the [documentation](https://github.com/shaderLABS/shaderBOT-server/wiki/Projects) for more information about Projects and how to manage them.',
+                            value: 'Please take a look at the [documentation](https://github.com/shaderLABS/shaderBOT/wiki/Projects) for more information about Projects and how to manage them.',
                         },
                     ],
                     footer: {

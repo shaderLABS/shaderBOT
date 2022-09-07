@@ -32,7 +32,7 @@ export const command: ChatInputCommandCallback = {
                         },
                         {
                             name: 'Release Endpoint',
-                            value: `\`${endpoint}\`\nAll webhooks sent to this endpoint will trigger a release message. If you're using GitHub, you will likely want to uncheck everything but the release event.\n[More Information](https://github.com/shaderLABS/shaderBOT-server/wiki/Projects#webhooks)`,
+                            value: `\`${endpoint}\`\nAll webhooks sent to this endpoint will trigger a release message. If you're using GitHub, you will likely want to uncheck everything but the release event.\n[More Information](https://github.com/shaderLABS/shaderBOT/wiki/Projects#webhooks)`,
                         },
                     ],
                     footer: { text: 'DO NOT SHARE THE KEY WITH ANYONE! YOU CAN REGENERATE IT AND INVALIDATE THE OLD ONE BY RUNNING THIS COMMAND AGAIN.', iconURL: EmbedIcon.Info },
