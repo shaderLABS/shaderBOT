@@ -73,7 +73,7 @@ export class AutomaticResponse {
     }
 
     public toJSON() {
-        return JSON.stringify(this.toData(), null, 4);
+        return JSON.stringify(this.toData(), null, '\t');
     }
 
     public getFileName() {

@@ -4,7 +4,7 @@ import path from 'path';
 import url from 'url';
 import { BotSettings, SettingsFile } from './bot/lib/settings.js';
 
-const settings = new SettingsFile<BotSettings>('customContent/settings.json');
+const settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
 const commandStructure: ApplicationCommandData[] = [];
 
 async function stitchCommandStructure(dir: string) {

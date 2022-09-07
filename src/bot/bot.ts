@@ -35,7 +35,7 @@ export async function startBot() {
 
     cooldownStore = new CooldownStore();
     timeoutStore = new TimeoutStore();
-    settings = new SettingsFile<BotSettings>('customContent/settings.json');
+    settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
 
     registerEvents('build/bot/events');
     registerChatInputCommands('build/bot/chatInputCommands');
