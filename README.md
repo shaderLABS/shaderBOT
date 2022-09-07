@@ -1,9 +1,9 @@
-# shaderBOT Server
+# shaderBOT
 
 ![GitHub](https://img.shields.io/badge/license-Apache-%2391BF0A?style=flat-square)
 [![Discord](https://img.shields.io/discord/237199950235041794?label=shaderLABS&logo=discord&color=7289da&style=flat-square)](https://discord.gg/RpzWN9S)
 
-The following information is for developers and contributors. If you're a user, please go to [the wiki](https://github.com/shaderLABS/shaderBOT-server/wiki) instead.
+The following information is for developers and contributors. If you're a user, please go to [the wiki](https://github.com/shaderLABS/shaderBOT/wiki) instead.
 
 ## Install Dependencies
 
@@ -17,66 +17,13 @@ npm install
 
 You must enable the "Server Members Intent" and "Message Content Intent" switches in the "Bot" tab of your [Discord application](https://discord.com/developers/applications) in order for some features to work.
 
-### Bot Settings
+### Settings
 
-The file `customContent/settings.json` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. The content should not include any sensitive information, since it may be publicly displayed while configuring the bot through commands (depending on where you run it). \
-**Important**: The comments only exist for documentation purposes, they must be removed because the used parser does not support them.
+The file `customContent/settings.jsonc` contains information specific to the bot (e.g. the ID of the guild) and should match the setup on your server. Its content should not include any sensitive information, since it may be publicly displayed while configuring the bot.
 
-```jsonc
-{
-    "logging": {
-        "moderationChannelID": "",
-        "messageChannelID": ""
-    },
-    "moderatorRoleID": "", // moderator role, e.g. mentioned in ban appeal threads
-    "threadRoleID": "", // role that will be automatically added to new threads
-    "stickyThreadChannelIDs": [""], // channels whose threads will be automatically sticky upon creation
-    "appealChannelID": "", // channel for listing ban appeals
-    "appealCooldown": 0, // cooldown in seconds for submitting new appeals after the previous one has been declined
-    "botChannelID": "", // channel for sending failed auto responses, editing tickets and managing project subscriptions
-    "mediaChannelIDs": [""], // channels in which every message that doesn't contain an image, a video or a link will be deleted
-    "serverLogPaths": [""], // paths to log files that are sent when /serverlogs is executed
-    "guildID": "",
-    "archive": {
-        "categoryIDs": [""], // categories which are used for archiving projects
-        "minimumMessageCount": 0, // a project will be eligible for archiving if less than minimumMessageCount (must be between 1 and 100) messages...
-        "maximumMessageAge": 0 // ...were sent in maximumMessageAge seconds
-    },
-    "warnings": {
-        "decay": [0, 0, 0], // days, severity 1-3
-        "punishment": {
-            "muteRange": [0, 0], // min - max threshold
-            "muteValues": [0, 0], // min - max values in seconds
-            "tempbanRange": [0, 0], // min - max threshold
-            "tempbanValues": [0, 0], // min - max values in seconds
-            "ban": 0 // min threshold
-        }
-    },
-    "blacklist": {
-        "strings": [""], // any message containing these links will be deleted and the author will be muted
-        "muteDuration": 900 // duration of the mute in seconds
-    },
-    "spamProtection": {
-        "cacheLength": 0, // length of the spam protection cache
-        "characterThreshold": 0, // minimum characters after which messages will be checked for spam
-        "muteDuration": 0, // duration of the mute in seconds
-        "messageThreshold": 0, // number of similar messages after which the spam protection will be triggered
-        "timeThreshold": 0, // maximum delay between similar messages in seconds (after which they won't be counted)
-        "similarityThreshold": 0 // threshold that determines how similar messages must be in order to get flagged as spam (between 0 and 1)
-    },
-    "raidProtection": {
-        "cacheLength": 0, // length of the raid protection cache
-        "creationTimeThreshold": 0, // maximum time between the creation of accounts in seconds (if less, then accounts will be flagged)
-        "usernameSimilarityThreshold": 0, // threshold that determines how similar usernames must be in order to get flagged as bots (between 0 and 1)
-        "userThreshold": 0 // number of similar users after which the raid protection will be triggered
-    },
-    "messageTranslation": {
-        "cacheLength": 0, // length of the message translation cache
-        "fetchCooldownTimeThreshold": 0, // maximum age of fetches in seconds for them to be considered "recent"
-        "fetchCooldownCountThreshold": 0 // maximum amount of recently fetched messages
-    }
-}
-```
+There is a template configuration in [`settings.template.jsonc`](settings.template.jsonc), which contains the necessary structure and documents what each option does. Using this template, you must manually create and adjust `customContent/settings.jsonc` before starting shaderBOT. Once it is running, you can use commands to modify the configuration.
+
+> **WARNING:** Most invalid options will crash shaderBOT or silently skip the desired action as soon as they are accessed! shaderBOT will check the types of all configuration values at startup, but it can not check their validity.
 
 ### Environment Variables
 
