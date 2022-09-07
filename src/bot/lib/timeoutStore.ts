@@ -1,4 +1,4 @@
-import { client, timeoutStore } from '../bot.js';
+import { client } from '../bot.js';
 import { LockSlowmode } from './lockSlowmode.js';
 import { Punishment } from './punishment.js';
 
@@ -76,18 +76,16 @@ export class TimeoutStore {
             }
         }
     }
-}
 
-export function loadTimeouts(includeTomorrow: boolean) {
-    if (!client.user) throw 'The client is not logged in.';
+    public load(includeTomorrow: boolean) {
+        if (!client.user) throw 'The client is not logged in.';
 
-    console.log('Loading expiring punishments...');
-    const expiringPunishments = includeTomorrow ? Punishment.getExpiringTomorrow() : Punishment.getExpiringToday();
-    expiringPunishments.then((punishments) => punishments.forEach((punishment) => timeoutStore.set(punishment, false)));
+        console.log('Loading expiring punishments...');
+        const expiringPunishments = includeTomorrow ? Punishment.getExpiringTomorrow() : Punishment.getExpiringToday();
+        expiringPunishments.then((punishments) => punishments.forEach((punishment) => this.set(punishment, false)));
 
-    console.log('Loading expiring locks and slowmodes...');
-    const expiringLockSlowmodes = includeTomorrow ? LockSlowmode.getExpiringTomorrow() : LockSlowmode.getExpiringToday();
-    expiringLockSlowmodes.then((lockSlowmodes) => lockSlowmodes.forEach((lockSlowmode) => timeoutStore.set(lockSlowmode, false)));
-
-    // return Promise.all([expiringPunishments, expiringLockSlowmodes]);
+        console.log('Loading expiring locks and slowmodes...');
+        const expiringLockSlowmodes = includeTomorrow ? LockSlowmode.getExpiringTomorrow() : LockSlowmode.getExpiringToday();
+        expiringLockSlowmodes.then((lockSlowmodes) => lockSlowmodes.forEach((lockSlowmode) => this.set(lockSlowmode, false)));
+    }
 }

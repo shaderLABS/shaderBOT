@@ -2,45 +2,50 @@ import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Permis
 import fs from 'fs/promises';
 import path from 'path';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { backupPath, readBackup } from '../../../lib/backup.js';
+import { Backup } from '../../../lib/backup.js';
 import { replyError, replyInfo, sendError } from '../../../lib/embeds.js';
 import { formatTimeDateString } from '../../../lib/time.js';
+
+type BackupEntry = {
+    fileName: string;
+    channel: string;
+    size: string;
+    creationTime: Date;
+};
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
-        // read backup dir & sort by creation time
-        const files: string[] = await fs.readdir(backupPath).catch((error) => {
+        const files: string[] = await fs.readdir(Backup.DIRECTORY).catch((error) => {
             if (error.code !== 'ENOENT') console.error(error);
             return [];
         });
 
         if (files.length === 0) return replyInfo(interaction, 'There are no backups.');
 
-        const backups = (
-            await Promise.all(
-                files.map(async (name) => {
-                    return { name, createdAt: (await fs.stat(path.join(backupPath, name))).birthtime.getTime() };
-                })
-            )
-        ).sort((a, b) => b.createdAt - a.createdAt);
+        const backupEntries: BackupEntry[] = files
+            .map((fileName) => {
+                const [channel, creationTime, size] = path.parse(fileName).name.split(' - ');
+                return { fileName, channel, size, creationTime: new Date(creationTime) };
+            })
+            .sort((a, b) => b.creationTime.getTime() - a.creationTime.getTime());
 
-        const backupChunks: { name: string; createdAt: number }[][] = [];
-        for (let i = 0; i < Math.ceil(backups.length / 25); ++i) {
-            backupChunks.push(backups.slice(25 * i, 25 * (i + 1)));
+        const backupEntryChunks: BackupEntry[][] = [];
+        for (let i = 0; i < Math.ceil(backupEntries.length / 25); ++i) {
+            backupEntryChunks.push(backupEntries.slice(25 * i, 25 * (i + 1)));
         }
 
-        const menu = backupChunks.map(
+        const menu = backupEntryChunks.map(
             (chunk, index) =>
                 new SelectMenuBuilder({
                     customId: 'select-backup',
-                    placeholder: `${backups.length} backups available. Page ${index + 1} out of ${backupChunks.length}.`,
-                    options: chunk.map((backup, index) => {
+                    placeholder: `${backupEntries.length} backups available. Page ${index + 1} out of ${backupEntryChunks.length}.`,
+                    options: chunk.map((backupEntry, index) => {
                         return {
-                            label: backup.name.substring(0, backup.name.lastIndexOf(' - ')),
+                            label: `${backupEntry.channel} - ${backupEntry.size} MSG`,
                             value: index.toString(),
-                            emoji: { name: '📝' },
-                            description: formatTimeDateString(new Date(backup.createdAt)),
+                            emoji: { name: '🗒️' },
+                            description: formatTimeDateString(backupEntry.creationTime),
                         };
                     }),
                 })
@@ -60,7 +65,7 @@ export const command: ChatInputCommandCallback = {
         });
 
         const components = [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[0]] })];
-        if (backupChunks.length > 1) components.push(new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
+        if (backupEntryChunks.length > 1) components.push(new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
 
         const selectionMessage = await interaction.reply({ content: '**Select a Backup**', components, fetchReply: true });
 
@@ -83,20 +88,26 @@ export const command: ChatInputCommandCallback = {
                 messageInteraction.update({
                     components: [
                         new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index]] }),
-                        new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton.setDisabled(!backupChunks[index - 1]), forwardButton.setDisabled(!backupChunks[index + 1])] }),
+                        new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton.setDisabled(!backupEntryChunks[index - 1]), forwardButton.setDisabled(!backupEntryChunks[index + 1])] }),
                     ],
                 });
             } else if (messageInteraction.isSelectMenu()) {
-                const backup = backupChunks[index][+messageInteraction.values[0]];
+                const backupEntry = backupEntryChunks[index][+messageInteraction.values[0]];
 
                 try {
-                    const data = await readBackup(backup.name);
-                    interaction.channel.send({ files: [new AttachmentBuilder(Buffer.from(data), { name: backup.name })] });
+                    const backup = await Backup.read(backupEntry.fileName);
+                    interaction.channel.send({ files: [new AttachmentBuilder(Buffer.from(backup.content), { name: backup.fileName })] });
                 } catch (error) {
                     sendError(interaction.channel, error);
                 }
 
-                messageInteraction.update({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setPlaceholder(backup.name).setDisabled(true)] })] });
+                messageInteraction.update({
+                    components: [
+                        new ActionRowBuilder<SelectMenuBuilder>({
+                            components: [menu[index].setPlaceholder(`${backupEntry.channel} - ${backupEntry.size} MSG - ${formatTimeDateString(backupEntry.creationTime)}`).setDisabled(true)],
+                        }),
+                    ],
+                });
                 collector.stop('selected');
             }
         });

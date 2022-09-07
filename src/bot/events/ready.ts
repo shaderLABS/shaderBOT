@@ -1,28 +1,29 @@
 import { Events } from 'discord.js';
-import { client } from '../bot.js';
+import { client, timeoutStore } from '../bot.js';
 import { Event } from '../eventHandler.js';
-import { cleanBackups } from '../lib/backup.js';
+import { Backup } from '../lib/backup.js';
 import { rotateBanner } from '../lib/banner.js';
-import { setRandomPresence } from '../lib/presence.js';
+import { RandomPresence } from '../lib/presence.js';
 import { StickyThread } from '../lib/stickyThread.js';
-import { loadTimeouts } from '../lib/timeoutStore.js';
 
-function runDailyTasks() {
-    cleanBackups();
-    rotateBanner();
+class DailyTasks {
+    private static run() {
+        timeoutStore.load(true);
+        Backup.clean();
 
-    loadTimeouts(true);
-    setRandomPresence();
+        RandomPresence.set(client);
+        rotateBanner();
 
-    scheduleDailyTasks();
-}
+        DailyTasks.schedule();
+    }
 
-function scheduleDailyTasks() {
-    const date = new Date();
-    const scheduleToday = -date.getTime() + date.setHours(23, 59, 0, 0);
+    public static schedule() {
+        const date = new Date();
+        const scheduleToday = -date.getTime() + date.setHours(23, 59, 0, 0);
 
-    // if today's time has passed, use tomorrow's time (1d = 86400000ms)
-    setTimeout(runDailyTasks, scheduleToday < 0 ? scheduleToday + 86400000 : scheduleToday);
+        // if today's time has passed, use tomorrow's time (1d = 86400000ms)
+        setTimeout(DailyTasks.run, scheduleToday < 0 ? scheduleToday + 86400000 : scheduleToday);
+    }
 }
 
 export const event: Event = {
@@ -31,10 +32,9 @@ export const event: Event = {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as ${client.user.tag} (${client.user.id}).`);
 
-        loadTimeouts(false);
-        setRandomPresence();
+        timeoutStore.load(false);
 
-        scheduleDailyTasks();
+        DailyTasks.schedule();
         StickyThread.checkAllStickyThreads();
     },
 };

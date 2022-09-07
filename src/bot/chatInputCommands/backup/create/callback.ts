@@ -1,6 +1,6 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { createBackup } from '../../../lib/backup.js';
+import { Backup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 
 export const command: ChatInputCommandCallback = {
@@ -17,7 +17,7 @@ export const command: ChatInputCommandCallback = {
         const backupMessages = await backupChannel.messages.fetch({ limit });
 
         try {
-            await createBackup(backupChannel, backupMessages);
+            await Backup.create(backupChannel, backupMessages);
             replySuccess(interaction, `Backup of <#${backupChannel.id}> created. ${backupMessages.size} messages have been encrypted and saved.`, 'Backup');
         } catch (error) {
             replyError(interaction, error);

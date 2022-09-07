@@ -4,8 +4,9 @@ import { automaticResponsePath, registerAutomaticResponses } from './automaticRe
 import { registerChatInputCommands } from './chatInputCommandHandler.js';
 import { registerMessageContextMenuCommands, registerUserContextMenuCommands } from './contextMenuCommandHandler.js';
 import { registerEvents } from './eventHandler.js';
-import { cleanBackups } from './lib/backup.js';
+import { Backup } from './lib/backup.js';
 import { CooldownStore } from './lib/cooldownStore.js';
+import { RandomPresence } from './lib/presence.js';
 import { BotSettings, SettingsFile } from './lib/settings.js';
 import { TimeoutStore } from './lib/timeoutStore.js';
 import { registerModals } from './modalSubmitHandler.js';
@@ -31,6 +32,7 @@ export async function startBot() {
             GatewayIntentBits.GuildVoiceStates,
             GatewayIntentBits.MessageContent,
         ],
+        presence: RandomPresence.PRESENCE,
     });
 
     cooldownStore = new CooldownStore();
@@ -44,7 +46,7 @@ export async function startBot() {
     registerModals('build/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
-    cleanBackups();
+    Backup.clean();
 
     client.login(process.env.TOKEN);
 }

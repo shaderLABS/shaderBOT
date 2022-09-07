@@ -1,7 +1,7 @@
 import { ChannelType, Events } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { Event } from '../eventHandler.js';
-import { createBackup } from '../lib/backup.js';
+import { Backup } from '../lib/backup.js';
 import { LockSlowmode } from '../lib/lockSlowmode.js';
 import log from '../lib/log.js';
 
@@ -19,8 +19,8 @@ export const event: Event = {
             logContent += 'The project that was linked to this channel has been removed. ';
         }
 
-        const backupSize = await createBackup(channel).catch(() => undefined);
-        logContent += backupSize ? `${backupSize} cached messages have been encrypted and saved. ` : 'There were no cached messages to save. ';
+        const backup = await Backup.create(channel).catch(() => undefined);
+        logContent += backup ? `${backup.size} cached messages have been encrypted and saved. ` : 'There were no cached messages to save. ';
 
         const lockSlowmodes = await LockSlowmode.getAllByChannelID(channel.id);
         if (lockSlowmodes.length > 0) {

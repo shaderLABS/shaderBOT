@@ -1,6 +1,6 @@
 import { ChannelType, Events, PartialMessage } from 'discord.js';
 import { Event } from '../../eventHandler.js';
-import { createBackup } from '../../lib/backup.js';
+import { Backup } from '../../lib/backup.js';
 import log from '../../lib/log.js';
 
 export const event: Event = {
@@ -13,10 +13,10 @@ export const event: Event = {
         const { channel } = firstMessage;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) return;
 
-        const messageCount = await createBackup(channel, backupMessages, `Created after ${messages.size} messages were bulk deleted.`);
+        const backup = await Backup.create(channel, backupMessages, `Created after ${messages.size} messages were bulk deleted.`);
 
-        if (messageCount > 0) {
-            log(`${messageCount} out of ${messages.size} bulk deleted messages have been backed up. Use \`/backup list\` in order to view them.`, 'Bulk Delete Backup');
+        if (+backup.size > 0) {
+            log(`${backup.size} out of ${messages.size} bulk deleted messages have been backed up. Use \`/backup list\` in order to view them.`, 'Bulk Delete Backup');
         }
     },
 };
