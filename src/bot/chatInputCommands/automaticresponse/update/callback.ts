@@ -6,18 +6,7 @@ import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { AutomaticResponse } from '../../../lib/automaticResponse.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser, stringToFileName } from '../../../lib/misc.js';
-
-function setValue(obj: any, path: string[], value: any) {
-    path.reduce((a, b, i) => {
-        if (i + 1 === path.length) {
-            a[b] = value;
-            return value;
-        }
-        if (a[b] === undefined) a[b] = {};
-        return a[b];
-    }, obj);
-}
+import { parseUser, setObjectValueByStringPath, stringToFileName } from '../../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,
@@ -28,11 +17,11 @@ export const command: ChatInputCommandCallback = {
             let automaticResponseData = automaticResponseStore.get(alias)?.toData();
             if (!automaticResponseData) return replyError(interaction, 'The specified automatic response does not exist.');
 
-            const objPath = interaction.options.getString('path', true).split('.');
+            const objPath = interaction.options.getString('path', true);
             const rawValue = interaction.options.getString('value', false);
             const jsonValue = rawValue ? JSON.parse(rawValue) : undefined;
 
-            setValue(automaticResponseData, objPath, jsonValue);
+            setObjectValueByStringPath(automaticResponseData, objPath, jsonValue);
 
             const automaticResponse = new AutomaticResponse(automaticResponseData);
 
@@ -49,7 +38,7 @@ export const command: ChatInputCommandCallback = {
             replySuccess(interaction, `Successfully updated the automatic response \`${alias}\`.`, 'Update Automatic Response');
             log(`${parseUser(interaction.user)} updated the automatic response \`${alias}\`.`, 'Update Automatic Response');
         } catch (error) {
-            replyError(interaction, 'Invalid JSON value.');
+            replyError(interaction, 'Invalid path or JSON value.');
         }
     },
 };
