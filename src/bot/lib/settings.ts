@@ -3,6 +3,7 @@ import { Console } from 'console';
 import { Snowflake } from 'discord.js';
 import fssync from 'fs';
 import fsasync from 'fs/promises';
+import { getObjectInvalidProperties } from './misc.js';
 
 export class SettingsFile<Data> {
     public data: Data;
@@ -12,7 +13,7 @@ export class SettingsFile<Data> {
         const settingsData = JSONC.parse(fssync.readFileSync(settingsPath, 'utf-8'));
         const templateData = JSONC.parse(fssync.readFileSync(templatePath, 'utf-8'));
 
-        const invalidProperties = SettingsFile.getInvalidProperties(settingsData, templateData);
+        const invalidProperties = getObjectInvalidProperties(settingsData, templateData);
         if (invalidProperties.length !== 0) {
             new Console(process.stderr).table(invalidProperties);
             throw new Error(`Invalid properties found in ${settingsPath}.`);
@@ -20,26 +21,6 @@ export class SettingsFile<Data> {
 
         this.data = settingsData as Data;
         this.path = settingsPath;
-    }
-
-    private static getInvalidProperties<T>(settings: T, template: T, keyPath: string = '') {
-        const invalidProperties: { key: string; expected: string; received: string }[] = [];
-
-        for (const key in template) {
-            const templateValue = template[key];
-            const settingsValue = settings[key];
-
-            const templateType = Object.prototype.toString.call(templateValue);
-            const settingsType = Object.prototype.toString.call(settingsValue);
-
-            if (templateType !== settingsType) {
-                invalidProperties.push({ key: keyPath + key, expected: templateType.slice(8, -1), received: settingsType.slice(8, -1) });
-            } else if (templateValue && typeof templateValue === 'object') {
-                invalidProperties.push(...SettingsFile.getInvalidProperties(settingsValue, templateValue, keyPath + key + '.'));
-            }
-        }
-
-        return invalidProperties;
     }
 
     public async save() {
