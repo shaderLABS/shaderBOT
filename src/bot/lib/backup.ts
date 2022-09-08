@@ -33,12 +33,12 @@ export class Backup {
         const messageArray = [...messages.values()];
         if (backupMessages) messageArray.reverse();
 
-        const content = messageArray.reduce((prev, curr) => {
-            let messageContent = `${curr.author.tag} (${curr.author.id}) - ${curr.content.replaceAll(/\r?\n|\r/g, ' ')}`;
-            for (const embed of curr.embeds) messageContent += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
-            for (const attachment of curr.attachments.values()) messageContent += '\n\t' + attachment.url;
+        const content = messageArray.reduce((content, message) => {
+            let messageContent = `${message.author.tag} (${message.author.id}) - ${message.content.replaceAll(/\r?\n|\r/g, ' ')}`;
+            for (const embed of message.embeds) messageContent += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
+            for (const attachment of message.attachments.values()) messageContent += '\n\t' + attachment.url;
 
-            return prev + `${curr.createdAt.toUTCString()} - ${messageContent}\n`;
+            return content + `${message.createdAt.toUTCString()} - ${messageContent}\n`;
         }, `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${introduction ? '\n' + introduction : ''}\n\n`);
 
         const backup = new Backup({ fileName: `#${channel.name} - ${creationTime} - ${messages.size}.txt`, content }, false);

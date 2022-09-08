@@ -38,7 +38,7 @@ export async function releaseNotification(channelID: string, roleID: string, req
         let assetsDescription = '';
         const assets = req.body.release?.assets;
         if (assets && Array.isArray(assets)) {
-            assetsDescription = assets.reduce((prev, curr) => prev + `[${curr.name}](${curr.browser_download_url}) (${formatBytes(curr.size)})` + '\n', '\n\n');
+            assetsDescription = assets.reduce((list, asset) => list + `[${asset.name}](${asset.browser_download_url}) (${formatBytes(asset.size)})` + '\n', '\n\n');
         }
 
         description = trimString(description, 4096 - assetsDescription.length) + assetsDescription;

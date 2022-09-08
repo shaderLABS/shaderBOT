@@ -32,7 +32,7 @@ export const command: ChatInputCommandCallback = {
                 ? 'No project channels are currently eligible for archiving.'
                 : eligibleProjectChannels
                       .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
-                      .reduce((prev, curr) => prev + curr.toString() + '\n', ''),
+                      .reduce((list, channel) => list + channel.toString() + '\n', ''),
             'Archive Candidates'
         );
     },

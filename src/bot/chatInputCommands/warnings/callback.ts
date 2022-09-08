@@ -13,15 +13,15 @@ export const command: ChatInputCommandCallback = {
         }
 
         const pages: string[] = [];
-        warnings.reduce((prev, curr, i, { length }) => {
-            const page = curr.toString(false);
+        warnings.reduce((content, warning, index, { length }) => {
+            const page = warning.toString(false);
 
-            if ((i + 1) % 3 === 0 || i === length - 1) {
-                pages.push(prev + '\n\n' + page);
+            if ((index + 1) % 3 === 0 || index === length - 1) {
+                pages.push(content + '\n\n' + page);
                 return '';
             }
 
-            return prev + '\n\n' + page;
+            return content + '\n\n' + page;
         }, '');
 
         try {

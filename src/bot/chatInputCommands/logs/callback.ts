@@ -18,14 +18,14 @@ export async function getUserModerationLogPages(targetUser: User) {
 
     let pages: string[] = [];
     function pageCategory(title: string, content: string[]) {
-        content.reduce((prev, curr, i, arr) => {
-            const isLast = i === arr.length - 1;
-            if ((i + 1) % 3 === 0 || isLast) {
-                pages.push(isLast ? prev + '\n\n' + curr : prev + '\n\n' + curr + '\n\n_(continued on next page)_');
+        content.reduce((page, entry, index, { length }) => {
+            const isLast = index === length - 1;
+            if ((index + 1) % 3 === 0 || isLast) {
+                pages.push(isLast ? page + '\n\n' + entry : page + '\n\n' + entry + '\n\n_(continued on next page)_');
                 return '';
             }
 
-            return prev + '\n\n' + curr;
+            return page + '\n\n' + entry;
         }, `**${title}**`);
     }
 

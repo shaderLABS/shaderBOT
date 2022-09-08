@@ -120,7 +120,7 @@ export async function checkFilePreview(message: GuildMessage) {
     if (selectedContent.length === 0) return;
 
     const lineNumberLength = Math.ceil(Math.log10(topLineNumber + selectedContent.length));
-    const fileContent = selectedContent.reduce((previous, current, index) => previous + ('' + (index + topLineNumber)).padStart(lineNumberLength, ' ') + ' | ' + current + '\n', '');
+    const fileContent = selectedContent.reduce((content, line, index) => content + ('' + (index + topLineNumber)).padStart(lineNumberLength, ' ') + ' | ' + line + '\n', '');
 
     const openButton = new ButtonBuilder({
         url: rawURL.href,

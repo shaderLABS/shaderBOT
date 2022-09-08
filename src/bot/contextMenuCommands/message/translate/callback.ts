@@ -50,7 +50,7 @@ export const command: MessageContextMenuCommandCallback = {
                 cache.delete(translationID);
             } else {
                 const recentlyFetchedDeadline = Date.now() - settings.data.messageTranslation.fetchCooldownTimeThreshold * 1000;
-                const recentlyFetchedCount = cache.reduce((accumulator, pastTranslation) => accumulator + +(pastTranslation.fetchedTimestamp > recentlyFetchedDeadline), 0);
+                const recentlyFetchedCount = cache.reduce((count, pastTranslation) => count + +(pastTranslation.fetchedTimestamp > recentlyFetchedDeadline), 0);
 
                 if (recentlyFetchedCount > settings.data.messageTranslation.fetchCooldownCountThreshold && !interaction.memberPermissions.has(PermissionFlagsBits.ManageMessages)) {
                     log(
@@ -87,7 +87,7 @@ export const command: MessageContextMenuCommandCallback = {
                 translation = {
                     language: data[2],
                     languageConfidence: data[6],
-                    text: data[0]?.reduce((previous: string, current: (string | null)[]) => previous + (current[0] ?? ''), ''),
+                    text: data[0]?.reduce((text: string, chunk: (string | null)[]) => text + (chunk[0] ?? ''), ''),
                     fetchedTimestamp: Date.now(),
                 };
 

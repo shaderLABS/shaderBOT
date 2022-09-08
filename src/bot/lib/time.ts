@@ -66,9 +66,9 @@ export function splitString(str: string): string[] {
     return splitString;
 }
 
-export function stringToSeconds(str: string[]) {
+export function stringToSeconds(strings: string[]) {
     const MAX_SECONDS = 8639999999000 - Date.now() / 1000;
-    const seconds = str.reduce((a, b) => a + getSeconds(b), 0);
+    const seconds = strings.reduce((total, string) => total + getSeconds(string), 0);
 
     return seconds > MAX_SECONDS ? NaN : seconds;
 }
