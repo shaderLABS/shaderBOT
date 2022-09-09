@@ -3,7 +3,7 @@ import { Console } from 'console';
 import { Snowflake } from 'discord.js';
 import fssync from 'fs';
 import fsasync from 'fs/promises';
-import { getObjectInvalidProperties } from './misc.js';
+import { getObjectInvalidProperties } from './objectManipulation.js';
 
 export class SettingsFile<Data> {
     public data: Data;

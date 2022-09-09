@@ -3,7 +3,8 @@ import { settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser, updateObjectValueByStringPath } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
+import { updateObjectValueByStringPath } from '../../../lib/objectManipulation.js';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

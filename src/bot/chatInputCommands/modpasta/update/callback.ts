@@ -2,7 +2,8 @@ import { PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
 import log from '../../../lib/log.js';
-import { parseUser, setObjectValueByStringPath } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
+import { setObjectValueByStringPath } from '../../../lib/objectManipulation.js';
 import { Pasta } from '../../../lib/pasta.js';
 import { pastaStore } from '../../../pastaHandler.js';
 
