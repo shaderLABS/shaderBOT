@@ -1,5 +1,5 @@
 import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
-import { ChannelType, EmbedBuilder, escapeMarkdown, User } from 'discord.js';
+import { ChannelType, EmbedBuilder, escapeMarkdown, SnowflakeUtil, time, TimestampStyles, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
@@ -89,8 +89,8 @@ export class BanAppeal {
         return +result.rows[0].count;
     }
 
-    public static async getPreviousThreadsByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT message_id FROM appeal WHERE user_id = $1 ORDER BY timestamp ASC;`, [userID]);
+    public static async getPreviousThreadsByUserID(userID: string): Promise<string[]> {
+        const result = await db.query(/*sql*/ `SELECT message_id FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
         return result.rows.map((row) => row.message_id);
     }
 
@@ -126,9 +126,23 @@ export class BanAppeal {
         const { id } = result.rows[0];
 
         const appeal = new BanAppeal({ id, reason, result: 'pending', timestamp, user_id: user.id });
-
         const embed = appeal.toAppealEmbed(user);
-        if (previousThreads.length > 0) embed.addFields({ name: 'Previous Threads', value: '<#' + previousThreads.slice(0, 50).join('>\n<#') + '>' });
+
+        if (previousThreads.length > 0) {
+            embed.addFields({
+                name: `Previous Ban Appeals (${previousThreads.length})`,
+                value: previousThreads.slice(0, 8).reduce((list, threadID, index) => {
+                    return (
+                        list +
+                        `[${getNumberWithOrdinalSuffix(previousThreads.length - index)} Ban Appeal](https://www.discord.com/channels/${appealChannel.guildId}/${threadID}) - ${time(
+                            Math.floor(SnowflakeUtil.timestampFrom(threadID) / 1000),
+                            TimestampStyles.RelativeTime
+                        )}\n`
+                    );
+                }, ''),
+            });
+        }
+
         const message = await appealChannel.send({ embeds: [embed] });
 
         const thread = await message.startThread({
@@ -325,6 +339,10 @@ export class BanAppeal {
         }
 
         string += `**Reason:** ${trimString(this.reason, 150)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**Result:** ${this.result}\n`;
+
+        if (this.messageID) {
+            string += `**Thread:** [click here](https://www.discord.com/channels/${settings.data.guildID}/${this.messageID})\n`;
+        }
 
         if (this.result === 'expired') {
             if (!this.resultTimestamp) throw 'The ban appeal result is invalid.';
