@@ -38,10 +38,16 @@ client.once(Events.ClientReady, async () => {
     }
 
     await stitchCommandStructure('build/bot/chatInputCommands');
-    await stitchCommandStructure('build/bot/contextMenuCommands');
-    await guild.commands.set(commandStructure);
+    const chatInputCommandAmount = commandStructure.length;
+    console.log(`Stitched ${chatInputCommandAmount} chat input commands...`);
 
-    console.log('Successfully updated slash commands!');
+    await stitchCommandStructure('build/bot/contextMenuCommands');
+    const contextMenuCommandAmount = commandStructure.length - chatInputCommandAmount;
+    console.log(`Stitched ${contextMenuCommandAmount} context menu commands...`);
+
+    await guild.commands.set(commandStructure);
+    console.log('Successfully updated application commands!');
+
     client.destroy();
 });
 
