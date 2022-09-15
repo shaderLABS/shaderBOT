@@ -108,8 +108,8 @@ export function makeBoldUnicode(str: string) {
 
 export function getNumberWithOrdinalSuffix(n: number) {
     const mod10 = n % 10; // n >= 0
-    const mod100 = (n / 10) % 10;
-    if (mod100 === 1) return 'th'; // all numbers between 10 and 20 are "th"
+    const mod100 = Math.floor(n / 10) % 10;
+    if (mod100 === 1) return n + 'th'; // all numbers between 10 and 20 are "th"
 
     return n + (['st', 'nd', 'rd'][mod10 - 1] ?? 'th');
 }
