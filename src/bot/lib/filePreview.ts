@@ -166,7 +166,7 @@ export async function checkFilePreview(message: GuildMessage) {
                 replyError(buttonInteraction, undefined, 'Insufficient Permissions');
                 return false;
             },
-            time: 300000,
+            time: 300_000, // 5min = 300,000ms
         })
         .then(() => {
             reply.delete();

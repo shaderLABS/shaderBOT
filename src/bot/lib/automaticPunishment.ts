@@ -10,33 +10,35 @@ function interpolateTime(range: number[], values: number[], punishmentPoints: nu
 }
 
 function warningToPoints(severity: number, passedMS: number) {
-    const elapsedDays = Math.floor((Date.now() - passedMS) / 86400000);
+    const elapsedDays = Math.floor((Date.now() - passedMS) / 86_400_000); // 1d = 86,400,000ms
     const scale = elapsedDays / settings.data.warnings.decay[severity - 1];
     return severity / (scale + 1.0);
 }
 
 export async function getPunishmentPoints(userID: string) {
     const warnings = (
-        await db.query(
-            /*sql*/ `
-            SELECT severity, timestamp
-            FROM warn
-            WHERE severity > 0 AND user_id = $1;`,
-            [userID]
-        )
+        await db.query({
+            text: /*sql*/ `
+                SELECT severity, timestamp
+                FROM warn
+                WHERE severity > 0 AND user_id = $1;`,
+            values: [userID],
+            name: 'warn-points-total-severity',
+        })
     ).rows;
 
     if (warnings.length === 0) return 0;
 
     const excludedTimes = await Promise.all(
         warnings.map((warning) =>
-            db.query(
-                /*sql*/ `
-                SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - timestamp))), 0) AS exclude
-                FROM past_punishment
-                WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND timestamp >= $1::TIMESTAMP AND user_id = $2;`,
-                [new Date(warning.timestamp), userID]
-            )
+            db.query({
+                text: /*sql*/ `
+                    SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - timestamp))), 0) AS exclude
+                    FROM past_punishment
+                    WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND timestamp >= $1::TIMESTAMP AND user_id = $2;`,
+                values: [new Date(warning.timestamp), userID],
+                name: 'past-punishment-points-total-punished-time',
+            })
         )
     );
 

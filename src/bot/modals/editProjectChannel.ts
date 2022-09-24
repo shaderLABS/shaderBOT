@@ -38,7 +38,7 @@ export const modal: ModalSubmitCallback = {
             return replyError(interaction, 'Failed to edit the channel.', 'Edit Project Channel', false);
         }
 
-        replySuccess(interaction, 'Successfully edited the channel.', 'Edit Project Channel');
+        replySuccess(interaction, 'The channel has been edited.', 'Edit Project Channel');
         log(
             `${parseUser(interaction.user)} edited the their project project channel (<#${channel.id}>).\n\n**Before**\nName: ${oldChannelName}\nDescription: ${
                 oldChannelDescription || 'No description.'

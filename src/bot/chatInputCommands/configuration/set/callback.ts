@@ -17,15 +17,15 @@ export const command: ChatInputCommandCallback = {
             if (oldValue === undefined) return replyError(interaction, 'The specified path does not exist.');
 
             settings.save();
-            replySuccess(interaction, 'Successfully edited the configuration value.', 'Edit Configuration');
-            log(
-                `${parseUser(interaction.user)} edited the configuration \`${path}\`.\n\n**Before**\n\`${JSON.stringify(oldValue, null, '\t')}\`\n\n**After**\n\`${JSON.stringify(
-                    newValue,
-                    null,
-                    '\t'
-                )}\``,
-                'Edit Configuration'
-            );
+
+            const logString = `${parseUser(interaction.user)} edited the configuration \`${path}\`.\n\n**Before**\n\`${JSON.stringify(oldValue, null, '\t')}\`\n\n**After**\n\`${JSON.stringify(
+                newValue,
+                null,
+                '\t'
+            )}\``;
+
+            replySuccess(interaction, logString, 'Edit Configuration');
+            log(logString, 'Edit Configuration');
         } catch (error) {
             replyError(interaction, typeof error === 'string' ? error : 'Invalid path or JSON value.');
         }

@@ -55,7 +55,7 @@ export async function checkSpam(message: GuildMessage) {
         id: message.id,
         content: message.content,
         authorID: message.author.id,
-        channelID: message.channel.id,
+        channelID: message.channelId,
         createdTimestamp: message.createdTimestamp,
     };
 

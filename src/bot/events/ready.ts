@@ -21,8 +21,8 @@ class DailyTasks {
         const date = new Date();
         const scheduleToday = -date.getTime() + date.setHours(23, 59, 0, 0);
 
-        // if today's time has passed, use tomorrow's time (1d = 86400000ms)
-        setTimeout(DailyTasks.run, scheduleToday < 0 ? scheduleToday + 86400000 : scheduleToday);
+        // if today's time has passed, use tomorrow's time (1d = 86,400,000ms)
+        setTimeout(DailyTasks.run, scheduleToday < 0 ? scheduleToday + 86_400_000 : scheduleToday);
     }
 }
 

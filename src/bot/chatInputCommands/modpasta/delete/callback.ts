@@ -17,8 +17,10 @@ export const command: ChatInputCommandCallback = {
             pastaStore.delete(alias);
             await pasta.delete();
 
-            replySuccess(interaction, `Successfully deleted the pasta \`${alias}\`.`, 'Delete Pasta');
-            log(`${parseUser(interaction.user)} deleted the pasta \`${alias}\`.`, 'Delete Pasta');
+            const logString = `${parseUser(interaction.user)} deleted the pasta \`${alias}\`.`;
+
+            replySuccess(interaction, logString, 'Delete Pasta');
+            log(logString, 'Delete Pasta');
         } catch {
             replyError(interaction, `Failed to delete pasta \`${alias}\` from the file system.`);
         }

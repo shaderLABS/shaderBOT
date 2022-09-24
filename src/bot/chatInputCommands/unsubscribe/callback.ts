@@ -1,27 +1,19 @@
 import { ChannelType } from 'discord.js';
-import { db } from '../../../db/postgres.js';
 import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
+import { Project } from '../../lib/project.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
-        const { member, guild } = interaction;
-
         const projectChannel = interaction.options.getChannel('project', false) || interaction.channel;
         if (projectChannel.type !== ChannelType.GuildText) return replyError(interaction, 'You must specify a text channel.');
 
-        const project = (await db.query(/*sql*/ `SELECT id, role_id FROM project WHERE channel_id = $1 LIMIT 1;`, [projectChannel.id])).rows[0];
-        if (!project) return replyError(interaction, `<#${projectChannel.id}> is not a project channel.`);
-        if (!project.role_id) return replyError(interaction, `<#${projectChannel.id}> is archived.`);
-
-        const role = await guild.roles.fetch(project.role_id);
-        if (!role) return replyError(interaction, "Failed to resolve the project's role.", undefined, false);
-
-        if (member.roles.cache.has(role.id)) {
-            member.roles.remove(role);
-            return replySuccess(interaction, `You will no longer receive notifications from <#${projectChannel.id}>.`, 'Unsubscribe', true);
+        try {
+            const project = await Project.getByChannelID(projectChannel.id);
+            const logString = await project.removeSubscriber(interaction.member);
+            replySuccess(interaction, logString, undefined, true);
+        } catch (error) {
+            replyError(interaction, error);
         }
-
-        return replyError(interaction, `You do not receive notifications from <#${projectChannel.id}>.\nYou can subscribe to notifications using \`/subscribe\`.`);
     },
 };

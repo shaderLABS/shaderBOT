@@ -16,8 +16,10 @@ export const command: ChatInputCommandCallback = {
             if (!automaticResponseStore.delete(alias)) return replyError(interaction, 'The specified automatic response does not exist.');
             await fs.rm(path.join(automaticResponsePath, stringToFileName(alias)));
 
-            replySuccess(interaction, `Successfully deleted the automatic response \`${alias}\`.`, 'Delete Automatic Response');
-            log(`${parseUser(interaction.user)} deleted the automatic response \`${alias}\`.`, 'Delete Automatic Response');
+            const logString = `${parseUser(interaction.user)} deleted the automatic response \`${alias}\`.`;
+
+            replySuccess(interaction, logString, 'Delete Automatic Response');
+            log(logString, 'Delete Automatic Response');
         } catch {
             replyError(interaction, `Failed to delete automatic response \`${alias}\` from the file system.`);
         }

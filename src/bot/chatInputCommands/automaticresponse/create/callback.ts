@@ -18,8 +18,10 @@ export const command: ChatInputCommandCallback = {
             await automaticResponse.save();
             automaticResponseStore.set(automaticResponse.alias, automaticResponse);
 
-            replySuccess(interaction, `Successfully created the automatic response \`${automaticResponse.alias}\`.`, 'Create Automatic Response');
-            log(`${parseUser(interaction.user)} created the automatic response \`${automaticResponse.alias}\`.`, 'Create Automatic Response');
+            const logString = `${parseUser(interaction.user)} created the automatic response \`${automaticResponse.alias}\`.`;
+
+            replySuccess(interaction, logString, 'Create Automatic Response');
+            log(logString, 'Create Automatic Response');
         } catch {
             replyError(interaction, 'Failed to save the automatic response.');
         }

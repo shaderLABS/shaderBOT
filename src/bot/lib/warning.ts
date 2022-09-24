@@ -42,19 +42,19 @@ export class Warning {
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM warn WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM warn WHERE id = $1;`, values: [uuid], name: 'warn-uuid' });
         if (result.rowCount === 0) return Promise.reject('A warning with the specified UUID does not exist.');
         return new Warning(result.rows[0]);
     }
 
     static async getLatestByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, values: [userID], name: 'warn-latest-user-id' });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any warnings.');
         return new Warning(result.rows[0]);
     }
 
     static async getAllByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM warn WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'warn-all-user-id' });
         return result.rows.map((row) => new Warning(row));
     }
 
@@ -70,13 +70,14 @@ export class Warning {
 
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO warn (user_id, mod_id, reason, context_url, severity, timestamp)
-            VALUES ($1, $2, $3, $4, $5::SMALLINT, $6)
-            RETURNING id;`,
-            [user.id, moderatorID, reason, contextURL, severity, timestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+               INSERT INTO warn (user_id, mod_id, reason, context_url, severity, timestamp)
+               VALUES ($1, $2, $3, $4, $5::SMALLINT, $6)
+               RETURNING id;`,
+            values: [user.id, moderatorID, reason, contextURL, severity, timestamp],
+            name: 'warn-create',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert warning.');
         const { id } = result.rows[0];
@@ -112,13 +113,14 @@ export class Warning {
         const oldSeverity = this.severity;
         const editTimestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE warn
-            SET severity = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4`,
-            [newSeverity, editTimestamp, editModeratorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                UPDATE warn
+                SET severity = $1, edited_timestamp = $2, edited_mod_id = $3
+                WHERE id = $4`,
+            values: [newSeverity, editTimestamp, editModeratorID, this.id],
+            name: 'warn-edit-severity',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the severity of the warning.');
 
         this.severity = newSeverity;
@@ -137,13 +139,14 @@ export class Warning {
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE warn
-            SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4;`,
-            [newReason, editTimestamp, editModeratorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                UPDATE warn
+                SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
+                WHERE id = $4;`,
+            values: [newReason, editTimestamp, editModeratorID, this.id],
+            name: 'warn-edit-reason',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the warning.');
 
         this.reason = newReason;
@@ -157,7 +160,7 @@ export class Warning {
     }
 
     public async delete(moderatorID: string) {
-        const result = await db.query(/*sql*/ `DELETE FROM warn WHERE id = $1;`, [this.id]);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM warn WHERE id = $1;`, values: [this.id], name: 'warn-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete warning.');
 
         const logString = `${parseUser(moderatorID)} deleted ${parseUser(this.userID)}'s warning.\n\n${this.toString()}`;

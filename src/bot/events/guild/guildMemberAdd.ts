@@ -1,10 +1,9 @@
-import { ChannelType, Events, LimitedCollection } from 'discord.js';
-import { db } from '../../../db/postgres.js';
+import { Events, LimitedCollection } from 'discord.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
 import { parseUser, similarityLevenshtein } from '../../lib/misc.js';
-import { ownerOverwrites } from '../../lib/project.js';
+import { Project, ProjectMute } from '../../lib/project.js';
 import { Punishment } from '../../lib/punishment.js';
 
 type CachedMember = {
@@ -53,16 +52,25 @@ export const event: Event = {
         // rotate cache
         cache.set(member.id, currentMember);
 
+        /******************
+         * Parallel Fetch *
+         ******************/
+
+        const [mute, projects, projectMutes] = await Promise.all([
+            Punishment.getByUserID(member.id, 'mute').catch(() => undefined),
+            Project.getAllUnarchivedByOwnerID(member.id),
+            ProjectMute.getAllByUserID(member.id),
+        ]);
+
         /**********
          * Unmute *
          **********/
 
-        const [mute, projects] = await Promise.all([
-            Punishment.has(member.id, 'mute'),
-            db.query(/*sql*/ `SELECT channel_id FROM project WHERE $1 = ANY (owners) AND role_id IS NOT NULL;`, [member.id]),
-        ]);
-
-        if (!mute && member.isCommunicationDisabled()) {
+        if (mute !== undefined) {
+            // member is currently muted. re-set the timeout in case it was edited while they were gone.
+            if (mute.expireTimestamp) member.disableCommunicationUntil(mute.expireTimestamp);
+        } else if (member.isCommunicationDisabled()) {
+            // member is not muted, but still has a timeout. remove the timeout.
             member.timeout(null);
         }
 
@@ -70,14 +78,18 @@ export const event: Event = {
          * Project Owners *
          ******************/
 
-        for (const project of projects.rows) {
-            const channel = member.guild.channels.cache.get(project.channel_id);
-            if (channel?.type !== ChannelType.GuildText) {
-                log(`Failed to restore permissions for ${parseUser(member.user)}'s project channel <#${project.channel_id}>. The channel does not exist or is not cached.`, 'Restore Permissions');
-                continue;
-            }
+        for (const project of projects) {
+            project.applyPermissions(member).catch((error) => {
+                log(`Failed to restore permissions for ${parseUser(member.user)}'s project channel <#${project.channelID}> (${project.id}).\n${error}`, 'Restore Project Owner');
+            });
+        }
 
-            channel.permissionOverwrites.create(member, ownerOverwrites);
+        /*****************
+         * Project Mutes *
+         *****************/
+
+        for (const projectMute of projectMutes) {
+            projectMute.applyPermissions();
         }
     },
 };

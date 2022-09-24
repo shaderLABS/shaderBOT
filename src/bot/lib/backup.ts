@@ -101,8 +101,8 @@ export class Backup {
             const backups = await fs.readdir(Backup.DIRECTORY);
             for (const backup of backups) {
                 const { birthtime } = await fs.stat(path.join(Backup.DIRECTORY, backup));
-                if (Date.now() - birthtime.getTime() > 2419200000) {
-                    // 4 weeks
+                if (Date.now() - birthtime.getTime() > 2_419_200_000) {
+                    // 4w = 2,419,200,000ms
                     fs.rm(path.join(Backup.DIRECTORY, backup));
                 }
             }

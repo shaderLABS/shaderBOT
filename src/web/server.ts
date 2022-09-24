@@ -47,7 +47,7 @@ export function startWebserver() {
     app.use(
         session({
             secret: process.env.SESSION_SECRET,
-            cookie: { maxAge: 86400000 }, // 1 day
+            cookie: { maxAge: 86_400_000 }, // 1 day
             resave: false,
             saveUninitialized: false,
             store: new pg_store({ pool: db }),
@@ -175,7 +175,14 @@ export function startWebserver() {
             return res.end();
         }
 
-        const project = (await db.query(/*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`, [channelID])).rows[0];
+        const project = (
+            await db.query({
+                text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
+                values: [channelID],
+                name: 'project-get-webhook-secret',
+            })
+        ).rows[0];
+
         if (!project || !project.webhook_secret || !project.role_id) {
             res.statusCode = 404;
             return res.end();

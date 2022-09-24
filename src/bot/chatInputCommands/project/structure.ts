@@ -49,27 +49,39 @@ export default {
         },
         {
             name: 'mute',
-            description: 'Mute a user in your project channel.',
-            type: ApplicationCommandOptionType.Subcommand,
+            description: 'Manage the mutes in your project channel.',
+            type: ApplicationCommandOptionType.SubcommandGroup,
             options: [
                 {
-                    name: 'user',
-                    description: 'The user you want to mute.',
-                    type: ApplicationCommandOptionType.User,
-                    required: true,
+                    name: 'create',
+                    description: 'Mute a user in your project channel.',
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: 'user',
+                            description: 'The user you want to mute.',
+                            type: ApplicationCommandOptionType.User,
+                            required: true,
+                        },
+                    ],
                 },
-            ],
-        },
-        {
-            name: 'unmute',
-            description: 'Unmute a user in your project channel.',
-            type: ApplicationCommandOptionType.Subcommand,
-            options: [
                 {
-                    name: 'user',
-                    description: 'The user you want to unmute.',
-                    type: ApplicationCommandOptionType.User,
-                    required: true,
+                    name: 'lift',
+                    description: 'Unmute a user in your project channel.',
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: 'user',
+                            description: 'The user you want to unmute.',
+                            type: ApplicationCommandOptionType.User,
+                            required: true,
+                        },
+                    ],
+                },
+                {
+                    name: 'list',
+                    description: 'List all mutes in your project channel.',
+                    type: ApplicationCommandOptionType.Subcommand,
                 },
             ],
         },

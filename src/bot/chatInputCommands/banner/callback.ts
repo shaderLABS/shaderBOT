@@ -9,15 +9,15 @@ export const command: ChatInputCommandCallback = {
         if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return replyError(interaction, 'The banner feature requires a boost level of 2.');
 
         const currentBannerProject = (
-            await db.query(
-                /*sql*/ `
-                SELECT channel_id
-                FROM project
-                WHERE banner_last_timestamp IS NOT NULL
-                ORDER BY banner_last_timestamp DESC
-                LIMIT 1;`,
-                []
-            )
+            await db.query({
+                text: /*sql*/ `
+                    SELECT channel_id
+                    FROM project
+                    WHERE banner_last_timestamp IS NOT NULL
+                    ORDER BY banner_last_timestamp DESC
+                    LIMIT 1;`,
+                name: 'project-rotate-banner-current',
+            })
         ).rows[0];
 
         const banner = guild.bannerURL({ size: 1024 });

@@ -51,15 +51,16 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
 export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: 'warn' | 'punishment' | 'past_punishment' | 'note') {
     const editTimestamp = new Date();
 
-    const result = await db.query(
-        /*sql*/ `
-        UPDATE ${table}
-        SET context_url = $1, edited_timestamp = $2, edited_mod_id = $3
-        FROM ${table} old_table
-        WHERE ${table}.id = $4 AND old_table.id = ${table}.id
-        RETURNING ${table}.user_id::TEXT, old_table.context_url AS old_context;`,
-        [contextURL, editTimestamp, editModeratorID, id]
-    );
+    const result = await db.query({
+        text: /*sql*/ `
+            UPDATE ${table}
+            SET context_url = $1, edited_timestamp = $2, edited_mod_id = $3
+            FROM ${table} old_table
+            WHERE ${table}.id = $4 AND old_table.id = ${table}.id
+            RETURNING ${table}.user_id::TEXT, old_table.context_url AS old_context;`,
+        values: [contextURL, editTimestamp, editModeratorID, id],
+        name: `${table}-edit-context-url`,
+    });
     if (result.rowCount === 0) return Promise.reject('There is no entry with the specified UUID.');
 
     const { user_id, old_context } = result.rows[0];

@@ -111,7 +111,7 @@ export class AutomaticResponse {
         if (this.deleteAfter) setTimeout(() => response.delete(), this.deleteAfter * 1000);
         if (this.cooldown) cooldownStore.add(this.alias, message.member, this.cooldown * 1000);
 
-        if (this.directMessage && channel.id !== message.channel.id) {
+        if (this.directMessage && channel.id !== message.channelId) {
             sendInfo(message.channel, channel.type === ChannelType.DM ? `${message.author.toString()}, check your DMs!` : `${message.author.toString()}, go to <#${settings.data.botChannelID}>!`);
         }
     }

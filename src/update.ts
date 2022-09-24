@@ -46,7 +46,7 @@ client.once(Events.ClientReady, async () => {
     console.log(`Stitched ${contextMenuCommandAmount} context menu commands...`);
 
     await guild.commands.set(commandStructure);
-    console.log('Successfully updated application commands!');
+    console.log('Updated application commands!');
 
     client.destroy();
 });

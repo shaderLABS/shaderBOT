@@ -36,8 +36,10 @@ export const command: ChatInputCommandCallback = {
                 if (oldFileName !== automaticResponse.getFileName()) await fs.rm(path.join(automaticResponsePath, oldFileName));
             }
 
-            replySuccess(interaction, `Successfully updated the automatic response \`${alias}\`.`, 'Update Automatic Response');
-            log(`${parseUser(interaction.user)} updated the automatic response \`${alias}\`.`, 'Update Automatic Response');
+            const logString = `${parseUser(interaction.user)} updated the automatic response \`${alias}\`.`;
+
+            replySuccess(interaction, logString, 'Update Automatic Response');
+            log(logString, 'Update Automatic Response');
         } catch (error) {
             replyError(interaction, 'Invalid path or JSON value.');
         }

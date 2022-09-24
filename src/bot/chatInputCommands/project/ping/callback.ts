@@ -1,16 +1,17 @@
-import { db } from '../../../../db/postgres.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
+import { Project } from '../../../lib/project.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
-        const { channel } = interaction;
+        try {
+            const project = await Project.getByChannelID(interaction.channelId);
+            project.assertOwner(interaction.user.id).assertNotArchived();
 
-        const project = (await db.query(/*sql*/ `SELECT id, role_id FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, [channel.id, interaction.user.id])).rows[0];
-        if (!project) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
-        if (!project.role_id) return replyError(interaction, 'This project is archived.');
-
-        await channel.send('<@&' + project.role_id + '>');
-        replySuccess(interaction, 'Successfully pinged all users that are subscribed to this project.', 'Project Ping', true);
+            await interaction.channel.send('<@&' + project.roleID + '>');
+            replySuccess(interaction, 'All users that are subscribed to this project have been pinged.', 'Project Ping', true);
+        } catch (error) {
+            replyError(interaction, error);
+        }
     },
 };

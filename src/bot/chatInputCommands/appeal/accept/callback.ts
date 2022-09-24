@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
             } else {
                 if (!interaction.channel.isThread()) throw 'You must either specify a user or use this command in the thread of a ban appeal.';
 
-                appeal = await BanAppeal.getByThreadID(interaction.channel.id);
+                appeal = await BanAppeal.getByThreadID(interaction.channelId);
                 if (appeal.result !== 'pending') throw 'The specified ban appeal is already closed.';
             }
 

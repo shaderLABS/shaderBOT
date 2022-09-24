@@ -54,31 +54,39 @@ export class PastPunishment {
     }
 
     static async getByUUID(uuid: string, type: 'ban' | 'mute' | 'kick') {
-        const result = await db.query(/*sql*/ `SELECT * FROM past_punishment WHERE "type" = $1 AND id = $2;`, [type, uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM past_punishment WHERE "type" = $1 AND id = $2;`, values: [type, uuid], name: 'past-punishment-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A past ${type} with the specified UUID does not exist.`);
         return new PastPunishment(result.rows[0]);
     }
 
     static async getAnyByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM past_punishment WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM past_punishment WHERE id = $1;`, values: [uuid], name: 'past-punishment-any-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A past punishment with the specified UUID does not exist.`);
         return new PastPunishment(result.rows[0]);
     }
 
     static async getLatestByUserID(userID: string, type: 'ban' | 'mute' | 'kick') {
-        const result = await db.query(/*sql*/ `SELECT * FROM past_punishment WHERE "type" = $1 AND user_id = $2 ORDER BY timestamp DESC LIMIT 1;`, [type, userID]);
+        const result = await db.query({
+            text: /*sql*/ `SELECT * FROM past_punishment WHERE "type" = $1 AND user_id = $2 ORDER BY timestamp DESC LIMIT 1;`,
+            values: [type, userID],
+            name: 'past-punishment-latest-user-id',
+        });
         if (result.rowCount === 0) return Promise.reject(`The specified user does not have any past ${type}s.`);
         return new PastPunishment(result.rows[0]);
     }
 
     static async getAnyLatestByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [userID]);
+        const result = await db.query({
+            text: /*sql*/ `SELECT * FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
+            values: [userID],
+            name: 'past-punishment-any-latest-user-id',
+        });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any past punishments.');
         return new PastPunishment(result.rows[0]);
     }
 
     static async getAllByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'past-punishment-all-user-id' });
         return result.rows.map((row) => new PastPunishment(row));
     }
 
@@ -94,13 +102,14 @@ export class PastPunishment {
         const member = await userToMember(guild, user.id);
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO past_punishment (user_id, "type", mod_id, reason, context_url, timestamp)
-            VALUES ($1, 'kick', $2, $3, $4, $5)
-            RETURNING id;`,
-            [user.id, moderatorID, reason, contextURL, timestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	INSERT INTO past_punishment (user_id, "type", mod_id, reason, context_url, timestamp)
+            	VALUES ($1, 'kick', $2, $3, $4, $5)
+            	RETURNING id;`,
+            values: [user.id, moderatorID, reason, contextURL, timestamp],
+            name: 'past-punishment-create-kick',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert punishment.');
         const { id } = result.rows[0];
@@ -145,13 +154,14 @@ export class PastPunishment {
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE past_punishment
-            SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4;`,
-            [newReason, editTimestamp, editModeratorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	UPDATE past_punishment
+            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
+            	WHERE id = $4;`,
+            values: [newReason, editTimestamp, editModeratorID, this.id],
+            name: 'past-punishment-edit-reason',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the past punishment.');
 
         this.reason = newReason;
@@ -165,7 +175,7 @@ export class PastPunishment {
     }
 
     public async delete(moderatorID: string) {
-        const result = await db.query(/*sql*/ `DELETE FROM past_punishment WHERE id = $1;`, [this.id]);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM past_punishment WHERE id = $1;`, values: [this.id], name: 'past-punishment-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete past punishment.');
 
         const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s ${this.type}.\n\n${this.toString(true, true)}`;
@@ -243,50 +253,52 @@ export class Punishment {
     }
 
     static async has(userID: string, type: 'ban' | 'mute'): Promise<boolean> {
-        const result = await db.query(/*sql*/ `SELECT 1 FROM punishment WHERE "type" = $1 AND user_id = $2;`, [type, userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM punishment WHERE "type" = $1 AND user_id = $2;`, values: [type, userID], name: 'punishment-has' });
         return !!result.rows[0];
     }
 
     static async getByUUID(uuid: string, type: 'ban' | 'mute') {
-        const result = await db.query(/*sql*/ `SELECT * FROM punishment WHERE "type" = $1 AND id = $2;`, [type, uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE "type" = $1 AND id = $2;`, values: [type, uuid], name: 'punishment-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A ${type} with the specified UUID does not exist.`);
         return new Punishment(result.rows[0]);
     }
 
     static async getAnyByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM punishment WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE id = $1;`, values: [uuid], name: 'punishment-any-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A punishment with the specified UUID does not exist.`);
         return new PastPunishment(result.rows[0]);
     }
 
     static async getByUserID(userID: string, type: 'ban' | 'mute') {
-        const result = await db.query(/*sql*/ `SELECT * FROM punishment WHERE "type" = $1 AND user_id = $2;`, [type, userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE "type" = $1 AND user_id = $2;`, values: [type, userID], name: 'punishment-user-id' });
         if (result.rowCount === 0) return Promise.reject(`The specified user does not have any past ${type}s.`);
         return new Punishment(result.rows[0]);
     }
 
     static async getAllByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'punishment-all-user-id' });
         return result.rows.map((row) => new Punishment(row));
     }
 
     static async getExpiringToday() {
-        const result = await db.query(
-            /*sql*/ `
-            SELECT * FROM punishment
-            WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            []
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	SELECT * FROM punishment
+            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
+            name: 'punishment-expiring-today',
+        });
+
         return result.rows.map((row) => new Punishment(row));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query(
-            /*sql*/ `
-            SELECT * FROM punishment
-            WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            []
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	SELECT * FROM punishment
+            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
+            name: 'punishment-expiring-tomorrow',
+        });
+
         return result.rows.map((row) => new Punishment(row));
     }
 
@@ -309,17 +321,18 @@ export class Punishment {
     private async moveEntry(liftedModeratorID?: string) {
         const pastPunishment = this.toPastPunishment(liftedModeratorID);
 
-        const result = await db.query(
-            /*sql*/ `
-            WITH moved_rows AS (
-                DELETE FROM punishment
-                WHERE id = $1
-                RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
-            )
-            INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
-            SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            [pastPunishment.id, pastPunishment.liftedTimestamp, pastPunishment.liftedModeratorID]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	WITH moved_rows AS (
+            	    DELETE FROM punishment
+            	    WHERE id = $1
+            	    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
+            	)
+            	INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+            	SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+            values: [pastPunishment.id, pastPunishment.liftedTimestamp, pastPunishment.liftedModeratorID],
+            name: 'punishment-move-entry',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to move entry.');
 
@@ -397,13 +410,14 @@ export class Punishment {
 
         const editTimestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE punishment
-            SET expire_timestamp = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4;`,
-            [newExpireTimestamp, editTimestamp, editModeratorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	UPDATE punishment
+            	SET expire_timestamp = $1, edited_timestamp = $2, edited_mod_id = $3
+            	WHERE id = $4;`,
+            values: [newExpireTimestamp, editTimestamp, editModeratorID, this.id],
+            name: 'punishment-edit-duration',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the duration of the punishment.');
 
         this.expireTimestamp = newExpireTimestamp;
@@ -430,13 +444,14 @@ export class Punishment {
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE punishment
-            SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4;`,
-            [newReason, editTimestamp, editModeratorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	UPDATE punishment
+            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
+            	WHERE id = $4;`,
+            values: [newReason, editTimestamp, editModeratorID, this.id],
+            name: 'punishment-edit-reason',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the punishment.');
 
         this.reason = newReason;
@@ -458,13 +473,14 @@ export class Punishment {
         const timestamp = new Date();
         const expireTimestamp = duration ? new Date(timestamp.getTime() + duration * 1000) : undefined;
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, expire_timestamp, timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING id;`,
-            [userID, type, moderatorID, reason, contextURL, expireTimestamp, timestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, expire_timestamp, timestamp)
+            	VALUES ($1, $2, $3, $4, $5, $6, $7)
+            	RETURNING id;`,
+            values: [userID, type, moderatorID, reason, contextURL, expireTimestamp, timestamp],
+            name: 'punishment-create-entry',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert punishment.');
         const { id } = result.rows[0];

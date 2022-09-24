@@ -76,7 +76,7 @@ export const command: ChatInputCommandCallback = {
                 replyError(messageInteraction, undefined, 'Insufficient Permissions');
                 return false;
             },
-            idle: 300000,
+            idle: 300_000, // 5min = 300,000ms
         });
 
         let index = 0;

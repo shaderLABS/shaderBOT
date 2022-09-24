@@ -50,47 +50,47 @@ export class BanAppeal {
     }
 
     public static async getLatestByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, values: [userID], name: 'appeal-latest-user-id' });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any ban appeals.');
         return new BanAppeal(result.rows[0]);
     }
 
     public static async getPendingByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE user_id = $1 AND result = 'pending' LIMIT 1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM appeal WHERE user_id = $1 AND result = 'pending' LIMIT 1;`, values: [userID], name: 'appeal-pending-user-id' });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any pending ban appeals.');
         return new BanAppeal(result.rows[0]);
     }
 
     public static async getByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM appeal WHERE id = $1;`, values: [uuid], name: 'appeal-uuid' });
         if (result.rowCount === 0) return Promise.reject('A ban appeal with the specified UUID does not exist.');
         return new BanAppeal(result.rows[0]);
     }
 
     public static async getAllByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'appeal-all-user-id' });
         return result.rows.map((row) => new BanAppeal(row));
     }
 
     public static async getByThreadID(threadID: string) {
         // thread channel ID === starter message ID
-        const result = await db.query(/*sql*/ `SELECT * FROM appeal WHERE message_id = $1 LIMIT 1;`, [threadID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM appeal WHERE message_id = $1 LIMIT 1;`, values: [threadID], name: 'appeal-thread-id' });
         if (result.rowCount === 0) return Promise.reject('A ban appeal with the specified thread ID does not exist.');
         return new BanAppeal(result.rows[0]);
     }
 
     public static async hasPending(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT 1 FROM appeal WHERE user_id = $1 AND result = 'pending' LIMIT 1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM appeal WHERE user_id = $1 AND result = 'pending' LIMIT 1;`, values: [userID], name: 'appeal-has-pending' });
         return !!result.rows[0];
     }
 
     public static async getNumberOfAppealsByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT COUNT(*) FROM appeal WHERE user_id = $1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT COUNT(*) FROM appeal WHERE user_id = $1;`, values: [userID], name: 'appeal-count-all-user-id' });
         return +result.rows[0].count;
     }
 
     public static async getPreviousThreadsByUserID(userID: string): Promise<string[]> {
-        const result = await db.query(/*sql*/ `SELECT message_id FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT message_id FROM appeal WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'appeal-previous-threads-all-user-id' });
         return result.rows.map((row) => row.message_id);
     }
 
@@ -114,13 +114,14 @@ export class BanAppeal {
         const previousThreads = await BanAppeal.getPreviousThreadsByUserID(user.id);
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO appeal (user_id, reason, result, timestamp)
-            VALUES ($1, $2, 'pending', $3)
-            RETURNING id;`,
-            [user.id, reason, timestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                INSERT INTO appeal (user_id, reason, result, timestamp)
+                VALUES ($1, $2, 'pending', $3)
+                RETURNING id;`,
+            values: [user.id, reason, timestamp],
+            name: 'appeal-create',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert punishment.');
         const { id } = result.rows[0];
@@ -151,7 +152,7 @@ export class BanAppeal {
         });
 
         thread.send(`<@&${settings.data.moderatorRoleID}>`);
-        db.query(/*sql*/ `UPDATE appeal SET message_id = $1 WHERE id = $2;`, [message.id, id]);
+        db.query({ text: /*sql*/ `UPDATE appeal SET message_id = $1 WHERE id = $2;`, values: [message.id, id], name: 'appeal-create-message-id' });
 
         return appeal;
     }
@@ -163,13 +164,14 @@ export class BanAppeal {
         const oldResultReason = this.resultReason;
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE appeal
-            SET result_reason = $1, result_edit_timestamp = $2, result_edit_mod_id = $3
-            WHERE id = $4`,
-            [newResultReason, timestamp, moderatorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                UPDATE appeal
+                SET result_reason = $1, result_edit_timestamp = $2, result_edit_mod_id = $3
+                WHERE id = $4`,
+            values: [newResultReason, timestamp, moderatorID, this.id],
+            name: 'appeal-edit-result-reason',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to edit the result reason of the ban appeal.');
 
         this.resultReason = newResultReason;
@@ -195,13 +197,14 @@ export class BanAppeal {
 
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE appeal
-            SET result = $1, result_reason = $2, result_mod_id = $3, result_timestamp = $4
-            WHERE id = $5;`,
-            [appealResult, reason, moderatorID, timestamp, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                UPDATE appeal
+                SET result = $1, result_reason = $2, result_mod_id = $3, result_timestamp = $4
+                WHERE id = $5;`,
+            values: [appealResult, reason, moderatorID, timestamp, this.id],
+            name: 'appeal-close',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to close the ban appeal.');
 
         this.result = appealResult;
@@ -236,13 +239,14 @@ export class BanAppeal {
 
         const timestamp = new Date();
 
-        const result = await db.query(
-            /*sql*/ `
+        const result = await db.query({
+            text: /*sql*/ `
             UPDATE appeal
             SET result = $1, result_timestamp = $2
             WHERE id = $3;`,
-            ['expired', timestamp, this.id]
-        );
+            values: ['expired', timestamp, this.id],
+            name: 'appeal-expire',
+        });
         if (result.rowCount === 0) return Promise.reject('Failed to expire the ban appeal.');
 
         this.result = 'expired';

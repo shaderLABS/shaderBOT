@@ -37,19 +37,19 @@ export class Note {
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM note WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE id = $1;`, values: [uuid], name: 'note-uuid' });
         if (result.rowCount === 0) return Promise.reject('A note with the specified UUID does not exist.');
         return new Note(result.rows[0]);
     }
 
     static async getLatestByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, values: [userID], name: 'note-latest-user-id' });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any notes.');
         return new Note(result.rows[0]);
     }
 
     static async getAllByUserID(userID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`, [userID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'note-all-user-id' });
         return result.rows.map((row) => new Note(row));
     }
 
@@ -57,13 +57,14 @@ export class Note {
         if (content.length < 1 || content.length > 512) return Promise.reject('The content must be between 1 and 512 characters long.');
 
         const timestamp = new Date();
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO note (user_id, mod_id, content, context_url, timestamp)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id;`,
-            [userID, moderatorID, content, contextURL, timestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                INSERT INTO note (user_id, mod_id, content, context_url, timestamp)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id;`,
+            values: [userID, moderatorID, content, contextURL, timestamp],
+            name: 'note-create',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert note.');
         const { id } = result.rows[0];
@@ -130,7 +131,7 @@ export class Note {
      * Delete the note.
      */
     public async delete(moderatorID: string) {
-        const result = await db.query(/*sql*/ `DELETE FROM note WHERE id = $1;`, [this.id]);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM note WHERE id = $1;`, values: [this.id], name: 'note-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete note.');
 
         const logString = `${parseUser(moderatorID)} deleted ${parseUser(this.userID)}'s note.\n\n${this.toString()}`;
@@ -149,13 +150,14 @@ export class Note {
         const timestamp = new Date();
         const oldContent = this.content;
 
-        const result = await db.query(
-            /*sql*/ `
-            UPDATE note
-            SET content = $1, edited_timestamp = $2, edited_mod_id = $3
-            WHERE id = $4;`,
-            [newContent, timestamp, moderatorID, this.id]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                UPDATE note
+                SET content = $1, edited_timestamp = $2, edited_mod_id = $3
+                WHERE id = $4;`,
+            values: [newContent, timestamp, moderatorID, this.id],
+            name: 'note-edit-content',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to edit note content.');
 

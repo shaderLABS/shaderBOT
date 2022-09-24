@@ -191,7 +191,7 @@ export async function sendButtonPages(
             replyError(buttonInteraction, undefined, 'Insufficient Permissions');
             return false;
         },
-        idle: 600000,
+        idle: 600_000, // 10min = 600,000ms
     });
 
     let index = 0;
@@ -274,7 +274,7 @@ export async function replyButtonPages(
             replyError(buttonInteraction, undefined, 'Insufficient Permissions');
             return false;
         },
-        idle: 600000,
+        idle: 600_000, // 10min = 600,000ms
     });
 
     let index = 0;

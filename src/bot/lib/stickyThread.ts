@@ -17,19 +17,19 @@ export class StickyThread {
     }
 
     public static async getByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM sticky_thread WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM sticky_thread WHERE id = $1;`, values: [uuid], name: 'sticky-thread-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A sticky thread with the specified UUID does not exist.`);
         return new StickyThread(result.rows[0]);
     }
 
     public static async getByThreadID(threadID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM sticky_thread WHERE thread_id = $1;`, [threadID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM sticky_thread WHERE thread_id = $1;`, values: [threadID], name: 'sticky-thread-thread-id' });
         if (result.rowCount === 0) return Promise.reject(`The specified thread is not sticky.`);
         return new StickyThread(result.rows[0]);
     }
 
     public static async getAllStickyThreads(): Promise<{ thread_id: string; channel_id: string }[]> {
-        const result = await db.query(/*sql*/ `SELECT thread_id, channel_id FROM sticky_thread;`);
+        const result = await db.query({ text: /*sql*/ `SELECT thread_id, channel_id FROM sticky_thread;`, name: 'sticky-thread-all' });
         return result.rows;
     }
 
@@ -59,20 +59,21 @@ export class StickyThread {
     }
 
     public static async isSticky(threadID: string) {
-        const result = await db.query(/*sql*/ `SELECT 1 FROM sticky_thread WHERE thread_id = $1 LIMIT 1;`, [threadID]);
+        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM sticky_thread WHERE thread_id = $1 LIMIT 1;`, values: [threadID], name: 'sticky-thread-is-sticky' });
         return !!result.rows[0];
     }
 
     public static async create(thread: AnyThreadChannel, moderatorID?: string): Promise<string> {
         if (await StickyThread.isSticky(thread.id)) return Promise.reject('The specified thread is already marked as sticky.');
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO sticky_thread (channel_id, thread_id, mod_id)
-            VALUES ($1, $2, $3)
-            RETURNING id;`,
-            [thread.parentId, thread.id, moderatorID]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+            	INSERT INTO sticky_thread (channel_id, thread_id, mod_id)
+            	VALUES ($1, $2, $3)
+            	RETURNING id;`,
+            values: [thread.parentId, thread.id, moderatorID],
+            name: 'sticky-thread-create',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert sticky thread.');
 
@@ -114,7 +115,7 @@ export class StickyThread {
     }
 
     public async delete() {
-        const result = await db.query(/*sql*/ `DELETE FROM sticky_thread WHERE id = $1 RETURNING id;`, [this.id]);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM sticky_thread WHERE id = $1 RETURNING id;`, values: [this.id], name: 'sticky-thread-delete' });
         if (result.rowCount === 0) return Promise.reject(`Failed to delete sticky thread.`);
     }
 }

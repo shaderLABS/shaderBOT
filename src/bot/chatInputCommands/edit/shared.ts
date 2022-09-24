@@ -137,47 +137,49 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 let table: 'warn' | 'punishment' | 'past_punishment' | 'note';
                 if (target instanceof User) {
                     const entry = (
-                        await db.query(
-                            /*sql*/ `
-                            WITH entries AS (
-                                (SELECT id, timestamp, 'punishment' AS table_name FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION ALL
-                                (SELECT id, timestamp, 'past_punishment' AS table_name FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION ALL
-                                (SELECT id, timestamp, 'note' AS table_name FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                UNION ALL
-                                (SELECT id, timestamp, 'warn' AS table_name FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                            )
-                            SELECT id, table_name FROM entries ORDER BY timestamp DESC LIMIT 1;`,
-                            [target.id]
-                        )
+                        await db.query({
+                            text: /*sql*/ `
+                                WITH entries AS (
+                                    (SELECT id, timestamp, tableoid::regclass FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                )
+                                SELECT id, tableoid FROM entries ORDER BY timestamp DESC LIMIT 1;`,
+                            values: [target.id],
+                            name: 'context-latest-user-id',
+                        })
                     ).rows[0];
 
                     if (!entry) return replyError(interaction, 'The specified user does not have any entries.');
                     if (!(await hasPermissionForTarget(interaction, target))) return;
 
                     uuid = entry.id;
-                    table = entry.table_name;
+                    table = entry.tableoid;
                 } else {
                     const entry = (
-                        await db.query(
-                            /*sql*/ `
-                            (SELECT user_id, 'punishment' AS table_name FROM punishment WHERE id = $1)
-                            UNION ALL
-                            (SELECT user_id, 'past_punishment' AS table_name FROM past_punishment WHERE id = $1)
-                            UNION ALL
-                            (SELECT user_id, 'note' AS table_name FROM note WHERE id = $1)
-                            UNION ALL
-                            (SELECT user_id, 'warn' AS table_name FROM warn WHERE id = $1)`,
-                            [target]
-                        )
+                        await db.query({
+                            text: /*sql*/ `
+                                (SELECT user_id, tableoid::regclass FROM punishment WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM past_punishment WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM note WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM warn WHERE id = $1)`,
+                            values: [target],
+                            name: 'context-uuid',
+                        })
                     ).rows[0];
 
                     if (!entry) return replyError(interaction, 'There is no entry with the specified UUID.');
                     if (!(await hasPermissionForTarget(interaction, entry.user_id))) return;
 
                     uuid = target;
-                    table = entry.table_name;
+                    table = entry.tableoid;
                 }
 
                 const logString = await editContextURL(uuid, context, interaction.user.id, table);

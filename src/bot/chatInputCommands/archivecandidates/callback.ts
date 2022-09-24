@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         await interaction.deferReply();
 
-        const projectChannels = (await db.query(/*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`)).rows;
+        const projectChannels = (await db.query({ text: /*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`, name: 'project-all-unarchived-channel-id' })).rows;
         const eligibleProjectChannelPromises: Promise<TextChannel | undefined>[] = [];
 
         for (const { channel_id } of projectChannels) {

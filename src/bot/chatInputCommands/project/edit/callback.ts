@@ -1,16 +1,19 @@
 import { ActionRowBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { replyError } from '../../../lib/embeds.js';
-import { isProjectOwner } from '../../../lib/project.js';
+import { Project } from '../../../lib/project.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
-        const { channel, user } = interaction;
-
+        const { channel } = interaction;
         if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
-        if (!(await isProjectOwner(user.id, channel.id))) return replyError(interaction, 'You do not have permission to run this command.', 'Insufficient Permissions');
-        if (channel.parentId && settings.data.archive.categoryIDs.includes(channel.parentId)) return replyError(interaction, 'This project is archived.');
+
+        try {
+            const project = await Project.getByChannelID(interaction.channelId);
+            project.assertOwner(interaction.user.id).assertNotArchived();
+        } catch (error) {
+            return replyError(interaction, error);
+        }
 
         const nameInput = new TextInputBuilder({
             customId: 'nameInput',
@@ -33,7 +36,7 @@ export const command: ChatInputCommandCallback = {
         });
 
         const modal = new ModalBuilder({
-            customId: 'editProjectChannel:' + channel.id,
+            customId: 'editProjectChannel:' + interaction.channelId,
             title: 'Edit Project Channel',
             components: [new ActionRowBuilder<TextInputBuilder>({ components: [nameInput] }), new ActionRowBuilder<TextInputBuilder>({ components: [descriptionInput] })],
         });

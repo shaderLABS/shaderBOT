@@ -66,7 +66,7 @@ export function handleChatInputCommand(interaction: ChatInputCommandInteraction<
         return;
     }
 
-    if (command.channelWhitelist && !command.channelWhitelist.includes(interaction.channel.id)) {
+    if (command.channelWhitelist && !command.channelWhitelist.includes(interaction.channelId)) {
         replyError(interaction, `This command is only usable in <#${command.channelWhitelist.join('>, <#')}>.`, 'Invalid Channel');
         return;
     }

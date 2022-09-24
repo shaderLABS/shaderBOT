@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
         if (isNaN(count) || count < 0 || count > 100) return replyError(interaction, 'Please use a number between 0 and 100 as the first argument.');
 
         const { size } = await channel.bulkDelete(count, true);
-        replySuccess(interaction, `Successfully deleted ${size} (out of ${count}) message(s).`, 'Purge Messages', true);
+        replySuccess(interaction, `${size} (out of ${count}) message(s) have been deleted.`, 'Purge Messages', true);
         log(`${parseUser(interaction.user)} deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`, 'Purge Messages');
     },
 };

@@ -17,8 +17,10 @@ export const command: ChatInputCommandCallback = {
             await pasta.save();
             pastaStore.set(pasta.alias, pasta);
 
-            replySuccess(interaction, `Successfully created the pasta \`${pasta.alias}\`.`, 'Create Pasta');
-            log(`${parseUser(interaction.user)} created the pasta \`${pasta.alias}\`.`, 'Create Pasta');
+            const logString = `${parseUser(interaction.user)} created the pasta \`${pasta.alias}\`.`;
+
+            replySuccess(interaction, logString, 'Create Pasta');
+            log(logString, 'Create Pasta');
         } catch {
             replyError(interaction, 'Failed to save pasta.');
         }

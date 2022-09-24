@@ -16,6 +16,14 @@ CREATE TABLE "project" (
     webhook_secret BYTEA UNIQUE
 );
 
+DROP TABLE IF EXISTS "project_mute";
+CREATE TABLE "project_mute" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    project_id UUID NOT NULL REFERENCES project(id),
+    user_id NUMERIC(20) NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 DROP TABLE IF EXISTS "warn";
 CREATE TABLE "warn" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

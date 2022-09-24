@@ -1,4 +1,4 @@
-import { AnyThreadChannel, BitField, ChannelType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
+import { AnyThreadChannel, BitField, ChannelType, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { timeoutStore } from '../bot.js';
 import log from './log.js';
@@ -37,45 +37,47 @@ export class LockSlowmode {
     }
 
     static async getByUUID(uuid: string, type: 'lock' | 'slowmode') {
-        const result = await db.query(/*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = $1 AND id = $2;`, [type, uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = $1 AND id = $2;`, values: [type, uuid], name: 'lock-slowmode-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A ${type} with the specified UUID does not exist.`);
         return new LockSlowmode(result.rows[0]);
     }
 
     static async getAnyByUUID(uuid: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM lock_slowmode WHERE id = $1;`, [uuid]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE id = $1;`, values: [uuid], name: 'lock-slowmode-any-uuid' });
         if (result.rowCount === 0) return Promise.reject(`A lock/slowmode with the specified UUID does not exist.`);
         return new LockSlowmode(result.rows[0]);
     }
 
     static async getByChannelID(channelID: string, type: 'lock' | 'slowmode') {
-        const result = await db.query(/*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = $1 AND channel_id = $2;`, [type, channelID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = $1 AND channel_id = $2;`, values: [type, channelID], name: 'lock-slowmode-channel-id' });
         if (result.rowCount === 0) return Promise.reject(`The specified channel does not have an active ${type}.`);
         return new LockSlowmode(result.rows[0]);
     }
 
     static async getAllByChannelID(channelID: string) {
-        const result = await db.query(/*sql*/ `SELECT * FROM lock_slowmode WHERE channel_id = $1 ORDER BY timestamp DESC;`, [channelID]);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE channel_id = $1 ORDER BY timestamp DESC;`, values: [channelID], name: 'lock-slowmode-all-channel-id' });
         return result.rows.map((row) => new LockSlowmode(row));
     }
 
     static async getExpiringToday() {
-        const result = await db.query(
-            /*sql*/ `
-            SELECT * FROM lock_slowmode
-            WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            []
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                SELECT * FROM lock_slowmode
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
+            name: 'lock-slowmode-expiring-today',
+        });
+
         return result.rows.map((row) => new LockSlowmode(row));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query(
-            /*sql*/ `
-            SELECT * FROM lock_slowmode
-            WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            []
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                SELECT * FROM lock_slowmode
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
+            name: 'lock-slowmode-expiring-tomorrow',
+        });
+
         return result.rows.map((row) => new LockSlowmode(row));
     }
 
@@ -122,7 +124,7 @@ export class LockSlowmode {
             if (bitfield.has(LockPermissionFlagBits.DenySpeak)) overwrite.Speak = false;
         }
 
-        return channel.permissionOverwrites.edit(channel.guild.roles.everyone.id, overwrite);
+        return channel.permissionOverwrites.edit(channel.guild.roles.everyone, overwrite, { type: OverwriteType.Role });
     }
 
     public static async createLock(moderatorID: string, channel: TextChannel | VoiceChannel, duration: number): Promise<string> {
@@ -139,13 +141,14 @@ export class LockSlowmode {
             await overwrittenLock.delete();
         }
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
-            VALUES ('lock', $1, $2, $3)
-            RETURNING id;`,
-            [channel.id, previousState, expireTimestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
+                VALUES ('lock', $1, $2, $3)
+                RETURNING id;`,
+            values: [channel.id, previousState, expireTimestamp],
+            name: 'lock-slowmode-create-lock',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert channel lock.');
         const { id } = result.rows[0];
@@ -158,7 +161,12 @@ export class LockSlowmode {
             expire_timestamp: expireTimestamp,
         });
 
-        await channel.permissionOverwrites.edit(channel.guild.roles.everyone, { SendMessages: false, CreatePublicThreads: false, CreatePrivateThreads: false, Speak: false });
+        await channel.permissionOverwrites.edit(
+            channel.guild.roles.everyone,
+            { SendMessages: false, CreatePublicThreads: false, CreatePrivateThreads: false, Speak: false },
+            { type: OverwriteType.Role }
+        );
+
         timeoutStore.set(lock, true);
 
         let logString = `${parseUser(moderatorID)} has locked ${channel.toString()} for ${secondsToString(duration)}.`;
@@ -186,13 +194,14 @@ export class LockSlowmode {
             await overwrittenSlowmode.delete();
         }
 
-        const result = await db.query(
-            /*sql*/ `
-            INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
-            VALUES ('slowmode', $1, $2, $3)
-            RETURNING id;`,
-            [channel.id, previousState, expireTimestamp]
-        );
+        const result = await db.query({
+            text: /*sql*/ `
+                INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
+                VALUES ('slowmode', $1, $2, $3)
+                RETURNING id;`,
+            values: [channel.id, previousState, expireTimestamp],
+            name: 'lock-slowmode-create-slowmode',
+        });
 
         if (result.rowCount === 0) return Promise.reject('Failed to insert channel slowmode.');
         const { id } = result.rows[0];
@@ -261,7 +270,7 @@ export class LockSlowmode {
     }
 
     public async delete() {
-        const result = await db.query(/*sql*/ `DELETE FROM lock_slowmode WHERE id = $1 RETURNING id;`, [this.id]);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM lock_slowmode WHERE id = $1 RETURNING id;`, values: [this.id], name: 'lock-slowmode-delete' });
         if (result.rowCount === 0) return Promise.reject(`Failed to delete channel ${this.type}.`);
     }
 }

@@ -34,8 +34,10 @@ export const command: ChatInputCommandCallback = {
                 if (oldPasta.getFileName() !== newPasta.getFileName()) await oldPasta.delete();
             }
 
-            replySuccess(interaction, `Successfully updated the pasta \`${newPasta.alias}\`.`, 'Update Pasta');
-            log(`${parseUser(interaction.user)} updated the pasta \`${newPasta.alias}\`.`, 'Update Pasta');
+            const logString = `${parseUser(interaction.user)} updated the pasta \`${newPasta.alias}\`.`;
+
+            replySuccess(interaction, logString, 'Update Pasta');
+            log(logString, 'Update Pasta');
         } catch (error) {
             replyError(interaction, 'Invalid path or JSON value.');
         }

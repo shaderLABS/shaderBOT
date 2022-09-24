@@ -17,7 +17,7 @@ export const command: ChatInputCommandCallback = {
                 appeal = await BanAppeal.getByUUID(appealID);
             } else {
                 if (!interaction.channel.isThread()) throw 'You must either specify a UUID or use this command in the thread of a ban appeal.';
-                appeal = await BanAppeal.getByThreadID(interaction.channel.id);
+                appeal = await BanAppeal.getByThreadID(interaction.channelId);
             }
 
             if (!(await hasPermissionForTarget(interaction, appeal.userID))) return;
