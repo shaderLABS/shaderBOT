@@ -174,6 +174,7 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
 
         const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type === ChannelType.GuildText) {
+            const previewURL = reply.attachments.first()?.url;
             logChannel.send({
                 embeds: [
                     new EmbedBuilder({
@@ -183,7 +184,10 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                             iconURL: message.author.displayAvatarURL(),
                             url: message.url,
                         },
-                        description: `${parseUser(message.author)} sent a juxtapose URL in [their message](${message.url}) (${message.id}). A [preview](${reply.url}) has been rendered.`,
+                        description: `${parseUser(message.author)} sent a [juxtapose URL](${juxtaposeURL}) in [their message](${message.url}) (${message.id}). A [preview](${
+                            reply.url
+                        }) has been rendered.`,
+                        image: previewURL ? { url: previewURL } : undefined,
                         footer: {
                             text: `ID: ${message.id}`,
                         },

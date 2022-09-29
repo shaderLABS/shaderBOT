@@ -107,6 +107,7 @@ export const command: ChatInputCommandCallback = {
 
         const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type === ChannelType.GuildText) {
+            const previewURL = reply.attachments.first()?.url;
             logChannel.send({
                 embeds: [
                     new EmbedBuilder({
@@ -116,7 +117,8 @@ export const command: ChatInputCommandCallback = {
                             iconURL: interaction.user.displayAvatarURL(),
                             url: reply.url,
                         },
-                        description: `${parseUser(interaction.user)} created a [juxtapose](${reply.url}) by specifying two URLs.`,
+                        description: `${parseUser(interaction.user)} created a [juxtapose](${juxtaposeURL}) by specifying two URLs. A [preview](${reply.url}) has been rendered.`,
+                        image: previewURL ? { url: previewURL } : undefined,
                         footer: {
                             text: `ID: ${reply.id}`,
                         },
