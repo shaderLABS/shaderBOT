@@ -3,6 +3,7 @@ import { handleAutomaticResponse } from '../../automaticResponseHandler.js';
 import { settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { checkFilePreview } from '../../lib/filePreview.js';
+import { checkJuxtaposePreview } from '../../lib/juxtaposePreview.js';
 import { NonNullableProperty } from '../../lib/misc.js';
 import { matchBlacklist } from '../../lib/searchMessage.js';
 import { checkSpam } from '../../lib/spamProtection.js';
@@ -19,7 +20,12 @@ export const event: Event = {
         if (message.author.bot || !isGuildMessage(message)) return;
 
         checkSpam(message);
-        matchBlacklist(message) || checkMediaOnly(message) || handleAutomaticResponse(message) || checkFilePreview(message);
+        if (matchBlacklist(message) || checkMediaOnly(message) || handleAutomaticResponse(message)) return;
+
+        if (message.content.includes('https://')) {
+            checkFilePreview(message);
+            checkJuxtaposePreview(message);
+        }
     },
 };
 

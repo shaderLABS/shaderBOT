@@ -1,7 +1,8 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ComponentType, Message, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder, Message, PermissionFlagsBits } from 'discord.js';
+import { settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
-import { replyError } from './embeds.js';
-import { unicodeLineBoundaries } from './misc.js';
+import { EmbedColor, replyError } from './embeds.js';
+import { getGuild, parseUser, unicodeLineBoundaries } from './misc.js';
 
 const gitHubFileURLs = /https:\/\/github\.com(?:\/[^\/\s]+){2}\/blob(?:\/[^\/\s]+)+#[^\/\s]+/;
 const gitHubGistURLs = /https:\/\/gist\.github\.com(?:\/[^\/\s]+){2}#file\-[^\/\s]+/;
@@ -126,7 +127,7 @@ export async function checkFilePreview(message: GuildMessage) {
         url: rawURL.href,
         style: ButtonStyle.Link,
         emoji: '🔗',
-        label: 'Open Original',
+        label: 'Open',
     });
 
     const deleteButton = new ButtonBuilder({
@@ -175,6 +176,26 @@ export async function checkFilePreview(message: GuildMessage) {
             deleteButton.setDisabled(true);
             reply.edit({ components: [buttonActionRow] });
         });
+
+    const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+    if (logChannel?.type === ChannelType.GuildText) {
+        logChannel.send({
+            embeds: [
+                new EmbedBuilder({
+                    color: EmbedColor.Blue,
+                    author: {
+                        name: 'File Preview',
+                        iconURL: message.author.displayAvatarURL(),
+                        url: reply.url,
+                    },
+                    description: `${parseUser(message.author)} sent a file URL in [their message](${message.url}) (${message.id}). A [preview](${reply.url}) has been rendered.`,
+                    footer: {
+                        text: `ID: ${reply.id}`,
+                    },
+                }),
+            ],
+        });
+    }
 }
 
 function binarySearchSupportedLanguages(value: string) {
