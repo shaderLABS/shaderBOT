@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, Message, PermissionFlagsBits, User } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, PermissionFlagsBits, User } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
@@ -15,12 +15,18 @@ type CachedMessage = {
 };
 
 const cache: (CachedMessage | undefined)[] = new Array(settings.data.spamProtection.cacheLength);
+const interactionUserLocks = new Set<string>();
 
 export async function handleSpamInteraction(interaction: ButtonInteraction<'cached'>) {
     if (!interaction.memberPermissions.has(PermissionFlagsBits.KickMembers)) return replyError(interaction, undefined, 'Insufficient Permissions');
 
     const id = interaction.customId.split(':')[1];
-    if (!id) return;
+    if (!id || interactionUserLocks.has(id)) return;
+    interactionUserLocks.add(id);
+
+    interaction.message.edit({ components: [] }).then(() => {
+        interactionUserLocks.delete(id);
+    });
 
     const targetUser = await client.users.fetch(id).catch(() => undefined);
     if (!targetUser) return replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
@@ -28,16 +34,13 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
     const mute = await Punishment.getByUserID(id, 'mute').catch(() => undefined);
 
     if (interaction.customId.startsWith('kickSpam')) {
-        await kickSpammer(targetUser, interaction.user.id, interaction.message instanceof Message ? interaction.message.url : undefined);
+        await kickSpammer(targetUser, interaction.user.id, interaction.message.url);
         mute?.move(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
     } else {
         mute?.move(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
     }
-
-    const message = interaction.message;
-    if (message instanceof Message) message.edit({ components: [] });
 }
 
 export async function checkSpam(message: GuildMessage) {
