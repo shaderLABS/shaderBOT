@@ -1,10 +1,10 @@
-import { APIOverwrite, APIRole, AuditLogEvent, Events } from 'discord.js';
+import { APIAuditLogChange, AuditLogEvent, Events } from 'discord.js';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { Event } from '../../eventHandler.js';
 import { NonNullableProperty } from '../../lib/misc.js';
 import { Punishment } from '../../lib/punishment.js';
 
-function parseChangeTimestamp(timestamp: string | number | boolean | APIRole[] | APIOverwrite[] | undefined) {
+function parseChangeTimestamp(timestamp: APIAuditLogChange['old_value']) {
     return typeof timestamp === 'string' ? Date.parse(timestamp) : 0;
 }
 
