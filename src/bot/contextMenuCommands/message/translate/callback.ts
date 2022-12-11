@@ -97,9 +97,11 @@ export const command: MessageContextMenuCommandCallback = {
             cache.set(translationID, translation);
 
             const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
-            if (logChannel?.type === ChannelType.GuildText) logChannel.send({ embeds: [logEmbed] });
 
-            if (translation.language === 'en') return replyInfo(interaction, undefined, 'The source text is already in English.', undefined, undefined, true);
+            if (translation.language === 'en') {
+                if (logChannel?.type === ChannelType.GuildText) logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\nThe source text is already in English.')] });
+                return replyInfo(interaction, undefined, 'The source text is already in English.', undefined, undefined, true);
+            }
 
             const header = `${isoLanguageCodeToFlagEmoji(translation.language)}  **[${isoLanguageCodeToName(translation.language)} (${Math.round(translation.languageConfidence * 100)}%)](${
                 targetMessage.url
@@ -112,6 +114,10 @@ export const command: MessageContextMenuCommandCallback = {
                     allowedMentions: { parse: [] },
                     ephemeral: true,
                 });
+
+                if (logChannel?.type === ChannelType.GuildText) {
+                    logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\n' + header + '\n' + blockQuote(translation.text))] });
+                }
             } else {
                 interaction.reply({
                     content: header,
@@ -119,6 +125,13 @@ export const command: MessageContextMenuCommandCallback = {
                     allowedMentions: { parse: [] },
                     ephemeral: true,
                 });
+
+                if (logChannel?.type === ChannelType.GuildText) {
+                    logChannel.send({
+                        embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\n' + header)],
+                        files: [new AttachmentBuilder(Buffer.from(translation.text), { name: 'translation.txt' })],
+                    });
+                }
             }
         } catch (error) {
             console.error(error);
