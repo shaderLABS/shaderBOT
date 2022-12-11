@@ -1,5 +1,6 @@
 import {
     ActionRowBuilder,
+    AnySelectMenuInteraction,
     ApplicationCommandType,
     ButtonBuilder,
     ButtonInteraction,
@@ -14,7 +15,6 @@ import {
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     PermissionFlagsBits,
-    SelectMenuInteraction,
     TextBasedChannel,
     User,
     UserContextMenuCommandInteraction,
@@ -51,7 +51,7 @@ function chatInputApplicationCommandMention(interaction: ChatInputCommandInterac
     return string;
 }
 
-function getInteractionName(interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction) {
+function getInteractionName(interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction) {
     if (interaction.type === InteractionType.ApplicationCommand) {
         if (interaction.commandType === ApplicationCommandType.ChatInput) return chatInputApplicationCommandMention(interaction);
         return interaction.commandName;
@@ -71,7 +71,7 @@ export function sendSuccess(channel: TextBasedChannel | User | GuildMember, desc
 }
 
 export function replySuccess(
-    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
     description: any,
     title?: string,
     ephemeral: boolean = false
@@ -105,7 +105,7 @@ export function sendError(channel: TextBasedChannel | User | GuildMember, descri
 }
 
 export function replyError(
-    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
     description: any,
     title?: string,
     ephemeral: boolean = true
@@ -140,7 +140,7 @@ export function sendInfo(channel: TextBasedChannel | User | GuildMember, descrip
 }
 
 export function replyInfo(
-    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
     description: any,
     title?: string,
     message?: string,
@@ -246,7 +246,7 @@ export async function sendButtonPages(
 }
 
 export async function replyButtonPages(
-    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | SelectMenuInteraction,
+    interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
     pages: string[],
     title: string,
     color: number = EmbedColor.Blue,
