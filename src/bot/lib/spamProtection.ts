@@ -150,7 +150,7 @@ export async function kickSpammer(user: User, moderatorID?: string, contextURL?:
     ).catch(() => undefined);
 
     try {
-        const logString = await PastPunishment.createKick(user, 'Phished account used for spam.', moderatorID, contextURL, 1);
+        const logString = await PastPunishment.createKick(user, 'Phished account used for spam.', moderatorID, contextURL, 86400);
         return logString;
     } catch (error) {
         console.error(error);

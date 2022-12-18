@@ -90,7 +90,7 @@ export class PastPunishment {
         return result.rows.map((row) => new PastPunishment(row));
     }
 
-    static async createKick(userResolvable: UserResolvable, reason: string, moderatorID?: string, contextURL?: string, deleteMessageDays?: number) {
+    static async createKick(userResolvable: UserResolvable, reason: string, moderatorID?: string, contextURL?: string, deleteMessageSeconds?: number) {
         if (reason.length > 512) return Promise.reject('The kick reason must not be more than 512 characters long.');
 
         const guild = getGuild();
@@ -129,12 +129,12 @@ export class PastPunishment {
             sentDM = false;
         });
 
-        if (deleteMessageDays) {
+        if (deleteMessageSeconds) {
             if (await guild.bans.fetch(user).catch(() => undefined)) {
                 await guild.members.unban(user, reason);
-                await guild.members.ban(user, { reason, deleteMessageDays });
+                await guild.members.ban(user, { reason, deleteMessageSeconds });
             } else {
-                await guild.members.ban(user, { reason, deleteMessageDays });
+                await guild.members.ban(user, { reason, deleteMessageSeconds });
                 await guild.members.unban(user, reason);
             }
         } else {
@@ -502,7 +502,7 @@ export class Punishment {
         };
     }
 
-    public static async createBan(userResolvable: UserResolvable, reason: string, duration?: number, moderatorID?: string, contextURL?: string, deleteMessageDays?: number) {
+    public static async createBan(userResolvable: UserResolvable, reason: string, duration?: number, moderatorID?: string, contextURL?: string, deleteMessageSeconds?: number) {
         if (duration) {
             if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
             if (duration < 10) return Promise.reject("You can't ban someone for less than 10 seconds.");
@@ -525,13 +525,13 @@ export class Punishment {
 
         if (await guild.bans.fetch(user).catch(() => undefined)) {
             // is banned
-            if (deleteMessageDays) {
+            if (deleteMessageSeconds) {
                 await guild.members.unban(user, 'Rebanning an already banned user in order to delete their messages.');
-                await guild.members.ban(user, { reason, deleteMessageDays });
+                await guild.members.ban(user, { reason, deleteMessageSeconds });
             }
         } else {
             // is not banned
-            await guild.members.ban(user, { reason, deleteMessageDays });
+            await guild.members.ban(user, { reason, deleteMessageSeconds });
         }
 
         if (duration) timeoutStore.set(punishment, true);

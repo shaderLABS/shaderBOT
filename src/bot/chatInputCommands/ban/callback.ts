@@ -27,14 +27,14 @@ export const command: ChatInputCommandCallback = {
             }
 
             try {
-                const logString = await Punishment.createBan(targetUser, reason, duration, interaction.user.id, contextURL, deleteMessages ? 7 : undefined);
+                const logString = await Punishment.createBan(targetUser, reason, duration, interaction.user.id, contextURL, deleteMessages ? 604800 : undefined);
                 replySuccess(interaction, logString, 'Temporary Ban');
             } catch (error) {
                 replyError(interaction, error);
             }
         } else {
             try {
-                const logString = await Punishment.createBan(targetUser, reason, undefined, interaction.user.id, contextURL, deleteMessages ? 7 : undefined);
+                const logString = await Punishment.createBan(targetUser, reason, undefined, interaction.user.id, contextURL, deleteMessages ? 604800 : undefined);
                 replySuccess(interaction, logString, 'Permanent Ban');
             } catch (error) {
                 replyError(interaction, error);
