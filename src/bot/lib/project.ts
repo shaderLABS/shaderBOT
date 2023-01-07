@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import { ChannelType, EmbedBuilder, Guild, GuildMember, GuildTextBasedChannel, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, User } from 'discord.js';
+import { CategoryChannel, ChannelType, EmbedBuilder, Guild, GuildMember, GuildTextBasedChannel, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
-import { EmbedColor, EmbedIcon } from './embeds.js';
+import { EmbedColor, EmbedIcon, sendInfo } from './embeds.js';
 import log from './log.js';
-import { getGuild, parseUser, userToMember } from './misc.js';
+import { getAlphabeticalChannelPosition, getGuild, parseUser, userToMember } from './misc.js';
 import { formatTimeDate } from './time.js';
 
 export class Project {
@@ -83,6 +83,8 @@ export class Project {
         if (result.rowCount === 0) return Promise.reject('Failed to create project channel.');
         const { id } = result.rows[0];
 
+        channel.setPosition(getAlphabeticalChannelPosition(channel, channel.parent));
+
         const initializationEmbed = new EmbedBuilder({
             author: {
                 name: 'Create Project',
@@ -104,6 +106,11 @@ export class Project {
                 text: 'ID: ' + id,
             },
         });
+
+        const announcementChannel = channel.guild.channels.cache.get(settings.data.logging.announcementChannelID);
+        if (announcementChannel?.isTextBased()) {
+            sendInfo(announcementChannel, `${channel.toString()} (${channel.parent?.toString() || 'No Category'})`, 'A new project has been created!');
+        }
 
         log(`${parseUser(moderatorID)} created a project linked to <#${channel.id}> (${id}).`, 'Create Project');
         return initializationEmbed;
@@ -328,6 +335,33 @@ export class Project {
         const logString = `The project linked to <#${this.channelID}> (${this.id}) has been unarchived.`;
 
         log(logString, 'Unarchive Project');
+        return logString;
+    }
+
+    public async move(categoryChannel: CategoryChannel, moderatorID: string) {
+        const guild = getGuild();
+        if (!guild) return Promise.reject('No guild found.');
+
+        const channel = this.getChannel(guild);
+        if (channel.parentId === categoryChannel.id) return Promise.reject('The specified project is already in this category.');
+
+        const previousCategoryChannelID = channel.parentId;
+
+        // must be updated sequentially because Discord API developers decided not to handle this properly.
+        await channel.setParent(categoryChannel);
+        await channel.setPosition(getAlphabeticalChannelPosition(channel, categoryChannel));
+
+        const isInArchive = settings.data.archive.categoryIDs.includes(categoryChannel.id);
+
+        if (!this.archived && isInArchive) {
+            this.archive();
+        } else if (this.archived && !isInArchive) {
+            this.unarchive();
+        }
+
+        const logString = `${parseUser(moderatorID)} moved <#${channel.id}> (${this.id}) out of <#${previousCategoryChannelID}> and into <#${categoryChannel.id}>.`;
+
+        log(logString, 'Move Project');
         return logString;
     }
 

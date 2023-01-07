@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'modproject',
@@ -9,6 +9,20 @@ export default {
             name: 'create',
             description: 'Create a new project linked to the current channel.',
             type: ApplicationCommandOptionType.Subcommand,
+        },
+        {
+            name: 'move',
+            description: 'Move the project channel into a different category, updating the archive state if needed.',
+            type: ApplicationCommandOptionType.Subcommand,
+            options: [
+                {
+                    name: 'category',
+                    description: 'The category to move the project channel into.',
+                    type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.GuildCategory],
+                    required: true,
+                },
+            ],
         },
         {
             name: 'delete',

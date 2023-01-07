@@ -25,11 +25,11 @@ export const event: Event = {
         if (!wasArchived && isArchived) {
             // archive
             const project = await Project.getByChannelID(newChannel.id).catch(() => undefined);
-            if (project) project.archive();
+            if (project && !project.archived) project.archive();
         } else if (wasArchived && !isArchived) {
             // unarchive
             const project = await Project.getByChannelID(newChannel.id).catch(() => undefined);
-            if (project) project.unarchive();
+            if (project && project.archived) project.unarchive();
         }
     },
 };

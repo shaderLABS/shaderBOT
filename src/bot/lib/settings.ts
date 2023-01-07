@@ -32,6 +32,7 @@ export type BotSettings = {
     logging: {
         moderationChannelID: Snowflake;
         messageChannelID: Snowflake;
+        announcementChannelID: Snowflake;
     };
     moderatorRoleID: Snowflake;
     threadRoleID: Snowflake;

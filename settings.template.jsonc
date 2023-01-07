@@ -1,7 +1,8 @@
 {
     "logging": {
         "moderationChannelID": "",          // channel in which moderation actions will be logged
-        "messageChannelID": ""              // channel in which voice state changes and message deletions & updates will be logged
+        "messageChannelID": "",             // channel in which voice state changes and message deletions & updates will be logged
+        "announcementChannelID": ""         // channel in which project creations will be logged
     },
     "moderatorRoleID": "",                  // moderator role, e.g. mentioned when a new ban appeal arrives
     "threadRoleID": "",                     // role that will be automatically added to new threads
