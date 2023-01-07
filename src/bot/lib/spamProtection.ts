@@ -146,7 +146,7 @@ export async function kickSpammer(user: User, moderatorID?: string, contextURL?:
         'Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin shaderLABS using [this invite link](https://discord.gg/RpzWN9S "Invite for shaderLABS").',
         'Your account has been compromised.',
         undefined,
-        "DON'T FALL FOR PHISHING LINKS! ALWAYS CHECK THE URL BEFORE SIGNING IN."
+        "DON'T FALL FOR PHISHING! ALWAYS CHECK THE URL BEFORE SIGNING IN. NEVER SCAN ANY QR CODES."
     ).catch(() => undefined);
 
     try {
