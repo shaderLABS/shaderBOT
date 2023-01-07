@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'slowmode',
@@ -26,6 +26,7 @@ export default {
                     name: 'channel',
                     description: 'The channel that should be used. Not specifying a value will default to the current channel.',
                     type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread],
                     required: false,
                 },
             ],
@@ -39,6 +40,7 @@ export default {
                     name: 'channel',
                     description: 'The channel that should be used. Not specifying a value will default to the current channel.',
                     type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread],
                     required: false,
                 },
             ],

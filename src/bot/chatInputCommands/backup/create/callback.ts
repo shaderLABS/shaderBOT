@@ -8,7 +8,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {
-            return replyError(interaction, 'You must specify a text, thread or voice channel.');
+            return replyError(interaction, 'This command is only usable in text, voice or thread channels.', 'Invalid Channel');
         }
 
         const limit = interaction.options.getInteger('limit', false) || undefined;

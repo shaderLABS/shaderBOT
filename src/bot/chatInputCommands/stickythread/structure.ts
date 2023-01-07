@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'stickythread',
@@ -14,6 +14,7 @@ export default {
                     name: 'thread',
                     description: 'The thread that should be used. Not specifying a value will default to the current thread.',
                     type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.PublicThread, ChannelType.PrivateThread],
                     required: false,
                 },
             ],
@@ -27,6 +28,7 @@ export default {
                     name: 'thread',
                     description: 'The thread that should be used. Not specifying a value will default to the current thread.',
                     type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.PublicThread, ChannelType.PrivateThread],
                     required: false,
                 },
             ],

@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from 'discord.js';
 
 export default {
     name: 'backup',
@@ -14,6 +14,7 @@ export default {
                     name: 'channel',
                     description: 'The channel that the messages you want to backup are in.',
                     type: ApplicationCommandOptionType.Channel,
+                    channelTypes: [ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.PublicThread, ChannelType.PrivateThread],
                     required: false,
                 },
                 {

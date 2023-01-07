@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType } from 'discord.js';
 
 export default {
     name: 'sticky',
@@ -8,6 +8,7 @@ export default {
             name: 'thread',
             description: 'The thread that should be used. Not specifying a value will default to the current thread.',
             type: ApplicationCommandOptionType.Channel,
+            channelTypes: [ChannelType.PublicThread, ChannelType.PrivateThread],
             required: false,
         },
     ],

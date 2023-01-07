@@ -8,7 +8,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice) {
-            return replyError(interaction, 'This command is only usable in text and voice channels.', 'Invalid Channel');
+            return replyError(interaction, 'This command is only usable in text or voice channels.', 'Invalid Channel');
         }
 
         try {

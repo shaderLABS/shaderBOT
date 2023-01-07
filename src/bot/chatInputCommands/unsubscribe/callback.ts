@@ -6,7 +6,7 @@ import { Project } from '../../lib/project.js';
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const projectChannel = interaction.options.getChannel('project', false) || interaction.channel;
-        if (projectChannel.type !== ChannelType.GuildText) return replyError(interaction, 'You must specify a text channel.');
+        if (projectChannel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
 
         try {
             const project = await Project.getByChannelID(projectChannel.id);
