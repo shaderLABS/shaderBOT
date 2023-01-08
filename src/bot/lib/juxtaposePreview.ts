@@ -1,9 +1,9 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import sharp, { OverlayOptions } from 'sharp';
-import { settings } from '../bot.js';
+import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError } from './embeds.js';
-import { escapeXml, getGuild, parseUser } from './misc.js';
+import { escapeXml, parseUser } from './misc.js';
 
 function createLabelBuffer(label: string, maxWidth: number) {
     const overlayFontAspectRatio = 0.55;
@@ -172,7 +172,7 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                 reply.edit({ components: [buttonActionRow] });
             });
 
-        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+        const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type === ChannelType.GuildText) {
             const previewURL = reply.attachments.first()?.url;
             logChannel.send({

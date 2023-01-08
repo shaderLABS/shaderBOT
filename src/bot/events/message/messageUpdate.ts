@@ -1,8 +1,8 @@
 import { Attachment, ChannelType, Embed, EmbedBuilder, Events, MessageFlags } from 'discord.js';
-import { settings } from '../../bot.js';
+import { client, settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
-import { getGuild, getMaximumUploadBytes, getNumberWithOrdinalSuffix, parseUser, trimString } from '../../lib/misc.js';
+import { getMaximumUploadBytes, getNumberWithOrdinalSuffix, parseUser, trimString } from '../../lib/misc.js';
 import { formatLongTimeDate } from '../../lib/time.js';
 
 export const event: Event = {
@@ -144,7 +144,7 @@ export const event: Event = {
             },
         });
 
-        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+        const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type !== ChannelType.GuildText) return;
 
         logChannel.send({

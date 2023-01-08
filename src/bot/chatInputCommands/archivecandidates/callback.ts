@@ -1,6 +1,6 @@
 import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
 import { db } from '../../../db/postgres.js';
-import { settings } from '../../bot.js';
+import { client, settings } from '../../bot.js';
 import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { replyInfo } from '../../lib/embeds.js';
 
@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
         const eligibleProjectChannelPromises: Promise<TextChannel | undefined>[] = [];
 
         for (const { channel_id } of projectChannels) {
-            const channel = interaction.guild.channels.cache.get(channel_id);
+            const channel = client.channels.cache.get(channel_id);
             if (channel?.type !== ChannelType.GuildText) continue;
 
             eligibleProjectChannelPromises.push(

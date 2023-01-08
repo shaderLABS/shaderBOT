@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { CategoryChannel, ChannelType, EmbedBuilder, Guild, GuildMember, GuildTextBasedChannel, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { settings } from '../bot.js';
+import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon, sendInfo } from './embeds.js';
 import log from './log.js';
 import { getAlphabeticalChannelPosition, getGuild, parseUser, userToMember } from './misc.js';
@@ -23,14 +23,14 @@ export class Project {
         this.archived = !data.role_id;
     }
 
-    public getChannel(guild: Guild): TextChannel {
-        const channel = guild.channels.cache.get(this.channelID);
+    public getChannel(): TextChannel {
+        const channel = client.channels.cache.get(this.channelID);
         if (channel?.type !== ChannelType.GuildText) throw 'The project is linked to an invalid channel.';
 
         return channel;
     }
 
-    public getNotificationRole(guild: Guild) {
+    public getNotificationRole(guild: Guild = getGuild()) {
         if (!this.roleID) throw 'The specified project is archived.';
         return guild.roles.fetch(this.roleID).catch(() => null);
     }
@@ -107,7 +107,7 @@ export class Project {
             },
         });
 
-        const announcementChannel = channel.guild.channels.cache.get(settings.data.logging.announcementChannelID);
+        const announcementChannel = client.channels.cache.get(settings.data.logging.announcementChannelID);
         if (announcementChannel?.isTextBased()) {
             sendInfo(announcementChannel, `${channel.toString()} (${channel.parent?.toString() || 'No Category'})`, 'A new project has been created!');
         }
@@ -175,7 +175,7 @@ export class Project {
         this.assertNotArchived();
 
         if (this.ownerIDs.includes(member.id)) return Promise.reject('The specified member is already an owner.');
-        const channel = this.getChannel(member.guild);
+        const channel = this.getChannel();
 
         const projectMute = await ProjectMute.getByUserIDAndProjectID(member.id, this.id).catch(() => undefined);
         if (projectMute) await projectMute.lift(moderatorID);
@@ -197,11 +197,8 @@ export class Project {
     public async removeOwner(user: User, moderatorID: string) {
         this.assertNotArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const channel = this.getChannel(guild);
-        const member = await userToMember(guild, user.id);
+        const channel = this.getChannel();
+        const member = await userToMember(user.id);
 
         const newOwnerIDs = this.ownerIDs.filter((id) => id !== user.id);
         if (this.ownerIDs.length === newOwnerIDs.length) return Promise.reject('The specified user is not an owner.');
@@ -222,10 +219,7 @@ export class Project {
     public async addSubscriber(member: GuildMember) {
         this.assertNotArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const role = await this.getNotificationRole(guild);
+        const role = await this.getNotificationRole();
         if (!role) return Promise.reject('Failed to resolve the notification role of the specified project.');
 
         if (member.roles.cache.has(role.id)) {
@@ -242,10 +236,7 @@ export class Project {
     public async removeSubscriber(member: GuildMember) {
         this.assertNotArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const role = await this.getNotificationRole(guild);
+        const role = await this.getNotificationRole();
         if (!role) return Promise.reject('Failed to resolve the notification role of the specified project.');
 
         if (!member.roles.cache.has(role.id)) {
@@ -263,14 +254,7 @@ export class Project {
         ManageThreads: true,
     };
 
-    public async applyPermissions(owner: GuildMember | User | string, channel?: TextChannel) {
-        if (!channel) {
-            const guild = getGuild();
-            if (!guild) return Promise.reject('No guild found.');
-
-            channel = this.getChannel(guild);
-        }
-
+    public async applyPermissions(owner: GuildMember | User | string, channel: TextChannel = this.getChannel()) {
         await channel.permissionOverwrites.create(owner, Project.OWNER_OVERWRITES, { type: OverwriteType.Member, reason: 'Apply project owner permissions.' });
     }
 
@@ -293,15 +277,12 @@ export class Project {
     public async archive() {
         this.assertNotArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const channel = this.getChannel(guild);
+        const channel = this.getChannel();
 
         const result = await db.query({ text: /*sql*/ `UPDATE project SET role_id = NULL WHERE id = $1;`, values: [this.id], name: 'project-archive' });
         if (result.rowCount === 0) return Promise.reject(`Failed to archive project channel.`);
 
-        const role = await this.getNotificationRole(guild);
+        const role = await this.getNotificationRole();
         if (role) await role.delete();
 
         channel.lockPermissions();
@@ -315,10 +296,7 @@ export class Project {
     public async unarchive() {
         this.assertArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const channel = this.getChannel(guild);
+        const channel = this.getChannel();
         const role = await Project.createNotificationRole(channel);
 
         const result = await db.query({ text: /*sql*/ `UPDATE project SET role_id = $1 WHERE id = $2;`, values: [role.id, this.id], name: 'project-unarchive' });
@@ -339,10 +317,7 @@ export class Project {
     }
 
     public async move(categoryChannel: CategoryChannel, moderatorID: string) {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const channel = this.getChannel(guild);
+        const channel = this.getChannel();
         if (channel.parentId === categoryChannel.id) return Promise.reject('The specified project is already in this category.');
 
         const previousCategoryChannelID = channel.parentId;
@@ -358,12 +333,9 @@ export class Project {
     }
 
     public async delete(moderatorID: string) {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
+        const channel = this.getChannel();
 
-        const channel = this.getChannel(guild);
-
-        this.deleteEntry(guild);
+        await this.deleteEntry();
         channel.lockPermissions();
 
         const logString = `${parseUser(moderatorID)} deleted the project linked to <#${channel.id}> (${this.id}).`;
@@ -372,17 +344,14 @@ export class Project {
         return logString;
     }
 
-    public async deleteEntry(guild?: Guild) {
-        guild ??= getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
+    public async deleteEntry() {
         await ProjectMute.deleteAllByProjectID(this.id);
 
         const result = await db.query({ text: /*sql*/ `DELETE FROM project WHERE id = $1 RETURNING id;`, values: [this.id], name: 'project-delete' });
         if (result.rowCount === 0) return Promise.reject(`Failed to delete project channel.`);
 
         if (this.roleID) {
-            const role = await this.getNotificationRole(guild);
+            const role = await this.getNotificationRole();
             if (role) role.delete();
         }
     }
@@ -429,14 +398,11 @@ export class ProjectMute {
     public static async create(project: Project, user: User, ownerID: string) {
         project.assertNotArchived();
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const member = await userToMember(guild, user);
+        const member = await userToMember(user);
         if (member && member.permissions.has(PermissionFlagsBits.KickMembers)) return Promise.reject('You can not mute this member.');
         if (project.ownerIDs.includes(user.id)) return Promise.reject('You can not mute a channel owner.');
 
-        const channel = project.getChannel(guild);
+        const channel = project.getChannel();
         const timestamp = new Date();
 
         const result = await db.query({
@@ -460,21 +426,15 @@ export class ProjectMute {
     }
 
     public async applyPermissions() {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const project = await this.getProject();
-        const channel = project.getChannel(guild);
+        const channel = project.getChannel();
 
         await channel.permissionOverwrites.edit(this.userID, { SendMessages: false, AddReactions: false }, { type: OverwriteType.Member, reason: 'Apply project mute permissions.' });
     }
 
     public async lift(ownerID: string) {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const project = await this.getProject();
-        const channel = project.getChannel(guild);
+        const channel = project.getChannel();
 
         const result = await db.query({ text: /*sql*/ `DELETE FROM project_mute WHERE id = $1 RETURNING id;`, values: [this.id], name: 'project-mute-lift' });
         if (result.rowCount === 0) return Promise.reject(`Failed to delete project mute.`);

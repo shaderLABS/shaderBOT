@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import { ChannelType, EmbedBuilder } from 'discord.js';
+import { client } from '../bot/bot.js';
 import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.js';
-import { formatBytes, getGuild, trimString } from '../bot/lib/misc.js';
+import { formatBytes, trimString } from '../bot/lib/misc.js';
 
 function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
     return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
@@ -16,10 +17,7 @@ export function verifySignature(signature: string, data: Buffer, key: crypto.Bin
 }
 
 export async function releaseNotification(channelID: string, roleID: string, req: any): Promise<number> {
-    const guild = getGuild();
-    if (!guild) return 500;
-
-    const channel = guild.channels.cache.get(channelID);
+    const channel = client.channels.cache.get(channelID);
     if (channel?.type !== ChannelType.GuildText) return 500;
 
     if (req.headers['x-github-event'] === 'release') {

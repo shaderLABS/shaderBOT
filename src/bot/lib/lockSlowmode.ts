@@ -1,8 +1,8 @@
 import { AnyThreadChannel, BitField, ChannelType, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { timeoutStore } from '../bot.js';
+import { client, timeoutStore } from '../bot.js';
 import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { parseUser } from './misc.js';
 import { formatTimeDate, secondsToString } from './time.js';
 
 const enum LockPermissionFlagBits {
@@ -225,7 +225,7 @@ export class LockSlowmode {
     }
 
     public async expire() {
-        const channel = getGuild()?.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelID);
 
         try {
             if (this.type === 'lock') {
@@ -249,7 +249,7 @@ export class LockSlowmode {
     }
 
     public async lift(moderatorID: string): Promise<string> {
-        const channel = getGuild()?.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelID);
 
         if (this.type === 'lock') {
             if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);

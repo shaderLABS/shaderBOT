@@ -1,7 +1,8 @@
 import { AnyThreadChannel, ChannelType, ThreadAutoArchiveDuration } from 'discord.js';
 import { db } from '../../db/postgres.js';
+import { client } from '../bot.js';
 import log from './log.js';
-import { getGuild, parseUser } from './misc.js';
+import { parseUser } from './misc.js';
 
 export class StickyThread {
     public readonly id: string;
@@ -34,14 +35,11 @@ export class StickyThread {
     }
 
     public static async checkAllStickyThreads() {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         console.log('Checking for archived sticky threads...');
 
         return Promise.all(
             (await StickyThread.getAllStickyThreads()).map(async (stickyThread) => {
-                const channel = guild.channels.cache.get(stickyThread.channel_id);
+                const channel = client.channels.cache.get(stickyThread.channel_id);
                 if (channel?.type !== ChannelType.GuildText) return;
 
                 const thread = await channel.threads.fetch(stickyThread.thread_id).catch(() => undefined);
@@ -90,10 +88,7 @@ export class StickyThread {
     }
 
     public async lift(moderatorID?: string) {
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
-        const channel = guild.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelID);
         if (channel?.type !== ChannelType.GuildText) return Promise.reject('Failed to resolve parent channel.');
 
         const thread = await channel.threads.fetch(this.threadID).catch(() => undefined);

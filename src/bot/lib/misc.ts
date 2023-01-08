@@ -10,10 +10,13 @@ export const unicodeLineBoundaries = /\r\n|[\n\v\f\r\x85\u2028\u2029]/;
 export type NonNullableProperty<T, K extends keyof T> = T & Required<{ [P in keyof Pick<T, K>]: NonNullable<T[P]> }>;
 
 export function getGuild() {
-    return client.guilds.cache.get(settings.data.guildID);
+    const guild = client.guilds.cache.get(settings.data.guildID);
+    if (!guild) throw 'The specified guild does not exist.';
+
+    return guild;
 }
 
-export function userToMember(guild: Guild, userResolvable: UserResolvable) {
+export function userToMember(userResolvable: UserResolvable, guild: Guild = getGuild()) {
     return guild.members.fetch(userResolvable).catch(() => undefined);
 }
 

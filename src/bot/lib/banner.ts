@@ -5,7 +5,7 @@ import { getGuild } from './misc.js';
 
 export async function rotateBanner() {
     const guild = getGuild();
-    if (!guild || guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return;
+    if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return;
 
     const projects = (
         await db.query({

@@ -6,7 +6,7 @@ export const command: UserContextMenuCommandCallback = {
     commandName: 'Info',
     callback: async (interaction) => {
         const { targetUser } = interaction;
-        const targetMember = await userToMember(interaction.guild, targetUser.id);
+        const targetMember = await userToMember(targetUser.id, interaction.guild);
 
         interaction.reply({ embeds: [getUserInfoEmbed(targetUser, targetMember)], ephemeral: true });
     },

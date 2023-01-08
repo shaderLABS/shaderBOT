@@ -14,7 +14,6 @@ export const event: Event = {
         await sleep(1000);
 
         const guild = getGuild();
-        if (!guild) return;
 
         const auditLogEntry = (
             await guild.fetchAuditLogs({

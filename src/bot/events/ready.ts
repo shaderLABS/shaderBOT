@@ -3,6 +3,7 @@ import { client, timeoutStore } from '../bot.js';
 import { Event } from '../eventHandler.js';
 import { Backup } from '../lib/backup.js';
 import { rotateBanner } from '../lib/banner.js';
+import { getGuild } from '../lib/misc.js';
 import { RandomPresence } from '../lib/presence.js';
 import { StickyThread } from '../lib/stickyThread.js';
 
@@ -31,6 +32,9 @@ export const event: Event = {
     callback: () => {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as ${client.user.tag} (${client.user.id}).`);
+
+        console.log('Checking availability of specified guild...');
+        getGuild();
 
         timeoutStore.load(false);
 

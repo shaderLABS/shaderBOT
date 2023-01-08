@@ -42,7 +42,7 @@ export function getUserInfoEmbed(targetUser: User, targetMember?: GuildMember) {
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const targetUser = interaction.options.getUser('user', false) || interaction.user;
-        const targetMember = await userToMember(interaction.guild, targetUser.id);
+        const targetMember = await userToMember(targetUser.id, interaction.guild);
 
         interaction.reply({ embeds: [getUserInfoEmbed(targetUser, targetMember)] });
     },

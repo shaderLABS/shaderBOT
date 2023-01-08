@@ -1,4 +1,5 @@
 import { ChannelType } from 'discord.js';
+import { client } from '../bot.js';
 import { replyError, replyInfo, replySuccess } from '../lib/embeds.js';
 import log from '../lib/log.js';
 import { getAlphabeticalChannelPosition, parseUser } from '../lib/misc.js';
@@ -9,7 +10,7 @@ export const modal: ModalSubmitCallback = {
     callback: async (interaction, channelID) => {
         if (!channelID) return;
 
-        const channel = interaction.guild.channels.cache.get(channelID);
+        const channel = client.channels.cache.get(channelID);
         if (channel?.type !== ChannelType.GuildText) return;
 
         const oldChannelName = channel.name;

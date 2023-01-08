@@ -14,7 +14,7 @@ export const event: Event = {
 
         const project = await Project.getByChannelID(channel.id).catch(() => undefined);
         if (project) {
-            project.deleteEntry(channel.guild);
+            project.deleteEntry();
             logContent += 'The project that was linked to this channel has been removed. ';
         }
 

@@ -3,7 +3,7 @@ import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
 import log from './log.js';
-import { getGuild, parseUser, similarityLevenshtein } from './misc.js';
+import { parseUser, similarityLevenshtein } from './misc.js';
 import { PastPunishment, Punishment } from './punishment.js';
 
 type CachedMessage = {
@@ -111,7 +111,7 @@ export async function checkSpam(message: GuildMessage) {
                 color: EmbedColor.Red,
             });
 
-            const logChannel = message.guild.channels.cache.get(settings.data.logging.moderationChannelID);
+            const logChannel = client.channels.cache.get(settings.data.logging.moderationChannelID);
             if (logChannel?.type === ChannelType.GuildText) {
                 logChannel.send({
                     embeds: [logEmbed],
@@ -125,7 +125,7 @@ export async function checkSpam(message: GuildMessage) {
         }
 
         for (const spam of spamMessages) {
-            const spamChannel = message.guild.channels.cache.get(spam.channelID);
+            const spamChannel = client.channels.cache.get(spam.channelID);
             if (spamChannel && (spamChannel.type === ChannelType.GuildText || spamChannel.type === ChannelType.GuildVoice || spamChannel.isThread())) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
@@ -138,9 +138,6 @@ export async function checkSpam(message: GuildMessage) {
 }
 
 export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {
-    const guild = getGuild();
-    if (!guild) return Promise.reject('No guild found.');
-
     await sendInfo(
         user,
         'Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin shaderLABS using [this invite link](https://discord.gg/RpzWN9S "Invite for shaderLABS").',

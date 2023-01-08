@@ -1,10 +1,9 @@
 import { ChannelType, EmbedBuilder } from 'discord.js';
-import { settings } from '../bot.js';
+import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
-import { getGuild } from './misc.js';
 
 export default function (content: string | EmbedBuilder, title?: string) {
-    const logChannel = getGuild()?.channels.cache.get(settings.data.logging.moderationChannelID);
+    const logChannel = client.channels.cache.get(settings.data.logging.moderationChannelID);
     if (logChannel?.type !== ChannelType.GuildText) return;
 
     if (content instanceof EmbedBuilder) {

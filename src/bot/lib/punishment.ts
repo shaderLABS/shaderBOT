@@ -94,12 +94,11 @@ export class PastPunishment {
         if (reason.length > 512) return Promise.reject('The kick reason must not be more than 512 characters long.');
 
         const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
 
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
-        const member = await userToMember(guild, user.id);
+        const member = await userToMember(user.id, guild);
         const timestamp = new Date();
 
         const result = await db.query({
@@ -342,8 +341,6 @@ export class Punishment {
 
     public async move(liftedModeratorID?: string): Promise<string> {
         const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const pastPunishment = await this.moveEntry(liftedModeratorID);
 
         if (this.type === 'ban') {
@@ -358,7 +355,7 @@ export class Punishment {
             return logString;
         } else {
             // mute
-            const member = await userToMember(guild, this.userID);
+            const member = await userToMember(this.userID, guild);
             if (member) member.timeout(null);
 
             let logString = `${parseUser(this.userID)} has been unmuted.`;
@@ -372,7 +369,6 @@ export class Punishment {
 
     public async expire() {
         const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
 
         try {
             await this.moveEntry();
@@ -402,9 +398,6 @@ export class Punishment {
         if (duration < 10) return Promise.reject(`You can't ${this.type} someone for less than 10 seconds.`);
         if (this.type === 'mute' && duration > 2419200) return Promise.reject("You can't mute someone for more than 28 days.");
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const oldExpireTimestamp = this.expireTimestamp;
         const newExpireTimestamp = new Date(this.timestamp.getTime() + duration * 1000);
 
@@ -424,7 +417,7 @@ export class Punishment {
         this.editTimestamp = editTimestamp;
         this.editModeratorID = editModeratorID;
 
-        const member = await userToMember(guild, this.userID).catch(() => undefined);
+        const member = await userToMember(this.userID);
         if (member) member.disableCommunicationUntil(this.expireTimestamp);
 
         timeoutStore.delete(this);
@@ -511,8 +504,6 @@ export class Punishment {
         if (reason.length > 512) return Promise.reject('The ban reason must not be more than 512 characters long.');
 
         const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
@@ -551,13 +542,10 @@ export class Punishment {
 
         if (reason.length > 512) return Promise.reject('The mute reason must not be more than 512 characters long.');
 
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
-
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
-        const member = await userToMember(guild, user.id);
+        const member = await userToMember(user.id);
 
         const { punishment, overwrittenPunishment } = await Punishment.createEntry(user.id, 'mute', reason, moderatorID, contextURL, duration);
 

@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChannelType, EmbedBuilder, EmbedData } from 'discord
 import fs from 'fs/promises';
 import path from 'path';
 import { automaticResponsePath } from '../automaticResponseHandler.js';
-import { cooldownStore, settings } from '../bot.js';
+import { client, cooldownStore, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { sendInfo } from './embeds.js';
 import { stringToFileName } from './misc.js';
@@ -101,7 +101,7 @@ export class AutomaticResponse {
         const embeds = this.getEmbed(message);
 
         const response = await channel.send({ content, embeds, files: this.attachments }).catch(async () => {
-            let botChannel = message.guild.channels.cache.get(settings.data.botChannelID);
+            let botChannel = client.channels.cache.get(settings.data.botChannelID);
             if (botChannel?.type !== ChannelType.GuildText) return Promise.reject('Failed to resolve bot channel.');
             channel = botChannel;
 

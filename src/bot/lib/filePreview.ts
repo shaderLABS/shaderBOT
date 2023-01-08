@@ -1,8 +1,8 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder, Message, PermissionFlagsBits } from 'discord.js';
-import { settings } from '../bot.js';
+import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError } from './embeds.js';
-import { getGuild, parseUser, unicodeLineBoundaries } from './misc.js';
+import { parseUser, unicodeLineBoundaries } from './misc.js';
 
 const gitHubFileURLs = /https:\/\/github\.com(?:\/[^\/\s]+){2}\/blob(?:\/[^\/\s]+)+#[^\/\s]+/;
 const gitHubGistURLs = /https:\/\/gist\.github\.com(?:\/[^\/\s]+){2}#file\-[^\/\s]+/;
@@ -177,7 +177,7 @@ export async function checkFilePreview(message: GuildMessage) {
             reply.edit({ components: [buttonActionRow] });
         });
 
-    const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+    const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
     if (logChannel?.type === ChannelType.GuildText) {
         logChannel.send({
             embeds: [

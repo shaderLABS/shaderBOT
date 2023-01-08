@@ -4,7 +4,7 @@ import { client } from '../bot.js';
 import automaticPunishment from './automaticPunishment.js';
 import { sendInfo } from './embeds.js';
 import log from './log.js';
-import { formatContextURL, getGuild, parseUser } from './misc.js';
+import { formatContextURL, parseUser } from './misc.js';
 import { formatTimeDate } from './time.js';
 
 export class Warning {
@@ -61,9 +61,6 @@ export class Warning {
     public static async create(userResolvable: UserResolvable, severity: number, reason: string, moderatorID?: string, contextURL?: string) {
         if (severity !== 0 && severity !== 1 && severity !== 2 && severity !== 3) return Promise.reject('The warning severity must be an integer between 0 and 3');
         if (reason.length > 512) return Promise.reject('The warning reason must not be more than 512 characters long.');
-
-        const guild = getGuild();
-        if (!guild) return Promise.reject('No guild found.');
 
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');

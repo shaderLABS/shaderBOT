@@ -1,4 +1,5 @@
 import { db } from '../../db/postgres.js';
+import { client } from '../bot.js';
 import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
 import { replyError } from './embeds.js';
 import log from './log.js';
@@ -24,7 +25,7 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
             return;
         }
 
-        const channel = interaction.guild.channels.cache.get(channelID);
+        const channel = client.channels.cache.get(channelID);
         if (!channel?.isTextBased()) {
             replyError(interaction, 'The specified message URL points to an invalid channel.');
             return;

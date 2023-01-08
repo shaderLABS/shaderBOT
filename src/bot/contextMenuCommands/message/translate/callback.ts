@@ -1,10 +1,10 @@
 import { AttachmentBuilder, blockQuote, ChannelType, EmbedBuilder, LimitedCollection, MessageFlags, PermissionFlagsBits } from 'discord.js';
-import { settings } from '../../../bot.js';
+import { client, settings } from '../../../bot.js';
 import { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
 import { EmbedColor, replyError, replyInfo } from '../../../lib/embeds.js';
 import { isoLanguageCodeToFlagEmoji, isoLanguageCodeToName } from '../../../lib/languageCountryCode.js';
 import log from '../../../lib/log.js';
-import { getGuild, parseUser } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
 
 type Translation = {
     language: string;
@@ -96,7 +96,7 @@ export const command: MessageContextMenuCommandCallback = {
 
             cache.set(translationID, translation);
 
-            const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+            const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
 
             if (translation.language === 'en') {
                 if (logChannel?.type === ChannelType.GuildText) logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\nThe source text is already in English.')] });

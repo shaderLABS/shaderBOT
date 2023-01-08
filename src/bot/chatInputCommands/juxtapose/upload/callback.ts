@@ -1,9 +1,9 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, DataResolver, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
-import { settings } from '../../../bot.js';
+import { client, settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { EmbedColor, replyError } from '../../../lib/embeds.js';
 import { renderJuxtaposePreview } from '../../../lib/juxtaposePreview.js';
-import { getGuild, parseUser } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
@@ -100,7 +100,7 @@ export const command: ChatInputCommandCallback = {
                 reply.edit({ components: [buttonActionRow] });
             });
 
-        const logChannel = getGuild()?.channels.cache.get(settings.data.logging.messageChannelID);
+        const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
         if (logChannel?.type === ChannelType.GuildText) {
             const previewURL = reply.attachments.first()?.url;
             logChannel.send({

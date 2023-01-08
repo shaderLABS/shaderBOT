@@ -8,13 +8,12 @@ passport.serializeUser((user: any, done) => {
 });
 
 passport.deserializeUser(async (userID: string, done) => {
+    const guild = getGuild();
+
+    const user = await client.users.fetch(userID)?.catch(() => undefined);
+    if (!user) return done(null);
+
     try {
-        const user = await client.users.fetch(userID)?.catch(() => undefined);
-        if (!user) return done(null);
-
-        const guild = getGuild();
-        if (!guild) return done(null);
-
         const data = {
             id: user.id,
             username: user.username,
@@ -40,11 +39,10 @@ passport.use(
         },
 
         async (_accessToken, _refreshToken, profile, done) => {
+            const guild = getGuild();
+
             const user = await client.users.fetch(profile.id)?.catch(() => undefined);
             if (!user) return done(undefined, undefined, { error: 0 });
-
-            const guild = getGuild();
-            if (!guild) return done(null);
 
             try {
                 const data = {

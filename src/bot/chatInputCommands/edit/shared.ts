@@ -1,5 +1,6 @@
-import { Guild, User } from 'discord.js';
+import { User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
+import { client } from '../../bot.js';
 import { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.js';
 import { editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
@@ -9,14 +10,14 @@ import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 import { Warning } from '../../lib/warning.js';
 
-async function requireContext(value: string, guild: Guild) {
+async function requireContext(value: string) {
     const IDs = value.split('/');
     const messageID = IDs.pop();
     const channelID = IDs.pop();
 
     if (!messageID || !channelID) return Promise.reject('The specified message URL is invalid.');
 
-    const channel = guild.channels.cache.get(channelID);
+    const channel = client.channels.cache.get(channelID);
     if (!channel?.isTextBased()) return Promise.reject('The specified message URL points to an invalid channel.');
 
     const message = await channel.messages.fetch(messageID);
@@ -131,7 +132,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             }
 
             case 'context': {
-                const context = await requireContext(value, interaction.guild);
+                const context = await requireContext(value);
 
                 let uuid: string;
                 let table: 'warn' | 'punishment' | 'past_punishment' | 'note';

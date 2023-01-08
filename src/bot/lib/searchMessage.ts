@@ -8,7 +8,7 @@ import { parseUser, userToMember } from './misc.js';
 import { Punishment } from './punishment.js';
 
 export async function hasPermissionForTarget(interaction: GuildChatInputCommandInteraction, targetResolvable: UserResolvable, checkProperty?: 'bannable' | 'kickable' | 'manageable' | 'moderatable') {
-    const targetMember = await userToMember(interaction.guild, targetResolvable);
+    const targetMember = await userToMember(targetResolvable, interaction.guild);
     if (!targetMember) return true;
 
     if (interaction.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0) {
