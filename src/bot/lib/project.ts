@@ -351,14 +351,6 @@ export class Project {
         await channel.setParent(categoryChannel);
         await channel.setPosition(getAlphabeticalChannelPosition(channel, categoryChannel));
 
-        const isInArchive = settings.data.archive.categoryIDs.includes(categoryChannel.id);
-
-        if (!this.archived && isInArchive) {
-            this.archive();
-        } else if (this.archived && !isInArchive) {
-            this.unarchive();
-        }
-
         const logString = `${parseUser(moderatorID)} moved <#${channel.id}> (${this.id}) out of <#${previousCategoryChannelID}> and into <#${categoryChannel.id}>.`;
 
         log(logString, 'Move Project');

@@ -19,15 +19,10 @@ export const event: Event = {
             if (role) role.edit({ name: newChannel.name });
         }
 
-        const wasArchived = Project.isChannelArchived(oldChannel);
-        const isArchived = Project.isChannelArchived(newChannel);
-
-        if (!wasArchived && isArchived) {
-            // archive
+        if (Project.isChannelArchived(newChannel)) {
             const project = await Project.getByChannelID(newChannel.id).catch(() => undefined);
             if (project && !project.archived) project.archive();
-        } else if (wasArchived && !isArchived) {
-            // unarchive
+        } else {
             const project = await Project.getByChannelID(newChannel.id).catch(() => undefined);
             if (project && project.archived) project.unarchive();
         }
