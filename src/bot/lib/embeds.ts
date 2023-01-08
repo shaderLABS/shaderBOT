@@ -241,7 +241,7 @@ export async function sendButtonPages(
     });
 
     collector.on('end', () => {
-        message.edit({ components: [] });
+        message.edit({ components: [] }).catch(() => undefined);
     });
 }
 
@@ -322,6 +322,6 @@ export async function replyButtonPages(
     });
 
     collector.on('end', () => {
-        interaction.editReply({ components: [] });
+        message.edit({ components: [] }).catch(() => undefined);
     });
 }

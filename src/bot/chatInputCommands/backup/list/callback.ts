@@ -113,7 +113,9 @@ export const command: ChatInputCommandCallback = {
         });
 
         collector.on('end', (_, reason) => {
-            if (reason !== 'selected') selectionMessage.edit({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] });
+            if (reason !== 'selected') {
+                selectionMessage.edit({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] }).catch(() => undefined);
+            }
         });
     },
 };

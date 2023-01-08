@@ -165,11 +165,11 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                 time: 300_000, // 5min = 300,000ms
             })
             .then(() => {
-                reply.delete();
+                reply.delete().catch(() => undefined);
             })
             .catch(() => {
                 deleteButton.setDisabled(true);
-                reply.edit({ components: [buttonActionRow] });
+                reply.edit({ components: [buttonActionRow] }).catch(() => undefined);
             });
 
         const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
