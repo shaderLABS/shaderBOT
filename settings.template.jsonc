@@ -20,6 +20,7 @@
     },
     "warnings": {
         "decay": [0, 0, 0],                 // time in days, for severity [1, 2, 3]
+        "decay_minimum": 0,                 // lower bound which the decay approaches over time (between 0 and 1)
         "punishment": {
             "muteRange": [0, 0],            // point threshold, [minimum, maximum]
             "muteValues": [0, 0],           // duration in seconds, [minimum, maximum]

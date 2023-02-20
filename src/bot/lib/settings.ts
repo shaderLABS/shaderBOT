@@ -50,6 +50,7 @@ export type BotSettings = {
     };
     warnings: {
         decay: number[];
+        decay_minimum: number;
         punishment: {
             muteRange: number[];
             muteValues: number[];

@@ -12,7 +12,7 @@ function interpolateTime(range: number[], values: number[], punishmentPoints: nu
 function warningToPoints(severity: number, passedMS: number) {
     const elapsedDays = Math.floor((Date.now() - passedMS) / 86_400_000); // 1d = 86,400,000ms
     const scale = elapsedDays / settings.data.warnings.decay[severity - 1];
-    return severity / (scale + 1.0);
+    return ((1 - settings.data.warnings.decay_minimum) / (scale + 1) + settings.data.warnings.decay_minimum) * severity;
 }
 
 export async function getPunishmentPoints(userID: string) {
