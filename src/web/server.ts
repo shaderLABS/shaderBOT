@@ -64,7 +64,7 @@ export function startWebserver() {
     app.get('/api/auth/login', passport.authenticate('discord'));
 
     app.get('/api/auth/redirect', (req, res, next) => {
-        passport.authenticate('discord', (_, user, info) => {
+        passport.authenticate('discord', (_err: any, user?: Express.User | false | null, info?: any) => {
             if (info?.error) {
                 res.setHeader('Location', '/?error=' + info.error);
                 res.statusCode = 302;
