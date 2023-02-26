@@ -33,8 +33,8 @@ export const event: Event = {
         if (!client.user) return console.error('Failed to login.');
         console.log(`Logged in as ${client.user.tag} (${client.user.id}).`);
 
-        console.log('Checking availability of specified guild...');
-        getGuild();
+        console.log('Fetching members of specified guild...');
+        getGuild().members.fetch();
 
         timeoutStore.load(false);
 

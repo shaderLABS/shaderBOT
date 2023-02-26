@@ -156,6 +156,54 @@ export class Project {
         return logString;
     }
 
+    public async getBannerInformation() {
+        const result = await db.query({
+            text: /*sql*/ `
+                SELECT banner_url, banner_last_timestamp
+                FROM project
+                WHERE id = $1 AND banner_url IS NOT NULL;`,
+            values: [this.id],
+            name: 'project-get-current-banner',
+        });
+
+        if (result.rowCount === 0) return Promise.reject('There is no banner image set.');
+
+        const { banner_url, banner_last_timestamp }: { banner_url: string; banner_last_timestamp?: string } = result.rows[0];
+
+        if (banner_last_timestamp) {
+            const lastTimestamp = new Date(banner_last_timestamp);
+
+            const result = await db.query({
+                text: /*sql*/ `
+                    SELECT COUNT(*)
+                    FROM project
+                    WHERE banner_url IS NOT NULL AND role_id IS NOT NULL AND (banner_last_timestamp IS NULL OR banner_last_timestamp < $1::TIMESTAMP);`,
+                values: [lastTimestamp],
+                name: 'project-count-following-banners',
+            });
+
+            const count: number = result.rows[0].count;
+
+            const nextTimestamp = new Date(Date.now() + count * 86_400_000);
+            nextTimestamp.setHours(23, 59, 0, 0);
+
+            return {
+                lastTimestamp,
+                nextTimestamp,
+                bannerURL: banner_url,
+            };
+        } else {
+            const nextTimestamp = new Date();
+            nextTimestamp.setHours(23, 59, 0, 0);
+
+            return {
+                lastTimestamp: null,
+                nextTimestamp,
+                bannerURL: banner_url,
+            };
+        }
+    }
+
     public assertOwner(userID: string) {
         if (!this.ownerIDs.includes(userID)) throw 'You are not an owner of this project.';
         return this;

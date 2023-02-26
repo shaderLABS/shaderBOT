@@ -91,6 +91,11 @@ export default {
             type: ApplicationCommandOptionType.Subcommand,
         },
         {
+            name: 'info',
+            description: 'Get information about the banner and subscribers of this project.',
+            type: ApplicationCommandOptionType.Subcommand,
+        },
+        {
             name: 'webhook',
             description: 'Set up webhooks for your project and (re)generate a secret key for signing them.',
             type: ApplicationCommandOptionType.Subcommand,
