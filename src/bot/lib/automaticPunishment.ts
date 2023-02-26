@@ -33,9 +33,15 @@ export async function getPunishmentPoints(userID: string) {
         warnings.map((warning) =>
             db.query({
                 text: /*sql*/ `
-                    SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - timestamp))), 0) AS exclude
-                    FROM past_punishment
-                    WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND timestamp >= $1::TIMESTAMP AND user_id = $2;`,
+                    SELECT (
+                        SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                        FROM past_punishment
+                        WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND lifted_timestamp >= $1::TIMESTAMP AND user_id = $2
+                    ) AS past_exclude, (
+                        SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (NOW() - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                        FROM punishment
+                        WHERE ("type" = 'ban' OR "type" = 'mute') AND user_id = $2
+                    ) as exclude;`,
                 values: [new Date(warning.timestamp), userID],
                 name: 'past-punishment-points-total-punished-time',
             })
@@ -43,7 +49,8 @@ export async function getPunishmentPoints(userID: string) {
     );
 
     const points: number = warnings.reduce((total, warning, index) => {
-        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + excludedTimes[index].rows[0].exclude * 1000);
+        const { exclude, past_exclude }: { exclude: number; past_exclude: number } = excludedTimes[index].rows[0];
+        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + (exclude + past_exclude) * 1000);
     }, 0);
 
     return Math.round(points * 1000) / 1000;
