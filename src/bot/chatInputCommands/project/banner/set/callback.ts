@@ -26,7 +26,7 @@ export const command: ChatInputCommandCallback = {
                     return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
                 }
 
-                const bannerSharp = sharp((await DataResolver.resolveFile(banner.attachment)).data, { failOnError: false });
+                const bannerSharp = sharp((await DataResolver.resolveFile(banner.url)).data, { failOnError: false });
 
                 const bannerWidth = 960;
                 const bannerHeight = 540;

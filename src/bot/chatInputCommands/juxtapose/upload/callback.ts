@@ -24,8 +24,8 @@ export const command: ChatInputCommandCallback = {
             }
 
             var previewPromise = renderJuxtaposePreview(
-                (await DataResolver.resolveFile(leftImageAttachment.attachment)).data,
-                (await DataResolver.resolveFile(rightImageAttachment.attachment)).data,
+                (await DataResolver.resolveFile(leftImageAttachment.url)).data,
+                (await DataResolver.resolveFile(rightImageAttachment.url)).data,
                 isVertical,
                 leftLabel,
                 rightLabel
