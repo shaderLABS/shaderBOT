@@ -9,43 +9,39 @@ export const event: Event = {
     callback: async (oldThread, newThread) => {
         if (oldThread.archived || !newThread.archived) return;
 
-        const { guild } = newThread;
-        let threadArchiveTimestamp = newThread.archiveTimestamp || Date.now();
+        const threadArchiveTimestamp = newThread.archiveTimestamp || Date.now();
 
         const stickyThread = await StickyThread.getByThreadID(newThread.id).catch(() => undefined);
         if (!stickyThread) return;
 
-        // wait 1 second because discord api sucks
+        // wait 1 second for the audit log entry to be created
         await sleep(1000);
 
         const auditLogEntry = (
-            await guild.fetchAuditLogs({
+            await newThread.guild.fetchAuditLogs({
                 type: AuditLogEvent.ThreadUpdate,
                 limit: 5,
             })
-        ).entries.find(
-            (entry) =>
-                entry.target?.id === newThread.id &&
-                entry.executor !== null &&
-                !entry.executor.bot &&
-                entry.changes.some((change) => change.key === 'archived' && change.old === false && change.new === true) &&
-                Math.abs(entry.createdTimestamp - threadArchiveTimestamp) < 5000
-        );
+        ).entries.find((entry) => {
+            if (entry.targetId !== newThread.id || entry.executor === null || entry.executor.bot || Math.abs(entry.createdTimestamp - threadArchiveTimestamp) > 5000) return false;
 
-        if (auditLogEntry) {
-            // manual -> lift
-            stickyThread.lift(auditLogEntry.executor?.id);
-        } else {
-            // automatic -> unarchive
-            try {
-                newThread.edit({
-                    archived: false,
-                    autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
-                    reason: 'Sticky Thread',
-                });
-            } catch {
-                log(`Failed to unarchive the sticky thread <#${newThread.id}>.`, 'Sticky Thread');
-            }
+            const archivedChange = entry.changes.find((change) => change.key === 'archived');
+            if (!archivedChange || archivedChange.old !== false || archivedChange.new !== true) return false;
+
+            return true;
+        });
+
+        if (auditLogEntry) return;
+        // archive was automatic -> unarchive
+
+        try {
+            newThread.edit({
+                archived: false,
+                autoArchiveDuration: ThreadAutoArchiveDuration.OneWeek,
+                reason: 'Sticky Thread',
+            });
+        } catch {
+            log(`Failed to unarchive the sticky thread <#${newThread.id}>.`, 'Sticky Thread');
         }
     },
 };
