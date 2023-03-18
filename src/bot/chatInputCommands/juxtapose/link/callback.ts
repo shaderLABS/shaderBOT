@@ -33,13 +33,13 @@ export const command: ChatInputCommandCallback = {
                 return replyError(interaction, 'Unsupported file type. You must provide URLs to PNG, JPEG or WebP images.');
             }
 
+            await interaction.deferReply();
+
             var previewPromise = renderJuxtaposePreview(Buffer.from(await leftImageResponse.arrayBuffer()), Buffer.from(await rightImageResponse.arrayBuffer()), isVertical, leftLabel, rightLabel);
         } catch {
             fetchAbortController.abort();
-            return replyError(interaction, 'Failed to resolve the images. You must provide URLs to PNG, JPEG or WebP images');
+            return replyError(interaction, 'Failed to resolve the images.');
         }
-
-        await interaction.deferReply();
 
         const response = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
             method: 'POST',

@@ -17,15 +17,15 @@ export const command: ChatInputCommandCallback = {
             const label = interaction.options.getBoolean('label', true);
             const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
 
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(banner.contentType || '')) {
+                return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
+            }
+
             await interaction.deferReply();
 
             let bannerURL: string;
 
             try {
-                if (!banner.contentType || !['image/jpeg', 'image/png', 'image/webp'].includes(banner.contentType)) {
-                    return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
-                }
-
                 const bannerSharp = sharp((await DataResolver.resolveFile(banner.url)).data, { failOnError: false });
 
                 const bannerWidth = 960;

@@ -15,13 +15,12 @@ export const command: ChatInputCommandCallback = {
 
         const isVertical = interaction.options.getBoolean('vertical', false) || false;
 
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(leftImageAttachment.contentType || '') || !['image/jpeg', 'image/png', 'image/webp'].includes(rightImageAttachment.contentType || '')) {
+            return replyError(interaction, 'Unsupported file type. You must upload PNG, JPEG or WebP images.');
+        }
+
         try {
-            if (
-                !['image/jpeg', 'image/png', 'image/webp'].includes(leftImageAttachment.contentType || '') ||
-                !['image/jpeg', 'image/png', 'image/webp'].includes(rightImageAttachment.contentType || '')
-            ) {
-                return replyError(interaction, 'Unsupported file type. You must upload PNG, JPEG or WebP images.');
-            }
+            await interaction.deferReply();
 
             var previewPromise = renderJuxtaposePreview(
                 (await DataResolver.resolveFile(leftImageAttachment.url)).data,
@@ -31,10 +30,8 @@ export const command: ChatInputCommandCallback = {
                 rightLabel
             );
         } catch {
-            return replyError(interaction, 'Failed to resolve the images. You must provide URLs to PNG, JPEG or WebP images');
+            return replyError(interaction, 'Failed to resolve the images.');
         }
-
-        await interaction.deferReply();
 
         const response = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
             method: 'POST',
