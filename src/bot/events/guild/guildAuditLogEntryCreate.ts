@@ -1,4 +1,5 @@
 import { APIAuditLogChange, AuditLogEvent, Events } from 'discord.js';
+import { client } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
 import log from '../../lib/log.js';
@@ -15,10 +16,10 @@ export const event: Event = {
     callback: async (auditLogEntry) => {
         switch (auditLogEntry.action) {
             case AuditLogEvent.MemberBanAdd:
-                if (auditLogEntry.executor === null || auditLogEntry.executor.bot || !auditLogEntry.targetId) return;
+                if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 try {
-                    await Punishment.createBan(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', undefined, auditLogEntry.executor.id);
+                    await Punishment.createBan(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', undefined, auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to create ban entry for ${parseUser(auditLogEntry.targetId)}.`, 'Permanent Ban');
@@ -26,14 +27,14 @@ export const event: Event = {
 
                 break;
             case AuditLogEvent.MemberBanRemove:
-                if (auditLogEntry.executor === null || auditLogEntry.executor.bot || !auditLogEntry.targetId) return;
+                if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 try {
                     const appeal = await BanAppeal.getPendingByUserID(auditLogEntry.targetId).catch(() => undefined);
-                    if (appeal) await appeal.close('accepted', 'You have been unbanned.', auditLogEntry.executor.id);
+                    if (appeal) await appeal.close('accepted', 'You have been unbanned.', auditLogEntry.executorId);
 
                     const punishment = await Punishment.getByUserID(auditLogEntry.targetId, 'ban');
-                    await punishment.move(auditLogEntry.executor.id);
+                    await punishment.move(auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to remove ban entry of ${parseUser(auditLogEntry.targetId)}.`, 'Unban');
@@ -41,10 +42,10 @@ export const event: Event = {
 
                 break;
             case AuditLogEvent.MemberKick:
-                if (auditLogEntry.executor === null || auditLogEntry.executor.bot || !auditLogEntry.targetId) return;
+                if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 try {
-                    await PastPunishment.createKick(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', auditLogEntry.executor.id);
+                    await PastPunishment.createKick(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to add kick entry for ${parseUser(auditLogEntry.targetId)}.`, 'Kick');
@@ -52,7 +53,7 @@ export const event: Event = {
 
                 break;
             case AuditLogEvent.MemberUpdate:
-                if (auditLogEntry.executor === null || auditLogEntry.executor.bot || !auditLogEntry.targetId) return;
+                if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 const timeoutChange = auditLogEntry.changes.find((change) => change.key === 'communication_disabled_until');
                 if (!timeoutChange) return;
@@ -62,7 +63,7 @@ export const event: Event = {
 
                 if (oldTimestamp <= auditLogEntry.createdTimestamp && newTimestamp > auditLogEntry.createdTimestamp) {
                     try {
-                        await Punishment.createMute(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', (newTimestamp - Date.now()) / 1000, auditLogEntry.executor.id);
+                        await Punishment.createMute(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', (newTimestamp - Date.now()) / 1000, auditLogEntry.executorId);
                     } catch (error) {
                         console.error(error);
                         log(`Failed to create mute entry for ${parseUser(auditLogEntry.targetId)}.`, 'Mute');
@@ -70,7 +71,7 @@ export const event: Event = {
                 } else if (oldTimestamp > auditLogEntry.createdTimestamp && newTimestamp <= auditLogEntry.createdTimestamp) {
                     try {
                         const mute = await Punishment.getByUserID(auditLogEntry.targetId, 'mute');
-                        await mute?.move(auditLogEntry.executor.id);
+                        await mute?.move(auditLogEntry.executorId);
                     } catch (error) {
                         console.error(error);
                         log(`Failed to remove mute entry of ${parseUser(auditLogEntry.targetId)}.`, 'Unmute');
@@ -79,14 +80,14 @@ export const event: Event = {
 
                 break;
             case AuditLogEvent.ThreadUpdate:
-                if (auditLogEntry.executor === null || auditLogEntry.executor.bot || !auditLogEntry.targetId) return;
+                if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 const archivedChange = auditLogEntry.changes.find((change) => change.key === 'archived');
                 if (!archivedChange || archivedChange.old !== false || archivedChange.new !== true) return;
 
                 try {
                     const stickyThread = await StickyThread.getByThreadID(auditLogEntry.targetId);
-                    await stickyThread.lift(auditLogEntry.executor.id);
+                    await stickyThread.lift(auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to lift sticky flag of thread <#${auditLogEntry.targetId}>.`, 'Lift Sticky Flag');
