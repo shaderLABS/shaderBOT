@@ -86,8 +86,8 @@ export const event: Event = {
                 if (!archivedChange || archivedChange.old !== false || archivedChange.new !== true) return;
 
                 try {
-                    const stickyThread = await StickyThread.getByThreadID(auditLogEntry.targetId);
-                    await stickyThread.lift(auditLogEntry.executorId);
+                    const stickyThread = await StickyThread.getByThreadID(auditLogEntry.targetId).catch(() => undefined);
+                    await stickyThread?.lift(auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to lift sticky flag of thread <#${auditLogEntry.targetId}>.`, 'Lift Sticky Flag');
