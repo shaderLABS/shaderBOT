@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, SelectMenuBuilder } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, StringSelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
@@ -37,7 +37,7 @@ export const command: ChatInputCommandCallback = {
 
         const menu = backupEntryChunks.map(
             (chunk, index) =>
-                new SelectMenuBuilder({
+                new StringSelectMenuBuilder({
                     customId: 'select-backup',
                     placeholder: `${backupEntries.length} backups available. Page ${index + 1} out of ${backupEntryChunks.length}.`,
                     options: chunk.map((backupEntry, index) => {
@@ -64,8 +64,8 @@ export const command: ChatInputCommandCallback = {
             emoji: { name: '➡️' },
         });
 
-        const components = [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[0]] })];
-        if (backupEntryChunks.length > 1) components.push(new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
+        const components = [new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[0]] })];
+        if (backupEntryChunks.length > 1) components.push(new ActionRowBuilder<StringSelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
 
         const selectionMessage = await interaction.reply({ content: '**Select a Backup**', components, fetchReply: true });
 
@@ -87,11 +87,13 @@ export const command: ChatInputCommandCallback = {
 
                 messageInteraction.update({
                     components: [
-                        new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index]] }),
-                        new ActionRowBuilder<SelectMenuBuilder>({ components: [backwardButton.setDisabled(!backupEntryChunks[index - 1]), forwardButton.setDisabled(!backupEntryChunks[index + 1])] }),
+                        new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[index]] }),
+                        new ActionRowBuilder<StringSelectMenuBuilder>({
+                            components: [backwardButton.setDisabled(!backupEntryChunks[index - 1]), forwardButton.setDisabled(!backupEntryChunks[index + 1])],
+                        }),
                     ],
                 });
-            } else if (messageInteraction.isSelectMenu()) {
+            } else if (messageInteraction.isStringSelectMenu()) {
                 const backupEntry = backupEntryChunks[index][+messageInteraction.values[0]];
 
                 try {
@@ -103,7 +105,7 @@ export const command: ChatInputCommandCallback = {
 
                 messageInteraction.update({
                     components: [
-                        new ActionRowBuilder<SelectMenuBuilder>({
+                        new ActionRowBuilder<StringSelectMenuBuilder>({
                             components: [menu[index].setPlaceholder(`${backupEntry.channel} - ${backupEntry.size} MSG - ${formatTimeDateString(backupEntry.creationTime)}`).setDisabled(true)],
                         }),
                     ],
@@ -114,7 +116,7 @@ export const command: ChatInputCommandCallback = {
 
         collector.on('end', (_, reason) => {
             if (reason !== 'selected') {
-                selectionMessage.edit({ components: [new ActionRowBuilder<SelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] }).catch(() => undefined);
+                selectionMessage.edit({ components: [new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] }).catch(() => undefined);
             }
         });
     },
