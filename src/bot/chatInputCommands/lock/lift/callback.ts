@@ -16,7 +16,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await lock.lift(interaction.user.id);
             replySuccess(interaction, logString, 'Lift Lock');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

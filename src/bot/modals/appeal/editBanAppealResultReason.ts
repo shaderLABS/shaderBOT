@@ -19,7 +19,7 @@ export const modal: ModalSubmitCallback = {
 
             replySuccess(interaction, logString, 'Edit Ban Appeal Result Reason');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

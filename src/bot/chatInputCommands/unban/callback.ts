@@ -17,7 +17,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await ban.move(interaction.user.id);
             replySuccess(interaction, logString, 'Unban');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

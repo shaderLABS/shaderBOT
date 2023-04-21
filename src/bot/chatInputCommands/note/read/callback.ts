@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
 
             interaction.reply({ embeds: [Note.toEmbed('Note', note.toString())] });
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

@@ -189,6 +189,6 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             }
         }
     } catch (error) {
-        replyError(interaction, error);
+        replyError(interaction, String(error));
     }
 }

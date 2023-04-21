@@ -17,14 +17,14 @@ export const command: ChatInputCommandCallback = {
             var length = stringToSeconds(splitString(lengthString));
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            return replyError(interaction, error);
+            return replyError(interaction, String(error));
         }
 
         try {
             const logString = await LockSlowmode.createSlowmode(interaction.user.id, channel, duration, length);
             replySuccess(interaction, logString, 'Create Slowmode');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

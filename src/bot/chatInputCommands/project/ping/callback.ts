@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
             await interaction.channel.send('<@&' + project.roleID + '>');
             replySuccess(interaction, 'All users that are subscribed to this project have been pinged.', 'Project Ping', true);
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

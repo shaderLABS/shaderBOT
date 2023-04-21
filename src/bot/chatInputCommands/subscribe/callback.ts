@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.addSubscriber(interaction.member);
             replySuccess(interaction, logString, undefined, true);
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

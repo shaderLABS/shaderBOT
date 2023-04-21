@@ -23,21 +23,21 @@ export const command: ChatInputCommandCallback = {
             try {
                 var duration = stringToSeconds(splitString(durationString));
             } catch (error) {
-                return replyError(interaction, error);
+                return replyError(interaction, String(error));
             }
 
             try {
                 const logString = await Punishment.createBan(targetUser, reason, duration, interaction.user.id, contextURL, deleteMessages ? 604800 : undefined);
                 replySuccess(interaction, logString, 'Temporary Ban');
             } catch (error) {
-                replyError(interaction, error);
+                replyError(interaction, String(error));
             }
         } else {
             try {
                 const logString = await Punishment.createBan(targetUser, reason, undefined, interaction.user.id, contextURL, deleteMessages ? 604800 : undefined);
                 replySuccess(interaction, logString, 'Permanent Ban');
             } catch (error) {
-                replyError(interaction, error);
+                replyError(interaction, String(error));
             }
         }
     },

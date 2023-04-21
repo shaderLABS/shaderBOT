@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.delete(interaction.user.id);
             replySuccess(interaction, logString, 'Delete Project');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

@@ -20,7 +20,7 @@ export const command: ChatInputCommandCallback = {
             await Backup.create(backupChannel, backupMessages);
             replySuccess(interaction, `Backup of <#${backupChannel.id}> created. ${backupMessages.size} messages have been encrypted and saved.`, 'Backup');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
             const logString = project.removeBannerURL(interaction.user.id);
             replySuccess(interaction, logString, 'Remove Project Banner');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

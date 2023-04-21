@@ -17,7 +17,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await mute.move(member.id);
             replySuccess(interaction, logString, 'Unmute');
         } catch (error) {
-            if (error) replyError(interaction, error);
+            if (error) replyError(interaction, String(error));
         }
     },
 };

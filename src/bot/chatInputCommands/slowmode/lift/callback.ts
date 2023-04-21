@@ -14,7 +14,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await slowmode.lift(interaction.user.id);
             replySuccess(interaction, logString, 'Lift Slowmode');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

@@ -14,7 +14,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await stickyThread.lift(interaction.user.id);
             replySuccess(interaction, logString, 'Lift Sticky Thread');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

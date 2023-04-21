@@ -21,7 +21,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await PastPunishment.createKick(targetMember, reason, interaction.member.id, contextURL);
             replySuccess(interaction, logString, 'Kick');
         } catch (error) {
-            if (error) replyError(interaction, error);
+            if (error) replyError(interaction, String(error));
         }
     },
 };

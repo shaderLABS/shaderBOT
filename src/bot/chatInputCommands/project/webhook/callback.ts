@@ -36,7 +36,7 @@ export const command: ChatInputCommandCallback = {
                 ephemeral: true,
             });
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

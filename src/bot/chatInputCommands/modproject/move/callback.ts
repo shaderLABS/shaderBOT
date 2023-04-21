@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.move(categoryChannel, interaction.user.id);
             replySuccess(interaction, logString, 'Move Project');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

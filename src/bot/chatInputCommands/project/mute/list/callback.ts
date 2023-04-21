@@ -29,7 +29,7 @@ export const command: ChatInputCommandCallback = {
 
             replyButtonPages(interaction, pages, 'Project Mutes', undefined, undefined, true);
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

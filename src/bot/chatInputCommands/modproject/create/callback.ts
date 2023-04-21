@@ -12,7 +12,7 @@ export const command: ChatInputCommandCallback = {
             const initializationEmbed = await Project.create(interaction.channel, interaction.user.id);
             interaction.reply({ embeds: [initializationEmbed] });
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

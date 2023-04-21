@@ -20,7 +20,7 @@ export const command: ChatInputCommandCallback = {
         try {
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            return replyError(interaction, error);
+            return replyError(interaction, String(error));
         }
 
         const contextURL = await getContextURL(interaction, targetUser.id);
@@ -30,7 +30,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await Punishment.createMute(targetUser, reason, duration, member.id, contextURL);
             replySuccess(interaction, logString, 'Mute');
         } catch (error) {
-            if (error) replyError(interaction, error);
+            if (error) replyError(interaction, String(error));
         }
     },
 };

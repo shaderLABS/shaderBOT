@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.removeOwner(targetUser, interaction.user.id);
             replySuccess(interaction, logString, 'Remove Project Owner');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

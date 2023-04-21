@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await StickyThread.create(thread, interaction.user.id);
             replySuccess(interaction, logString, 'Create Sticky Thread');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

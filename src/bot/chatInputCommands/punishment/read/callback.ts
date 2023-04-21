@@ -18,7 +18,7 @@ export const command: ChatInputCommandCallback = {
             const punishment = await Punishment.getAnyByUUID(id);
             return replyInfo(interaction, punishment.toString(true, true), 'Punishment');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

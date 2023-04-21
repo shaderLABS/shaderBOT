@@ -9,7 +9,7 @@ export const command: MessageContextMenuCommandCallback = {
             const project = await Project.getByChannelID(interaction.channelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
         } catch (error) {
-            return replyError(interaction, error);
+            return replyError(interaction, String(error));
         }
 
         const { targetMessage } = interaction;

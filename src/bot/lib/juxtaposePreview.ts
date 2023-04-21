@@ -24,8 +24,8 @@ function createLabelBuffer(label: string, maxWidth: number) {
 }
 
 export async function renderJuxtaposePreview(
-    leftImageBuffer: Buffer,
-    rightImageBuffer: Buffer,
+    leftImageBuffer: ArrayBuffer,
+    rightImageBuffer: ArrayBuffer,
     isVertical: boolean,
     leftImageLabel: string | undefined | null,
     rightImageLabel: string | undefined | null

@@ -23,7 +23,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await Warning.create(targetUser, severity, reason, member.id, contextURL);
             replySuccess(interaction, logString, 'Create Warning');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

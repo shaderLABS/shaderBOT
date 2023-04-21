@@ -42,7 +42,7 @@ export const command: ChatInputCommandCallback = {
 
             interaction.showModal(modal);
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

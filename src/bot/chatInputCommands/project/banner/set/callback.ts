@@ -70,7 +70,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.setBannerURL(bannerURL, interaction.user.id);
             replySuccess(interaction, logString, 'Set Project Banner');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

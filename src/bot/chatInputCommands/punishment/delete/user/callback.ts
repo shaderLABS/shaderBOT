@@ -16,7 +16,7 @@ export const command: ChatInputCommandCallback = {
 
             replySuccess(interaction, logString, 'Delete Past Punishment Entry');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };

@@ -14,7 +14,7 @@ export const command: ChatInputCommandCallback = {
             const logString = await project.addOwner(targetMember, interaction.user.id);
             replySuccess(interaction, logString, 'Add Project Owner');
         } catch (error) {
-            replyError(interaction, error);
+            replyError(interaction, String(error));
         }
     },
 };
