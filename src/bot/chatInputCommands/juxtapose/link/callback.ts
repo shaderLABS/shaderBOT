@@ -35,7 +35,7 @@ export const command: ChatInputCommandCallback = {
 
             await interaction.deferReply();
 
-            var previewPromise = renderJuxtaposePreview(Buffer.from(await leftImageResponse.arrayBuffer()), Buffer.from(await rightImageResponse.arrayBuffer()), isVertical, leftLabel, rightLabel);
+            var previewPromise = renderJuxtaposePreview(await leftImageResponse.arrayBuffer(), await rightImageResponse.arrayBuffer(), isVertical, leftLabel, rightLabel);
         } catch {
             fetchAbortController.abort();
             return replyError(interaction, 'Failed to resolve the images.');

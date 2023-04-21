@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, DataResolver, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { client, settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { EmbedColor, replyError } from '../../../lib/embeds.js';
@@ -22,13 +22,8 @@ export const command: ChatInputCommandCallback = {
         try {
             await interaction.deferReply();
 
-            var previewPromise = renderJuxtaposePreview(
-                (await DataResolver.resolveFile(leftImageAttachment.url)).data,
-                (await DataResolver.resolveFile(rightImageAttachment.url)).data,
-                isVertical,
-                leftLabel,
-                rightLabel
-            );
+            const [leftImageResponse, rightImageResponse] = await Promise.all([fetch(leftImageAttachment.url), fetch(rightImageAttachment.url)]);
+            var previewPromise = renderJuxtaposePreview(await leftImageResponse.arrayBuffer(), await rightImageResponse.arrayBuffer(), isVertical, leftLabel, rightLabel);
         } catch {
             return replyError(interaction, 'Failed to resolve the images.');
         }
