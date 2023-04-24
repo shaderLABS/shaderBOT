@@ -21,7 +21,7 @@ export class Backup {
         this.fileName = data.fileName;
         this.content = isEncrypted ? Backup.decryptContent(data.content) : data.content;
 
-        [this.channelName, this.creationTime, this.size] = this.fileName.split(' - ');
+        [this.channelName, this.creationTime, this.size] = path.parse(this.fileName).name.split(' - ');
     }
 
     public static async create(channel: TextChannel | AnyThreadChannel | VoiceChannel, backupMessages?: Collection<string, Message>, introduction?: string) {
