@@ -47,7 +47,11 @@ export function startWebserver() {
     app.use(
         session({
             secret: process.env.SESSION_SECRET,
-            cookie: { maxAge: 86_400_000 }, // 1 day
+            cookie: {
+                maxAge: 86_400_000, // 1 day
+                httpOnly: true,
+                secure: PRODUCTION
+            },
             resave: false,
             saveUninitialized: false,
             store: new pg_store({ pool: db }),
