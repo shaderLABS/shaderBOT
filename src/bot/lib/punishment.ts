@@ -124,7 +124,7 @@ export class PastPunishment {
         });
 
         let sentDM = true;
-        await sendInfo(user, pastPunishment.toString(false), 'You have been kicked from shaderLABS.').catch(() => {
+        await sendInfo(user, pastPunishment.toString(false), `You have been kicked from ${guild.name}.`).catch(() => {
             sentDM = false;
         });
 
@@ -504,13 +504,14 @@ export class Punishment {
         if (reason.length > 512) return Promise.reject('The ban reason must not be more than 512 characters long.');
 
         const guild = getGuild();
+
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
         const { punishment, overwrittenPunishment } = await Punishment.createEntry(user.id, 'ban', reason, moderatorID, contextURL, duration);
 
         let sentDM = true;
-        await sendInfo(user, punishment.toString(false), 'You have been banned from shaderLABS.').catch(() => {
+        await sendInfo(user, punishment.toString(false), `You have been banned from ${guild.name}.`).catch(() => {
             sentDM = false;
         });
 
@@ -542,6 +543,8 @@ export class Punishment {
 
         if (reason.length > 512) return Promise.reject('The mute reason must not be more than 512 characters long.');
 
+        const guild = getGuild();
+
         const user = await client.users.fetch(userResolvable).catch(() => undefined);
         if (!user) return Promise.reject('Failed to resolve the user.');
 
@@ -550,7 +553,7 @@ export class Punishment {
         const { punishment, overwrittenPunishment } = await Punishment.createEntry(user.id, 'mute', reason, moderatorID, contextURL, duration);
 
         let sentDM = true;
-        await sendInfo(user, punishment.toString(false), 'You have been muted on shaderLABS.').catch(() => {
+        await sendInfo(user, punishment.toString(false), `You have been muted on ${guild.name}.`).catch(() => {
             sentDM = false;
         });
 

@@ -43,9 +43,10 @@ export const event: Event = {
                 if (raidMember.banned) continue;
 
                 raidMember.banned = true;
-                Punishment.createBan(raidMemberID, 'Flagged by raid protection. If you are not a bot, please [submit a ban appeal](https://appeal.shaderlabs.org/) or contact the staff team.').catch(
-                    () => undefined
-                );
+                Punishment.createBan(
+                    raidMemberID,
+                    `Flagged by raid protection. If you are not a bot, please [submit a ban appeal](${settings.data.raidProtection.appealURL}) or contact the staff team.`
+                ).catch(() => undefined);
             }
         }
 

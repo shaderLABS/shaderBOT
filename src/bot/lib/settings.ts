@@ -70,12 +70,14 @@ export type BotSettings = {
         messageThreshold: number;
         timeThreshold: number;
         similarityThreshold: number;
+        inviteURL: string;
     };
     raidProtection: {
         cacheLength: number;
         creationTimeThreshold: number;
         usernameSimilarityThreshold: number;
         userThreshold: number;
+        appealURL: string;
     };
     messageTranslation: {
         cacheLength: number;

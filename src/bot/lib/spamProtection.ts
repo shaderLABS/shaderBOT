@@ -3,7 +3,7 @@ import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
 import log from './log.js';
-import { parseUser, similarityLevenshtein } from './misc.js';
+import { getGuild, parseUser, similarityLevenshtein } from './misc.js';
 import { PastPunishment, Punishment } from './punishment.js';
 
 type CachedMessage = {
@@ -138,9 +138,11 @@ export async function checkSpam(message: GuildMessage) {
 }
 
 export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {
+    const guild = getGuild();
+
     await sendInfo(
         user,
-        'Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin shaderLABS using [this invite link](https://discord.gg/RpzWN9S "Invite for shaderLABS").',
+        `Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin ${guild.name} using [this invite link](${settings.data.spamProtection.inviteURL} "Invite for ${guild.name}").`,
         'Your account has been compromised.',
         undefined,
         "DON'T FALL FOR PHISHING! ALWAYS CHECK THE URL BEFORE SIGNING IN. NEVER SCAN ANY QR CODES."
