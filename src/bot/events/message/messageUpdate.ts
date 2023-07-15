@@ -10,7 +10,9 @@ export const event: Event = {
     callback: async (oldMessage, newMessage) => {
         const { channel } = newMessage;
 
-        if (newMessage.partial) newMessage = await newMessage.fetch();
+        if (newMessage.partial) {
+            newMessage = (await newMessage.fetch().catch(() => undefined)) ?? newMessage;
+        }
 
         if (
             // message is neither in text/voice nor thread channel
@@ -26,15 +28,19 @@ export const event: Event = {
         const embeds: Embed[] = [];
         let attachments: Attachment[] = [];
 
-        const metadata = `**Author:** ${parseUser(newMessage.author)}\n**Channel:** <#${newMessage.channelId}>\n**Sent At:** ${formatLongTimeDate(
+        const metadata = `**Author:** ${newMessage.author ? parseUser(newMessage.author) : 'Unknown'}\n**Channel:** <#${newMessage.channelId}>\n**Sent At:** ${formatLongTimeDate(
             newMessage.createdAt
         )}\n**Edited At:** ${formatLongTimeDate(new Date())}`;
 
         let content = '';
-        if (oldMessage.partial) {
+        if (oldMessage.partial || newMessage.partial) {
             content += `\n\nThe message is a partial with limited information. All embeds are attached below, and all attachments are attached above this message.\n\n**New Flags**\n${
                 newMessage.flags.toArray().join(', ') || 'none'
-            }\n\n**New Content**\n${newMessage.content.trim()}`;
+            }`;
+
+            if (!newMessage.partial) {
+                content += `\n\n**New Content**\n${newMessage.content.trim()}`;
+            }
 
             attachments.push(...newMessage.attachments.values());
             embeds.push(...newMessage.embeds);
@@ -135,7 +141,7 @@ export const event: Event = {
                 name: newMessage.mentions.repliedUser
                     ? `Edit Reply ${newMessage.mentions.users.has(newMessage.mentions.repliedUser.id) ? `(@${newMessage.mentions.repliedUser.tag})` : ''}`
                     : 'Edit Message',
-                iconURL: newMessage.author.displayAvatarURL(),
+                iconURL: newMessage.author?.displayAvatarURL(),
                 url: newMessage.url,
             },
             description: trimString(metadata + content, 4096 - overflowAttachmentURLs.length) + overflowAttachmentURLs,
