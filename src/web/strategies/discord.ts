@@ -3,8 +3,13 @@ import discordStrategy from 'passport-discord';
 import { client } from '../../bot/bot.js';
 import { getGuild } from '../../bot/lib/misc.js';
 
-passport.serializeUser((user: any, done) => {
-    done(undefined, user.id);
+export namespace DiscordPassportStrategy {
+    export type Info = undefined | { error: number };
+}
+
+passport.serializeUser<string>((user, done) => {
+    // @ts-expect-error
+    return done(undefined, user.id);
 });
 
 passport.deserializeUser(async (userID: string, done) => {
@@ -25,7 +30,7 @@ passport.deserializeUser(async (userID: string, done) => {
         return done(undefined, data);
     } catch (error) {
         console.log(error);
-        done(error);
+        return done(error);
     }
 });
 
@@ -42,7 +47,7 @@ passport.use(
             const guild = getGuild();
 
             const user = await client.users.fetch(profile.id)?.catch(() => undefined);
-            if (!user) return done(undefined, undefined, { error: 0 });
+            if (!user) return done(undefined, undefined, { error: 0 } as DiscordPassportStrategy.Info);
 
             try {
                 const data = {
@@ -53,10 +58,10 @@ passport.use(
                     isBanned: !!(await guild.bans.fetch(user).catch(() => undefined)),
                 };
 
-                done(undefined, data);
+                return done(undefined, data);
             } catch (error) {
                 console.log(error);
-                done(error instanceof Error ? error : new Error('Login failed.'));
+                return done(error instanceof Error ? error : new Error('Login failed.'));
             }
         }
     )

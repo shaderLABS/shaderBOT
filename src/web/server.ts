@@ -7,6 +7,7 @@ import polka from 'polka';
 import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.js';
 import { db } from '../db/postgres.js';
 import './strategies/discord.js';
+import { DiscordPassportStrategy } from './strategies/discord.js';
 import { releaseNotification, verifySignature } from './webhook.js';
 
 const PRODUCTION = process.env.NODE_ENV === 'production';
@@ -50,7 +51,7 @@ export function startWebserver() {
             cookie: {
                 maxAge: 86_400_000, // 1 day
                 httpOnly: true,
-                secure: PRODUCTION
+                secure: PRODUCTION,
             },
             resave: false,
             saveUninitialized: false,
@@ -68,7 +69,7 @@ export function startWebserver() {
     app.get('/api/auth/login', passport.authenticate('discord'));
 
     app.get('/api/auth/redirect', (req, res, next) => {
-        passport.authenticate('discord', (_err: any, user?: Express.User | false | null, info?: any) => {
+        passport.authenticate('discord', (_err: any, user?: Express.User | false | null, info?: DiscordPassportStrategy.Info) => {
             if (info?.error) {
                 res.setHeader('Location', '/?error=' + info.error);
                 res.statusCode = 302;
