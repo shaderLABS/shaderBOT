@@ -15,7 +15,7 @@ export const event: Event = {
 
         const backup = await Backup.create(channel, backupMessages, `Created after ${messages.size} messages were bulk deleted.`);
 
-        if (+backup.size > 0) {
+        if (Number(backup.size) > 0) {
             log(`${backup.size} out of ${messages.size} bulk deleted messages have been backed up. Use \`/backup list\` in order to view them.`, 'Bulk Delete Backup');
         }
     },

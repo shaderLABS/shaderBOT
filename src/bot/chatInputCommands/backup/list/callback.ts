@@ -94,13 +94,13 @@ export const command: ChatInputCommandCallback = {
                     ],
                 });
             } else if (messageInteraction.isStringSelectMenu()) {
-                const backupEntry = backupEntryChunks[index][+messageInteraction.values[0]];
+                const backupEntry = backupEntryChunks[index][Number(messageInteraction.values[0])];
 
                 try {
                     const backup = await Backup.read(backupEntry.fileName);
                     interaction.channel.send({ files: [new AttachmentBuilder(Buffer.from(backup.content), { name: backup.fileName })] });
                 } catch (error) {
-                    sendError(interaction.channel, error);
+                    sendError(interaction.channel, String(error));
                 }
 
                 messageInteraction.update({

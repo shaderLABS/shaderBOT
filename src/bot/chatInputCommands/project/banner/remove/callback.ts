@@ -8,7 +8,7 @@ export const command: ChatInputCommandCallback = {
             const project = await Project.getByChannelID(interaction.channelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
 
-            const logString = project.removeBannerURL(interaction.user.id);
+            const logString = await project.removeBannerURL(interaction.user.id);
             replySuccess(interaction, logString, 'Remove Project Banner');
         } catch (error) {
             replyError(interaction, String(error));

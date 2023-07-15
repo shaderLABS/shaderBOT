@@ -4,19 +4,19 @@ function getSeconds(time: string) {
     switch (time.replace(/[^a-z]/g, '')) {
         case 'a':
         case 'y':
-            return +time.slice(0, -1) * 31536000;
+            return Number(time.slice(0, -1)) * 31536000;
         case 'mo':
-            return +time.slice(0, -2) * 2592000;
+            return Number(time.slice(0, -2)) * 2592000;
         case 'w':
-            return +time.slice(0, -1) * 604800;
+            return Number(time.slice(0, -1)) * 604800;
         case 'd':
-            return +time.slice(0, -1) * 86400;
+            return Number(time.slice(0, -1)) * 86400;
         case 'h':
-            return +time.slice(0, -1) * 3600;
+            return Number(time.slice(0, -1)) * 3600;
         case 'min':
-            return +time.slice(0, -3) * 60;
+            return Number(time.slice(0, -3)) * 60;
         case 's':
-            return +time.slice(0, -1);
+            return Number(time.slice(0, -1));
         default:
             return 0;
     }

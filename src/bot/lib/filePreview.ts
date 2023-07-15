@@ -70,8 +70,8 @@ export async function checkFilePreview(message: GuildMessage) {
     const lineNumbers = [...rawURL.hash.matchAll(/L(\d+)/g)];
     if (lineNumbers.length === 0) return;
 
-    let topLineNumber = Math.max(+lineNumbers[0][1], 1);
-    let bottomLineNumber = lineNumbers.length === 2 ? Math.max(+lineNumbers[1][1], 1) : topLineNumber;
+    let topLineNumber = Math.max(Number(lineNumbers[0][1]), 1);
+    let bottomLineNumber = lineNumbers.length === 2 ? Math.max(Number(lineNumbers[1][1]), 1) : topLineNumber;
 
     if (bottomLineNumber < topLineNumber) {
         [topLineNumber, bottomLineNumber] = [bottomLineNumber, topLineNumber];
@@ -85,7 +85,7 @@ export async function checkFilePreview(message: GuildMessage) {
 
     // limit file size to 64 KB
     const fileSize = request.headers.get('Content-Length');
-    if (!fileSize || +fileSize > 65536) {
+    if (!fileSize || Number(fileSize) > 65536) {
         await request.body.cancel();
         return;
     }
@@ -121,7 +121,7 @@ export async function checkFilePreview(message: GuildMessage) {
     if (selectedContent.length === 0) return;
 
     const lineNumberLength = Math.ceil(Math.log10(topLineNumber + selectedContent.length));
-    const fileContent = selectedContent.reduce((content, line, index) => content + ('' + (index + topLineNumber)).padStart(lineNumberLength, ' ') + ' | ' + line + '\n', '');
+    const fileContent = selectedContent.reduce((content, line, index) => content + String(index + topLineNumber).padStart(lineNumberLength, ' ') + ' | ' + line + '\n', '');
 
     const openButton = new ButtonBuilder({
         url: rawURL.href,

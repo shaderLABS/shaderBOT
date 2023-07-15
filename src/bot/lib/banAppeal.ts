@@ -86,7 +86,7 @@ export class BanAppeal {
 
     public static async getNumberOfAppealsByUserID(userID: string) {
         const result = await db.query({ text: /*sql*/ `SELECT COUNT(*) FROM appeal WHERE user_id = $1;`, values: [userID], name: 'appeal-count-all-user-id' });
-        return +result.rows[0].count;
+        return Number(result.rows[0].count);
     }
 
     public static async getPreviousThreadsByUserID(userID: string): Promise<string[]> {

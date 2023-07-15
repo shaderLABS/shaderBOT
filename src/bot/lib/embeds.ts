@@ -60,7 +60,7 @@ function getInteractionName(interaction: ApplicationCommandInteraction | ButtonI
     return 'Unknown Interaction';
 }
 
-export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
+export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
@@ -72,7 +72,7 @@ export function sendSuccess(channel: TextBasedChannel | User | GuildMember, desc
 
 export function replySuccess(
     interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description: any,
+    description?: string,
     title?: string,
     ephemeral: boolean = false
 ) {
@@ -94,7 +94,7 @@ export function replySuccess(
     );
 }
 
-export function sendError(channel: TextBasedChannel | User | GuildMember, description: any, title?: string) {
+export function sendError(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
@@ -106,7 +106,7 @@ export function sendError(channel: TextBasedChannel | User | GuildMember, descri
 
 export function replyError(
     interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description: any,
+    description?: string,
     title?: string,
     ephemeral: boolean = true
 ) {
@@ -128,7 +128,7 @@ export function replyError(
     );
 }
 
-export function sendInfo(channel: TextBasedChannel | User | GuildMember, description: any, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string, message?: string, footer?: string) {
     const embed = new EmbedBuilder({
         author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
         description,
@@ -141,7 +141,7 @@ export function sendInfo(channel: TextBasedChannel | User | GuildMember, descrip
 
 export function replyInfo(
     interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description: any,
+    description?: string,
     title?: string,
     message?: string,
     footer?: string,
