@@ -1,57 +1,57 @@
 {
     "logging": {
-        "moderationChannelID": "",          // channel in which moderation actions will be logged
-        "messageChannelID": "",             // channel in which voice state changes and message deletions & updates will be logged
-        "announcementChannelID": ""         // channel in which project creations will be logged
+        "moderationChannelID": "",              // channel in which moderation actions will be logged
+        "messageChannelID": "",                 // channel in which voice state changes and message deletions & updates will be logged
+        "announcementChannelID": ""             // channel in which project creations will be logged
     },
-    "moderatorRoleID": "",                  // moderator role, e.g. mentioned when a new ban appeal arrives
-    "threadRoleID": "",                     // role that will be automatically added to new threads
-    "stickyThreadChannelIDs": [],           // channels whose threads will be automatically sticky upon creation
-    "appealChannelID": "",                  // channel for listing pending ban appeals
-    "appealCooldown": 0,                    // cooldown in seconds for submitting new appeals after the previous one has been declined
-    "botChannelID": "",                     // channel for sending DM-only automatic responses if a user can't receive the DM
-    "mediaChannelIDs": [],                  // channels in which every message that doesn't contain an attachment or a link will be deleted
-    "serverLogPaths": [],                   // paths to log files that are sent when /serverlogs is executed
-    "guildID": "",                          // ID of the guild that the bot is in
+    "moderatorRoleID": "",                      // moderator role, e.g. mentioned when a new ban appeal arrives
+    "threadRoleID": "",                         // role that will be automatically added to new threads
+    "stickyThreadChannelIDs": [],               // channels whose threads will be automatically sticky upon creation
+    "appealChannelID": "",                      // channel for listing pending ban appeals
+    "appealCooldown": 604800,                   // cooldown in seconds for submitting new appeals after the previous one has been declined
+    "botChannelID": "",                         // channel for sending DM-only automatic responses if a user can't receive the DM
+    "mediaChannelIDs": [],                      // channels in which every message that doesn't contain an attachment or a link will be deleted
+    "serverLogPaths": [],                       // paths to log files that are sent when /serverlogs is executed
+    "guildID": "",                              // ID of the guild that the bot is in
     "archive": {
-        "categoryIDs": [],                  // categories which are used for archiving projects
-        "minimumMessageCount": 0,           // a project will be eligible for archiving if less than minimumMessageCount (must be between 1 and 100) messages...
-        "maximumMessageAge": 0              // ...were sent in maximumMessageAge seconds
+        "categoryIDs": [],                      // categories which are used for archiving projects
+        "minimumMessageCount": 40,              // a project will be eligible for archiving if less than minimumMessageCount (must be between 1 and 100) messages...
+        "maximumMessageAge": 10368000           // ...were sent in maximumMessageAge seconds
     },
     "warnings": {
-        "decay": [0, 0, 0],                 // time in days, for severity [1, 2, 3]
-        "decay_minimum": 0,                 // lower bound which the decay approaches over time (between 0 and 1)
+        "decay": [20, 60, 180],                 // time in days, for severity [1, 2, 3]
+        "decay_minimum": 0.1,                   // lower bound which the decay approaches over time (between 0 and 1)
         "punishment": {
-            "muteRange": [0, 0],            // point threshold, [minimum, maximum]
-            "muteValues": [0, 0],           // duration in seconds, [minimum, maximum]
-            "tempbanRange": [0, 0],         // point threshold, [minimum, maximum]
-            "tempbanValues": [0, 0],        // duration in seconds, [minimum, maximum]
-            "ban": 0                        // point threshold, minimum
+            "muteRange": [2.75, 4.75],          // point threshold, [minimum, maximum]
+            "muteValues": [3600, 86400],        // duration in seconds, [minimum, maximum]
+            "tempbanRange": [4.75, 6.75],       // point threshold, [minimum, maximum]
+            "tempbanValues": [604800, 7776000], // duration in seconds, [minimum, maximum]
+            "ban": 6.75                         // point threshold, minimum
         }
     },
     "blacklist": {
-        "strings": [],                      // any message containing these links will be deleted and the author will be muted
-        "muteDuration": 0                   // duration of the mute in seconds
+        "strings": [],                          // any message containing these links will be deleted and the author will be muted
+        "muteDuration": 900                     // duration of the mute in seconds
     },
     "spamProtection": {
-        "cacheLength": 0,                   // length of the spam protection cache
-        "characterThreshold": 0,            // minimum characters after which messages will be checked for spam
-        "muteDuration": 0,                  // duration of the mute in seconds
-        "messageThreshold": 0,              // number of similar messages after which the spam protection will be triggered
-        "timeThreshold": 0,                 // maximum delay between similar messages in seconds (after which they won't be included in the message threshold)
-        "similarityThreshold": 0,           // threshold that determines how similar messages must be in order to get flagged as spam (between 0 and 1)
-        "inviteURL": ""                     // invite URL that is used for informing a spammer about their kick and how to re-join
+        "cacheLength": 15,                      // length of the spam protection cache
+        "characterThreshold": 20,               // minimum characters after which messages will be checked for spam
+        "muteDuration": 900,                    // duration of the mute in seconds
+        "messageThreshold": 3,                  // number of similar messages after which the spam protection will be triggered
+        "timeThreshold": 30,                    // maximum delay between similar messages in seconds (after which they won't be included in the message threshold)
+        "similarityThreshold": 0.5,             // threshold that determines how similar messages must be in order to get flagged as spam (between 0 and 1)
+        "inviteURL": ""                         // invite URL that is used for informing a spammer about their kick and how to re-join
     },
     "raidProtection": {
-        "cacheLength": 0,                   // length of the raid protection cache
-        "creationTimeThreshold": 0,         // maximum time between the creation of accounts in seconds (if less, then accounts will be flagged)
-        "usernameSimilarityThreshold": 0,   // minimum similarity of the usernames of accounts between 0 and 1 (if more, then accounts will be flagged)
-        "userThreshold": 0,                 // number of flagged users after which the raid protection will be triggered
-        "appealURL": ""                     // appeal URL that is used for informing a raid account about their ban and how to appeal it
+        "cacheLength": 20,                      // length of the raid protection cache
+        "creationTimeThreshold": 3600,          // maximum time between the creation of accounts in seconds (if less, then accounts will be flagged)
+        "usernameSimilarityThreshold": 0.9,     // minimum similarity of the usernames of accounts between 0 and 1 (if more, then accounts will be flagged)
+        "userThreshold": 10,                    // number of flagged users after which the raid protection will be triggered
+        "appealURL": ""                         // appeal URL that is used for informing a raid account about their ban and how to appeal it
     },
     "messageTranslation": {
-        "cacheLength": 0,                   // length of the message translation cache
-        "fetchCooldownTimeThreshold": 0,    // maximum age of fetches in seconds for them to be considered "recent"
-        "fetchCooldownCountThreshold": 0    // maximum amount of recently fetched messages (global limit)
+        "cacheLength": 25,                      // length of the message translation cache
+        "fetchCooldownTimeThreshold": 15,       // maximum age of fetches in seconds for them to be considered "recent"
+        "fetchCooldownCountThreshold": 5        // maximum amount of recently fetched messages (global limit)
     }
 }
