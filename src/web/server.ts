@@ -10,7 +10,7 @@ import './strategies/discord.js';
 import { DiscordPassportStrategy } from './strategies/discord.js';
 import { releaseNotification, verifySignature } from './webhook.js';
 
-const PRODUCTION = process.env.NODE_ENV === 'production';
+const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
 const PORT = Number(process.env.PORT) || 3001;
 
 const app = polka();
@@ -30,7 +30,7 @@ export function startWebserver() {
 
     app.use(
         cors({
-            origin: PRODUCTION ? [] : ['http://localhost:3000'],
+            origin: IS_DEVELOPMENT_ENVIRONMENT ? ['http://localhost:3000'] : [],
             credentials: true,
         })
     );
@@ -51,7 +51,7 @@ export function startWebserver() {
             cookie: {
                 maxAge: 86_400_000, // 1 day
                 httpOnly: true,
-                secure: PRODUCTION,
+                secure: !IS_DEVELOPMENT_ENVIRONMENT,
             },
             resave: false,
             saveUninitialized: false,

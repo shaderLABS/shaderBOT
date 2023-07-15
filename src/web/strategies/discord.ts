@@ -39,7 +39,7 @@ passport.use(
         {
             clientID: process.env.APPLICATION_CLIENT_ID || '',
             clientSecret: process.env.APPLICATION_CLIENT_SECRET || '',
-            callbackURL: process.env.NODE_ENV === 'production' ? `https://${process.env.DOMAIN || 'localhost'}/api/auth/redirect` : '/api/auth/redirect',
+            callbackURL: process.env.NODE_ENV === 'development' ? '/api/auth/redirect' : `https://${process.env.DOMAIN || 'localhost'}/api/auth/redirect`,
             scope: ['identify'],
         },
 
