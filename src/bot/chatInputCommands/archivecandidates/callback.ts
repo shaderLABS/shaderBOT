@@ -10,7 +10,7 @@ export const command: ChatInputCommandCallback = {
         await interaction.deferReply();
 
         const projectChannels = (await db.query({ text: /*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`, name: 'project-all-unarchived-channel-id' })).rows;
-        const eligibleProjectChannelPromises: Promise<TextChannel | undefined>[] = [];
+        const eligibleProjectChannelPromises: Promise<TextChannel | null>[] = [];
 
         for (const { channel_id } of projectChannels) {
             const channel = client.channels.cache.get(channel_id);
@@ -20,11 +20,12 @@ export const command: ChatInputCommandCallback = {
                 channel.messages.fetch({ limit: settings.data.archive.minimumMessageCount }).then((messages) => {
                     const oldestMessage = messages.last();
                     if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.data.archive.maximumMessageAge * 1000) return channel;
+                    else return null;
                 })
             );
         }
 
-        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter((channel): channel is NonNullable<typeof channel> => channel !== undefined);
+        const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter((channel): channel is NonNullable<typeof channel> => channel !== null);
 
         replyInfo(
             interaction,

@@ -14,7 +14,10 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const oldPasta = pastaStore.get(alias);
-            if (!oldPasta) return replyError(interaction, 'The specified pasta does not exist.');
+            if (!oldPasta) {
+                replyError(interaction, 'The specified pasta does not exist.');
+                return;
+            }
 
             const pastaData = oldPasta.toData();
 

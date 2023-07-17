@@ -8,11 +8,15 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {
-            return replyError(interaction, 'This command is only usable in text, voice or thread channels.', 'Invalid Channel');
+            replyError(interaction, 'This command is only usable in text, voice or thread channels.', 'Invalid Channel');
+            return;
         }
 
         const limit = interaction.options.getInteger('limit', false) || undefined;
-        if (limit && limit < 1) return replyError(interaction, 'The message limit must be bigger than one.');
+        if (limit && limit < 1) {
+            replyError(interaction, 'The message limit must be bigger than one.');
+            return;
+        }
 
         const backupMessages = await backupChannel.messages.fetch({ limit });
 

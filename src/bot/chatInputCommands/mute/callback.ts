@@ -20,7 +20,8 @@ export const command: ChatInputCommandCallback = {
         try {
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            return replyError(interaction, String(error));
+            replyError(interaction, String(error));
+            return;
         }
 
         const contextURL = await getContextURL(interaction, targetUser.id);

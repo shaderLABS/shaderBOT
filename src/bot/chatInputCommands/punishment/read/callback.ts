@@ -8,15 +8,21 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
-        if (!uuid.test(id)) return replyError(interaction, 'The specified UUID is invalid.');
+        if (!uuid.test(id)) {
+            replyError(interaction, 'The specified UUID is invalid.');
+            return;
+        }
 
         try {
             // more likely, check first
             const pastPunishment = await PastPunishment.getAnyByUUID(id).catch(() => undefined);
-            if (pastPunishment) return replyInfo(interaction, pastPunishment.toString(true, true), 'Past Punishment');
+            if (pastPunishment) {
+                replyInfo(interaction, pastPunishment.toString(true, true), 'Past Punishment');
+                return;
+            }
 
             const punishment = await Punishment.getAnyByUUID(id);
-            return replyInfo(interaction, punishment.toString(true, true), 'Punishment');
+            replyInfo(interaction, punishment.toString(true, true), 'Punishment');
         } catch (error) {
             replyError(interaction, String(error));
         }

@@ -73,19 +73,21 @@ export function startWebserver() {
             if (info?.error) {
                 res.setHeader('Location', '/?error=' + info.error);
                 res.statusCode = 302;
-                return res.end();
+                res.end();
+                return;
             }
 
             if (!user) {
                 res.setHeader('Location', '/?error=1');
                 res.statusCode = 302;
-                return res.end();
+                res.end();
+                return;
             }
 
             req.logIn(user, (err) => {
                 res.setHeader('Location', err ? '/?error=2' : '/');
                 res.statusCode = 302;
-                return res.end();
+                res.end();
             });
         })(req, res, next);
     });
@@ -93,7 +95,8 @@ export function startWebserver() {
     app.post('/api/auth/logout', (req, res) => {
         if (req.isUnauthenticated()) {
             res.statusCode = 401;
-            return res.end('Unauthorized');
+            res.end('Unauthorized');
+            return;
         }
 
         if (req.session) {
@@ -102,11 +105,11 @@ export function startWebserver() {
                 res.setHeader('Set-Cookie', `connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT`);
 
                 res.statusCode = 200;
-                return res.end('OK');
+                res.end('OK');
             });
         } else {
             res.statusCode = 400;
-            return res.end('Bad Request');
+            res.end('Bad Request');
         }
     });
 
@@ -116,18 +119,20 @@ export function startWebserver() {
 
         if (req.isUnauthenticated()) {
             res.statusCode = 204;
-            return res.end('No Content');
+            res.end('No Content');
+            return;
         }
 
         res.setHeader('Content-Type', 'application/json');
         res.statusCode = 200;
-        return res.end(JSON.stringify(req.user));
+        res.end(JSON.stringify(req.user));
     });
 
     app.get('/api/ban/me', async (req, res) => {
         if (req.isUnauthenticated()) {
             res.statusCode = 401;
-            return res.end('Unauthorized');
+            res.end('Unauthorized');
+            return;
         }
 
         // @ts-expect-error
@@ -137,18 +142,19 @@ export function startWebserver() {
             const banInformation = JSON.stringify(await getUserAppealData(userID));
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 200;
-            return res.end(banInformation);
+            res.end(banInformation);
         } catch (error) {
             console.error('/api/ban/me', userID, error);
             res.statusCode = 400;
-            return res.end('Bad Request');
+            res.end('Bad Request');
         }
     });
 
     app.post('/api/appeal', async (req, res) => {
         if (req.isUnauthenticated()) {
             res.statusCode = 401;
-            return res.end('Unauthorized');
+            res.end('Unauthorized');
+            return;
         }
 
         // @ts-expect-error
@@ -157,27 +163,28 @@ export function startWebserver() {
 
         try {
             await BanAppeal.create(userID, reason);
+            res.statusCode = 200;
+            res.end('OK');
         } catch (error) {
             console.error('/api/appeal', userID, error);
             res.statusCode = 400;
-            return res.end('Bad Request');
+            res.end('Bad Request');
         }
-
-        res.statusCode = 200;
-        return res.end('OK');
     });
 
     app.post('/api/webhook/release/:id', async (req, res) => {
         const channelID = req.params.id;
         if (/\D/.test(channelID) || !hasRawBody(req)) {
             res.statusCode = 400;
-            return res.end();
+            res.end();
+            return;
         }
 
         const signature = req.headers['x-hub-signature-256'];
         if (!signature || Array.isArray(signature)) {
             res.statusCode = 400;
-            return res.end();
+            res.end();
+            return;
         }
 
         const project = (
@@ -190,16 +197,18 @@ export function startWebserver() {
 
         if (!project || !project.webhook_secret || !project.role_id) {
             res.statusCode = 404;
-            return res.end();
+            res.end();
+            return;
         }
 
         if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
             res.statusCode = 403;
-            return res.end();
+            res.end();
+            return;
         }
 
         res.statusCode = await releaseNotification(channelID, project.role_id, req);
-        return res.end();
+        res.end();
     });
 
     /*********

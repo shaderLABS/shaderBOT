@@ -15,7 +15,10 @@ export const command: ChatInputCommandCallback = {
 
         const isVertical = interaction.options.getBoolean('vertical', false) || false;
 
-        if (!isValidUrl(leftImageURL) || !isValidUrl(rightImageURL)) return replyError(interaction, 'The specified image links are not valid URLs.');
+        if (!isValidUrl(leftImageURL) || !isValidUrl(rightImageURL)) {
+            replyError(interaction, 'The specified image links are not valid URLs.');
+            return;
+        }
 
         const fetchAbortController = new AbortController();
 
@@ -30,7 +33,8 @@ export const command: ChatInputCommandCallback = {
                 !['image/jpeg', 'image/png', 'image/webp'].includes(rightImageResponse.headers.get('Content-Type') || '')
             ) {
                 fetchAbortController.abort();
-                return replyError(interaction, 'Unsupported file type. You must provide URLs to PNG, JPEG or WebP images.');
+                replyError(interaction, 'Unsupported file type. You must provide URLs to PNG, JPEG or WebP images.');
+                return;
             }
 
             await interaction.deferReply();
@@ -38,7 +42,8 @@ export const command: ChatInputCommandCallback = {
             var previewPromise = renderJuxtaposePreview(await leftImageResponse.arrayBuffer(), await rightImageResponse.arrayBuffer(), isVertical, leftLabel, rightLabel);
         } catch {
             fetchAbortController.abort();
-            return replyError(interaction, 'Failed to resolve the images.');
+            replyError(interaction, 'Failed to resolve the images.');
+            return;
         }
 
         const response = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
@@ -61,7 +66,10 @@ export const command: ChatInputCommandCallback = {
         if (response.status !== 200) throw 'The API request failed with code ' + response.status + '.';
         const data = await response.json();
 
-        if (data.error) return replyError(interaction, data.error);
+        if (data.error) {
+            replyError(interaction, data.error);
+            return;
+        }
 
         const juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + data.uid;
         const preview = await previewPromise.catch(() => undefined);

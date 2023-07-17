@@ -8,7 +8,10 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false) || interaction.channel;
-        if (channel.type !== ChannelType.GuildText && !channel.isThread()) return replyError(interaction, 'This command is only usable in text or thread channels.', 'Invalid Channel');
+        if (channel.type !== ChannelType.GuildText && !channel.isThread()) {
+            replyError(interaction, 'This command is only usable in text or thread channels.', 'Invalid Channel');
+            return;
+        }
 
         const lengthString = interaction.options.getString('length', true);
         const durationString = interaction.options.getString('duration', true);
@@ -17,7 +20,8 @@ export const command: ChatInputCommandCallback = {
             var length = stringToSeconds(splitString(lengthString));
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            return replyError(interaction, String(error));
+            replyError(interaction, String(error));
+            return;
         }
 
         try {

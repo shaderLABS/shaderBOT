@@ -18,7 +18,8 @@ export const modal: ModalSubmitCallback = {
         const channelNameEdited = oldChannelName !== channel.name;
 
         if (!channel.name) {
-            return replyError(interaction, 'The channel name must be at least one character long.', 'Edit Project Channel');
+            replyError(interaction, 'The channel name must be at least one character long.', 'Edit Project Channel');
+            return;
         }
 
         const oldChannelDescription = channel.topic || '';
@@ -26,7 +27,8 @@ export const modal: ModalSubmitCallback = {
         const channelDescriptionEdited = oldChannelDescription !== channel.topic;
 
         if (!channelNameEdited && !channelDescriptionEdited) {
-            return replyInfo(interaction, 'The channel was not edited because neither the name nor the description have been changed.', 'Edit Project Channel', undefined, undefined, true);
+            replyInfo(interaction, 'The channel was not edited because neither the name nor the description have been changed.', 'Edit Project Channel', undefined, undefined, true);
+            return;
         }
 
         try {
@@ -36,7 +38,8 @@ export const modal: ModalSubmitCallback = {
                 position: channelNameEdited ? getAlphabeticalChannelPosition(channel, channel.parent) : undefined,
             });
         } catch {
-            return replyError(interaction, 'Failed to edit the channel.', 'Edit Project Channel', false);
+            replyError(interaction, 'Failed to edit the channel.', 'Edit Project Channel', false);
+            return;
         }
 
         replySuccess(interaction, 'The channel has been edited.', 'Edit Project Channel');

@@ -12,7 +12,10 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const pasta = pastaStore.get(alias);
-            if (!pasta) return replyError(interaction, 'The specified pasta does not exist.');
+            if (!pasta) {
+                replyError(interaction, 'The specified pasta does not exist.');
+                return;
+            }
 
             pastaStore.delete(alias);
             await pasta.delete();

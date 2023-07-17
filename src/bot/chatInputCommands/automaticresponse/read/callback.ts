@@ -10,7 +10,10 @@ export const command: ChatInputCommandCallback = {
 
         if (alias) {
             const automaticResponse = automaticResponseStore.get(alias);
-            if (!automaticResponse) return replyError(interaction, 'The specified automatic response does not exist.');
+            if (!automaticResponse) {
+                replyError(interaction, 'The specified automatic response does not exist.');
+                return;
+            }
 
             try {
                 const attachment = new AttachmentBuilder(Buffer.from(automaticResponse.toJSON()), { name: automaticResponse.getFileName() });
@@ -19,7 +22,11 @@ export const command: ChatInputCommandCallback = {
                 replyError(interaction, 'Failed to send automatic response.');
             }
         } else {
-            if (automaticResponseStore.size === 0) return replyInfo(interaction, 'There are no automatic responses.');
+            if (automaticResponseStore.size === 0) {
+                replyInfo(interaction, 'There are no automatic responses.');
+                return;
+            }
+
             replyInfo(interaction, '`' + [...automaticResponseStore.keys()].join('`, `') + '`', 'All Automatic Responses');
         }
     },

@@ -6,7 +6,10 @@ import { Project } from '../../../lib/project.js';
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,
     callback: async (interaction) => {
-        if (interaction.channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+        if (interaction.channel.type !== ChannelType.GuildText) {
+            replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+            return;
+        }
 
         try {
             const initializationEmbed = await Project.create(interaction.channel, interaction.user.id);

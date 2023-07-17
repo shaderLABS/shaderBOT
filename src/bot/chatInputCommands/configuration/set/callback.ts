@@ -14,7 +14,10 @@ export const command: ChatInputCommandCallback = {
             const newValue = JSON.parse(interaction.options.getString('value', true));
 
             const oldValue = updateObjectValueByStringPath(settings.data, path, newValue);
-            if (oldValue === undefined) return replyError(interaction, 'The specified path does not exist.');
+            if (oldValue === undefined) {
+                replyError(interaction, 'The specified path does not exist.');
+                return;
+            }
 
             settings.save();
 

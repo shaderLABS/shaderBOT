@@ -16,7 +16,10 @@ export const command: ChatInputCommandCallback = {
 
         try {
             let automaticResponseData = automaticResponseStore.get(alias)?.toData();
-            if (!automaticResponseData) return replyError(interaction, 'The specified automatic response does not exist.');
+            if (!automaticResponseData) {
+                replyError(interaction, 'The specified automatic response does not exist.');
+                return;
+            }
 
             const objPath = interaction.options.getString('path', true);
             const rawValue = interaction.options.getString('value', false);

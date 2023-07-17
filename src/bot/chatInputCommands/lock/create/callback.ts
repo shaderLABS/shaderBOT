@@ -9,7 +9,8 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice) {
-            return replyError(interaction, 'This command is only usable in text or voice channels.', 'Invalid Channel');
+            replyError(interaction, 'This command is only usable in text or voice channels.', 'Invalid Channel');
+            return;
         }
 
         const durationString = interaction.options.getString('duration', true);
@@ -17,7 +18,8 @@ export const command: ChatInputCommandCallback = {
         try {
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            return replyError(interaction, String(error));
+            replyError(interaction, String(error));
+            return;
         }
 
         try {

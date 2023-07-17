@@ -11,7 +11,11 @@ export const command: ChatInputCommandCallback = {
         const reason = interaction.options.getString('reason', true);
         const targetMember = interaction.options.getMember('member');
 
-        if (!(targetMember instanceof GuildMember)) return replyError(interaction, 'The specified user is not a member of this guild.');
+        if (!(targetMember instanceof GuildMember)) {
+            replyError(interaction, 'The specified user is not a member of this guild.');
+            return;
+        }
+
         if (!(await hasPermissionForTarget(interaction, targetMember, 'kickable'))) return;
 
         const contextURL = await getContextURL(interaction, targetMember.id);

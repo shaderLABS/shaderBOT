@@ -7,7 +7,10 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
         const thread = interaction.options.getChannel('thread', false) || interaction.channel;
-        if (!thread.isThread()) return replyError(interaction, 'This command is only usable in thread channels.', 'Invalid Channel');
+        if (!thread.isThread()) {
+            replyError(interaction, 'This command is only usable in thread channels.', 'Invalid Channel');
+            return;
+        }
 
         try {
             const stickyThread = await StickyThread.getByThreadID(thread.id);

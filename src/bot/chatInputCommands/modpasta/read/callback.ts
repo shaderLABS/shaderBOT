@@ -9,7 +9,10 @@ export const command: ChatInputCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         const pasta = pastaStore.get(alias);
-        if (!pasta) return replyError(interaction, 'The specified pasta does not exist.');
+        if (!pasta) {
+            replyError(interaction, 'The specified pasta does not exist.');
+            return;
+        }
 
         try {
             const attachment = new AttachmentBuilder(Buffer.from(pasta.toJSON()), { name: pasta.getFileName() });

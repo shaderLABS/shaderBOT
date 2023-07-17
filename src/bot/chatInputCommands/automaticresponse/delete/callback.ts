@@ -13,7 +13,11 @@ export const command: ChatInputCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         try {
-            if (!automaticResponseStore.delete(alias)) return replyError(interaction, 'The specified automatic response does not exist.');
+            if (!automaticResponseStore.delete(alias)) {
+                replyError(interaction, 'The specified automatic response does not exist.');
+                return;
+            }
+
             await fs.rm(path.join(automaticResponsePath, stringToFileName(alias)));
 
             const logString = `${parseUser(interaction.user)} deleted the automatic response \`${alias}\`.`;

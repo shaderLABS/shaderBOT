@@ -7,7 +7,10 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,
     callback: async (interaction) => {
         const targetMember = interaction.options.getMember('user');
-        if (!(targetMember instanceof GuildMember)) return replyError(interaction, 'The specified user is not a member of this guild.');
+        if (!(targetMember instanceof GuildMember)) {
+            replyError(interaction, 'The specified user is not a member of this guild.');
+            return;
+        }
 
         try {
             const project = await Project.getByChannelID(interaction.channelId);

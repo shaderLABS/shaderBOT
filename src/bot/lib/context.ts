@@ -12,7 +12,7 @@ const tableToString = {
     note: 'note',
 };
 
-export async function getContextURL(interaction: GuildChatInputCommandInteraction, targetID?: string) {
+export async function getContextURL(interaction: GuildChatInputCommandInteraction, targetID?: string): Promise<string | undefined> {
     const customURL = interaction.options.getString('context', false);
 
     if (customURL) {
@@ -46,6 +46,7 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
         if (channelLastMessage) return channelLastMessage;
 
         replyError(interaction, 'Failed to fetch a context URL. Please specify it manually using the `context` argument.');
+        return;
     }
 }
 

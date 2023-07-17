@@ -229,13 +229,18 @@ export class LockSlowmode {
 
         try {
             if (this.type === 'lock') {
-                if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice))
-                    return log(`Failed to expire lock. The channel <#${this.channelID}> could not be resolved.`, 'Expire Lock');
+                if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) {
+                    log(`Failed to expire lock. The channel <#${this.channelID}> could not be resolved.`, 'Expire Lock');
+                    return;
+                }
+
                 await LockSlowmode.applyLockState(this.previousState, channel);
             } else {
                 if (!channel || (channel.type !== ChannelType.GuildText && !channel.isThread())) {
-                    return log(`Failed to expire slowmode. The channel <#${this.channelID}> could not be resolved.`, 'Expire Slowmode');
+                    log(`Failed to expire slowmode. The channel <#${this.channelID}> could not be resolved.`, 'Expire Slowmode');
+                    return;
                 }
+
                 await channel.setRateLimitPerUser(this.previousState);
             }
 

@@ -6,7 +6,10 @@ import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.js';
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const { guild } = interaction;
-        if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return replyError(interaction, 'The banner feature requires a boost level of 2.');
+        if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) {
+            replyError(interaction, 'The banner feature requires a boost level of 2.');
+            return;
+        }
 
         const currentBannerProject = (
             await db.query({
@@ -21,7 +24,10 @@ export const command: ChatInputCommandCallback = {
         ).rows[0];
 
         const banner = guild.bannerURL({ size: 1024 });
-        if (!currentBannerProject || !banner) return replyError(interaction, 'There is no banner at the moment.');
+        if (!currentBannerProject || !banner) {
+            replyError(interaction, 'There is no banner at the moment.');
+            return;
+        }
 
         interaction.reply({
             embeds: [

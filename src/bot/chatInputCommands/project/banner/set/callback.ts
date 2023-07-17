@@ -18,7 +18,8 @@ export const command: ChatInputCommandCallback = {
             const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
 
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(banner.contentType || '')) {
-                return replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
+                replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
+                return;
             }
 
             await interaction.deferReply();
@@ -64,7 +65,8 @@ export const command: ChatInputCommandCallback = {
                 bannerURL = cachedAttachmentURL;
             } catch (error) {
                 console.error(error);
-                return replyError(interaction, 'Failed to process and cache the banner image.');
+                replyError(interaction, 'Failed to process and cache the banner image.');
+                return;
             }
 
             const logString = await project.setBannerURL(bannerURL, interaction.user.id);

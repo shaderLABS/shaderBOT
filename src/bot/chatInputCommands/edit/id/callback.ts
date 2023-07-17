@@ -8,7 +8,11 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: (interaction) => {
         const id = interaction.options.getString('id', true);
-        if (!uuid.test(id)) return replyError(interaction, 'The specified UUID is invalid.');
+        if (!uuid.test(id)) {
+            replyError(interaction, 'The specified UUID is invalid.');
+            return;
+        }
+
         editApsect(interaction, id);
     },
 };

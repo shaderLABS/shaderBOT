@@ -9,7 +9,8 @@ export const command: ChatInputCommandCallback = {
         const warnings = await Warning.getAllByUserID(user.id);
 
         if (warnings.length === 0) {
-            return replyInfo(interaction, 'You do not have any warnings.', 'Warnings', undefined, undefined, true);
+            replyInfo(interaction, 'You do not have any warnings.', 'Warnings', undefined, undefined, true);
+            return;
         }
 
         const pages: string[] = [];

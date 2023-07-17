@@ -6,13 +6,17 @@ import { Project } from '../../../lib/project.js';
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const { channel } = interaction;
-        if (channel.type !== ChannelType.GuildText) return replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+        if (channel.type !== ChannelType.GuildText) {
+            replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+            return;
+        }
 
         try {
             const project = await Project.getByChannelID(interaction.channelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
         } catch (error) {
-            return replyError(interaction, String(error));
+            replyError(interaction, String(error));
+            return;
         }
 
         const nameInput = new TextInputBuilder({

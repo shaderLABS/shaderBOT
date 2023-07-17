@@ -12,7 +12,8 @@ export const modal: ModalSubmitCallback = {
             const appeal = await BanAppeal.getByUUID(appealID);
 
             if (appeal.resultReason === newResultReason) {
-                return replyInfo(interaction, 'The ban appeal was not edited because the result reason has not been changed.', 'Edit Ban Appeal Result Reason', undefined, undefined, true);
+                replyInfo(interaction, 'The ban appeal was not edited because the result reason has not been changed.', 'Edit Ban Appeal Result Reason', undefined, undefined, true);
+                return;
             }
 
             const logString = await appeal.editResultReason(newResultReason, interaction.user.id);

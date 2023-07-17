@@ -12,7 +12,8 @@ export const command: ChatInputCommandCallback = {
             const projectMutes = await ProjectMute.getAllByProjectID(project.id);
 
             if (projectMutes.length === 0) {
-                return replyInfo(interaction, 'There are no mutes in the current project.', 'Project Mutes', undefined, undefined, true);
+                replyInfo(interaction, 'There are no mutes in the current project.', 'Project Mutes', undefined, undefined, true);
+                return;
             }
 
             const pages: string[] = [];

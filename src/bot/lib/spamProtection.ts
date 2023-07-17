@@ -18,7 +18,10 @@ const cache: (CachedMessage | undefined)[] = new Array(settings.data.spamProtect
 const interactionUserLocks = new Set<string>();
 
 export async function handleSpamInteraction(interaction: ButtonInteraction<'cached'>) {
-    if (!interaction.memberPermissions.has(PermissionFlagsBits.KickMembers)) return replyError(interaction, undefined, 'Insufficient Permissions');
+    if (!interaction.memberPermissions.has(PermissionFlagsBits.KickMembers)) {
+        replyError(interaction, undefined, 'Insufficient Permissions');
+        return;
+    }
 
     const id = interaction.customId.split(':')[1];
     if (!id || interactionUserLocks.has(id)) return;
@@ -29,7 +32,10 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
     });
 
     const targetUser = await client.users.fetch(id).catch(() => undefined);
-    if (!targetUser) return replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
+    if (!targetUser) {
+        replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
+        return;
+    }
 
     const mute = await Punishment.getByUserID(id, 'mute').catch(() => undefined);
 

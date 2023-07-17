@@ -21,7 +21,10 @@ export const command: ChatInputCommandCallback = {
             return [];
         });
 
-        if (files.length === 0) return replyInfo(interaction, 'There are no backups.');
+        if (files.length === 0) {
+            replyInfo(interaction, 'There are no backups.');
+            return;
+        }
 
         const backupEntries: BackupEntry[] = files
             .map((fileName) => {

@@ -49,12 +49,18 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     ban = await Punishment.getByUserID(target.id, 'ban').catch(() => undefined);
                     ban ??= await PastPunishment.getLatestByUserID(target.id, 'ban').catch(() => undefined);
 
-                    if (!ban) return replyError(interaction, 'The specified user does not have any bans.');
+                    if (!ban) {
+                        replyError(interaction, 'The specified user does not have any bans.');
+                        return;
+                    }
                 } else {
                     ban = await Punishment.getByUUID(target, 'ban').catch(() => undefined);
                     ban ??= await PastPunishment.getByUUID(target, 'ban').catch(() => undefined);
 
-                    if (!ban) return replyError(interaction, 'A ban with the specified UUID does not exist.');
+                    if (!ban) {
+                        replyError(interaction, 'A ban with the specified UUID does not exist.');
+                        return;
+                    }
                 }
 
                 if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
@@ -90,12 +96,18 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     mute = await Punishment.getByUserID(target.id, 'mute').catch(() => undefined);
                     mute ??= await PastPunishment.getLatestByUserID(target.id, 'mute').catch(() => undefined);
 
-                    if (!mute) return replyError(interaction, 'The specified user does not have any mutes.');
+                    if (!mute) {
+                        replyError(interaction, 'The specified user does not have any mutes.');
+                        return;
+                    }
                 } else {
                     mute = await Punishment.getByUUID(target, 'mute').catch(() => undefined);
                     mute ??= await PastPunishment.getByUUID(target, 'mute').catch(() => undefined);
 
-                    if (!mute) return replyError(interaction, 'A mute with the specified UUID does not exist.');
+                    if (!mute) {
+                        replyError(interaction, 'A mute with the specified UUID does not exist.');
+                        return;
+                    }
                 }
 
                 if (!(await hasPermissionForTarget(interaction, mute.userID))) return;
@@ -155,7 +167,11 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                         })
                     ).rows[0];
 
-                    if (!entry) return replyError(interaction, 'The specified user does not have any entries.');
+                    if (!entry) {
+                        replyError(interaction, 'The specified user does not have any entries.');
+                        return;
+                    }
+
                     if (!(await hasPermissionForTarget(interaction, target))) return;
 
                     uuid = entry.id;
@@ -176,7 +192,11 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                         })
                     ).rows[0];
 
-                    if (!entry) return replyError(interaction, 'There is no entry with the specified UUID.');
+                    if (!entry) {
+                        replyError(interaction, 'There is no entry with the specified UUID.');
+                        return;
+                    }
+
                     if (!(await hasPermissionForTarget(interaction, entry.user_id))) return;
 
                     uuid = target;

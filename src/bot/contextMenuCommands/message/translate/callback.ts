@@ -22,7 +22,8 @@ export const command: MessageContextMenuCommandCallback = {
 
         try {
             if (targetMessage.content.replaceAll(/https?:\/\/[\n\S]+/g, '').trim().length < 5) {
-                return replyInfo(interaction, undefined, 'The source text is empty or too short.', undefined, undefined, true);
+                replyInfo(interaction, undefined, 'The source text is empty or too short.', undefined, undefined, true);
+                return;
             }
 
             const logEmbed = new EmbedBuilder({
@@ -60,7 +61,8 @@ export const command: MessageContextMenuCommandCallback = {
                         'Translate Message Rate Limit'
                     );
 
-                    return replyInfo(interaction, undefined, 'There have been too many translation requests. Please try again later.', undefined, undefined, true);
+                    replyInfo(interaction, undefined, 'There have been too many translation requests. Please try again later.', undefined, undefined, true);
+                    return;
                 }
 
                 logEmbed.setDescription(
@@ -100,7 +102,9 @@ export const command: MessageContextMenuCommandCallback = {
 
             if (translation.language === 'en') {
                 if (logChannel?.type === ChannelType.GuildText) logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\nThe source text is already in English.')] });
-                return replyInfo(interaction, undefined, 'The source text is already in English.', undefined, undefined, true);
+
+                replyInfo(interaction, undefined, 'The source text is already in English.', undefined, undefined, true);
+                return;
             }
 
             const header = `${isoLanguageCodeToFlagEmoji(translation.language)}  **[${isoLanguageCodeToName(translation.language)} (${Math.round(translation.languageConfidence * 100)}%)](${

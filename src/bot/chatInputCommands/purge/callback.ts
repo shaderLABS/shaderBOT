@@ -10,7 +10,10 @@ export const command: ChatInputCommandCallback = {
         const { channel } = interaction;
 
         const count = interaction.options.getInteger('amount', true);
-        if (isNaN(count) || count < 0 || count > 100) return replyError(interaction, 'Please use a number between 0 and 100 as the first argument.');
+        if (isNaN(count) || count < 0 || count > 100) {
+            replyError(interaction, 'Please use a number between 0 and 100 as the first argument.');
+            return;
+        }
 
         const { size } = await channel.bulkDelete(count, true);
         replySuccess(interaction, `${size} (out of ${count}) message(s) have been deleted.`, 'Purge Messages', true);

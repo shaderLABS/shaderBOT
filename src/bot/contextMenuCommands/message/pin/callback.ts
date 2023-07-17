@@ -9,7 +9,8 @@ export const command: MessageContextMenuCommandCallback = {
             const project = await Project.getByChannelID(interaction.channelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
         } catch (error) {
-            return replyError(interaction, String(error));
+            replyError(interaction, String(error));
+            return;
         }
 
         const { targetMessage } = interaction;
@@ -20,6 +21,7 @@ export const command: MessageContextMenuCommandCallback = {
             else await targetMessage.pin();
         } catch {
             replyError(interaction, wasPinned ? 'Failed to unpin message.' : 'Failed to pin message. You can only pin up to 50 messages.');
+            return;
         }
 
         replySuccess(interaction, undefined, `The message was ${wasPinned ? 'unpinned' : 'pinned'}.`, true);

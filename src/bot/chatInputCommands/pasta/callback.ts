@@ -7,7 +7,10 @@ export const command: ChatInputCommandCallback = {
         const alias = interaction.options.getString('alias', true);
 
         const pasta = pastaStore.get(alias);
-        if (!pasta) return replyError(interaction, 'Pasta not found.');
+        if (!pasta) {
+            replyError(interaction, 'Pasta not found.');
+            return;
+        }
 
         try {
             await pasta.reply(interaction);
