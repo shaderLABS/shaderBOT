@@ -51,11 +51,12 @@ export function startWebserver() {
             cookie: {
                 maxAge: 86_400_000, // 1 day
                 httpOnly: true,
-                secure: !IS_DEVELOPMENT_ENVIRONMENT,
+                secure: !IS_DEVELOPMENT_ENVIRONMENT, // only send cookie over HTTPS, will cause issues if proxy is misconfigured
             },
             resave: false,
             saveUninitialized: false,
             store: new pg_store({ pool: db }),
+            proxy: !IS_DEVELOPMENT_ENVIRONMENT, // trust first proxy, must be configured to forward original protocol in X-Forwarded-Proto header
         })
     );
 
