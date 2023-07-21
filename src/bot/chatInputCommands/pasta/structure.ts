@@ -12,4 +12,4 @@ export default {
             autocomplete: true,
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

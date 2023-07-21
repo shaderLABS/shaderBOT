@@ -1,4 +1,4 @@
-import { ChannelType, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { Backup } from '../../../lib/backup.js';
 import { replyError, replySuccess } from '../../../lib/embeds.js';
@@ -6,11 +6,7 @@ import { replyError, replySuccess } from '../../../lib/embeds.js';
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
-        const backupChannel = interaction.options.getChannel('channel', false) || interaction.channel;
-        if (backupChannel.type !== ChannelType.GuildText && backupChannel.type !== ChannelType.GuildVoice && !backupChannel.isThread()) {
-            replyError(interaction, 'This command is only usable in text, voice or thread channels.', 'Invalid Channel');
-            return;
-        }
+        const backupChannel = interaction.options.getChannel('channel', false, Backup.CHANNEL_TYPES) || interaction.channel;
 
         const limit = interaction.options.getInteger('limit', false) || undefined;
         if (limit && limit < 1) {

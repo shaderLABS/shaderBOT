@@ -4,4 +4,4 @@ export default {
     name: 'restart',
     description: 'Restart the bot.',
     defaultMemberPermissions: PermissionFlagsBits.BanMembers,
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

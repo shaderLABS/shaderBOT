@@ -101,4 +101,4 @@ export default {
             type: ApplicationCommandOptionType.Subcommand,
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

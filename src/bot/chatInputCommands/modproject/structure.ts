@@ -1,4 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
+import { Project } from '../../lib/project';
 
 export default {
     name: 'modproject',
@@ -19,7 +20,7 @@ export default {
                     name: 'category',
                     description: 'The category to move the project channel into.',
                     type: ApplicationCommandOptionType.Channel,
-                    channelTypes: [ChannelType.GuildCategory],
+                    channelTypes: Project.CATEGORY_CHANNEL_TYPES,
                     required: true,
                 },
             ],
@@ -63,4 +64,4 @@ export default {
             ],
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

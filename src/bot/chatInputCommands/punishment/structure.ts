@@ -52,4 +52,4 @@ export default {
             ],
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

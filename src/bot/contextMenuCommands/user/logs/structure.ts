@@ -4,4 +4,4 @@ export default {
     name: 'Logs',
     type: ApplicationCommandType.User,
     defaultMemberPermissions: PermissionFlagsBits.KickMembers,
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

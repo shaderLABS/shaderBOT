@@ -4,7 +4,7 @@ import { StickyThread } from '../../lib/stickyThread.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
-        const thread = interaction.options.getChannel('thread', false) || interaction.channel;
+        const thread = interaction.options.getChannel('thread', false, StickyThread.CHANNEL_TYPES) || interaction.channel;
         if (!thread.isThread()) {
             replyError(interaction, 'This command is only usable in thread channels.', 'Invalid Channel');
             return;

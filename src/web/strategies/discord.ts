@@ -47,7 +47,7 @@ passport.use(
             const guild = getGuild();
 
             const user = await client.users.fetch(profile.id)?.catch(() => undefined);
-            if (!user) return done(undefined, undefined, { error: 0 } as DiscordPassportStrategy.Info);
+            if (!user) return done(undefined, undefined, { error: 0 } satisfies DiscordPassportStrategy.Info);
 
             try {
                 const data = {

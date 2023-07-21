@@ -2,9 +2,11 @@ import bodyParser from 'body-parser';
 import store from 'connect-pg-simple';
 import cors from 'cors';
 import session from 'express-session';
+import { IncomingMessage } from 'node:http';
 import passport from 'passport';
 import polka from 'polka';
 import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.js';
+import { NonNullableProperty } from '../bot/lib/misc.js';
 import { db } from '../db/postgres.js';
 import './strategies/discord.js';
 import { DiscordPassportStrategy } from './strategies/discord.js';
@@ -15,7 +17,8 @@ const PORT = Number(process.env.PORT) || 3001;
 
 const app = polka();
 
-function hasRawBody<T>(record: T & { rawBody?: Buffer }): record is T & { rawBody: Buffer } {
+type AddRawBody<T> = T & { rawBody?: Buffer };
+function hasRawBody<T>(record: AddRawBody<T>): record is NonNullableProperty<AddRawBody<T>, 'rawBody'> {
     return Buffer.isBuffer(record.rawBody);
 }
 
@@ -37,8 +40,8 @@ export function startWebserver() {
 
     app.use(
         bodyParser.json({
-            verify: (req, _, buffer) => {
-                (req as typeof req & { rawBody?: Buffer }).rawBody = buffer;
+            verify: (req: AddRawBody<IncomingMessage>, _, buffer) => {
+                req.rawBody = buffer;
             },
         })
     );

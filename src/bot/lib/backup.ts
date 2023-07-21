@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { AnyThreadChannel, Collection, Message, TextChannel, VoiceChannel } from 'discord.js';
+import { AnyThreadChannel, ChannelType, Collection, Message, TextChannel, VoiceChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -15,7 +15,8 @@ export class Backup {
     public size: string;
     public creationTime: string;
 
-    public static readonly DIRECTORY = 'customContent/channelBackup/';
+    public static readonly CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildVoice, ChannelType.PublicThread, ChannelType.PrivateThread] as const;
+    public static readonly DIRECTORY = 'customContent/channelBackup/' as const;
 
     constructor(data: { fileName: string; content: string }, isEncrypted: boolean) {
         this.fileName = data.fileName;

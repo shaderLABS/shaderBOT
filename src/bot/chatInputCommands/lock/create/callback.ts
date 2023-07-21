@@ -7,7 +7,7 @@ import { splitString, stringToSeconds } from '../../../lib/time.js';
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
-        const channel = interaction.options.getChannel('channel', false) || interaction.channel;
+        const channel = interaction.options.getChannel('channel', false, LockSlowmode.LOCK_CHANNEL_TYPES) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice) {
             replyError(interaction, 'This command is only usable in text or voice channels.', 'Invalid Channel');
             return;
