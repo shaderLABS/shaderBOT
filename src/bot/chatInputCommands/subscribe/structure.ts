@@ -1,4 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, ChannelType } from 'discord.js';
+import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { Project } from '../../lib/project';
 
 export default {
     name: 'subscribe',
@@ -8,8 +9,8 @@ export default {
             name: 'project',
             description: 'The channel of the project you want to subscribe to.',
             type: ApplicationCommandOptionType.Channel,
-            channelTypes: [ChannelType.GuildText],
+            channelTypes: Project.CHANNEL_TYPES,
             required: false,
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

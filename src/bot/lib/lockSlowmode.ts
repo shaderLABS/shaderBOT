@@ -28,6 +28,9 @@ export class LockSlowmode {
     public readonly previousState: number; // permission bitfield or slow mode length
     public readonly expireTimestamp: Date;
 
+    public static readonly LOCK_CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.GuildVoice] as const;
+    public static readonly SLOWMODE_CHANNEL_TYPES = [ChannelType.GuildText, ChannelType.PublicThread, ChannelType.PrivateThread] as const;
+
     constructor(data: { id: string; type: 'lock' | 'slowmode'; channel_id: string; previous_state: number; expire_timestamp: string | number | Date }) {
         this.id = data.id;
         this.type = data.type;

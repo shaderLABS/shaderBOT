@@ -41,7 +41,7 @@ export async function getPunishmentPoints(userID: string) {
                         SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (NOW() - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
                         FROM punishment
                         WHERE ("type" = 'ban' OR "type" = 'mute') AND user_id = $2
-                    ) as exclude;`,
+                    ) AS exclude;`,
                 values: [new Date(warning.timestamp), userID],
                 name: 'past-punishment-points-total-punished-time',
             })

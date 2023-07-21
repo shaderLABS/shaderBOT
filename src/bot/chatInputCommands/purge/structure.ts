@@ -12,4 +12,4 @@ export default {
             required: true,
         },
     ],
-} as ApplicationCommandData;
+} satisfies ApplicationCommandData;

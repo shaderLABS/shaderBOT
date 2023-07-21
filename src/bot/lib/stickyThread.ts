@@ -10,6 +10,8 @@ export class StickyThread {
     public readonly threadID: string;
     public readonly moderatorID?: string;
 
+    public static readonly CHANNEL_TYPES = [ChannelType.PublicThread, ChannelType.PrivateThread] as const;
+
     constructor(data: { id: string; channel_id: string; thread_id: string; mod_id?: string }) {
         this.id = data.id;
         this.channelID = data.channel_id;

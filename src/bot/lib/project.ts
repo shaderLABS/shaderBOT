@@ -15,6 +15,9 @@ export class Project {
     public roleID?: string;
     public archived: boolean;
 
+    public static readonly CHANNEL_TYPES = [ChannelType.GuildText] as const;
+    public static readonly CATEGORY_CHANNEL_TYPES = [ChannelType.GuildCategory] as const;
+
     constructor(data: { id: string; channel_id: string; owners: string[]; role_id?: string }) {
         this.id = data.id;
         this.channelID = data.channel_id;
