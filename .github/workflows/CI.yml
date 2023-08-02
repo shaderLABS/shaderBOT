@@ -23,6 +23,6 @@ jobs:
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
-          name: shaderBOT-${{ github.ref_name }}
+          name: shaderBOT-build
           path: build/
           if-no-files-found: error
