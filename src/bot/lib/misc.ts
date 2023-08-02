@@ -40,7 +40,7 @@ export function parseUser(user: User | string) {
         if (!target) return `<@${user}> (${user})`;
     }
 
-    return `<@${target.id}> (${escapeMarkdown(target.tag)} | ${target.id})`;
+    return `<@${target.id}> (${escapeMarkdown(target.username)} | ${target.id})`;
 }
 
 export function stringToFileName(alias: string) {

@@ -7,7 +7,7 @@ import { Project, ProjectMute } from '../../lib/project.js';
 import { Punishment } from '../../lib/punishment.js';
 
 type CachedMember = {
-    username: string;
+    displayName: string;
     avatarHash: string | null;
     createdTimestamp: number;
     banned: boolean;
@@ -23,7 +23,7 @@ export const event: Event = {
          *******************/
 
         const currentMember: CachedMember = {
-            username: member.user.username,
+            displayName: member.user.displayName,
             avatarHash: member.avatar,
             createdTimestamp: member.user.createdTimestamp,
             banned: false,
@@ -31,7 +31,7 @@ export const event: Event = {
 
         const potentialRaid = cache.filter(
             (previousMember) =>
-                similarityLevenshtein(currentMember.username, previousMember.username) > settings.data.raidProtection.usernameSimilarityThreshold ||
+                similarityLevenshtein(currentMember.displayName, previousMember.displayName) > settings.data.raidProtection.usernameSimilarityThreshold ||
                 (currentMember.avatarHash && currentMember.avatarHash === previousMember.avatarHash) ||
                 Math.abs(currentMember.createdTimestamp - previousMember.createdTimestamp) < settings.data.raidProtection.creationTimeThreshold * 1000
         );

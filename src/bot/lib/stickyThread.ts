@@ -60,7 +60,7 @@ export class StickyThread {
 
     public static async isSticky(threadID: string) {
         const result = await db.query({ text: /*sql*/ `SELECT 1 FROM sticky_thread WHERE thread_id = $1 LIMIT 1;`, values: [threadID], name: 'sticky-thread-is-sticky' });
-        return !!result.rows[0];
+        return Boolean(result.rows[0]);
     }
 
     public static async create(thread: AnyThreadChannel, moderatorID?: string): Promise<string> {

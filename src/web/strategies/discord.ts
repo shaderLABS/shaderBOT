@@ -2,6 +2,7 @@ import passport from 'passport';
 import discordStrategy from 'passport-discord';
 import { client } from '../../bot/bot.js';
 import { getGuild } from '../../bot/lib/misc.js';
+import { API } from '../api.js';
 
 export namespace DiscordPassportStrategy {
     export type Info = undefined | { error: number };
@@ -19,12 +20,11 @@ passport.deserializeUser(async (userID: string, done) => {
     if (!user) return done(null);
 
     try {
-        const data = {
+        const data: API.UserInformation = {
             id: user.id,
             username: user.username,
-            discriminator: user.discriminator,
             avatarURL: user.displayAvatarURL(),
-            isBanned: !!(await guild.bans.fetch(user).catch(() => undefined)),
+            isBanned: Boolean(await guild.bans.fetch(user).catch(() => undefined)),
         };
 
         return done(undefined, data);
@@ -50,12 +50,11 @@ passport.use(
             if (!user) return done(undefined, undefined, { error: 0 } satisfies DiscordPassportStrategy.Info);
 
             try {
-                const data = {
+                const data: API.UserInformation = {
                     id: user.id,
                     username: user.username,
-                    discriminator: user.discriminator,
                     avatarURL: user.displayAvatarURL(),
-                    isBanned: !!(await guild.bans.fetch(user).catch(() => undefined)),
+                    isBanned: Boolean(await guild.bans.fetch(user).catch(() => undefined)),
                 };
 
                 return done(undefined, data);

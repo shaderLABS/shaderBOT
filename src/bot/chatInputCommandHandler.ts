@@ -24,7 +24,7 @@ export type GuildChatInputCommandInteraction = ChatInputCommandInteraction<'cach
  ***********/
 
 function isGuildChatInputCommandInteraction(interaction: ChatInputCommandInteraction<'cached'>): interaction is GuildChatInputCommandInteraction {
-    return !!interaction.channel && (interaction.channel.type === ChannelType.GuildText || interaction.channel.type === ChannelType.GuildVoice || interaction.channel.isThread());
+    return interaction.channel !== null && (interaction.channel.type === ChannelType.GuildText || interaction.channel.type === ChannelType.GuildVoice || interaction.channel.isThread());
 }
 
 export function hasPermissionsForCommand(
