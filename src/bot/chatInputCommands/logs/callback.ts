@@ -78,6 +78,6 @@ export const command: ChatInputCommandCallback = {
         const targetUser = interaction.options.getUser('user', true);
 
         const pages = await getUserModerationLogPages(targetUser);
-        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.tag}`);
+        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.username}`);
     },
 };

@@ -1,6 +1,7 @@
 import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
 import { ChannelType, EmbedBuilder, escapeMarkdown, SnowflakeUtil, time, TimestampStyles, User } from 'discord.js';
 import { db } from '../../db/postgres.js';
+import { API } from '../../web/api.js';
 import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
@@ -81,7 +82,7 @@ export class BanAppeal {
 
     public static async hasPending(userID: string) {
         const result = await db.query({ text: /*sql*/ `SELECT 1 FROM appeal WHERE user_id = $1 AND result = 'pending' LIMIT 1;`, values: [userID], name: 'appeal-has-pending' });
-        return !!result.rows[0];
+        return Boolean(result.rows[0]);
     }
 
     public static async getNumberOfAppealsByUserID(userID: string) {
@@ -275,7 +276,7 @@ export class BanAppeal {
         return new EmbedBuilder({
             author: user
                 ? {
-                      name: user.tag,
+                      name: user.username,
                       iconURL: user.displayAvatarURL(),
                   }
                 : undefined,
@@ -371,7 +372,7 @@ export class BanAppeal {
     }
 }
 
-export async function getUserAppealData(userID: string) {
+export async function getUserAppealData(userID: string): Promise<API.BanInformation> {
     const [ban, appeal] = await Promise.all([Punishment.getByUserID(userID, 'ban'), BanAppeal.getLatestByUserID(userID).catch(() => undefined)]);
     const banModerator = ban.moderatorID ? await client.users.fetch(ban.moderatorID).catch(() => undefined) : undefined;
 
@@ -381,21 +382,20 @@ export async function getUserAppealData(userID: string) {
             ? {
                   id: banModerator.id,
                   username: banModerator.username,
-                  discriminator: banModerator.discriminator,
               }
             : undefined,
         appeal: appeal
             ? {
                   result: appeal.result,
                   resultReason: appeal.resultReason,
-                  resultTimestamp: appeal.resultTimestamp,
-                  timestamp: appeal.timestamp,
+                  resultTimestamp: appeal.resultTimestamp?.toISOString(),
+                  timestamp: appeal.timestamp.toISOString(),
               }
             : undefined,
         appealCooldown: settings.data.appealCooldown,
         reason: ban.reason,
         contextURL: ban.contextURL,
-        expireTimestamp: ban.expireTimestamp,
-        timestamp: ban.timestamp,
+        expireTimestamp: ban.expireTimestamp?.toISOString(),
+        timestamp: ban.timestamp.toISOString(),
     };
 }

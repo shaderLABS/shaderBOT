@@ -7,7 +7,7 @@ import { formatRelativeTime } from '../../lib/time.js';
 export function getUserInfoEmbed(targetUser: User, targetMember?: GuildMember) {
     const embed = new EmbedBuilder({
         author: {
-            name: targetUser.tag,
+            name: targetUser.username,
             iconURL: EmbedIcon.Info,
         },
         color: EmbedColor.Blue,

@@ -87,7 +87,7 @@ export function replySuccess(
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
+                    text: `${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })
@@ -121,7 +121,7 @@ export function replyError(
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
+                    text: `${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })
@@ -159,7 +159,7 @@ export function replyInfo(
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${footer ? footer + '\n' : ''}${interaction.user.tag} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
+                    text: `${footer ? footer + '\n' : ''}${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         })

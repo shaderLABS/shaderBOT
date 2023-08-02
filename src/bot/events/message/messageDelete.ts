@@ -57,7 +57,7 @@ export const event: Event = {
             logEmbed
                 .setAuthor({
                     name: message.mentions.repliedUser
-                        ? `Delete Reply ${message.mentions.users.has(message.mentions.repliedUser.id) ? `(@${message.mentions.repliedUser.tag})` : ''}`
+                        ? `Delete Reply ${message.mentions.users.has(message.mentions.repliedUser.id) ? `(@${message.mentions.repliedUser.username})` : ''}`
                         : 'Delete Message',
                     iconURL: message.author.displayAvatarURL(),
                 })

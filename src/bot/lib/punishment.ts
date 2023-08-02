@@ -253,7 +253,7 @@ export class Punishment {
 
     static async has(userID: string, type: 'ban' | 'mute'): Promise<boolean> {
         const result = await db.query({ text: /*sql*/ `SELECT 1 FROM punishment WHERE "type" = $1 AND user_id = $2;`, values: [type, userID], name: 'punishment-has' });
-        return !!result.rows[0];
+        return Boolean(result.rows[0]);
     }
 
     static async getByUUID(uuid: string, type: 'ban' | 'mute') {

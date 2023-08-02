@@ -310,11 +310,11 @@ export class Project {
     }
 
     public static async isOwner(userID: string, channelID: string): Promise<Boolean> {
-        return !!(await db.query({ text: /*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, values: [channelID, userID], name: 'project-is-owner' })).rows[0];
+        return Boolean((await db.query({ text: /*sql*/ `SELECT 1 FROM project WHERE channel_id = $1 AND $2 = ANY (owners) LIMIT 1`, values: [channelID, userID], name: 'project-is-owner' })).rows[0]);
     }
 
     public static async isProjectChannel(channelID: string): Promise<Boolean> {
-        return !!(await db.query({ text: /*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, values: [channelID], name: 'project-is-project' })).rows[0];
+        return Boolean((await db.query({ text: /*sql*/ `SELECT 1 FROM project WHERE channel_id = $1;`, values: [channelID], name: 'project-is-project' })).rows[0]);
     }
 
     public static async isProjectArchived(channelID: string): Promise<Boolean> {

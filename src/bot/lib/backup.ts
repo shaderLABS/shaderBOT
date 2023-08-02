@@ -35,7 +35,7 @@ export class Backup {
         if (backupMessages) messageArray.reverse();
 
         const content = messageArray.reduce((content, message) => {
-            let messageContent = `${message.author.tag} (${message.author.id}) - ${message.content.replaceAll(/\r?\n|\r/g, ' ')}`;
+            let messageContent = `${message.author.username} (${message.author.id}) - ${message.content.replaceAll(/\r?\n|\r/g, ' ')}`;
             for (const embed of message.embeds) messageContent += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
             for (const attachment of message.attachments.values()) messageContent += '\n\t' + attachment.url;
 
