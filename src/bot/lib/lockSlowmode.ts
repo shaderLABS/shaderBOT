@@ -58,7 +58,7 @@ export class LockSlowmode {
     }
 
     static async getAllByChannelID(channelID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE channel_id = $1 ORDER BY timestamp DESC;`, values: [channelID], name: 'lock-slowmode-all-channel-id' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE channel_id = $1;`, values: [channelID], name: 'lock-slowmode-all-channel-id' });
         return result.rows.map((row) => new LockSlowmode(row));
     }
 
