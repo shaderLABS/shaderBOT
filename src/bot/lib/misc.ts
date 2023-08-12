@@ -48,7 +48,7 @@ export function stringToFileName(alias: string) {
 }
 
 export function formatContextURL(context: string | null | undefined) {
-    return context ? `[click here](${context})` : 'No context exists.';
+    return context || 'No context exists.';
 }
 
 export function trimString(str: string, n: number) {

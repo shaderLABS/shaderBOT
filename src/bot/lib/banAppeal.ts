@@ -346,7 +346,7 @@ export class BanAppeal {
         string += `**Reason:** ${trimString(this.reason, 150)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**Result:** ${this.result}\n`;
 
         if (this.messageID) {
-            string += `**Thread:** [click here](https://www.discord.com/channels/${settings.data.guildID}/${this.messageID})\n`;
+            string += `**Thread:** https://www.discord.com/channels/${settings.data.guildID}/${this.messageID}\n`;
         }
 
         if (this.result === 'expired') {
