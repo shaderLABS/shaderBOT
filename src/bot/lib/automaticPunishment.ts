@@ -50,7 +50,7 @@ export async function getPunishmentPoints(userID: string) {
 
     const points: number = warnings.reduce((total, warning, index) => {
         const { exclude, past_exclude }: { exclude: number; past_exclude: number } = excludedTimes[index].rows[0];
-        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + (exclude + past_exclude) * 1000);
+        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + exclude * 1000.0 + past_exclude * 1000.0);
     }, 0);
 
     return Math.round(points * 1000) / 1000;
