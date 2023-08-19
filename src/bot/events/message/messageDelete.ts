@@ -47,7 +47,8 @@ export const event: Event = {
             )}\n**Deleted At:** ${formatLongTimeDate(new Date())}`;
 
             if (message.reference) {
-                metadata += `\n**Reference To:** https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`;
+                metadata += `\n**Reference To:** https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}`;
+                if (message.reference.messageId) metadata += `/${message.reference.messageId}`;
             }
 
             if (message.embeds.length > 0) {
