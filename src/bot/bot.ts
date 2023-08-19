@@ -18,6 +18,10 @@ export let timeoutStore: TimeoutStore;
 export let settings: SettingsFile<BotSettings>;
 
 export async function startBot() {
+    cooldownStore = new CooldownStore();
+    timeoutStore = new TimeoutStore();
+    settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
+
     client = new Client({
         allowedMentions: {
             parse: ['roles', 'users'],
@@ -34,10 +38,6 @@ export async function startBot() {
         ],
         presence: RandomPresence.PRESENCE,
     });
-
-    cooldownStore = new CooldownStore();
-    timeoutStore = new TimeoutStore();
-    settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
 
     registerEvents('build/bot/events');
     registerChatInputCommands('build/bot/chatInputCommands');

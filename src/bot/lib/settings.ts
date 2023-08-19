@@ -42,6 +42,7 @@ export type BotSettings = {
     botChannelID: Snowflake;
     mediaChannelIDs: Snowflake[];
     serverLogPaths: string[];
+    randomCustomStatuses: string[];
     guildID: Snowflake;
     archive: {
         categoryIDs: Snowflake[];

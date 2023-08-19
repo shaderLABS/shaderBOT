@@ -12,6 +12,7 @@
     "botChannelID": "",                         // channel for sending DM-only automatic responses if a user can't receive the DM
     "mediaChannelIDs": [],                      // channels in which every message that doesn't contain an attachment or a link will be deleted
     "serverLogPaths": [],                       // paths to log files that are sent when /serverlogs is executed
+    "randomCustomStatuses": [],                 // custom statuses that will be randomly chosen every day, which can be disabled by providing an empty array
     "guildID": "",                              // ID of the guild that the bot is in
     "archive": {
         "categoryIDs": [],                      // categories which are used for archiving projects
