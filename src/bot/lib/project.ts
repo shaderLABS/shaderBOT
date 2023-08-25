@@ -266,7 +266,6 @@ export class Project {
         return logString;
     }
 
-    // TODO: log
     public async addSubscriber(member: GuildMember) {
         this.assertNotArchived();
 
@@ -280,10 +279,11 @@ export class Project {
         member.roles.add(role);
 
         const logString = `You will now receive notifications from <#${this.channelID}> (${this.id}).`;
+
+        log(`${parseUser(member.user)} subscribed to the project linked to <#${this.channelID}> (${this.id}).`, 'Add Project Subscriber');
         return logString;
     }
 
-    // TODO: log
     public async removeSubscriber(member: GuildMember) {
         this.assertNotArchived();
 
@@ -297,6 +297,8 @@ export class Project {
         member.roles.remove(role);
 
         const logString = `You will no longer receive notifications from <#${this.channelID}> (${this.id}).`;
+
+        log(`${parseUser(member.user)} unsubscribed from the project linked to <#${this.channelID}> (${this.id}).`, 'Remove Project Subscriber');
         return logString;
     }
 
