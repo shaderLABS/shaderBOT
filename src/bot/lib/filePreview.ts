@@ -4,8 +4,8 @@ import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError } from './embeds.js';
 import { parseUser, unicodeLineBoundaries } from './misc.js';
 
-const gitHubFileURLs = /https:\/\/github\.com(?:\/[^\/\s]+){2}\/blob(?:\/[^\/\s]+)+#[^\/\s]+/;
-const gitHubGistURLs = /https:\/\/gist\.github\.com(?:\/[^\/\s]+){2}#file\-[^\/\s]+/;
+const gitHubFileURLs = /https:\/\/github\.com(?:\/[^\/\s]+){2}\/blob(?:\/[^\/\s]+)+#[^\/\s]+/g;
+const gitHubGistURLs = /https:\/\/gist\.github\.com(?:\/[^\/\s]+){2}#file\-[^\/\s]+/g;
 
 // not all properties
 type Gist = {
@@ -37,36 +37,15 @@ type Gist = {
     truncated: boolean;
 };
 
-export async function checkFilePreview(message: GuildMessage) {
-    let rawURLMatch: RegExpMatchArray | null;
-    let type: 'file' | 'gist';
+type FilePreviewData = {
+    rawURL: URL;
+    apiURL: string;
+    metadataContent: string;
+    type: 'file' | 'gist';
+    position: number;
+};
 
-    if ((rawURLMatch = message.content.match(gitHubFileURLs))) {
-        try {
-            var rawURL = new URL(rawURLMatch[0]);
-        } catch {
-            return;
-        }
-
-        const [, author, repository, , branch, ...path] = rawURL.pathname.split('/');
-        type = 'file';
-
-        var metadataContent = `**${author}/${repository}** (on ${branch})\n${path.join('/')}`;
-        var apiURL = `https://raw.githubusercontent.com/${author}/${repository}/${branch}/${path.join('/')}`;
-    } else if ((rawURLMatch = message.content.match(gitHubGistURLs))) {
-        try {
-            var rawURL = new URL(rawURLMatch[0]);
-        } catch {
-            return;
-        }
-
-        const [, author, id] = rawURL.pathname.split('/');
-        type = 'gist';
-
-        var metadataContent = `**${author}**`;
-        var apiURL = `https://api.github.com/gists/${id}`;
-    } else return;
-
+async function sendFilePreview(message: GuildMessage, { rawURL, apiURL, metadataContent, type }: FilePreviewData) {
     const lineNumbers = [...rawURL.hash.matchAll(/L(\d+)/g)];
     if (lineNumbers.length === 0) return;
 
@@ -77,15 +56,19 @@ export async function checkFilePreview(message: GuildMessage) {
         [topLineNumber, bottomLineNumber] = [bottomLineNumber, topLineNumber];
     }
 
-    const request = await fetch(apiURL, { method: 'GET', headers: { Accept: type === 'file' ? 'text/plain' : 'application/vnd.github.raw+json' } }).catch(() => undefined);
+    const request = await fetch(apiURL, {
+        method: 'GET',
+        headers: { Accept: type === 'file' ? 'text/plain' : 'application/vnd.github.raw+json' },
+    }).catch(() => undefined);
+
     if (!request || !request.ok || !request.body) {
         await request?.body?.cancel();
         return;
     }
 
-    // limit file size to 64 KB
+    // limit file size to 4 MB
     const fileSize = request.headers.get('Content-Length');
-    if (!fileSize || Number(fileSize) > 65536) {
+    if (Number(fileSize) > 4194304) {
         await request.body.cancel();
         return;
     }
@@ -156,7 +139,6 @@ export async function checkFilePreview(message: GuildMessage) {
     }
 
     if (!reply.inGuild()) return;
-    message.suppressEmbeds();
 
     reply
         .awaitMessageComponent({
@@ -196,6 +178,55 @@ export async function checkFilePreview(message: GuildMessage) {
             ],
         });
     }
+}
+
+export async function checkFilePreview(message: GuildMessage) {
+    let totalPreviewCount = 0;
+
+    const queue: FilePreviewData[] = [];
+
+    for (const rawURLMatch of message.content.matchAll(gitHubFileURLs)) {
+        let rawURL: URL;
+
+        try {
+            rawURL = new URL(rawURLMatch[0]);
+        } catch {
+            continue;
+        }
+
+        const [, author, repository, , branch, ...path] = rawURL.pathname.split('/');
+
+        const metadataContent = `**${author}/${repository}** (on ${branch})\n${path.join('/')}`;
+        const apiURL = `https://raw.githubusercontent.com/${author}/${repository}/${branch}/${path.join('/')}`;
+
+        queue.push({ position: rawURLMatch.index || 0, rawURL, apiURL, metadataContent, type: 'file' });
+    }
+
+    for (const rawURLMatch of message.content.matchAll(gitHubGistURLs)) {
+        let rawURL: URL;
+
+        try {
+            rawURL = new URL(rawURLMatch[0]);
+        } catch {
+            continue;
+        }
+
+        const [, author, id] = rawURL.pathname.split('/');
+
+        const metadataContent = `**${author}**`;
+        const apiURL = `https://api.github.com/gists/${id}`;
+
+        queue.push({ position: rawURLMatch.index || 0, rawURL, apiURL, metadataContent, type: 'gist' });
+    }
+
+    for (const preview of queue.sort((a, b) => a.position - b.position)) {
+        if (totalPreviewCount >= settings.data.preview.maximumFileCount) break;
+
+        await sendFilePreview(message, preview);
+        ++totalPreviewCount;
+    }
+
+    if (totalPreviewCount > 0) message.suppressEmbeds();
 }
 
 function binarySearchSupportedLanguages(value: string) {

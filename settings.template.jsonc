@@ -14,6 +14,10 @@
     "serverLogPaths": [],                       // paths to log files that are sent when /serverlogs is executed
     "randomCustomStatuses": [],                 // custom statuses that will be randomly chosen every day, which can be disabled by providing an empty array
     "guildID": "",                              // ID of the guild that the bot is in
+    "preview": {
+        "maximumJuxtaposeCount": 3,             // maximum number of juxtapose previews generated per message
+        "maximumFileCount": 5                   // maximum number of file previews generated from GitHub/Gist links per message
+    },
     "archive": {
         "categoryIDs": [],                      // categories which are used for archiving projects
         "minimumMessageCount": 40,              // a project will be eligible for archiving if less than minimumMessageCount (must be between 1 and 100) messages...
