@@ -61,7 +61,7 @@ export const event: Event = {
                 if (removedAttachments.size !== 0) {
                     if (removedAttachments.size > 1) {
                         content += `\n\n${removedAttachments.size} attachments have been removed. The removed attachments are attached above as the ${
-                            getNumberWithOrdinalSuffix(attachments.length + 1) + ' - ' + getNumberWithOrdinalSuffix(attachments.length + 1 + removedAttachments.size)
+                            getNumberWithOrdinalSuffix(attachments.length + 1) + ' - ' + getNumberWithOrdinalSuffix(attachments.length + removedAttachments.size)
                         } files.`;
                     } else {
                         content += `\n\nOne attachment has been removed. The removed attachment is attached above as the ${getNumberWithOrdinalSuffix(attachments.length + 1)} file.`;
@@ -74,7 +74,7 @@ export const event: Event = {
                 if (addedAttachments.size !== 0) {
                     if (addedAttachments.size > 1) {
                         content += `\n\n${addedAttachments.size} attachments have been added. The added attachments are attached above as the ${
-                            getNumberWithOrdinalSuffix(attachments.length + 1) + ' - ' + getNumberWithOrdinalSuffix(attachments.length + 1 + addedAttachments.size)
+                            getNumberWithOrdinalSuffix(attachments.length + 1) + ' - ' + getNumberWithOrdinalSuffix(attachments.length + addedAttachments.size)
                         } files.`;
                     } else {
                         content += `\n\nOne attachment has been added. The added attachment is attached above as the ${getNumberWithOrdinalSuffix(attachments.length + 1)} file.`;
@@ -89,7 +89,7 @@ export const event: Event = {
                 if (removedEmbeds.length !== 0) {
                     if (removedEmbeds.length > 1) {
                         content += `\n\n${removedEmbeds.length} embeds have been removed. The removed embeds are attached below as the ${
-                            getNumberWithOrdinalSuffix(embeds.length + 1) + ' - ' + getNumberWithOrdinalSuffix(embeds.length + 1 + removedEmbeds.length)
+                            getNumberWithOrdinalSuffix(embeds.length + 1) + ' - ' + getNumberWithOrdinalSuffix(embeds.length + removedEmbeds.length)
                         } embeds.`;
                     } else {
                         content += `\n\nOne embed has been removed. The removed embed is attached below as the ${getNumberWithOrdinalSuffix(embeds.length + 1)} embed.`;
@@ -102,7 +102,7 @@ export const event: Event = {
                 if (addedEmbeds.length !== 0) {
                     if (addedEmbeds.length > 1) {
                         content += `\n\n${addedEmbeds.length} embeds have been added. The added embeds are attached below as the ${
-                            getNumberWithOrdinalSuffix(embeds.length + 1) + ' - ' + getNumberWithOrdinalSuffix(embeds.length + 1 + addedEmbeds.length)
+                            getNumberWithOrdinalSuffix(embeds.length + 1) + ' - ' + getNumberWithOrdinalSuffix(embeds.length + addedEmbeds.length)
                         } embeds.`;
                     } else {
                         content += `\n\nOne embed has been added. The added embed is attached below as the ${getNumberWithOrdinalSuffix(embeds.length + 1)} embed.`;
