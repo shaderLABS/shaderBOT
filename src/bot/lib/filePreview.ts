@@ -119,7 +119,6 @@ async function sendFilePreview(message: GuildMessage, { rawURL, apiURL, metadata
         emoji: '🗑️',
     });
 
-    const buttonActionRow = new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] });
     fileExtension = additionalAliases[fileExtension] || fileExtension;
 
     let reply: Message;
@@ -127,7 +126,7 @@ async function sendFilePreview(message: GuildMessage, { rawURL, apiURL, metadata
         reply = await message.reply({
             content: metadataContent,
             files: [new AttachmentBuilder(Buffer.from(fileContent), { name: 'preview.' + (binarySearchSupportedLanguages(fileExtension) ? fileExtension : 'txt') })],
-            components: [buttonActionRow],
+            components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
         });
 
         // send as .txt if the original file extension isn't recognized
@@ -135,7 +134,10 @@ async function sendFilePreview(message: GuildMessage, { rawURL, apiURL, metadata
             reply.edit({ files: [new AttachmentBuilder(Buffer.from(fileContent), { name: 'preview.txt' })] });
         }
     } else {
-        reply = await message.reply({ content: metadataContent + '\n```' + fileExtension + '\n' + fileContent + '```', components: [buttonActionRow] });
+        reply = await message.reply({
+            content: metadataContent + '\n```' + fileExtension + '\n' + fileContent + '```',
+            components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
+        });
     }
 
     if (!reply.inGuild()) return;
@@ -151,12 +153,14 @@ async function sendFilePreview(message: GuildMessage, { rawURL, apiURL, metadata
             },
             time: 300_000, // 5min = 300,000ms
         })
-        .then(() => {
-            reply.delete().catch(() => undefined);
+        .then(async (buttonInteraction) => {
+            try {
+                await buttonInteraction.deferUpdate();
+                await buttonInteraction.deleteReply();
+            } catch {}
         })
         .catch(() => {
-            deleteButton.setDisabled(true);
-            reply.edit({ components: [buttonActionRow] }).catch(() => undefined);
+            reply.edit({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton] })] }).catch(() => undefined);
         });
 
     const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
