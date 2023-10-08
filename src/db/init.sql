@@ -110,6 +110,15 @@ CREATE TABLE "sticky_thread" (
     mod_id NUMERIC(20)
 );
 
+DROP TABLE IF EXISTS "expiring_juxtapose";
+CREATE TABLE "expiring_juxtapose" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    juxtapose_id UUID NOT NULL,
+    channel_id NUMERIC(20) NOT NULL,
+    message_id NUMERIC(20) NOT NULL,
+    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
 -- SESSION
 
 DROP TABLE IF EXISTS "session";

@@ -2,8 +2,9 @@ import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Channe
 import { client, settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { EmbedColor, replyError } from '../../../lib/embeds.js';
+import { ExpiringJuxtapose } from '../../../lib/juxtapose.js';
 import { renderJuxtaposePreview } from '../../../lib/juxtaposePreview.js';
-import { parseUser } from '../../../lib/misc.js';
+import { getExpireTimestampCDN, parseUser } from '../../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
@@ -71,17 +72,23 @@ export const command: ChatInputCommandCallback = {
             emoji: '🗑️',
         });
 
-        const buttonActionRow = new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] });
-
         const reply = await interaction.editReply({
-            components: [buttonActionRow],
-            files: [preview ? new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }) : leftImageAttachment],
+            components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
+            files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageAttachment, rightImageAttachment] : [leftImageAttachment, rightImageAttachment],
         });
+
+        const leftExpireTimestamp = getExpireTimestampCDN(leftImageAttachment.url);
+        const rightExpireTimestamp = getExpireTimestampCDN(rightImageAttachment.url);
+
+        if (leftExpireTimestamp || rightExpireTimestamp) {
+            ExpiringJuxtapose.create(data.uid, reply.channelId, reply.id, new Date(Math.min(leftExpireTimestamp ?? Infinity, rightExpireTimestamp ?? Infinity)));
+        }
 
         reply
             .awaitMessageComponent({
                 componentType: ComponentType.Button,
                 filter: (buttonInteraction) => {
+                    if (buttonInteraction.customId !== 'deleteJuxtapose') return false;
                     if (buttonInteraction.user.id === interaction.user.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return true;
 
                     replyError(buttonInteraction, undefined, 'Insufficient Permissions');
@@ -89,12 +96,14 @@ export const command: ChatInputCommandCallback = {
                 },
                 time: 300_000, // 5min = 300,000ms
             })
-            .then(() => {
-                reply.delete().catch(() => undefined);
+            .then(async (buttonInteraction) => {
+                try {
+                    await buttonInteraction.deferUpdate();
+                    await buttonInteraction.deleteReply();
+                } catch {}
             })
             .catch(() => {
-                deleteButton.setDisabled(true);
-                reply.edit({ components: [buttonActionRow] }).catch(() => undefined);
+                reply.edit({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton] })] }).catch(() => undefined);
             });
 
         const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);

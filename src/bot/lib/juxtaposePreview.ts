@@ -3,7 +3,8 @@ import sharp, { OverlayOptions } from 'sharp';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError } from './embeds.js';
-import { escapeXml, parseUser } from './misc.js';
+import { ExpiringJuxtapose } from './juxtapose.js';
+import { escapeXml, getExpireTimestampCDN, parseUser } from './misc.js';
 
 function createLabelBuffer(label: string, maxWidth: number) {
     const overlayFontAspectRatio = 0.55;
@@ -126,7 +127,10 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
 
             const data = await request.json();
 
-            const [leftImageRequest, rightImageRequest] = await Promise.all([fetch(data.images[0].src), fetch(data.images[1].src)]);
+            const leftImageURL: string = data.images[0].src;
+            const rightImageURL: string = data.images[1].src;
+
+            const [leftImageRequest, rightImageRequest] = await Promise.all([fetch(leftImageURL), fetch(rightImageURL)]);
             const preview = await renderJuxtaposePreview(
                 Buffer.from(await leftImageRequest.arrayBuffer()),
                 Buffer.from(await rightImageRequest.arrayBuffer()),
@@ -148,17 +152,23 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                 emoji: '🗑️',
             });
 
-            const buttonActionRow = new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] });
-
             const reply = await message.reply({
-                components: [buttonActionRow],
-                files: [preview ? new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }) : data.images[0].src],
+                components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
+                files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageURL, rightImageURL] : [leftImageURL, rightImageURL],
             });
+
+            const leftExpireTimestamp = getExpireTimestampCDN(leftImageURL);
+            const rightExpireTimestamp = getExpireTimestampCDN(rightImageURL);
+
+            if (leftExpireTimestamp || rightExpireTimestamp) {
+                ExpiringJuxtapose.create(uuid, reply.channelId, reply.id, new Date(Math.min(leftExpireTimestamp ?? Infinity, rightExpireTimestamp ?? Infinity)));
+            }
 
             reply
                 .awaitMessageComponent({
                     componentType: ComponentType.Button,
                     filter: (buttonInteraction) => {
+                        if (buttonInteraction.customId !== 'deleteJuxtapose') return false;
                         if (buttonInteraction.user.id === message.author.id || buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages)) return true;
 
                         replyError(buttonInteraction, undefined, 'Insufficient Permissions');
@@ -166,12 +176,14 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                     },
                     time: 300_000, // 5min = 300,000ms
                 })
-                .then(() => {
-                    reply.delete().catch(() => undefined);
+                .then(async (buttonInteraction) => {
+                    try {
+                        await buttonInteraction.deferUpdate();
+                        await buttonInteraction.deleteReply();
+                    } catch {}
                 })
                 .catch(() => {
-                    deleteButton.setDisabled(true);
-                    reply.edit({ components: [buttonActionRow] }).catch(() => undefined);
+                    reply.edit({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton] })] }).catch(() => undefined);
                 });
 
             const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);

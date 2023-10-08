@@ -117,6 +117,17 @@ export function getNumberWithOrdinalSuffix(n: number) {
     return n + (['st', 'nd', 'rd'][mod10 - 1] ?? 'th');
 }
 
+export function getExpireTimestampCDN(rawURL: string): number | null {
+    const url = new URL(rawURL);
+    const hexUnixTimestamp = url.searchParams.get('ex');
+    if (!hexUnixTimestamp) return null;
+
+    const unixTimestamp = parseInt(hexUnixTimestamp, 16);
+    if (isNaN(unixTimestamp)) return null;
+
+    return unixTimestamp * 1000;
+}
+
 export function similarityLevenshtein(s1: string, s2: string) {
     // normalization form compatibility decomposition
     let longer = s1.normalize('NFKD');
