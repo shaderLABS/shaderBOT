@@ -8,6 +8,7 @@
         "build": "npx tsc -b --verbose",
         "start": "node -r dotenv/config build/index.js",
         "update": "node -r dotenv/config build/update.js",
+        "migrate": "node -r dotenv/config build/migration/migrate.js",
         "dev": "tsc-watch --onSuccess \"node --trace-warnings -r dotenv/config build/index.js\""
     },
     "author": {

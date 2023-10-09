@@ -76,6 +76,30 @@ docker-compose up
 
 **IMPORTANT:** The Docker configuration is mostly untested, so you should expect issues when using it.
 
+### Uploading Command Structure
+
+You must upload the command structure to Discord in order to be able to view and use commands. You can do that by running the following command after building the application:
+
+```properties
+npm run update
+```
+
+## Updating the Application
+
+In order to update the application to the newest version, pull the latest changes from GitHub. After rebuilding the source code, you must restart the application for the changes to take effect.
+
+Be aware that new settings could have been added to the configuration file. The console output will inform you about any missing keys and the application will only start after they have been added.
+
+Additionally, [re-uploading the command structure](#Uploading-Command-Structure) may be neccessary if it has changed.
+
+### Applying Migrations
+
+After certain updates, the database tables and other dynamic content might have to be migrated before starting the application. If new migrations are available, you can see them in the console output while pulling from GitHub. You can apply all migrations that have not been applied so far by running the following command after building the application:
+
+```properties
+npm run migrate
+```
+
 ## Recommended Visual Studio Code Settings and Extensions
 
 ### Settings
