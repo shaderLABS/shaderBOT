@@ -1,20 +1,34 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, Message } from 'discord.js';
 import { db } from '../../db/postgres.js';
-import { client, timeoutStore } from '../bot.js';
-import { replyError } from './embeds.js';
-import { getExpireTimestampCDN } from './misc.js';
+import { client, settings, timeoutStore } from '../bot.js';
+import { EmbedColor } from './embeds.js';
+import { getExpireTimestampCDN, parseUser } from './misc.js';
 
-export async function handleJuxtaposeRefreshInteraction(interaction: ButtonInteraction<'cached'>) {
-    const uuid = interaction.customId.split(':')[1];
-    const message = interaction.message;
+type JuxtaposeData = {
+    images: [
+        {
+            src: string;
+            label: string | null;
+            credit: string;
+        },
+        {
+            src: string;
+            label: string | null;
+            credit: string;
+        }
+    ];
+    options: {
+        animate: boolean;
+        showLabels: boolean;
+        showCredits: boolean;
+        makeResponsive: boolean;
+        mode: 'horizontal' | 'vertical';
+        startingPosition: string;
+    };
+};
 
-    if (!message || message.attachments.size < 2) return;
-
-    let leftImageURL = message.attachments.at(-2)?.url;
-    let rightImageURL = message.attachments.at(-1)?.url;
-    if (!leftImageURL || !rightImageURL) return;
-
-    const oldDataRequest = await fetch(`https://s3.amazonaws.com/uploads.knightlab.com/juxtapose/${uuid}.json`, {
+export async function readJuxtapose(juxtaposeID: string): Promise<JuxtaposeData> {
+    const response = await fetch(`https://s3.amazonaws.com/uploads.knightlab.com/juxtapose/${juxtaposeID}.json`, {
         method: 'GET',
         headers: {
             DNT: '1',
@@ -23,12 +37,11 @@ export async function handleJuxtaposeRefreshInteraction(interaction: ButtonInter
         },
     });
 
-    let juxtaposeData = await oldDataRequest.json();
+    return await response.json();
+}
 
-    juxtaposeData.images[0].src = leftImageURL;
-    juxtaposeData.images[1].src = rightImageURL;
-
-    const refreshRequest = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
+async function createJuxtapose(leftImageURL: string, rightImageURL: string, leftLabel: string | null, rightLabel: string | null, isVertical: boolean): Promise<string> {
+    const response = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
         method: 'POST',
         headers: {
             DNT: '1',
@@ -36,36 +49,93 @@ export async function handleJuxtaposeRefreshInteraction(interaction: ButtonInter
             'Content-Type': 'application/json',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
         },
-        body: JSON.stringify(juxtaposeData),
+        body: JSON.stringify({
+            images: [
+                { src: leftImageURL, label: leftLabel, credit: '' },
+                { src: rightImageURL, label: rightLabel, credit: '' },
+            ],
+            options: { animate: true, showLabels: true, showCredits: false, makeResponsive: true, mode: isVertical ? 'vertical' : 'horizontal', startingPosition: '50' },
+        } satisfies JuxtaposeData),
     });
 
-    if (refreshRequest.status !== 200) {
-        replyError(interaction, 'The API request failed with code ' + refreshRequest.status + '.');
+    if (response.status !== 200) return Promise.reject('The API request failed with code ' + response.status + '.');
+    const data = await response.json();
+
+    if (data.error) {
+        return Promise.reject(data.error);
     }
 
-    const refreshData = await refreshRequest.json();
+    return data.uid;
+}
 
-    if (refreshData.error) {
-        replyError(interaction, refreshData.error);
-        return;
-    }
+export async function createJuxtaposeFromReply(message: Message, leftLabel: string | null, rightLabel: string | null, isVertical: boolean) {
+    if (message.attachments.size < 2) return Promise.reject('The message does not have enough attachments to create a juxtapose.');
 
-    const juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + refreshData.uid;
+    let leftImageURL = message.attachments.at(-2)?.url;
+    let rightImageURL = message.attachments.at(-1)?.url;
+    if (!leftImageURL || !rightImageURL) return Promise.reject('Failed to retrieve at least one image URL for juxtapose.');
 
-    const openButton = new ButtonBuilder({
-        url: juxtaposeURL,
-        style: ButtonStyle.Link,
-        emoji: '🔗',
-        label: 'Open',
-    });
-
-    interaction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton] })] });
+    const juxtaposeID = await createJuxtapose(leftImageURL, rightImageURL, leftLabel, rightLabel, isVertical);
 
     const leftExpireTimestamp = getExpireTimestampCDN(leftImageURL);
     const rightExpireTimestamp = getExpireTimestampCDN(rightImageURL);
 
-    if (leftExpireTimestamp && rightExpireTimestamp) {
-        ExpiringJuxtapose.create(uuid, message.channel.id, message.id, new Date(Math.min(leftExpireTimestamp, rightExpireTimestamp)));
+    if (leftExpireTimestamp || rightExpireTimestamp) {
+        ExpiringJuxtapose.create(juxtaposeID, message.channelId, message.id, new Date(Math.min(leftExpireTimestamp ?? Infinity, rightExpireTimestamp ?? Infinity)));
+    }
+
+    return juxtaposeID;
+}
+
+export async function createJuxtaposeFromURLs(message: Message, leftImageURL: string, rightImageURL: string, leftLabel: string | null, rightLabel: string | null, isVertical: boolean) {
+    if (getExpireTimestampCDN(leftImageURL) || getExpireTimestampCDN(rightImageURL)) {
+        return await createJuxtaposeFromReply(message, leftLabel, rightLabel, isVertical);
+    } else {
+        return await createJuxtapose(leftImageURL, rightImageURL, leftLabel, rightLabel, isVertical);
+    }
+}
+
+export async function handleJuxtaposeRefreshInteraction(interaction: ButtonInteraction<'cached'>) {
+    const oldJuxtaposeID = interaction.customId.split(':')[1];
+
+    try {
+        const oldJuxtaposeData = await readJuxtapose(oldJuxtaposeID);
+
+        const juxtaposeID = await createJuxtaposeFromReply(interaction.message, oldJuxtaposeData.images[0].label, oldJuxtaposeData.images[1].label, oldJuxtaposeData.options.mode === 'vertical');
+        if (!juxtaposeID) return;
+
+        const juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + juxtaposeID;
+
+        const openButton = new ButtonBuilder({
+            url: juxtaposeURL,
+            style: ButtonStyle.Link,
+            emoji: '🔗',
+            label: 'Open',
+        });
+
+        await interaction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton] })] });
+
+        const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
+        if (logChannel?.type === ChannelType.GuildText) {
+            logChannel.send({
+                embeds: [
+                    new EmbedBuilder({
+                        color: EmbedColor.Blue,
+                        author: {
+                            name: 'Refresh Juxtapose',
+                            iconURL: interaction.user.displayAvatarURL(),
+                            url: interaction.message.url,
+                        },
+                        description: `${parseUser(interaction.user)} refreshed the [juxtapose](${juxtaposeURL}) of [this message](${interaction.message.url}).`,
+                        footer: {
+                            text: `ID: ${interaction.message.id}`,
+                        },
+                    }),
+                ],
+            });
+        }
+    } catch {
+        console.error(`Failed to refresh juxtapose with UUID ${oldJuxtaposeID}.`);
     }
 }
 

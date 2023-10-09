@@ -2,9 +2,9 @@ import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, Channe
 import { client, settings } from '../../../bot.js';
 import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
 import { EmbedColor, replyError } from '../../../lib/embeds.js';
-import { ExpiringJuxtapose } from '../../../lib/juxtapose.js';
+import { createJuxtaposeFromReply } from '../../../lib/juxtapose.js';
 import { renderJuxtaposePreview } from '../../../lib/juxtaposePreview.js';
-import { getExpireTimestampCDN, parseUser } from '../../../lib/misc.js';
+import { parseUser } from '../../../lib/misc.js';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
@@ -31,33 +31,14 @@ export const command: ChatInputCommandCallback = {
             return;
         }
 
-        const response = await fetch('https://juxtapose.knightlab.com/juxtapose/create/', {
-            method: 'POST',
-            headers: {
-                DNT: '1',
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-            },
-            body: JSON.stringify({
-                images: [
-                    { src: leftImageAttachment.url, label: leftLabel, credit: '' },
-                    { src: rightImageAttachment.url, label: rightLabel, credit: '' },
-                ],
-                options: { animate: true, showLabels: true, showCredits: false, makeResponsive: true, mode: isVertical ? 'vertical' : 'horizontal', startingPosition: '50' },
-            }),
+        const preview = await previewPromise.catch(() => undefined);
+
+        const reply = await interaction.editReply({
+            files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageAttachment, rightImageAttachment] : [leftImageAttachment, rightImageAttachment],
         });
 
-        if (response.status !== 200) throw 'The API request failed with code ' + response.status + '.';
-        const data = await response.json();
-
-        if (data.error) {
-            replyError(interaction, data.error);
-            return;
-        }
-
-        const juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + data.uid;
-        const preview = await previewPromise.catch(() => undefined);
+        const juxtaposeID = await createJuxtaposeFromReply(reply, leftLabel, rightLabel, isVertical);
+        const juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + juxtaposeID;
 
         const openButton = new ButtonBuilder({
             url: juxtaposeURL,
@@ -72,17 +53,9 @@ export const command: ChatInputCommandCallback = {
             emoji: '🗑️',
         });
 
-        const reply = await interaction.editReply({
+        await interaction.editReply({
             components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
-            files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageAttachment, rightImageAttachment] : [leftImageAttachment, rightImageAttachment],
         });
-
-        const leftExpireTimestamp = getExpireTimestampCDN(leftImageAttachment.url);
-        const rightExpireTimestamp = getExpireTimestampCDN(rightImageAttachment.url);
-
-        if (leftExpireTimestamp || rightExpireTimestamp) {
-            ExpiringJuxtapose.create(data.uid, reply.channelId, reply.id, new Date(Math.min(leftExpireTimestamp ?? Infinity, rightExpireTimestamp ?? Infinity)));
-        }
 
         reply
             .awaitMessageComponent({

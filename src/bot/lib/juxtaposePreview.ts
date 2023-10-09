@@ -3,7 +3,7 @@ import sharp, { OverlayOptions } from 'sharp';
 import { client, settings } from '../bot.js';
 import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError } from './embeds.js';
-import { ExpiringJuxtapose } from './juxtapose.js';
+import { createJuxtaposeFromReply, readJuxtapose } from './juxtapose.js';
 import { escapeXml, getExpireTimestampCDN, parseUser } from './misc.js';
 
 function createLabelBuffer(label: string, maxWidth: number) {
@@ -43,7 +43,7 @@ export async function renderJuxtaposePreview(
     const previewRightOriginalHeight = previewRightOriginalMetadata.height || 0;
 
     if (isVertical) {
-        const previewWidth = 960;
+        const previewWidth = Math.max(Math.min(previewOriginalWidth, 1920), 960);
         const previewHeight = Math.floor((previewOriginalHeight / previewOriginalWidth) * previewWidth);
         const previewRightHeight = Math.floor((previewRightOriginalHeight / previewRightOriginalWidth) * previewWidth);
 
@@ -72,7 +72,7 @@ export async function renderJuxtaposePreview(
 
         previewLeftSharp.composite([{ input: await previewRightSharp.toBuffer(), gravity: sharp.gravity.south }, ...labelOverlays]);
     } else {
-        const previewHeight = 540;
+        const previewHeight = Math.max(Math.min(previewOriginalHeight, 1080), 540);
         const previewWidth = Math.floor((previewOriginalWidth / previewOriginalHeight) * previewHeight);
         const previewRightWidth = Math.floor((previewRightOriginalWidth / previewRightOriginalHeight) * previewHeight);
 
@@ -113,19 +113,10 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
     for (const match of message.content.matchAll(juxtaposeURLs)) {
         if (totalPreviewCount >= settings.data.preview.maximumJuxtaposeCount) break;
 
-        const [juxtaposeURL, uuid] = match;
+        let [juxtaposeURL, juxtaposeID] = match;
 
         try {
-            const request = await fetch(`https://s3.amazonaws.com/uploads.knightlab.com/juxtapose/${uuid}.json`, {
-                method: 'GET',
-                headers: {
-                    DNT: '1',
-                    Accept: 'application/json',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
-                },
-            });
-
-            const data = await request.json();
+            const data = await readJuxtapose(juxtaposeID);
 
             const leftImageURL: string = data.images[0].src;
             const rightImageURL: string = data.images[1].src;
@@ -138,6 +129,15 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                 data.images[0].label,
                 data.images[1].label
             ).catch(() => undefined);
+
+            const reply = await message.reply({
+                files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageURL, rightImageURL] : [leftImageURL, rightImageURL],
+            });
+
+            if (getExpireTimestampCDN(leftImageURL) || getExpireTimestampCDN(rightImageURL)) {
+                juxtaposeID = await createJuxtaposeFromReply(reply, data.images[0].label, data.images[1].label, data.options.mode === 'vertical');
+                juxtaposeURL = 'https://cdn.knightlab.com/libs/juxtapose/latest/embed/index.html?uid=' + juxtaposeID;
+            }
 
             const openButton = new ButtonBuilder({
                 url: juxtaposeURL,
@@ -152,17 +152,7 @@ export async function checkJuxtaposePreview(message: GuildMessage) {
                 emoji: '🗑️',
             });
 
-            const reply = await message.reply({
-                components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })],
-                files: preview ? [new AttachmentBuilder(preview.data, { name: 'preview.' + preview.info.format }), leftImageURL, rightImageURL] : [leftImageURL, rightImageURL],
-            });
-
-            const leftExpireTimestamp = getExpireTimestampCDN(leftImageURL);
-            const rightExpireTimestamp = getExpireTimestampCDN(rightImageURL);
-
-            if (leftExpireTimestamp || rightExpireTimestamp) {
-                ExpiringJuxtapose.create(uuid, reply.channelId, reply.id, new Date(Math.min(leftExpireTimestamp ?? Infinity, rightExpireTimestamp ?? Infinity)));
-            }
+            await reply.edit({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [openButton, deleteButton] })] });
 
             reply
                 .awaitMessageComponent({
