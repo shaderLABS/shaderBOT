@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from 'node:timers/promises';
 import pg from 'pg';
-import { shutdown } from '../index.js';
+import { shutdown } from '../bot/lib/misc.js';
 
 export const db = new pg.Pool({
     user: process.env.PG_USER || 'postgres',

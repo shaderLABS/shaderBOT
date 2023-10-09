@@ -68,6 +68,19 @@ export class Project {
         });
     }
 
+    public static async bannerMessageToCDNURL(channelID: string, messageID: string) {
+        const channel = client.channels.cache.get(channelID);
+        if (!channel || !channel.isTextBased()) return Promise.reject('The specified channel does not exist.');
+
+        const message = await channel.messages.fetch({ message: messageID, force: true }).catch(() => undefined);
+        if (!message) return Promise.reject('The specified message does not exist.');
+
+        const imageURL = message.embeds[0]?.image?.url;
+        if (!imageURL) return Promise.reject('The specified message does not have embedded banner image.');
+
+        return imageURL;
+    }
+
     public static async create(channel: TextChannel, moderatorID: string) {
         if (Project.isChannelArchived(channel)) return Promise.reject('The specified channel is archived.');
         if (await Project.isProjectChannel(channel.id)) return Promise.reject('The specified channel is already linked to a project.');
@@ -133,8 +146,8 @@ export class Project {
         return { secret, endpoint };
     }
 
-    public async setBannerURL(bannerURL: string, ownerID: string) {
-        const result = await db.query({ text: /*sql*/ `UPDATE project SET banner_url = $1 WHERE id = $2;`, values: [bannerURL, this.id], name: 'project-set-banner-url' });
+    public async setBannerMessageID(messageID: string, ownerID: string) {
+        const result = await db.query({ text: /*sql*/ `UPDATE project SET banner_message_id = $1 WHERE id = $2;`, values: [messageID, this.id], name: 'project-set-banner-message-id' });
         if (result.rowCount === 0) return Promise.reject('Failed to set the banner URL.');
 
         const logString = `${parseUser(ownerID)} set the banner image of their project <#${this.channelID}> (${this.id}).`;
@@ -143,14 +156,18 @@ export class Project {
             new EmbedBuilder({
                 title: 'Set Project Banner',
                 description: logString,
-                image: { url: bannerURL },
+                image: { url: await Project.bannerMessageToCDNURL(this.channelID, messageID) },
             })
         );
         return logString;
     }
 
-    public async removeBannerURL(ownerID: string) {
-        const result = await db.query({ text: /*sql*/ `UPDATE project SET banner_url = NULL WHERE id = $1 AND banner_url IS NOT NULL;`, values: [this.id], name: 'project-remove-banner-url' });
+    public async removeBannerMessageID(ownerID: string) {
+        const result = await db.query({
+            text: /*sql*/ `UPDATE project SET banner_message_id = NULL WHERE id = $1 AND banner_message_id IS NOT NULL;`,
+            values: [this.id],
+            name: 'project-remove-banner-message-id',
+        });
         if (result.rowCount === 0) return Promise.reject('There is no banner image set.');
 
         const logString = `${parseUser(ownerID)} removed the banner image from their project <#${this.channelID}> (${this.id}).`;
@@ -162,16 +179,17 @@ export class Project {
     public async getBannerInformation() {
         const result = await db.query({
             text: /*sql*/ `
-                SELECT banner_url, banner_last_timestamp
+                SELECT banner_message_id, banner_last_timestamp
                 FROM project
-                WHERE id = $1 AND banner_url IS NOT NULL;`,
+                WHERE id = $1 AND banner_message_id IS NOT NULL;`,
             values: [this.id],
             name: 'project-get-current-banner',
         });
 
         if (result.rowCount === 0) return Promise.reject('There is no banner image set.');
 
-        const { banner_url, banner_last_timestamp }: { banner_url: string; banner_last_timestamp?: string } = result.rows[0];
+        const { banner_message_id, banner_last_timestamp }: { banner_message_id: string; banner_last_timestamp?: string } = result.rows[0];
+        const bannerURL = await Project.bannerMessageToCDNURL(this.channelID, banner_message_id);
 
         if (banner_last_timestamp) {
             const lastTimestamp = new Date(banner_last_timestamp);
@@ -180,7 +198,7 @@ export class Project {
                 text: /*sql*/ `
                     SELECT COUNT(*)
                     FROM project
-                    WHERE banner_url IS NOT NULL AND role_id IS NOT NULL AND (banner_last_timestamp IS NULL OR banner_last_timestamp < $1::TIMESTAMP);`,
+                    WHERE banner_message_id IS NOT NULL AND role_id IS NOT NULL AND (banner_last_timestamp IS NULL OR banner_last_timestamp < $1::TIMESTAMP);`,
                 values: [lastTimestamp],
                 name: 'project-count-following-banners',
             });
@@ -193,7 +211,7 @@ export class Project {
             return {
                 lastTimestamp,
                 nextTimestamp,
-                bannerURL: banner_url,
+                bannerURL,
             };
         } else {
             const nextTimestamp = new Date();
@@ -202,7 +220,7 @@ export class Project {
             return {
                 lastTimestamp: null,
                 nextTimestamp,
-                bannerURL: banner_url,
+                bannerURL,
             };
         }
     }

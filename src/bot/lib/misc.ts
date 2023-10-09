@@ -1,4 +1,5 @@
 import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, UserResolvable } from 'discord.js';
+import { db } from '../../db/postgres.js';
 import { client, settings } from '../bot.js';
 
 // https://www.unicode.org/reports/tr18/#Line_Boundaries
@@ -14,6 +15,13 @@ export function getGuild() {
     if (!guild) throw 'The specified guild does not exist.';
 
     return guild;
+}
+
+export function shutdown(code: number = 0) {
+    console.log('Shutting down...');
+    db.end().catch(() => undefined);
+    client?.destroy();
+    process.exit(code);
 }
 
 export function userToMember(userResolvable: UserResolvable, guild: Guild = getGuild()) {

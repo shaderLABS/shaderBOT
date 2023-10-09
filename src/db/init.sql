@@ -11,7 +11,7 @@ CREATE TABLE "project" (
     channel_id NUMERIC(20) UNIQUE NOT NULL,
     owners NUMERIC(20)[] NOT NULL,
     role_id NUMERIC(20) UNIQUE,
-    banner_url TEXT,
+    banner_message_id TEXT,
     banner_last_timestamp TIMESTAMP WITH TIME ZONE,
     webhook_secret BYTEA UNIQUE
 );

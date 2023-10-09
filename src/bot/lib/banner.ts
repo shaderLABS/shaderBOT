@@ -1,38 +1,46 @@
-import { GuildPremiumTier } from 'discord.js';
+import { GuildPremiumTier, messageLink } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import log from './log.js';
 import { getGuild } from './misc.js';
+import { Project } from './project.js';
 
 export async function rotateBanner() {
     const guild = getGuild();
     if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return;
 
-    const projects = (
+    const rawProjects: {
+        id: string;
+        banner_message_id: string;
+        channel_id: string;
+    }[] = (
         await db.query({
             text: /*sql*/ `
-            	SELECT id, banner_url, channel_id
+            	SELECT id, banner_message_id, channel_id
             	FROM project
-            	WHERE banner_url IS NOT NULL AND role_id IS NOT NULL
+            	WHERE banner_message_id IS NOT NULL AND role_id IS NOT NULL
             	ORDER BY banner_last_timestamp ASC NULLS FIRST;`,
             name: 'project-rotate-banner-list',
         })
     ).rows;
 
-    for (const project of projects) {
+    for (const rawProject of rawProjects) {
         try {
-            await guild.setBanner(project.banner_url);
+            const bannerURL = await Project.bannerMessageToCDNURL(rawProject.channel_id, rawProject.banner_message_id);
+
+            await guild.setBanner(bannerURL);
             await db.query({
                 text: /*sql*/ `
                     UPDATE project
                     SET banner_last_timestamp = NOW()
                     WHERE id = $1;`,
-                values: [project.id],
+                values: [rawProject.id],
                 name: 'project-rotate-banner-set',
             });
 
             break;
         } catch {
-            log(`Failed to rotate banner to ${project.banner_url} by <#${project.channel_id}>. Skipping...`);
+            const bannerMessageURL = messageLink(rawProject.channel_id, rawProject.banner_message_id, guild.id);
+            log(`Failed to rotate banner to [this image](${bannerMessageURL}) by <#${rawProject.channel_id}> (${rawProject.id}). Skipping...`, 'Rotate Project Banner');
         }
     }
 }
