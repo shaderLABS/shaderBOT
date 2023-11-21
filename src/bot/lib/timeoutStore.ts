@@ -1,5 +1,4 @@
 import { client } from '../bot.js';
-import { ExpiringJuxtapose } from './juxtapose.js';
 import { LockSlowmode } from './lockSlowmode.js';
 import { Punishment } from './punishment.js';
 
@@ -10,9 +9,7 @@ export class TimeoutStore {
     private locks = new Map<string, NodeJS.Timeout>();
     private slowmodes = new Map<string, NodeJS.Timeout>();
 
-    private juxtaposes = new Map<string, NodeJS.Timeout>();
-
-    public set(entry: Punishment | LockSlowmode | ExpiringJuxtapose, onlyExpiringToday: boolean) {
+    public set(entry: Punishment | LockSlowmode, onlyExpiringToday: boolean) {
         if (!entry.expireTimestamp || (onlyExpiringToday && entry.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;
 
         if (entry instanceof Punishment) {
@@ -49,19 +46,10 @@ export class TimeoutStore {
                 if (previousTimeout) clearTimeout(previousTimeout);
                 this.slowmodes.set(entry.channelID, timeout);
             }
-        } else if (entry instanceof ExpiringJuxtapose) {
-            const timeout = setTimeout(async () => {
-                entry.expire();
-                this.juxtaposes.delete(entry.id);
-            }, entry.expireTimestamp.getTime() - Date.now());
-
-            const previousTimeout = this.juxtaposes.get(entry.id);
-            if (previousTimeout) clearTimeout(previousTimeout);
-            this.juxtaposes.set(entry.id, timeout);
         }
     }
 
-    public delete(entry: Punishment | LockSlowmode | ExpiringJuxtapose) {
+    public delete(entry: Punishment | LockSlowmode) {
         if (entry instanceof Punishment) {
             if (entry.type === 'ban') {
                 const timeout = this.bans.get(entry.userID);
@@ -90,12 +78,6 @@ export class TimeoutStore {
                     this.slowmodes.delete(entry.channelID);
                 }
             }
-        } else if (entry instanceof ExpiringJuxtapose) {
-            const timeout = this.juxtaposes.get(entry.id);
-            if (timeout) {
-                clearTimeout(timeout);
-                this.juxtaposes.delete(entry.id);
-            }
         }
     }
 
@@ -109,9 +91,5 @@ export class TimeoutStore {
         console.log('Loading expiring locks and slowmodes...');
         const expiringLockSlowmodes = includeTomorrow ? LockSlowmode.getExpiringTomorrow() : LockSlowmode.getExpiringToday();
         expiringLockSlowmodes.then((lockSlowmodes) => lockSlowmodes.forEach((lockSlowmode) => this.set(lockSlowmode, false)));
-
-        console.log('Loading expiring juxtaposes...');
-        const expiringJuxtaposes = includeTomorrow ? ExpiringJuxtapose.getExpiringTomorrow() : ExpiringJuxtapose.getExpiringToday();
-        expiringJuxtaposes.then((juxtaposes) => juxtaposes.forEach((juxtapose) => this.set(juxtapose, false)));
     }
 }

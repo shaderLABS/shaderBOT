@@ -10,11 +10,24 @@ function applyMigration(filename: string) {
 
 await connectPostgreSQL();
 
+// DEPRECATED BY 2023-11-22 - HAS BEEN REVERTED
 // 2023-10-08
+// {
+//     const MIGRATION_NAME = '2023-10-08';
+//     const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.tables WHERE table_name = 'expiring_juxtapose';`);
+//     if (result.rowCount === 0) {
+//         console.log(`Applying migration ${MIGRATION_NAME}...`);
+//         applyMigration(MIGRATION_NAME);
+//     } else {
+//         console.log(`Migration ${MIGRATION_NAME} has already been applied.`);
+//     }
+// }
+
+// 2023-10-09
 {
-    const MIGRATION_NAME = '2023-10-08';
-    const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.tables WHERE table_name = 'expiring_juxtapose';`);
-    if (result.rowCount === 0) {
+    const MIGRATION_NAME = '2023-10-09';
+    const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.columns WHERE table_name = 'project' AND column_name = 'banner_url';`);
+    if (result.rowCount > 0) {
         console.log(`Applying migration ${MIGRATION_NAME}...`);
         applyMigration(MIGRATION_NAME);
     } else {
@@ -22,11 +35,11 @@ await connectPostgreSQL();
     }
 }
 
-// 2023-10-09
+// 2023-11-22
 {
-    const MIGRATION_NAME = '2023-10-09';
-    const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.columns WHERE table_name = 'project' AND column_name = 'banner_url';`);
-    if (result.rowCount > 0) {
+    const MIGRATION_NAME = '2023-11-22';
+    const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.tables WHERE table_name = 'expiring_juxtapose';`);
+    if (result.rowCount !== 0) {
         console.log(`Applying migration ${MIGRATION_NAME}...`);
         applyMigration(MIGRATION_NAME);
     } else {

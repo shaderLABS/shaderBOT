@@ -44,10 +44,6 @@ export type BotSettings = {
     serverLogPaths: string[];
     randomCustomStatuses: string[];
     guildID: Snowflake;
-    preview: {
-        maximumJuxtaposeCount: number;
-        maximumFileCount: number;
-    };
     archive: {
         categoryIDs: Snowflake[];
         minimumMessageCount: number;

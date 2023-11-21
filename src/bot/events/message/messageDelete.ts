@@ -2,7 +2,6 @@ import { Attachment, ChannelType, EmbedBuilder, Events, Message, PartialMessage 
 import { client, settings } from '../../bot.js';
 import { Event } from '../../eventHandler.js';
 import { EmbedColor } from '../../lib/embeds.js';
-import { ExpiringJuxtapose } from '../../lib/juxtapose.js';
 import { getMaximumUploadBytes, parseUser, trimString } from '../../lib/misc.js';
 import { formatLongTimeDate } from '../../lib/time.js';
 
@@ -11,14 +10,7 @@ export const event: Event = {
     callback: (message) => {
         const { channel } = message;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && !channel.isThread()) return;
-
         if (message.partial || !message.author.bot) logDeletedMessage(message);
-
-        if (message.partial || message.author.id === client.user?.id) {
-            ExpiringJuxtapose.getByChannelMessageID(message.channelId, message.id)
-                .then((juxtapose) => juxtapose.delete())
-                .catch(() => undefined);
-        }
     },
 };
 
