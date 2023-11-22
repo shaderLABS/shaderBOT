@@ -1,5 +1,5 @@
 import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { Backup } from '../../lib/backup';
+import { Backup } from '../../lib/backup.js';
 
 export default {
     name: 'backup',
