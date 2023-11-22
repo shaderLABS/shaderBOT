@@ -1,5 +1,5 @@
 import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
-import { Project } from '../../lib/project';
+import { Project } from '../../lib/project.js';
 
 export default {
     name: 'subscribe',
