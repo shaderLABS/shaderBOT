@@ -27,7 +27,7 @@ await connectPostgreSQL();
 {
     const MIGRATION_NAME = '2023-10-09';
     const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.columns WHERE table_name = 'project' AND column_name = 'banner_url';`);
-    if (result.rowCount > 0) {
+    if (result.rowCount !== 0) {
         console.log(`Applying migration ${MIGRATION_NAME}...`);
         applyMigration(MIGRATION_NAME);
     } else {

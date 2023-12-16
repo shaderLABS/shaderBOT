@@ -38,7 +38,8 @@ export async function rotateBanner() {
             });
 
             break;
-        } catch {
+        } catch (error) {
+            console.error(error);
             const bannerMessageURL = messageLink(rawProject.channel_id, rawProject.banner_message_id, guild.id);
             log(`Failed to rotate banner to [this image](${bannerMessageURL}) by <#${rawProject.channel_id}> (${rawProject.id}). Skipping...`, 'Rotate Project Banner');
         }
