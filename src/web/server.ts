@@ -13,9 +13,6 @@ import { DiscordPassportStrategy } from './strategies/discord.js';
 import { releaseNotification, verifySignature } from './webhook.js';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
-const PORT = Number(process.env.PORT) || 3001;
-
-const app = polka();
 
 type AddRawBody<T> = T & { rawBody?: Buffer };
 function hasRawBody<T>(record: AddRawBody<T>): record is NonNullableProperty<AddRawBody<T>, 'rawBody'> {
@@ -25,11 +22,12 @@ function hasRawBody<T>(record: AddRawBody<T>): record is NonNullableProperty<Add
 export function startWebserver() {
     if (process.env.BOT_ONLY === 'true') return;
 
+    const app = polka();
+    const pg_store = store(session);
+
     /**************
      * MIDDLEWARE *
      **************/
-
-    const pg_store = store(session);
 
     app.use(
         cors({
@@ -219,5 +217,10 @@ export function startWebserver() {
      * START *
      *********/
 
-    app.listen(PORT, () => console.log(`Started REST API on port ${PORT}.`));
+    if (process.env.IPC_PATH) {
+        app.listen({ path: process.env.IPC_PATH }, () => console.log(`Started REST API on UNIX socket "${process.env.IPC_PATH}".`));
+    } else {
+        const port = Number(process.env.PORT) || 3001;
+        app.listen({ port }, () => console.log(`Started REST API on port ${port}.`));
+    }
 }

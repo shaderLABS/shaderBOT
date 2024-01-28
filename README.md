@@ -38,6 +38,7 @@ Environment variables are read from `.env` and specifiy sensitive information li
 | `SESSION_SECRET`            |     NONE     | The secret key used for signing session cookies. It is required if `BOT_ONLY` is not set to `true`.                                                  |
 | `NODE_ENV`                  | `production` | The environment this is being run in. Can be either `development` or `production` and should always be set accordingly.                              |
 | `PORT`                      |    `3001`    | The port that the REST API will run on.                                                                                                              |
+| `IPC_PATH`                  |     NONE     | The IPC (e.g. UNIX sockets) path that the REST API will run on. Takes precedence over `PORT` if specified.                                           |
 | `DOMAIN`                    | `localhost`  | The domain that the REST API will run on.                                                                                                            |
 | `BOT_ONLY`                  |   `false`    | Run the server in bot-only mode, which disables the Polka server (REST API).                                                                         |
 | `PG_USER`                   |  `postgres`  | The name used for accessing the PostgreSQL database.                                                                                                 |
