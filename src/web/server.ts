@@ -2,6 +2,7 @@ import bodyParser from 'body-parser';
 import store from 'connect-pg-simple';
 import cors from 'cors';
 import session from 'express-session';
+import fssync from 'fs';
 import { IncomingMessage } from 'node:http';
 import passport from 'passport';
 import polka from 'polka';
@@ -218,7 +219,22 @@ export function startWebserver() {
      *********/
 
     if (process.env.IPC_PATH) {
-        app.listen({ path: process.env.IPC_PATH }, () => console.log(`Started REST API on UNIX socket "${process.env.IPC_PATH}".`));
+        const path = process.env.IPC_PATH;
+        const previousFile = fssync.statSync(path, { throwIfNoEntry: false });
+
+        if (previousFile) {
+            if (previousFile.isSocket()) {
+                fssync.unlinkSync(path);
+                console.log(`Removed previous UNIX socket "${path}".`);
+            } else {
+                throw new Error(`File "${path}" already exists and is not a socket.`);
+            }
+        }
+
+        app.listen({ path }, () => {
+            fssync.chmodSync(path, 0o660);
+            console.log(`Started REST API on UNIX socket "${path}".`);
+        });
     } else {
         const port = Number(process.env.PORT) || 3001;
         app.listen({ port }, () => console.log(`Started REST API on port ${port}.`));
