@@ -29,31 +29,31 @@ There is a template configuration in [`settings.template.jsonc`](settings.templa
 
 Environment variables are read from `.env` and specifiy sensitive information like private keys that shouldn't ever be publicly visible.
 
-| Name                        |        Default        | Description                                                                                                                                          |
-| --------------------------- | :-------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `TOKEN`                     |         NONE          | The token which you can find under the "Bot" tab of your [Discord application](https://discord.com/developers/applications).                         |
-| `APPLICATION_CLIENT_ID`     |         NONE          | The client ID which you can find under the "General Information" tab of your [Discord application](https://discord.com/developers/applications).     |
-| `APPLICATION_CLIENT_SECRET` |         NONE          | The client secret which you can find under the "General Information" tab of your [Discord application](https://discord.com/developers/applications). |
-| `BACKUP_ENCRYPTION_KEY`     |         NONE          | The key used for encrypting and decrypting channel backups. It must be 256 bits (32 characters) long.                                                |
-| `SESSION_SECRET`            |         NONE          | The secret key used for signing session cookies. It is required if `BOT_ONLY` is not set to `true`.                                                  |
-| `NODE_ENV`                  |     `production`      | The environment this is being run in. Can be either `development` or `production` and should always be set accordingly.                              |
-| `PORT`                      |        `3001`         | The port that the HTTP API will run on.                                                                                                              |
-| `UDS_PATH`                  |         NONE          | The UNIX domain socket that the HTTP API will run on. Takes precedence over `PORT` if specified.                                                     |
-| `UDS_UID`                   | Effective Process UID | The UID of the user that will own the UNIX domain socket file.                                                                                       |
-| `UDS_GID`                   | Effective Process GID | The GID of the group that will own the UNIX domain socket file.                                                                                      |
-| `DOMAIN`                    |      `localhost`      | The domain that the HTTP API will run on.                                                                                                            |
-| `BOT_ONLY`                  |        `false`        | Run the server in bot-only mode, which disables the Polka server (HTTP API).                                                                         |
-| `PG_USER`                   |      `postgres`       | The name used for accessing the PostgreSQL database.                                                                                                 |
-| `PG_PASSWORD`               |      `postgres`       | The password used for accessing the PostgreSQL database.                                                                                             |
-| `PG_HOST`                   |      `localhost`      | The hostname used for connecting to the PostgreSQL server.                                                                                           |
-| `PG_PORT`                   |        `5432`         | The port which the PostgreSQL server is running on.                                                                                                  |
-| `PG_DATABASE`               |      `shaderBOT`      | The name of the PostgreSQL database which is **already populated** using the [`init.sql`](src/db/init.sql) file.                                     |
+| Name                        |   Default    | Description                                                                                                                                          |
+| --------------------------- | :----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `TOKEN`                     |     NONE     | The token which you can find under the "Bot" tab of your [Discord application](https://discord.com/developers/applications).                         |
+| `APPLICATION_CLIENT_ID`     |     NONE     | The client ID which you can find under the "General Information" tab of your [Discord application](https://discord.com/developers/applications).     |
+| `APPLICATION_CLIENT_SECRET` |     NONE     | The client secret which you can find under the "General Information" tab of your [Discord application](https://discord.com/developers/applications). |
+| `BACKUP_ENCRYPTION_KEY`     |     NONE     | The key used for encrypting and decrypting channel backups. It must be 256 bits (32 characters) long.                                                |
+| `SESSION_SECRET`            |     NONE     | The secret key used for signing session cookies. It is required if `BOT_ONLY` is not set to `true`.                                                  |
+| `NODE_ENV`                  | `production` | The environment this is being run in. Can be either `development` or `production` and should always be set accordingly.                              |
+| `PORT`                      |    `3001`    | The port that the HTTP API will run on.                                                                                                              |
+| `UDS_PATH`                  |     NONE     | The UNIX domain socket that the HTTP API will run on. Takes precedence over `PORT` if specified.                                                     |
+| `UDS_UID`                   |     NONE     | The UID of the user that will own the UNIX domain socket file.                                                                                       |
+| `UDS_GID`                   |     NONE     | The GID of the group that will own the UNIX domain socket file.                                                                                      |
+| `DOMAIN`                    | `localhost`  | The domain that the HTTP API will run on.                                                                                                            |
+| `BOT_ONLY`                  |   `false`    | Run the server in bot-only mode, which disables the Polka server (HTTP API).                                                                         |
+| `PG_USER`                   |  `postgres`  | The name used for accessing the PostgreSQL database.                                                                                                 |
+| `PG_PASSWORD`               |  `postgres`  | The password used for accessing the PostgreSQL database.                                                                                             |
+| `PG_HOST`                   | `localhost`  | The hostname used for connecting to the PostgreSQL server.                                                                                           |
+| `PG_PORT`                   |    `5432`    | The port which the PostgreSQL server is running on.                                                                                                  |
+| `PG_DATABASE`               | `shaderBOT`  | The name of the PostgreSQL database which is **already populated** using the [`init.sql`](src/db/init.sql) file.                                     |
 
 ## UNIX Domain Sockets
 
 For using UNIX domain sockets, set the `UDS_PATH` environment variable to e.g. `/run/shaderbot/web-api.sock`. The socket file has read and write permissions for the user and group that owns it, i.e. only processes by the same user or in the same group can bind to it.
 
-By default, the UID and GID are set to the match the effective UID and GID of the process. You can override them using the `UDS_UID` and `UDS_GID` environment variables.
+By default, the UID and GID of the file are left untouched. You can override them using the `UDS_UID` and `UDS_GID` environment variables.
 
 If the API runs through a reverse proxy like NGINX, which is usually in the `www-data` group, grab the GID (`getent group www-data`) and set it accordingly.
 

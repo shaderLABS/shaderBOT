@@ -244,15 +244,14 @@ export function startWebserver() {
         app.listen({ path: udsPath }, () => {
             console.log(`Started HTTP API on UNIX socket "${udsPath}".`);
 
-            if (process.geteuid && process.getegid) {
-                const uid = process.env.UDS_UID ? Number(process.env.UDS_UID) : process.geteuid();
-                const gid = process.env.UDS_GID ? Number(process.env.UDS_GID) : process.getegid();
-
-                fssync.chownSync(udsPath, uid, gid);
-                fssync.chmodSync(udsPath, 0o660);
-
-                console.log(`Changed ownership of UNIX socket "${udsPath}" to UID ${uid} and GID ${gid}.`);
+            if (process.env.UDS_UID || process.env.UDS_GID) {
+                fssync.chownSync(udsPath, Number(process.env.UDS_UID || -1), Number(process.env.UDS_GID || -1));
             }
+
+            fssync.chmodSync(udsPath, 0o660);
+
+            const udsStat = fssync.statSync(udsPath);
+            console.log(`Set UID to ${udsStat.uid}, GID to ${udsStat.gid} and mode to ${udsStat.mode.toString(8)} for UNIX socket "${udsPath}".`);
         });
     } else {
         const port = Number(process.env.PORT) || 3001;
