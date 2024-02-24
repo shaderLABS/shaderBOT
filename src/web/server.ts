@@ -5,6 +5,7 @@ import session from 'express-session';
 import fssync from 'fs';
 import { IncomingMessage } from 'node:http';
 import passport from 'passport';
+import path from 'path';
 import polka from 'polka';
 import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.js';
 import { NonNullableProperty } from '../bot/lib/misc.js';
@@ -218,25 +219,43 @@ export function startWebserver() {
      * START *
      *********/
 
-    if (process.env.IPC_PATH) {
-        const path = process.env.IPC_PATH;
-        const previousFile = fssync.statSync(path, { throwIfNoEntry: false });
+    if (process.env.UDS_PATH) {
+        if (process.platform === 'win32') throw new Error('UNIX sockets are not supported on Windows.');
 
-        if (previousFile) {
-            if (previousFile.isSocket()) {
-                fssync.unlinkSync(path);
-                console.log(`Removed previous UNIX socket "${path}".`);
-            } else {
-                throw new Error(`File "${path}" already exists and is not a socket.`);
+        const udsPath = process.env.UDS_PATH;
+        const udsDirectory = path.dirname(udsPath);
+
+        if (fssync.existsSync(udsDirectory)) {
+            const previousFile = fssync.statSync(udsPath, { throwIfNoEntry: false });
+
+            if (previousFile) {
+                if (previousFile.isSocket()) {
+                    fssync.unlinkSync(udsPath);
+                    console.log(`Removed previous UNIX socket "${udsPath}".`);
+                } else {
+                    throw new Error(`File "${udsPath}" already exists and is not a socket.`);
+                }
             }
+        } else {
+            fssync.mkdirSync(udsDirectory, { recursive: true });
+            console.log(`Created directory for UNIX socket "${udsDirectory}".`);
         }
 
-        app.listen({ path }, () => {
-            fssync.chmodSync(path, 0o660);
-            console.log(`Started REST API on UNIX socket "${path}".`);
+        app.listen({ path: udsPath }, () => {
+            console.log(`Started HTTP API on UNIX socket "${udsPath}".`);
+
+            if (process.geteuid && process.getegid) {
+                const uid = process.env.UDS_UID ? Number(process.env.UDS_UID) : process.geteuid();
+                const gid = process.env.UDS_GID ? Number(process.env.UDS_GID) : process.getegid();
+
+                fssync.chownSync(udsPath, uid, gid);
+                fssync.chmodSync(udsPath, 0o660);
+
+                console.log(`Changed ownership of UNIX socket "${udsPath}" to UID ${uid} and GID ${gid}.`);
+            }
         });
     } else {
         const port = Number(process.env.PORT) || 3001;
-        app.listen({ port }, () => console.log(`Started REST API on port ${port}.`));
+        app.listen({ port }, () => console.log(`Started HTTP API on port ${port}.`));
     }
 }
