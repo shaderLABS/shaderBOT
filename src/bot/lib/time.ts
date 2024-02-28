@@ -74,31 +74,44 @@ export function stringToSeconds(strings: string[]) {
 }
 
 export function secondsToString(seconds: number) {
+    seconds = Math.round(seconds);
     const units: string[] = [];
 
     const years = Math.floor(seconds / 31536000);
-    if (years) units.push(years + 'a');
-    seconds -= years * 31536000;
+    if (years) {
+        units.push(years + 'a');
+        seconds -= years * 31536000;
+    }
 
     const months = Math.floor(seconds / 2592000);
-    if (months) units.push(months + 'mo');
-    seconds -= months * 2592000;
+    if (months) {
+        units.push(months + 'mo');
+        seconds -= months * 2592000;
+    }
 
     const weeks = Math.floor(seconds / 604800);
-    if (weeks) units.push(weeks + 'w');
-    seconds -= weeks * 604800;
+    if (weeks) {
+        units.push(weeks + 'w');
+        seconds -= weeks * 604800;
+    }
 
     const days = Math.floor(seconds / 86400);
-    if (days) units.push(days + 'd');
-    seconds -= days * 86400;
+    if (days) {
+        units.push(days + 'd');
+        seconds -= days * 86400;
+    }
 
     const hours = Math.floor(seconds / 3600);
-    if (hours) units.push(hours + 'h');
-    seconds -= hours * 3600;
+    if (hours) {
+        units.push(hours + 'h');
+        seconds -= hours * 3600;
+    }
 
     const minutes = Math.floor(seconds / 60);
-    if (minutes) units.push(minutes + 'min');
-    seconds -= minutes * 60;
+    if (minutes) {
+        units.push(minutes + 'min');
+        seconds -= minutes * 60;
+    }
 
     if (seconds) units.push(Math.round(seconds) + 's');
 
