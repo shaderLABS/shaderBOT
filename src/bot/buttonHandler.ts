@@ -1,5 +1,5 @@
 import { ButtonInteraction } from 'discord.js';
-import { handleSpamInteraction } from './lib/spamProtection.js';
+import { handleSpamInteraction } from './lib/spamProtection.ts';
 
 /***********
  * EXECUTE *

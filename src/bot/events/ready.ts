@@ -1,11 +1,11 @@
 import { Events } from 'discord.js';
-import { client, timeoutStore } from '../bot.js';
-import { Event } from '../eventHandler.js';
-import { Backup } from '../lib/backup.js';
-import { rotateBanner } from '../lib/banner.js';
-import { getGuild } from '../lib/misc.js';
-import { RandomPresence } from '../lib/presence.js';
-import { StickyThread } from '../lib/stickyThread.js';
+import { client, timeoutStore } from '../bot.ts';
+import type { Event } from '../eventHandler.ts';
+import { Backup } from '../lib/backup.ts';
+import { rotateBanner } from '../lib/banner.ts';
+import { getGuild } from '../lib/misc.ts';
+import { RandomPresence } from '../lib/presence.ts';
+import { StickyThread } from '../lib/stickyThread.ts';
 
 class DailyTasks {
     private static run() {

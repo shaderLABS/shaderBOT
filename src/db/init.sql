@@ -195,17 +195,3 @@ CREATE TABLE "sticky_thread" (
     thread_id NUMERIC(20) UNIQUE NOT NULL,
     mod_id NUMERIC(20)
 );
-
--- SESSION
-
-DROP TABLE IF EXISTS "session";
-CREATE TABLE "session" (
-    "sid" varchar NOT NULL COLLATE "default",
-    "sess" json NOT NULL,
-    "expire" timestamp(6) NOT NULL
-)
-WITH (OIDS=FALSE);
-
-ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
-
-CREATE INDEX "IDX_session_expire" ON "session" ("expire");

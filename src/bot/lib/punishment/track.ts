@@ -1,9 +1,9 @@
-import { UserResolvable } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
-import log from '../log.js';
-import { parseUser } from '../misc.js';
-import { Punishment } from './main.js';
+import type { UserResolvable } from 'discord.js';
+import { db } from '../../../db/postgres.ts';
+import { client } from '../../bot.ts';
+import log from '../log.ts';
+import { parseUser } from '../misc.ts';
+import { Punishment } from './main.ts';
 
 export class Track extends Punishment {
     readonly TYPE_STRING: string = 'Track';

@@ -1,5 +1,5 @@
 import { AutocompleteInteraction } from 'discord.js';
-import { handlePastaAutocomplete } from './lib/pasta.js';
+import { handlePastaAutocomplete } from './lib/pasta.ts';
 
 /***********
  * EXECUTE *

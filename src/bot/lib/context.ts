@@ -1,10 +1,10 @@
 import { Message } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client } from '../bot.js';
-import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
-import { replyError } from './embeds.js';
-import log from './log.js';
-import { parseUser } from './misc.js';
+import { db } from '../../db/postgres.ts';
+import { client } from '../bot.ts';
+import type { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.ts';
+import { replyError } from './embeds.ts';
+import log from './log.ts';
+import { parseUser } from './misc.ts';
 
 export type PunishmentTable = 'ban' | 'mute' | 'kick' | 'track' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
 

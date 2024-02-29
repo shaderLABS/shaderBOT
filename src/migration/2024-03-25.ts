@@ -1,6 +1,6 @@
 import { ChannelType, Client, Events, GatewayIntentBits } from 'discord.js';
-import { BotSettings, SettingsFile } from '../bot/lib/settings.js';
-import { connectPostgreSQL, db } from '../db/postgres.js';
+import { type BotSettings, SettingsFile } from '../bot/lib/settings.ts';
+import { connectPostgreSQL, db } from '../db/postgres.ts';
 
 // Adds indices to table.
 // Updates existing project mute permissions.

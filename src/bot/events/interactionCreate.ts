@@ -1,10 +1,10 @@
 import { ApplicationCommandType, ComponentType, Events, InteractionType } from 'discord.js';
-import { handleAutocomplete } from '../autocompleteHandler.js';
-import { handleButton } from '../buttonHandler.js';
-import { handleChatInputCommand } from '../chatInputCommandHandler.js';
-import { handleMessageContextMenuCommand, handleUserContextMenuCommand } from '../contextMenuCommandHandler.js';
-import { Event } from '../eventHandler.js';
-import { handleModalSubmit } from '../modalSubmitHandler.js';
+import { handleAutocomplete } from '../autocompleteHandler.ts';
+import { handleButton } from '../buttonHandler.ts';
+import { handleChatInputCommand } from '../chatInputCommandHandler.ts';
+import { handleMessageContextMenuCommand, handleUserContextMenuCommand } from '../contextMenuCommandHandler.ts';
+import type { Event } from '../eventHandler.ts';
+import { handleModalSubmit } from '../modalSubmitHandler.ts';
 
 export const event: Event = {
     name: Events.InteractionCreate,

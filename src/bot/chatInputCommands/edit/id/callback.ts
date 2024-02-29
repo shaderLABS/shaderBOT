@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError } from '../../../lib/embeds.js';
-import { editApsect } from '../shared.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError } from '../../../lib/embeds.ts';
+import { editApsect } from '../shared.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

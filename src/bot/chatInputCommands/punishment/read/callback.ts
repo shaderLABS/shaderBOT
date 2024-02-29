@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError, replyInfo } from '../../../lib/embeds.js';
-import { Ban, LiftedBan } from '../../../lib/punishment/ban.js';
-import { Kick } from '../../../lib/punishment/kick.js';
-import { LiftedMute, Mute } from '../../../lib/punishment/mute.js';
-import { Track } from '../../../lib/punishment/track.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError, replyInfo } from '../../../lib/embeds.ts';
+import { Ban, LiftedBan } from '../../../lib/punishment/ban.ts';
+import { Kick } from '../../../lib/punishment/kick.ts';
+import { LiftedMute, Mute } from '../../../lib/punishment/mute.ts';
+import { Track } from '../../../lib/punishment/track.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,

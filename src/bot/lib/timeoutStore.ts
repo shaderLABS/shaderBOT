@@ -1,8 +1,8 @@
-import { client } from '../bot.js';
-import { ChannelLock } from './channelRestriction/lock.js';
-import { ChannelSlowmode } from './channelRestriction/slowmode.js';
-import { Ban } from './punishment/ban.js';
-import { Mute } from './punishment/mute.js';
+import { client } from '../bot.ts';
+import { ChannelLock } from './channelRestriction/lock.ts';
+import { ChannelSlowmode } from './channelRestriction/slowmode.ts';
+import { Ban } from './punishment/ban.ts';
+import { Mute } from './punishment/mute.ts';
 
 export interface TimeoutEntry {
     id: string;
@@ -13,7 +13,7 @@ export interface TimeoutEntry {
 }
 
 export class TimeoutStore {
-    private entries = new Map<string, NodeJS.Timeout>();
+    private entries = new Map<string, Timer>();
 
     public set(entry: TimeoutEntry, onlyExpiringToday: boolean) {
         if (!entry.expireTimestamp || (onlyExpiringToday && entry.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;

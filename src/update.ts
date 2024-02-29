@@ -1,8 +1,8 @@
-import { ApplicationCommandData, Client, Events } from 'discord.js';
+import { Client, Events, type ApplicationCommandData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { BotSettings, SettingsFile } from './bot/lib/settings.js';
+import { SettingsFile, type BotSettings } from './bot/lib/settings.ts';
 
 const settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
 const commandStructure: ApplicationCommandData[] = [];
@@ -15,7 +15,7 @@ async function stitchCommandStructure(dir: string) {
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await stitchCommandStructure(path.join(dir, dirEntry.name));
-            } else if (dirEntry.name === 'structure.js') {
+            } else if (dirEntry.name === 'structure.ts') {
                 const structure: ApplicationCommandData = (await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href)).default;
                 commandStructure.push(structure);
             }
@@ -37,11 +37,11 @@ client.once(Events.ClientReady, async () => {
         return;
     }
 
-    await stitchCommandStructure('build/bot/chatInputCommands');
+    await stitchCommandStructure('src/bot/chatInputCommands');
     const chatInputCommandAmount = commandStructure.length;
     console.log(`Stitched ${chatInputCommandAmount} chat input commands...`);
 
-    await stitchCommandStructure('build/bot/contextMenuCommands');
+    await stitchCommandStructure('src/bot/contextMenuCommands');
     const contextMenuCommandAmount = commandStructure.length - chatInputCommandAmount;
     console.log(`Stitched ${contextMenuCommandAmount} context menu commands...`);
 

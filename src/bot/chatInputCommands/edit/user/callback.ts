@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { editApsect } from '../shared.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { editApsect } from '../shared.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

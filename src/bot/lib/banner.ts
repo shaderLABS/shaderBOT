@@ -1,8 +1,8 @@
 import { GuildPremiumTier, messageLink } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import log from './log.js';
-import { getGuild } from './misc.js';
-import { Project } from './project.js';
+import { db } from '../../db/postgres.ts';
+import log from './log.ts';
+import { getGuild } from './misc.ts';
+import { Project } from './project.ts';
 
 export async function rotateBanner() {
     const guild = getGuild();

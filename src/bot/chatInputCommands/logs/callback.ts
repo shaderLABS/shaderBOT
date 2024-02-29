@@ -1,14 +1,14 @@
-import { APIEmbedField, PermissionFlagsBits, User } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
-import { BanAppeal } from '../../lib/banAppeal.js';
-import { replyButtonPages } from '../../lib/embeds.js';
-import { Note } from '../../lib/note.js';
-import { Ban, LiftedBan } from '../../lib/punishment/ban.js';
-import { Kick } from '../../lib/punishment/kick.js';
-import { LiftedMute, Mute } from '../../lib/punishment/mute.js';
-import { Track } from '../../lib/punishment/track.js';
-import { Warning } from '../../lib/warning.js';
+import { type APIEmbedField, PermissionFlagsBits, User } from 'discord.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { getPunishmentPoints } from '../../lib/automaticPunishment.ts';
+import { BanAppeal } from '../../lib/banAppeal.ts';
+import { replyButtonPages } from '../../lib/embeds.ts';
+import { Note } from '../../lib/note.ts';
+import { Ban, LiftedBan } from '../../lib/punishment/ban.ts';
+import { Kick } from '../../lib/punishment/kick.ts';
+import { LiftedMute, Mute } from '../../lib/punishment/mute.ts';
+import { Track } from '../../lib/punishment/track.ts';
+import { Warning } from '../../lib/warning.ts';
 
 export async function getUserModerationLogPages(targetUser: User) {
     const queries = await Promise.all([

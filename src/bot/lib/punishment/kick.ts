@@ -1,10 +1,10 @@
-import { UserResolvable } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
-import { sendInfo } from '../embeds.js';
-import log from '../log.js';
-import { getGuild, parseUser, userToMember } from '../misc.js';
-import { Punishment } from './main.js';
+import type { UserResolvable } from 'discord.js';
+import { db } from '../../../db/postgres.ts';
+import { client } from '../../bot.ts';
+import { sendInfo } from '../embeds.ts';
+import log from '../log.ts';
+import { getGuild, parseUser, userToMember } from '../misc.ts';
+import { Punishment } from './main.ts';
 
 export class Kick extends Punishment {
     readonly TYPE_STRING: string = 'Kick';

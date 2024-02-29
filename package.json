@@ -2,14 +2,13 @@
     "name": "shaderbot",
     "version": "1.0.0",
     "description": "Bot of the shaderLABS Discord Server.",
-    "main": "index.js",
+    "main": "index.ts",
     "private": true,
     "scripts": {
-        "build": "npx tsc -b --verbose",
-        "start": "node -r dotenv/config build/index.js",
-        "update": "node -r dotenv/config build/update.js",
-        "migrate": "node -r dotenv/config build/migration/migrate.js",
-        "dev": "tsc-watch --onSuccess \"node --trace-warnings -r dotenv/config build/index.js\""
+        "start": "bun run src/index.ts",
+        "update": "bun run src/update.ts",
+        "migrate": "bun run src/migration/migrate.ts",
+        "dev": "bun run --watch src/index.ts"
     },
     "author": {
         "name": "Niemand",
@@ -24,32 +23,20 @@
         }
     ],
     "dependencies": {
-        "body-parser": "1.20.3",
-        "comment-json": "4.2.5",
-        "connect-pg-simple": "10.0.0",
-        "cors": "2.8.5",
-        "discord.js": "14.16.2",
-        "express-session": "1.18.0",
-        "passport": "0.7.0",
-        "passport-discord": "0.1.4",
-        "pg": "8.13.0",
-        "polka": "0.5.2",
-        "sharp": "0.33.5",
-        "uuid-random": "1.3.2"
+        "@elysiajs/cors": "^0.8.0",
+        "@elysiajs/jwt": "^0.8.0",
+        "arctic": "^1.2.1",
+        "comment-json": "^4.2.5",
+        "discord.js": "^14.16.2",
+        "elysia": "^0.8.17",
+        "pg": "^8.13.0",
+        "sharp": "^0.33.5",
+        "uuid-random": "^1.3.2"
     },
     "devDependencies": {
-        "@types/connect-pg-simple": "7.0.3",
-        "@types/cors": "2.8.17",
-        "@types/express-session": "1.18.0",
-        "@types/node": "22.7.4",
-        "@types/node-cron": "3.0.11",
-        "@types/passport": "1.0.16",
-        "@types/passport-discord": "0.1.13",
-        "@types/pg": "8.11.10",
-        "@types/polka": "0.5.7",
-        "@types/sharp": "0.31.1",
-        "dotenv": "16.4.5",
-        "tsc-watch": "6.2.0",
-        "typescript": "5.6.2"
+        "@types/bun": "^1.0.8",
+        "@types/node-cron": "^3.0.11",
+        "@types/pg": "^8.11.10",
+        "@types/sharp": "^0.32.0"
     }
 }

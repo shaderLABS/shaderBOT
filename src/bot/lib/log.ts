@@ -1,6 +1,6 @@
 import { ChannelType, EmbedBuilder } from 'discord.js';
-import { client, settings } from '../bot.js';
-import { EmbedColor, EmbedIcon } from './embeds.js';
+import { client, settings } from '../bot.ts';
+import { EmbedColor, EmbedIcon } from './embeds.ts';
 
 export default function (content: string | EmbedBuilder, title?: string, files?: string[]) {
     const logChannel = client.channels.cache.get(settings.data.logging.moderationChannelID);

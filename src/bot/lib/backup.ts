@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { AnyThreadChannel, ChannelType, Collection, Message, TextChannel, VoiceChannel } from 'discord.js';
+import { ChannelType, Collection, Message, TextChannel, VoiceChannel, type AnyThreadChannel } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 

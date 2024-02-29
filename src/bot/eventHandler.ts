@@ -1,8 +1,8 @@
-import { Awaitable, ClientEvents, Collection, Events } from 'discord.js';
+import { Collection, Events, type Awaitable, type ClientEvents } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { client } from './bot.js';
+import { client } from './bot.ts';
 
 type EventGeneric<K extends keyof ClientEvents> = {
     readonly name: K;
@@ -25,7 +25,7 @@ export async function registerEvents(dir: string) {
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 registerEvents(path.join(dir, dirEntry.name));
-            } else if (dirEntry.name.endsWith('.js')) {
+            } else if (dirEntry.name.endsWith('.ts')) {
                 const { event }: { event: Event } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 events.set(event.name, event);
 

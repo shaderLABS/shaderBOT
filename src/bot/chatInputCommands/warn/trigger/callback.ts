@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import automaticPunishment from '../../../lib/automaticPunishment.js';
-import { replySuccess } from '../../../lib/embeds.js';
-import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
-import { hasPermissionForTarget } from '../../../lib/searchMessage.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import automaticPunishment from '../../../lib/automaticPunishment.ts';
+import { replySuccess } from '../../../lib/embeds.ts';
+import log from '../../../lib/log.ts';
+import { parseUser } from '../../../lib/misc.ts';
+import { hasPermissionForTarget } from '../../../lib/searchMessage.ts';
 
 const actionToString = ['They did not get punished.', 'They have been muted.', 'They have been temporarily banned.', 'They have been permanently banned.'];
 

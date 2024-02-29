@@ -1,11 +1,11 @@
-import { UserResolvable } from 'discord.js';
-import { settings } from '../bot.js';
-import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
-import { GuildMessage } from '../events/message/messageCreate.js';
-import { replyError } from './embeds.js';
-import log from './log.js';
-import { parseUser, userToMember } from './misc.js';
-import { Mute } from './punishment/mute.js';
+import type { UserResolvable } from 'discord.js';
+import { settings } from '../bot.ts';
+import type { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.ts';
+import type { GuildMessage } from '../events/message/messageCreate.ts';
+import { replyError } from './embeds.ts';
+import log from './log.ts';
+import { parseUser, userToMember } from './misc.ts';
+import { Mute } from './punishment/mute.ts';
 
 export async function hasPermissionForTarget(interaction: GuildChatInputCommandInteraction, targetResolvable: UserResolvable, checkProperty?: 'bannable' | 'kickable' | 'manageable' | 'moderatable') {
     const targetMember = await userToMember(targetResolvable, interaction.guild);

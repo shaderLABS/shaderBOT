@@ -1,8 +1,8 @@
 import { ChannelType, EmbedBuilder, Events } from 'discord.js';
-import { client, settings } from '../bot.js';
-import { Event } from '../eventHandler.js';
-import { EmbedColor } from '../lib/embeds.js';
-import { parseUser } from '../lib/misc.js';
+import { client, settings } from '../bot.ts';
+import type { Event } from '../eventHandler.ts';
+import { EmbedColor } from '../lib/embeds.ts';
+import { parseUser } from '../lib/misc.ts';
 
 export const event: Event = {
     name: Events.VoiceStateUpdate,

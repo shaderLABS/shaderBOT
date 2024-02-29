@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { getContextURL } from '../../lib/context.js';
-import { replySuccess } from '../../lib/embeds.js';
-import log from '../../lib/log.js';
-import { Mute } from '../../lib/punishment/mute.js';
-import { hasPermissionForTarget } from '../../lib/searchMessage.js';
-import { kickSpammer } from '../../lib/spamProtection.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { getContextURL } from '../../lib/context.ts';
+import { replySuccess } from '../../lib/embeds.ts';
+import log from '../../lib/log.ts';
+import { Mute } from '../../lib/punishment/mute.ts';
+import { hasPermissionForTarget } from '../../lib/searchMessage.ts';
+import { kickSpammer } from '../../lib/spamProtection.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

@@ -1,4 +1,4 @@
-import { connectPostgreSQL, db } from '../db/postgres.js';
+import { connectPostgreSQL, db } from '../db/postgres.ts';
 
 // Removes the table called 'expiring_juxtapose' from the database.
 console.group();

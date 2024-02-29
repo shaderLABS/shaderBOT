@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError } from '../../../lib/embeds.js';
-import { Project } from '../../../lib/project.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError } from '../../../lib/embeds.ts';
+import { Project } from '../../../lib/project.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
