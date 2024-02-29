@@ -1,6 +1,6 @@
-import { BanAppeal } from '../../lib/banAppeal.js';
-import { replyError, replyInfo, replySuccess } from '../../lib/embeds.js';
-import { ModalSubmitCallback } from '../../modalSubmitHandler.js';
+import { BanAppeal } from '../../lib/banAppeal.ts';
+import { replyError, replyInfo, replySuccess } from '../../lib/embeds.ts';
+import type { ModalSubmitCallback } from '../../modalSubmitHandler.ts';
 
 export const modal: ModalSubmitCallback = {
     customID: 'editBanAppealResultReason',

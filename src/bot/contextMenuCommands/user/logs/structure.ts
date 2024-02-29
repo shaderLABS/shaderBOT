@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandType, PermissionFlagsBits } from 'discord.js';
+import { ApplicationCommandType, PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
 
 export default {
     name: 'Logs',

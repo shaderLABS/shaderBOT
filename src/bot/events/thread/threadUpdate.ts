@@ -1,8 +1,7 @@
 import { AuditLogEvent, Events, ThreadAutoArchiveDuration } from 'discord.js';
-import { setTimeout as sleep } from 'node:timers/promises';
-import { Event } from '../../eventHandler.js';
-import log from '../../lib/log.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import type { Event } from '../../eventHandler.ts';
+import log from '../../lib/log.ts';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 export const event: Event = {
     name: Events.ThreadUpdate,
@@ -15,7 +14,7 @@ export const event: Event = {
         if (!stickyThread) return;
 
         // wait 1 second for the audit log entry to be created
-        await sleep(1000);
+        await Bun.sleep(1000);
 
         const auditLogEntry = (
             await newThread.guild.fetchAuditLogs({

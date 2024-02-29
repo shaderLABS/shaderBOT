@@ -1,11 +1,11 @@
-import { UserResolvable } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client } from '../bot.js';
-import automaticPunishment from './automaticPunishment.js';
-import { sendInfo } from './embeds.js';
-import log from './log.js';
-import { formatContextURL, getGuild, parseUser } from './misc.js';
-import { formatTimeDate } from './time.js';
+import type { UserResolvable } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client } from '../bot.ts';
+import automaticPunishment from './automaticPunishment.ts';
+import { sendInfo } from './embeds.ts';
+import log from './log.ts';
+import { formatContextURL, getGuild, parseUser } from './misc.ts';
+import { formatTimeDate } from './time.ts';
 
 export class Warning {
     public readonly id: string;

@@ -1,9 +1,9 @@
 import { ChannelType, Events } from 'discord.js';
-import { Event } from '../eventHandler.js';
-import { Backup } from '../lib/backup.js';
-import { LockSlowmode } from '../lib/lockSlowmode.js';
-import log from '../lib/log.js';
-import { Project } from '../lib/project.js';
+import type { Event } from '../eventHandler.ts';
+import { Backup } from '../lib/backup.ts';
+import { LockSlowmode } from '../lib/lockSlowmode.ts';
+import log from '../lib/log.ts';
+import { Project } from '../lib/project.ts';
 
 export const event: Event = {
     name: Events.ChannelDelete,

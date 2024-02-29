@@ -1,8 +1,8 @@
 import { Events } from 'discord.js';
-import { Event } from '../../eventHandler.js';
-import { Backup } from '../../lib/backup.js';
-import log from '../../lib/log.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import type { Event } from '../../eventHandler.ts';
+import { Backup } from '../../lib/backup.ts';
+import log from '../../lib/log.ts';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 export const event: Event = {
     name: Events.ThreadDelete,

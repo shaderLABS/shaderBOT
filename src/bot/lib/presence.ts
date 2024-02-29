@@ -1,5 +1,5 @@
-import { ActivityType, Client, PresenceData } from 'discord.js';
-import { settings } from '../bot.js';
+import { ActivityType, Client, type PresenceData } from 'discord.js';
+import { settings } from '../bot.ts';
 
 export abstract class RandomPresence {
     public static get PRESENCE(): PresenceData {

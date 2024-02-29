@@ -1,11 +1,12 @@
 import crypto from 'crypto';
-import { CategoryChannel, ChannelType, EmbedBuilder, Guild, GuildMember, GuildTextBasedChannel, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, User } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client, settings } from '../bot.js';
-import { EmbedColor, EmbedIcon, sendInfo } from './embeds.js';
-import log from './log.js';
-import { getAlphabeticalChannelPosition, getGuild, parseUser, userToMember } from './misc.js';
-import { formatTimeDate } from './time.js';
+import type { GuildTextBasedChannel, PermissionOverwriteOptions } from 'discord.js';
+import { CategoryChannel, ChannelType, EmbedBuilder, Guild, GuildMember, OverwriteType, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client, settings } from '../bot.ts';
+import { EmbedColor, EmbedIcon, sendInfo } from './embeds.ts';
+import log from './log.ts';
+import { getAlphabeticalChannelPosition, getGuild, parseUser, userToMember } from './misc.ts';
+import { formatTimeDate } from './time.ts';
 
 export class Project {
     public readonly id: string;

@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
-import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
-import { replyError, replySuccess } from '../../../../lib/embeds.js';
-import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
-import { Warning } from '../../../../lib/warning.js';
+import type { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.ts';
+import { replyError, replySuccess } from '../../../../lib/embeds.ts';
+import { hasPermissionForTarget } from '../../../../lib/searchMessage.ts';
+import { Warning } from '../../../../lib/warning.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

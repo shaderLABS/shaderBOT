@@ -1,10 +1,10 @@
 import { Events, LimitedCollection } from 'discord.js';
-import { settings } from '../../bot.js';
-import { Event } from '../../eventHandler.js';
-import log from '../../lib/log.js';
-import { parseUser, similarityLevenshtein } from '../../lib/misc.js';
-import { Project, ProjectMute } from '../../lib/project.js';
-import { Punishment } from '../../lib/punishment.js';
+import { settings } from '../../bot.ts';
+import type { Event } from '../../eventHandler.ts';
+import log from '../../lib/log.ts';
+import { parseUser, similarityLevenshtein } from '../../lib/misc.ts';
+import { Project, ProjectMute } from '../../lib/project.ts';
+import { Punishment } from '../../lib/punishment.ts';
 
 type CachedMember = {
     displayName: string;

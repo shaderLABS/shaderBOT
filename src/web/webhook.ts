@@ -1,14 +1,15 @@
 import crypto from 'crypto';
 import { ChannelType, EmbedBuilder } from 'discord.js';
-import { client } from '../bot/bot.js';
-import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.js';
-import { formatBytes, trimString } from '../bot/lib/misc.js';
+import { t, type Static } from 'elysia';
+import { client } from '../bot/bot.ts';
+import { EmbedColor } from '../bot/lib/embeds.ts';
+import { formatBytes, trimString } from '../bot/lib/misc.ts';
 
 function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
     return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
 }
 
-export function verifySignature(signature: string, data: Buffer, key: crypto.BinaryLike) {
+export function verifySignature(signature: string, data: crypto.BinaryLike, key: crypto.BinaryLike) {
     const signatureBuffer = Buffer.from(signature);
     const signedDataBuffer = Buffer.from(signData(data, key));
 
@@ -16,61 +17,64 @@ export function verifySignature(signature: string, data: Buffer, key: crypto.Bin
     return crypto.timingSafeEqual(signatureBuffer, signedDataBuffer);
 }
 
-export async function releaseNotification(channelID: string, roleID: string, req: any): Promise<number> {
+export const GitHubReleaseWebhookBody = t.Object(
+    {
+        action: t.Literal('published'),
+        release: t.Object({
+            name: t.Nullable(t.String()),
+            html_url: t.String(),
+            body: t.Nullable(t.String()),
+            assets: t.Array(
+                t.Object({
+                    name: t.String(),
+                    browser_download_url: t.String(),
+                    size: t.Number(),
+                })
+            ),
+            author: t.Object({
+                login: t.String(),
+                avatar_url: t.Optional(t.String()),
+                html_url: t.Optional(t.String()),
+            }),
+        }),
+        repository: t.Object({
+            full_name: t.String(),
+        }),
+    },
+    { additionalProperties: true }
+);
+
+export async function releaseNotification(channelID: string, roleID: string, body: Static<typeof GitHubReleaseWebhookBody>): Promise<number> {
     const channel = client.channels.cache.get(channelID);
     if (channel?.type !== ChannelType.GuildText) return 500;
 
-    if (req.headers['x-github-event'] === 'release') {
-        // GitHub Release Event
+    let description = `A new release has been published: [${body.release.name || 'Unknown Name'}](${body.release.html_url})`;
 
-        // published: a release, pre-release, or draft of a release is published
-        if (req.body.action !== 'published') return 204;
-
-        let description = `A new release has been published: [${req.body.release?.name || 'Unknown Name'}](${req.body.release?.html_url})`;
-
-        const body = req.body.release?.body?.trim();
-        if (body) {
-            description += '\n\n> ' + body.replaceAll('\n', '\n> ');
-        }
-
-        let assetsDescription = '';
-        const assets = req.body.release?.assets;
-        if (assets && Array.isArray(assets)) {
-            assetsDescription = assets.reduce((list, asset) => list + `[${asset.name}](${asset.browser_download_url}) (${formatBytes(asset.size)})` + '\n', '\n\n');
-        }
-
-        description = trimString(description, 4096 - assetsDescription.length) + assetsDescription;
-
-        await channel.send({
-            content: '<@&' + roleID + '>',
-            embeds: [
-                new EmbedBuilder({
-                    author: {
-                        name: req.body.release?.author?.login || 'Unknown Author',
-                        iconURL: req.body.release?.author?.avatar_url,
-                        url: req.body.release?.author?.html_url,
-                    },
-                    title: req.body.repository?.full_name,
-                    description,
-                    color: EmbedColor.Blue,
-                }),
-            ],
-        });
-    } else {
-        // Generic Release Event
-        await channel.send({
-            content: '<@&' + roleID + '>',
-            embeds: [
-                new EmbedBuilder({
-                    author: {
-                        name: 'A new release has been published!',
-                        iconURL: EmbedIcon.Info,
-                    },
-                    color: EmbedColor.Blue,
-                }),
-            ],
-        });
+    if (body.release.body) {
+        description += '\n\n> ' + body.release.body.trim().replaceAll('\n', '\n> ');
     }
+
+    let assetsDescription = body.release.assets.reduce((list, asset) => {
+        return list + `[${asset.name}](${asset.browser_download_url}) (${formatBytes(asset.size)})` + '\n';
+    }, '\n\n');
+
+    description = trimString(description, 4096 - assetsDescription.length) + assetsDescription;
+
+    await channel.send({
+        content: '<@&' + roleID + '>',
+        embeds: [
+            new EmbedBuilder({
+                author: {
+                    name: body.release.author.login || 'Unknown Author',
+                    iconURL: body.release.author.avatar_url,
+                    url: body.release.author.html_url,
+                },
+                title: body.repository.full_name,
+                description,
+                color: EmbedColor.Blue,
+            }),
+        ],
+    });
 
     return 200;
 }

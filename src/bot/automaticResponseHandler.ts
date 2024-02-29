@@ -1,8 +1,8 @@
 import { Collection } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { GuildMessage } from './events/message/messageCreate.js';
-import { AutomaticResponse } from './lib/automaticResponse.js';
+import type { GuildMessage } from './events/message/messageCreate.ts';
+import { AutomaticResponse } from './lib/automaticResponse.ts';
 
 export const automaticResponsePath = 'customContent/automaticResponse';
 export const automaticResponseStore = new Collection<string, AutomaticResponse>();

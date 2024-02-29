@@ -1,7 +1,7 @@
 import { Events } from 'discord.js';
-import { settings } from '../../bot.js';
-import { Event } from '../../eventHandler.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import { settings } from '../../bot.ts';
+import type { Event } from '../../eventHandler.ts';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 export const event: Event = {
     name: Events.ThreadCreate,

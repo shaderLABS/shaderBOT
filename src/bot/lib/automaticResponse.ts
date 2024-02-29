@@ -1,11 +1,11 @@
-import { AttachmentBuilder, ChannelType, EmbedBuilder, EmbedData } from 'discord.js';
+import { AttachmentBuilder, ChannelType, EmbedBuilder, type EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { automaticResponsePath } from '../automaticResponseHandler.js';
-import { client, cooldownStore, settings } from '../bot.js';
-import { GuildMessage } from '../events/message/messageCreate.js';
-import { sendInfo } from './embeds.js';
-import { stringToFileName } from './misc.js';
+import { automaticResponsePath } from '../automaticResponseHandler.ts';
+import { client, cooldownStore, settings } from '../bot.ts';
+import type { GuildMessage } from '../events/message/messageCreate.ts';
+import { sendInfo } from './embeds.ts';
+import { stringToFileName } from './misc.ts';
 
 type AutomaticResponseData = {
     alias: string;

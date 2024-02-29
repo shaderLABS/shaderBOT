@@ -1,7 +1,7 @@
 import { AttachmentBuilder, PermissionFlagsBits } from 'discord.js';
-import { automaticResponseStore } from '../../../automaticResponseHandler.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError, replyInfo } from '../../../lib/embeds.js';
+import { automaticResponseStore } from '../../../automaticResponseHandler.ts';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError, replyInfo } from '../../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

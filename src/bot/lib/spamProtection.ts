@@ -1,10 +1,10 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, PermissionFlagsBits, User } from 'discord.js';
-import { client, settings } from '../bot.js';
-import { GuildMessage } from '../events/message/messageCreate.js';
-import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
-import log from './log.js';
-import { getGuild, parseUser, similarityLevenshtein } from './misc.js';
-import { PastPunishment, Punishment } from './punishment.js';
+import { client, settings } from '../bot.ts';
+import type { GuildMessage } from '../events/message/messageCreate.ts';
+import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.ts';
+import log from './log.ts';
+import { getGuild, parseUser, similarityLevenshtein } from './misc.ts';
+import { PastPunishment, Punishment } from './punishment.ts';
 
 type CachedMessage = {
     id: string;

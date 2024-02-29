@@ -1,9 +1,9 @@
 import { User } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { settings } from '../bot.js';
-import log from './log.js';
-import { parseUser } from './misc.js';
-import { Punishment } from './punishment.js';
+import { db } from '../../db/postgres.ts';
+import { settings } from '../bot.ts';
+import log from './log.ts';
+import { parseUser } from './misc.ts';
+import { Punishment } from './punishment.ts';
 
 function interpolateTime(range: number[], values: number[], punishmentPoints: number) {
     return values[0] + ((values[1] - values[0]) * (punishmentPoints - range[0])) / (range[1] - range[0]);

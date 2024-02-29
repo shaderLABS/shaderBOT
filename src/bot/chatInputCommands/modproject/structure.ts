@@ -1,5 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { Project } from '../../lib/project.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
+import { Project } from '../../lib/project.ts';
 
 export default {
     name: 'modproject',

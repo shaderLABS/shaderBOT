@@ -1,16 +1,16 @@
 import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
-import { automaticResponsePath, registerAutomaticResponses } from './automaticResponseHandler.js';
-import { registerChatInputCommands } from './chatInputCommandHandler.js';
-import { registerMessageContextMenuCommands, registerUserContextMenuCommands } from './contextMenuCommandHandler.js';
-import { registerEvents } from './eventHandler.js';
-import { Backup } from './lib/backup.js';
-import { CooldownStore } from './lib/cooldownStore.js';
-import { RandomPresence } from './lib/presence.js';
-import { BotSettings, SettingsFile } from './lib/settings.js';
-import { TimeoutStore } from './lib/timeoutStore.js';
-import { registerModals } from './modalSubmitHandler.js';
-import { pastaPath, registerPastas } from './pastaHandler.js';
+import { automaticResponsePath, registerAutomaticResponses } from './automaticResponseHandler.ts';
+import { registerChatInputCommands } from './chatInputCommandHandler.ts';
+import { registerMessageContextMenuCommands, registerUserContextMenuCommands } from './contextMenuCommandHandler.ts';
+import { registerEvents } from './eventHandler.ts';
+import { Backup } from './lib/backup.ts';
+import { CooldownStore } from './lib/cooldownStore.ts';
+import { RandomPresence } from './lib/presence.ts';
+import { SettingsFile, type BotSettings } from './lib/settings.ts';
+import { TimeoutStore } from './lib/timeoutStore.ts';
+import { registerModals } from './modalSubmitHandler.ts';
+import { pastaPath, registerPastas } from './pastaHandler.ts';
 
 export let client: Client;
 export let cooldownStore: CooldownStore;
@@ -39,11 +39,11 @@ export async function startBot() {
         presence: RandomPresence.PRESENCE,
     });
 
-    registerEvents('build/bot/events');
-    registerChatInputCommands('build/bot/chatInputCommands');
-    registerMessageContextMenuCommands('build/bot/contextMenuCommands/message');
-    registerUserContextMenuCommands('build/bot/contextMenuCommands/user');
-    registerModals('build/bot/modals');
+    registerEvents('src/bot/events');
+    registerChatInputCommands('src/bot/chatInputCommands');
+    registerMessageContextMenuCommands('src/bot/contextMenuCommands/message');
+    registerUserContextMenuCommands('src/bot/contextMenuCommands/user');
+    registerModals('src/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
     Backup.clean();

@@ -1,11 +1,11 @@
-import { UserResolvable } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client, timeoutStore } from '../bot.js';
-import { BanAppeal } from './banAppeal.js';
-import { sendInfo } from './embeds.js';
-import log from './log.js';
-import { formatContextURL, getGuild, parseUser, userToMember } from './misc.js';
-import { formatTimeDate, secondsToString } from './time.js';
+import type { UserResolvable } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client, timeoutStore } from '../bot.ts';
+import { BanAppeal } from './banAppeal.ts';
+import { sendInfo } from './embeds.ts';
+import log from './log.ts';
+import { formatContextURL, getGuild, parseUser, userToMember } from './misc.ts';
+import { formatTimeDate, secondsToString } from './time.ts';
 
 const typeToString = {
     mute: 'Mute',

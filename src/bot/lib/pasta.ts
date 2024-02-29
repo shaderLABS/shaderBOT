@@ -1,8 +1,8 @@
-import { AttachmentBuilder, AutocompleteInteraction, CommandInteraction, EmbedBuilder, EmbedData } from 'discord.js';
+import { AttachmentBuilder, AutocompleteInteraction, CommandInteraction, EmbedBuilder, type EmbedData } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { pastaPath, pastaStore } from '../pastaHandler.js';
-import { stringToFileName } from './misc.js';
+import { pastaPath, pastaStore } from '../pastaHandler.ts';
+import { stringToFileName } from './misc.ts';
 
 type PastaData = {
     alias: string;
@@ -17,14 +17,8 @@ export function handlePastaAutocomplete(interaction: AutocompleteInteraction<'ca
         (pasta) =>
             pasta.alias.includes(value) ||
             pasta.content?.includes(value) ||
-            (
-                pasta.embedData &&
-                (
-                    pasta.embedData.description?.includes(value) ||
-                    pasta.embedData.footer?.text.includes(value) ||
-                    pasta.embedData.fields?.some((field) => field.value.includes(value))
-                )
-            ) ||
+            (pasta.embedData &&
+                (pasta.embedData.description?.includes(value) || pasta.embedData.footer?.text.includes(value) || pasta.embedData.fields?.some((field) => field.value.includes(value)))) ||
             false
     );
     interaction.respond(filtered.map((_, alias) => ({ name: alias, value: alias })));

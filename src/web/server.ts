@@ -1,219 +1,232 @@
-import bodyParser from 'body-parser';
-import store from 'connect-pg-simple';
-import cors from 'cors';
-import session from 'express-session';
+import cors from '@elysiajs/cors';
+import jwt from '@elysiajs/jwt';
+import { Discord, OAuth2RequestError, generateState } from 'arctic';
+import type { APIUser } from 'discord.js';
+import { Elysia, t, type CookieOptions } from 'elysia';
 import fssync from 'fs';
-import { IncomingMessage } from 'node:http';
-import passport from 'passport';
 import path from 'path';
-import polka from 'polka';
-import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.js';
-import { NonNullableProperty } from '../bot/lib/misc.js';
-import { db } from '../db/postgres.js';
-import './strategies/discord.js';
-import { DiscordPassportStrategy } from './strategies/discord.js';
-import { releaseNotification, verifySignature } from './webhook.js';
+import { client } from '../bot/bot.ts';
+import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.ts';
+import { getGuild } from '../bot/lib/misc.ts';
+import { db } from '../db/postgres.ts';
+import type { API } from './api.ts';
+import { GitHubReleaseWebhookBody, releaseNotification, verifySignature } from './webhook.ts';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
 
-type AddRawBody<T> = T & { rawBody?: Buffer };
-function hasRawBody<T>(record: AddRawBody<T>): record is NonNullableProperty<AddRawBody<T>, 'rawBody'> {
-    return Buffer.isBuffer(record.rawBody);
-}
+const COOKIE_CONFIGURATION: Pick<CookieOptions, 'sameSite' | 'secure'> = {
+    sameSite: IS_DEVELOPMENT_ENVIRONMENT ? 'lax' : 'strict',
+    secure: !IS_DEVELOPMENT_ENVIRONMENT,
+};
 
 export function startWebserver() {
     if (process.env.BOT_ONLY === 'true') return;
+    if (!process.env.SESSION_SECRET) throw "The 'SESSION_SECRET' environment variable is required.";
+    if (!process.env.APPLICATION_CLIENT_ID) throw "The 'APPLICATION_CLIENT_ID' environment variable is required.";
+    if (!process.env.APPLICATION_CLIENT_SECRET) throw "The 'APPLICATION_CLIENT_SECRET' environment variable is required.";
+    if (!process.env.DOMAIN && !IS_DEVELOPMENT_ENVIRONMENT) throw "The 'DOMAIN' environment variable is required in production.";
 
-    const app = polka();
-    const pg_store = store(session);
+    const discordOAuthProvider = new Discord(
+        process.env.APPLICATION_CLIENT_ID,
+        process.env.APPLICATION_CLIENT_SECRET,
+        IS_DEVELOPMENT_ENVIRONMENT ? 'http://localhost:3001/api/auth/redirect' : `https://${process.env.DOMAIN}/api/auth/redirect`
+    );
 
     /**************
      * MIDDLEWARE *
      **************/
 
-    app.use(
-        cors({
-            origin: IS_DEVELOPMENT_ENVIRONMENT ? ['http://localhost:3000'] : [],
-            credentials: true,
-        })
-    );
-
-    app.use(
-        bodyParser.json({
-            verify: (req: AddRawBody<IncomingMessage>, _, buffer) => {
-                req.rawBody = buffer;
-            },
-        })
-    );
-
-    if (!process.env.SESSION_SECRET) throw "The 'SESSION_SECRET' environment variable is required.";
-
-    app.use(
-        session({
-            secret: process.env.SESSION_SECRET,
-            cookie: {
-                maxAge: 86_400_000, // 1 day
-                httpOnly: true,
-                secure: !IS_DEVELOPMENT_ENVIRONMENT, // only send cookie over HTTPS, will cause issues if proxy is misconfigured
-            },
-            resave: false,
-            saveUninitialized: false,
-            store: new pg_store({ pool: db }),
-            proxy: !IS_DEVELOPMENT_ENVIRONMENT, // trust first proxy, must be configured to forward original protocol in X-Forwarded-Proto header
-        })
-    );
-
-    app.use(passport.initialize());
-    app.use(passport.session());
+    const app = new Elysia()
+        .use(
+            cors({
+                origin: IS_DEVELOPMENT_ENVIRONMENT ? ['localhost:3000'] : false,
+                methods: ['GET', 'POST'],
+                credentials: true,
+            })
+        )
+        .use(jwt({ secret: process.env.SESSION_SECRET, schema: t.Object({ id: t.String() }), exp: '1d' }))
+        .derive(async ({ cookie: { discord_auth }, jwt }): Promise<{ user: { id: string } | null }> => {
+            return {
+                user: (await jwt.verify(discord_auth.value)) || null,
+            };
+        });
 
     /**********
      * ROUTES *
      **********/
 
-    app.get('/api/auth/login', passport.authenticate('discord'));
+    app.get('/api/auth/login', async ({ cookie: { discord_oauth_state }, set }) => {
+        const state = generateState();
+        const url = await discordOAuthProvider.createAuthorizationURL(state, { scopes: ['identify'] });
 
-    app.get('/api/auth/redirect', (req, res, next) => {
-        passport.authenticate('discord', (_err: any, user?: Express.User | false | null, info?: DiscordPassportStrategy.Info) => {
-            if (info?.error) {
-                res.setHeader('Location', '/?error=' + info.error);
-                res.statusCode = 302;
-                res.end();
-                return;
-            }
+        discord_oauth_state.set({
+            value: state,
+            maxAge: 600, // 10 minutes
+            httpOnly: true,
+            ...COOKIE_CONFIGURATION,
+        });
 
-            if (!user) {
-                res.setHeader('Location', '/?error=1');
-                res.statusCode = 302;
-                res.end();
-                return;
-            }
-
-            req.logIn(user, (err) => {
-                res.setHeader('Location', err ? '/?error=2' : '/');
-                res.statusCode = 302;
-                res.end();
-            });
-        })(req, res, next);
+        set.redirect = url.toString();
     });
 
-    app.post('/api/auth/logout', (req, res) => {
-        if (req.isUnauthenticated()) {
-            res.statusCode = 401;
-            res.end('Unauthorized');
-            return;
+    app.get(
+        '/api/auth/redirect',
+        async ({ query: { code, state }, cookie: { discord_oauth_state, discord_auth }, set, jwt }) => {
+            if (state !== discord_oauth_state.value) {
+                set.status = 400;
+                return 'Bad Request';
+            }
+
+            try {
+                const tokens = await discordOAuthProvider.validateAuthorizationCode(code);
+                const discordUserResponse = await fetch('https://discord.com/api/users/@me', {
+                    headers: {
+                        Authorization: `Bearer ${tokens.accessToken}`,
+                    },
+                });
+
+                const discordUser: APIUser = await discordUserResponse.json();
+
+                discord_auth.set({
+                    value: await jwt.sign({ id: discordUser.id }),
+                    path: '/',
+                    maxAge: 86_400, // 1 day
+                    httpOnly: true,
+                    ...COOKIE_CONFIGURATION,
+                });
+
+                discord_oauth_state.remove(COOKIE_CONFIGURATION);
+
+                set.redirect = '/';
+                return;
+            } catch (error) {
+                if (error instanceof OAuth2RequestError) {
+                    set.status = 400;
+                    return 'Bad Request';
+                } else {
+                    console.error(error);
+                    set.status = 500;
+                    return 'Internal Server Error';
+                }
+            }
+        },
+        { query: t.Object({ code: t.String(), state: t.String() }) }
+    );
+
+    app.post('/api/auth/logout', async ({ user, set, cookie: { discord_auth } }) => {
+        if (!user) {
+            set.status = 401;
+            return 'Unauthorized';
         }
 
-        if (req.session) {
-            req.session.destroy(() => {
-                // clear session cookie
-                res.setHeader('Set-Cookie', `connect.sid=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT`);
+        discord_auth.remove({
+            path: '/',
+            ...COOKIE_CONFIGURATION,
+        });
 
-                res.statusCode = 200;
-                res.end('OK');
-            });
-        } else {
-            res.statusCode = 400;
-            res.end('Bad Request');
-        }
+        set.status = 200;
+        return 'OK';
     });
 
-    app.get('/api/user/me', (req, res) => {
+    app.get('/api/user/me', async ({ user, set }) => {
         // 200 OK - user is logged in, data in response
         // 204 No Content - user not logged in, no data available
+        // 404 Not Found - user not found in Discord, no data available
 
-        if (req.isUnauthenticated()) {
-            res.statusCode = 204;
-            res.end('No Content');
-            return;
+        if (!user) {
+            set.status = 204;
+            return 'No Content';
         }
 
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        res.end(JSON.stringify(req.user));
+        const discordUser = await client.users.fetch(user.id)?.catch(() => undefined);
+
+        if (!discordUser) {
+            set.status = 404;
+            return 'Not Found';
+        }
+
+        const data: API.UserInformation = {
+            id: discordUser.id,
+            username: discordUser.username,
+            avatarURL: discordUser.displayAvatarURL(),
+            isBanned: Boolean(
+                await getGuild()
+                    .bans.fetch(discordUser)
+                    .catch(() => undefined)
+            ),
+        };
+
+        return data;
     });
 
-    app.get('/api/ban/me', async (req, res) => {
-        if (req.isUnauthenticated()) {
-            res.statusCode = 401;
-            res.end('Unauthorized');
-            return;
+    app.get('/api/ban/me', async ({ set, user }) => {
+        if (!user) {
+            set.status = 401;
+            return 'Unauthorized';
         }
-
-        // @ts-expect-error
-        const userID = req.user?.id;
 
         try {
-            const banInformation = JSON.stringify(await getUserAppealData(userID));
-            res.setHeader('Content-Type', 'application/json');
-            res.statusCode = 200;
-            res.end(banInformation);
+            return await getUserAppealData(user.id);
         } catch (error) {
-            console.error('/api/ban/me', userID, error);
-            res.statusCode = 400;
-            res.end('Bad Request');
+            console.error('/api/ban/me', user.id, error);
+            set.status = 400;
+            return 'Bad Request';
         }
     });
 
-    app.post('/api/appeal', async (req, res) => {
-        if (req.isUnauthenticated()) {
-            res.statusCode = 401;
-            res.end('Unauthorized');
+    app.post(
+        '/api/appeal',
+        async ({ user, set, body: { reason } }) => {
+            if (!user) {
+                set.status = 401;
+                return 'Unauthorized';
+            }
+
+            try {
+                await BanAppeal.create(user.id, reason);
+                set.status = 200;
+                return 'OK';
+            } catch (error) {
+                console.error('/api/appeal', user.id, error);
+                set.status = 400;
+                return 'Bad Request';
+            }
+        },
+        { body: t.Object({ reason: t.String() }) }
+    );
+
+    app.post(
+        '/api/webhook/release/:channelID',
+        async ({ params: { channelID }, set, body, request, headers: { 'x-hub-signature-256': signature } }) => {
+            const project = (
+                await db.query({
+                    text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
+                    values: [channelID],
+                    name: 'project-get-webhook-secret',
+                })
+            ).rows[0];
+
+            if (!project || !project.webhook_secret || !project.role_id) {
+                set.status = 404;
+                return 'Not Found';
+            }
+
+            const rawBodyBuffer = Buffer.from(await request.clone().arrayBuffer());
+            if (!verifySignature(signature, rawBodyBuffer, project.webhook_secret)) {
+                set.status = 403;
+                return 'Forbidden';
+            }
+
+            set.status = await releaseNotification(channelID, project.role_id, body);
             return;
+        },
+        {
+            type: 'json',
+            body: GitHubReleaseWebhookBody,
+            params: t.Object({ channelID: t.String({ pattern: '^[0-9]+$', default: '0', examples: '1044804143455420539' }) }),
+            headers: t.Object({ 'x-hub-signature-256': t.String({ pattern: '^sha256=[0-9a-f]{64}$', default: 'sha256=0' }), 'x-github-event': t.Literal('release') }),
         }
-
-        // @ts-expect-error
-        const userID = req.user?.id;
-        const reason = req.body?.reason;
-
-        try {
-            await BanAppeal.create(userID, reason);
-            res.statusCode = 200;
-            res.end('OK');
-        } catch (error) {
-            console.error('/api/appeal', userID, error);
-            res.statusCode = 400;
-            res.end('Bad Request');
-        }
-    });
-
-    app.post('/api/webhook/release/:id', async (req, res) => {
-        const channelID = req.params.id;
-        if (/\D/.test(channelID) || !hasRawBody(req)) {
-            res.statusCode = 400;
-            res.end();
-            return;
-        }
-
-        const signature = req.headers['x-hub-signature-256'];
-        if (!signature || Array.isArray(signature)) {
-            res.statusCode = 400;
-            res.end();
-            return;
-        }
-
-        const project = (
-            await db.query({
-                text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
-                values: [channelID],
-                name: 'project-get-webhook-secret',
-            })
-        ).rows[0];
-
-        if (!project || !project.webhook_secret || !project.role_id) {
-            res.statusCode = 404;
-            res.end();
-            return;
-        }
-
-        if (!verifySignature(signature, req.rawBody, project.webhook_secret)) {
-            res.statusCode = 403;
-            res.end();
-            return;
-        }
-
-        res.statusCode = await releaseNotification(channelID, project.role_id, req);
-        res.end();
-    });
+    );
 
     /*********
      * START *
@@ -241,7 +254,7 @@ export function startWebserver() {
             console.log(`Created directory for UNIX socket "${udsDirectory}".`);
         }
 
-        app.listen({ path: udsPath }, () => {
+        app.listen({ unix: udsPath }, () => {
             console.log(`Started HTTP API on UNIX socket "${udsPath}".`);
 
             if (process.env.UDS_UID || process.env.UDS_GID) {

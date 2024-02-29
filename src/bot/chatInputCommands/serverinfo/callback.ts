@@ -1,9 +1,9 @@
 import { EmbedBuilder } from 'discord.js';
 import os from 'os';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
-import { formatBytes } from '../../lib/misc.js';
-import { secondsToString } from '../../lib/time.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon } from '../../lib/embeds.ts';
+import { formatBytes } from '../../lib/misc.ts';
+import { secondsToString } from '../../lib/time.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: (interaction) => {

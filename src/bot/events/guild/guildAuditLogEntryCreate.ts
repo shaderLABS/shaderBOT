@@ -1,11 +1,11 @@
-import { APIAuditLogChange, AuditLogEvent, Events } from 'discord.js';
-import { client } from '../../bot.js';
-import { Event } from '../../eventHandler.js';
-import { BanAppeal } from '../../lib/banAppeal.js';
-import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
-import { PastPunishment, Punishment } from '../../lib/punishment.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import { AuditLogEvent, Events, type APIAuditLogChange } from 'discord.js';
+import { client } from '../../bot.ts';
+import type { Event } from '../../eventHandler.ts';
+import { BanAppeal } from '../../lib/banAppeal.ts';
+import log from '../../lib/log.ts';
+import { parseUser } from '../../lib/misc.ts';
+import { PastPunishment, Punishment } from '../../lib/punishment.ts';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 function parseChangeTimestamp(timestamp: APIAuditLogChange['old_value']) {
     return typeof timestamp === 'string' ? Date.parse(timestamp) : 0;

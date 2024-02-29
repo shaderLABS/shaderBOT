@@ -1,8 +1,8 @@
 import { EmbedBuilder } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.js';
-import { Project } from '../../../lib/project.js';
-import { formatRelativeTime } from '../../../lib/time.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.ts';
+import { Project } from '../../../lib/project.ts';
+import { formatRelativeTime } from '../../../lib/time.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

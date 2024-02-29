@@ -1,7 +1,7 @@
 import { Collection } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { Pasta } from './lib/pasta.js';
+import { Pasta } from './lib/pasta.ts';
 
 export const pastaPath = 'customContent/pasta';
 export const pastaStore = new Collection<string, Pasta>();

@@ -1,8 +1,8 @@
 import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { client, settings } from '../../bot.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { replyInfo } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.ts';
+import { client, settings } from '../../bot.ts';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { replyInfo } from '../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,

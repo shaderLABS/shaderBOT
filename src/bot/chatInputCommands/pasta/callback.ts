@@ -1,6 +1,6 @@
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { replyError } from '../../lib/embeds.js';
-import { pastaStore } from '../../pastaHandler.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { replyError } from '../../lib/embeds.ts';
+import { pastaStore } from '../../pastaHandler.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

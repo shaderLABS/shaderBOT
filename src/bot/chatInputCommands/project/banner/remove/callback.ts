@@ -1,6 +1,6 @@
-import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
-import { replyError, replySuccess } from '../../../../lib/embeds.js';
-import { Project } from '../../../../lib/project.js';
+import type { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.ts';
+import { replyError, replySuccess } from '../../../../lib/embeds.ts';
+import { Project } from '../../../../lib/project.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

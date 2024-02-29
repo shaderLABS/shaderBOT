@@ -33,7 +33,7 @@ export async function registerModals(dir: string, directories: string[] = []) {
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await registerModals(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
-            } else if (dirEntry.name.endsWith('.js')) {
+            } else if (dirEntry.name.endsWith('.ts')) {
                 const { modal }: { modal: ModalSubmitCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 modals.set(modal.customID, modal);
             }

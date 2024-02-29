@@ -1,5 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 export default {
     name: 'stickythread',

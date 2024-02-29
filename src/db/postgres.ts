@@ -1,6 +1,5 @@
-import { setTimeout as sleep } from 'node:timers/promises';
 import pg from 'pg';
-import { shutdown } from '../bot/lib/misc.js';
+import { shutdown } from '../bot/lib/misc.ts';
 
 export const db = new pg.Pool({
     user: process.env.PG_USER || 'postgres',
@@ -23,7 +22,7 @@ export async function connectPostgreSQL() {
             if (!--retries) return shutdown(1);
 
             console.log(`Retrying ${retries} more times...`);
-            await sleep(5000);
+            await Bun.sleep(5000);
         }
     }
 }

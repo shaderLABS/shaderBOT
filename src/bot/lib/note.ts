@@ -1,9 +1,9 @@
 import { EmbedBuilder } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { EmbedColor, EmbedIcon } from './embeds.js';
-import log from './log.js';
-import { formatContextURL, parseUser } from './misc.js';
-import { formatTimeDate } from './time.js';
+import { db } from '../../db/postgres.ts';
+import { EmbedColor, EmbedIcon } from './embeds.ts';
+import log from './log.ts';
+import { formatContextURL, parseUser } from './misc.ts';
+import { formatTimeDate } from './time.ts';
 
 export class Note {
     public readonly id: string;

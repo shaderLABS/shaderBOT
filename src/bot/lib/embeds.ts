@@ -1,11 +1,9 @@
 import {
     ActionRowBuilder,
-    AnySelectMenuInteraction,
     ApplicationCommandType,
     ButtonBuilder,
     ButtonInteraction,
     ButtonStyle,
-    CacheType,
     ChatInputCommandInteraction,
     CommandInteraction,
     ComponentType,
@@ -15,9 +13,11 @@ import {
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     PermissionFlagsBits,
-    TextBasedChannel,
     User,
     UserContextMenuCommandInteraction,
+    type AnySelectMenuInteraction,
+    type CacheType,
+    type TextBasedChannel,
 } from 'discord.js';
 
 export const enum EmbedColor {

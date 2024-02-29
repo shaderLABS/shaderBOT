@@ -1,9 +1,9 @@
 import { Attachment, ChannelType, Embed, EmbedBuilder, Events, MessageFlags } from 'discord.js';
-import { client, settings } from '../../bot.js';
-import { Event } from '../../eventHandler.js';
-import { EmbedColor } from '../../lib/embeds.js';
-import { getMaximumUploadBytes, getNumberWithOrdinalSuffix, parseUser, trimString } from '../../lib/misc.js';
-import { formatLongTimeDate } from '../../lib/time.js';
+import { client, settings } from '../../bot.ts';
+import type { Event } from '../../eventHandler.ts';
+import { EmbedColor } from '../../lib/embeds.ts';
+import { getMaximumUploadBytes, getNumberWithOrdinalSuffix, parseUser, trimString } from '../../lib/misc.ts';
+import { formatLongTimeDate } from '../../lib/time.ts';
 
 export const event: Event = {
     name: Events.MessageUpdate,

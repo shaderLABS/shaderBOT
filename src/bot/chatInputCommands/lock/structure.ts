@@ -1,5 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { LockSlowmode } from '../../lib/lockSlowmode.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
+import { LockSlowmode } from '../../lib/lockSlowmode.ts';
 
 export default {
     name: 'lock',

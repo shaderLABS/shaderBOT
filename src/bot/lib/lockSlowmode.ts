@@ -1,9 +1,9 @@
-import { AnyThreadChannel, BitField, ChannelType, OverwriteType, PermissionFlagsBits, PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client, timeoutStore } from '../bot.js';
-import log from './log.js';
-import { parseUser } from './misc.js';
-import { formatTimeDate, secondsToString } from './time.js';
+import { BitField, ChannelType, OverwriteType, PermissionFlagsBits, TextChannel, VoiceChannel, type AnyThreadChannel, type PermissionOverwriteOptions } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client, timeoutStore } from '../bot.ts';
+import log from './log.ts';
+import { parseUser } from './misc.ts';
+import { formatTimeDate, secondsToString } from './time.ts';
 
 const enum LockPermissionFlagBits {
     AllowSendMessages = 1 << 0,

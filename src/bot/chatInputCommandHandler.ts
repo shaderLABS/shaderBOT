@@ -1,9 +1,9 @@
-import { AnyThreadChannel, ChannelType, ChatInputCommandInteraction, Collection, GuildMember, PermissionResolvable, TextChannel, VoiceChannel } from 'discord.js';
+import { ChannelType, ChatInputCommandInteraction, Collection, GuildMember, TextChannel, VoiceChannel, type AnyThreadChannel, type PermissionResolvable } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { MessageContextMenuCommandCallback, UserContextMenuCommandCallback } from './contextMenuCommandHandler.js';
-import { replyError } from './lib/embeds.js';
+import type { MessageContextMenuCommandCallback, UserContextMenuCommandCallback } from './contextMenuCommandHandler.ts';
+import { replyError } from './lib/embeds.ts';
 
 export type ChatInputCommandCallback = {
     readonly channelWhitelist?: string[];
@@ -86,7 +86,7 @@ export async function registerChatInputCommands(dir: string, directories: string
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await registerChatInputCommands(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
-            } else if (dirEntry.name === 'callback.js') {
+            } else if (dirEntry.name === 'callback.ts') {
                 const { command }: { command: ChatInputCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
 
                 let collection = chatInputCommands;

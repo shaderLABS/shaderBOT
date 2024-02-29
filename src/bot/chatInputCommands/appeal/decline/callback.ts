@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { BanAppeal } from '../../../lib/banAppeal.js';
-import { replyError } from '../../../lib/embeds.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { BanAppeal } from '../../../lib/banAppeal.ts';
+import { replyError } from '../../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,

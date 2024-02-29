@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { BanAppeal } from '../../lib/banAppeal.js';
-import { replyError, replySuccess } from '../../lib/embeds.js';
-import { Punishment } from '../../lib/punishment.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { BanAppeal } from '../../lib/banAppeal.ts';
+import { replyError, replySuccess } from '../../lib/embeds.ts';
+import { Punishment } from '../../lib/punishment.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,

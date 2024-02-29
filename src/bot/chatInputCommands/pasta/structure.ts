@@ -1,4 +1,4 @@
-import { ApplicationCommandData, ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, type ApplicationCommandData } from 'discord.js';
 
 export default {
     name: 'pasta',

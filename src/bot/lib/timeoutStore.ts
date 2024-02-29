@@ -1,13 +1,13 @@
-import { client } from '../bot.js';
-import { LockSlowmode } from './lockSlowmode.js';
-import { Punishment } from './punishment.js';
+import { client } from '../bot.ts';
+import { LockSlowmode } from './lockSlowmode.ts';
+import { Punishment } from './punishment.ts';
 
 export class TimeoutStore {
-    private mutes = new Map<string, NodeJS.Timeout>();
-    private bans = new Map<string, NodeJS.Timeout>();
+    private mutes = new Map<string, Timer>();
+    private bans = new Map<string, Timer>();
 
-    private locks = new Map<string, NodeJS.Timeout>();
-    private slowmodes = new Map<string, NodeJS.Timeout>();
+    private locks = new Map<string, Timer>();
+    private slowmodes = new Map<string, Timer>();
 
     public set(entry: Punishment | LockSlowmode, onlyExpiringToday: boolean) {
         if (!entry.expireTimestamp || (onlyExpiringToday && entry.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;

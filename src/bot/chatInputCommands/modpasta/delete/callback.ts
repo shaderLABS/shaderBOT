@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
-import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
-import { pastaStore } from '../../../pastaHandler.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError, replySuccess } from '../../../lib/embeds.ts';
+import log from '../../../lib/log.ts';
+import { parseUser } from '../../../lib/misc.ts';
+import { pastaStore } from '../../../pastaHandler.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

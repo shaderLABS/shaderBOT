@@ -1,14 +1,14 @@
 import { User } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { client } from '../../bot.js';
-import { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.js';
-import { editContextURL } from '../../lib/context.js';
-import { replyError, replySuccess } from '../../lib/embeds.js';
-import { Note } from '../../lib/note.js';
-import { PastPunishment, Punishment } from '../../lib/punishment.js';
-import { hasPermissionForTarget } from '../../lib/searchMessage.js';
-import { splitString, stringToSeconds } from '../../lib/time.js';
-import { Warning } from '../../lib/warning.js';
+import { db } from '../../../db/postgres.ts';
+import { client } from '../../bot.ts';
+import type { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.ts';
+import { editContextURL } from '../../lib/context.ts';
+import { replyError, replySuccess } from '../../lib/embeds.ts';
+import { Note } from '../../lib/note.ts';
+import { PastPunishment, Punishment } from '../../lib/punishment.ts';
+import { hasPermissionForTarget } from '../../lib/searchMessage.ts';
+import { splitString, stringToSeconds } from '../../lib/time.ts';
+import { Warning } from '../../lib/warning.ts';
 
 async function requireContext(value: string) {
     const IDs = value.split('/');

@@ -1,11 +1,11 @@
 import { PermissionFlagsBits, User } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
-import { BanAppeal } from '../../lib/banAppeal.js';
-import { replyButtonPages } from '../../lib/embeds.js';
-import { Note } from '../../lib/note.js';
-import { PastPunishment, Punishment } from '../../lib/punishment.js';
-import { Warning } from '../../lib/warning.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { getPunishmentPoints } from '../../lib/automaticPunishment.ts';
+import { BanAppeal } from '../../lib/banAppeal.ts';
+import { replyButtonPages } from '../../lib/embeds.ts';
+import { Note } from '../../lib/note.ts';
+import { PastPunishment, Punishment } from '../../lib/punishment.ts';
+import { Warning } from '../../lib/warning.ts';
 
 export async function getUserModerationLogPages(targetUser: User) {
     const queries = await Promise.all([

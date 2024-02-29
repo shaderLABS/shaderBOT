@@ -1,9 +1,9 @@
 import { ChannelType } from 'discord.js';
-import { client } from '../bot.js';
-import { replyError, replyInfo, replySuccess } from '../lib/embeds.js';
-import log from '../lib/log.js';
-import { getAlphabeticalChannelPosition, parseUser } from '../lib/misc.js';
-import { ModalSubmitCallback } from '../modalSubmitHandler.js';
+import { client } from '../bot.ts';
+import { replyError, replyInfo, replySuccess } from '../lib/embeds.ts';
+import log from '../lib/log.ts';
+import { getAlphabeticalChannelPosition, parseUser } from '../lib/misc.ts';
+import type { ModalSubmitCallback } from '../modalSubmitHandler.ts';
 
 export const modal: ModalSubmitCallback = {
     customID: 'editProjectChannel',

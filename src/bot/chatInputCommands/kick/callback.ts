@@ -1,9 +1,9 @@
 import { GuildMember, PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { getContextURL } from '../../lib/context.js';
-import { replyError, replySuccess } from '../../lib/embeds.js';
-import { PastPunishment } from '../../lib/punishment.js';
-import { hasPermissionForTarget } from '../../lib/searchMessage.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { getContextURL } from '../../lib/context.ts';
+import { replyError, replySuccess } from '../../lib/embeds.ts';
+import { PastPunishment } from '../../lib/punishment.ts';
+import { hasPermissionForTarget } from '../../lib/searchMessage.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

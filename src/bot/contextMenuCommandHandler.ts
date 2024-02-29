@@ -1,9 +1,9 @@
-import { Collection, MessageContextMenuCommandInteraction, PermissionResolvable, UserContextMenuCommandInteraction } from 'discord.js';
+import { Collection, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, type PermissionResolvable } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
 import url from 'url';
-import { hasPermissionsForCommand } from './chatInputCommandHandler.js';
-import { replyError } from './lib/embeds.js';
+import { hasPermissionsForCommand } from './chatInputCommandHandler.ts';
+import { replyError } from './lib/embeds.ts';
 
 /***********
  * EXECUTE *
@@ -86,7 +86,7 @@ export async function registerMessageContextMenuCommands(dir: string, directorie
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await registerMessageContextMenuCommands(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
-            } else if (dirEntry.name === 'callback.js') {
+            } else if (dirEntry.name === 'callback.ts') {
                 const { command }: { command: MessageContextMenuCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 messageContextMenuCommands.set(command.commandName, command);
             }
@@ -102,7 +102,7 @@ export async function registerUserContextMenuCommands(dir: string, directories: 
         dirEntries.map(async (dirEntry) => {
             if (dirEntry.isDirectory()) {
                 await registerUserContextMenuCommands(path.join(dir, dirEntry.name), [...directories, dirEntry.name]);
-            } else if (dirEntry.name === 'callback.js') {
+            } else if (dirEntry.name === 'callback.ts') {
                 const { command }: { command: UserContextMenuCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 userContextMenuCommands.set(command.commandName, command);
             }
