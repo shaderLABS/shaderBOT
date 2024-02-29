@@ -1,7 +1,7 @@
 import JSONC from 'comment-json';
 import { AttachmentBuilder, PermissionFlagsBits } from 'discord.js';
-import { settings } from '../../../bot.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
+import { settings } from '../../../bot.ts';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

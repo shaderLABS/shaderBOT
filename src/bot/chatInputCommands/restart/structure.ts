@@ -1,4 +1,4 @@
-import { ApplicationCommandData, PermissionFlagsBits } from 'discord.js';
+import { PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
 
 export default {
     name: 'restart',

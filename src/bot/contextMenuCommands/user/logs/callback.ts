@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { getUserModerationLogPages } from '../../../chatInputCommands/logs/callback.js';
-import { UserContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
-import { replyButtonPages } from '../../../lib/embeds.js';
+import { getUserModerationLogPages } from '../../../chatInputCommands/logs/callback.ts';
+import type { UserContextMenuCommandCallback } from '../../../contextMenuCommandHandler.ts';
+import { replyButtonPages } from '../../../lib/embeds.ts';
 
 export const command: UserContextMenuCommandCallback = {
     commandName: 'Logs',

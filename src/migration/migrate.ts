@@ -1,8 +1,8 @@
 import { spawnSync } from 'child_process';
-import { connectPostgreSQL, db } from '../db/postgres.js';
+import { connectPostgreSQL, db } from '../db/postgres.ts';
 
 function applyMigration(filename: string) {
-    const { status } = spawnSync('node', [`build/migration/${filename}.js`], { env: process.env, stdio: 'inherit' });
+    const { status } = spawnSync('node', [`src/migration/${filename}.ts`], { env: process.env, stdio: 'inherit' });
     if (status !== 0) {
         throw new Error(`Migration failed with exit code ${status}.`);
     }

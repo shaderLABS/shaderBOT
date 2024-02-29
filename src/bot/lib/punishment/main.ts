@@ -1,6 +1,6 @@
-import { formatContextURL, parseUser } from '../misc.js';
-import { formatTimeDate } from '../time.js';
-import { TimeoutEntry } from '../timeoutStore.js';
+import { formatContextURL, parseUser } from '../misc.ts';
+import { formatTimeDate } from '../time.ts';
+import type { TimeoutEntry } from '../timeoutStore.ts';
 
 export abstract class Punishment {
     public readonly id: string;

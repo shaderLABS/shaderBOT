@@ -1,6 +1,6 @@
-import { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
-import { Project } from '../../../lib/project.js';
+import type { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.ts';
+import { replyError, replySuccess } from '../../../lib/embeds.ts';
+import { Project } from '../../../lib/project.ts';
 
 export const command: MessageContextMenuCommandCallback = {
     commandName: 'Pin/Unpin',

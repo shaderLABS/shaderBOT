@@ -1,8 +1,8 @@
 import { Events } from 'discord.js';
-import { Event } from '../../eventHandler.js';
-import log from '../../lib/log.js';
-import { parseUser } from '../../lib/misc.js';
-import { Track } from '../../lib/punishment/track.js';
+import type { Event } from '../../eventHandler.ts';
+import log from '../../lib/log.ts';
+import { parseUser } from '../../lib/misc.ts';
+import { Track } from '../../lib/punishment/track.ts';
 
 export const event: Event = {
     name: Events.GuildMemberRemove,

@@ -1,4 +1,4 @@
-import { TimeoutEntry } from '../timeoutStore.js';
+import type { TimeoutEntry } from '../timeoutStore.ts';
 
 export abstract class ChannelRestriction implements TimeoutEntry {
     public readonly id: string;

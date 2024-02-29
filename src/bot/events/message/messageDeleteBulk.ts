@@ -1,7 +1,7 @@
-import { ChannelType, Events, PartialMessage } from 'discord.js';
-import { Event } from '../../eventHandler.js';
-import { Backup } from '../../lib/backup.js';
-import log from '../../lib/log.js';
+import { ChannelType, Events, type PartialMessage } from 'discord.js';
+import type { Event } from '../../eventHandler.ts';
+import { Backup } from '../../lib/backup.ts';
+import log from '../../lib/log.ts';
 
 export const event: Event = {
     name: Events.MessageBulkDelete,

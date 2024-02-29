@@ -1,10 +1,10 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, StringSelectMenuBuilder } from 'discord.js';
 import fs from 'fs/promises';
 import path from 'path';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { Backup } from '../../../lib/backup.js';
-import { replyError, replyInfo, sendError } from '../../../lib/embeds.js';
-import { formatTimeDateString } from '../../../lib/time.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { Backup } from '../../../lib/backup.ts';
+import { replyError, replyInfo, sendError } from '../../../lib/embeds.ts';
+import { formatTimeDateString } from '../../../lib/time.ts';
 
 type BackupEntry = {
     fileName: string;

@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { automaticResponseStore } from '../../../automaticResponseHandler.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { AutomaticResponse } from '../../../lib/automaticResponse.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
-import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
+import { automaticResponseStore } from '../../../automaticResponseHandler.ts';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { AutomaticResponse } from '../../../lib/automaticResponse.ts';
+import { replyError, replySuccess } from '../../../lib/embeds.ts';
+import log from '../../../lib/log.ts';
+import { parseUser } from '../../../lib/misc.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

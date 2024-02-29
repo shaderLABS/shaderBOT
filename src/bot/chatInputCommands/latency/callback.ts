@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
-import { client } from '../../bot.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
+import { client } from '../../bot.ts';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon } from '../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: (interaction) => {

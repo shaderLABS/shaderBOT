@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from 'discord.js';
-import { settings } from '../../../bot.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
-import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
-import { updateObjectValueByStringPath } from '../../../lib/objectManipulation.js';
+import { settings } from '../../../bot.ts';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { replyError, replySuccess } from '../../../lib/embeds.ts';
+import log from '../../../lib/log.ts';
+import { parseUser } from '../../../lib/misc.ts';
+import { updateObjectValueByStringPath } from '../../../lib/objectManipulation.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageGuild,

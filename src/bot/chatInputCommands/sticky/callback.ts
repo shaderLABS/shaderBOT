@@ -1,6 +1,6 @@
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { replyError, replyInfo } from '../../lib/embeds.js';
-import { StickyThread } from '../../lib/stickyThread.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { replyError, replyInfo } from '../../lib/embeds.ts';
+import { StickyThread } from '../../lib/stickyThread.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

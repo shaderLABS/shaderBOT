@@ -1,8 +1,8 @@
-import { AnyThreadChannel, ChannelType, ThreadAutoArchiveDuration } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client } from '../bot.js';
-import log from './log.js';
-import { parseUser } from './misc.js';
+import { ChannelType, ThreadAutoArchiveDuration, type AnyThreadChannel } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client } from '../bot.ts';
+import log from './log.ts';
+import { parseUser } from './misc.ts';
 
 export class StickyThread {
     public readonly id: string;

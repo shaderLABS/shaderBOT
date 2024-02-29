@@ -1,10 +1,10 @@
 import { Events, Message, PermissionFlagsBits } from 'discord.js';
-import { handleAutomaticResponse } from '../../automaticResponseHandler.js';
-import { settings } from '../../bot.js';
-import { Event } from '../../eventHandler.js';
-import { NonNullableProperty } from '../../lib/misc.js';
-import { matchBlacklist } from '../../lib/searchMessage.js';
-import { checkSpam } from '../../lib/spamProtection.js';
+import { handleAutomaticResponse } from '../../automaticResponseHandler.ts';
+import { settings } from '../../bot.ts';
+import type { Event } from '../../eventHandler.ts';
+import type { NonNullableProperty } from '../../lib/misc.ts';
+import { matchBlacklist } from '../../lib/searchMessage.ts';
+import { checkSpam } from '../../lib/spamProtection.ts';
 
 export type GuildMessage = NonNullableProperty<Message<true>, 'member'>;
 

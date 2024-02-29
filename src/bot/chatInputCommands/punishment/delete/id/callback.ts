@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
-import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
-import { replyError, replySuccess } from '../../../../lib/embeds.js';
-import { LiftedBan } from '../../../../lib/punishment/ban.js';
-import { Kick } from '../../../../lib/punishment/kick.js';
-import { LiftedMute } from '../../../../lib/punishment/mute.js';
-import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
+import type { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.ts';
+import { replyError, replySuccess } from '../../../../lib/embeds.ts';
+import { LiftedBan } from '../../../../lib/punishment/ban.ts';
+import { Kick } from '../../../../lib/punishment/kick.ts';
+import { LiftedMute } from '../../../../lib/punishment/mute.ts';
+import { hasPermissionForTarget } from '../../../../lib/searchMessage.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,

@@ -1,10 +1,10 @@
 import { AttachmentBuilder, blockQuote, ChannelType, EmbedBuilder, LimitedCollection, MessageFlags, PermissionFlagsBits } from 'discord.js';
-import { client, settings } from '../../../bot.js';
-import { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
-import { EmbedColor, replyError, replyInfo } from '../../../lib/embeds.js';
-import { isoLanguageCodeToFlagEmoji, isoLanguageCodeToName } from '../../../lib/languageCountryCode.js';
-import log from '../../../lib/log.js';
-import { parseUser } from '../../../lib/misc.js';
+import { client, settings } from '../../../bot.ts';
+import type { MessageContextMenuCommandCallback } from '../../../contextMenuCommandHandler.ts';
+import { EmbedColor, replyError, replyInfo } from '../../../lib/embeds.ts';
+import { isoLanguageCodeToFlagEmoji, isoLanguageCodeToName } from '../../../lib/languageCountryCode.ts';
+import log from '../../../lib/log.ts';
+import { parseUser } from '../../../lib/misc.ts';
 
 type Translation = {
     language: string;

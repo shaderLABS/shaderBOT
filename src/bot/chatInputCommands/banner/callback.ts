@@ -1,7 +1,7 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.js';
+import { db } from '../../../db/postgres.ts';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

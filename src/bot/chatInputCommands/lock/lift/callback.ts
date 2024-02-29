@@ -1,7 +1,7 @@
 import { ChannelType, PermissionFlagsBits } from 'discord.js';
-import { ChatInputCommandCallback } from '../../../chatInputCommandHandler.js';
-import { ChannelLock } from '../../../lib/channelRestriction/lock.js';
-import { replyError, replySuccess } from '../../../lib/embeds.js';
+import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
+import { ChannelLock } from '../../../lib/channelRestriction/lock.ts';
+import { replyError, replySuccess } from '../../../lib/embeds.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,

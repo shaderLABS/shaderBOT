@@ -1,14 +1,14 @@
 import { ThreadAutoArchiveDuration } from 'discord-api-types/v10';
 import { ChannelType, EmbedBuilder, escapeMarkdown, SnowflakeUtil, time, TimestampStyles, User } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { API } from '../../web/api.js';
-import { client, settings } from '../bot.js';
-import { EmbedColor, EmbedIcon } from './embeds.js';
-import log from './log.js';
-import { getNumberWithOrdinalSuffix, parseUser, trimString } from './misc.js';
-import { Ban } from './punishment/ban.js';
-import { StickyThread } from './stickyThread.js';
-import { formatTimeDate } from './time.js';
+import { db } from '../../db/postgres.ts';
+import type { API } from '../../web/api.ts';
+import { client, settings } from '../bot.ts';
+import { EmbedColor, EmbedIcon } from './embeds.ts';
+import log from './log.ts';
+import { getNumberWithOrdinalSuffix, parseUser, trimString } from './misc.ts';
+import { Ban } from './punishment/ban.ts';
+import { StickyThread } from './stickyThread.ts';
+import { formatTimeDate } from './time.ts';
 
 export class BanAppeal {
     public readonly id: string;

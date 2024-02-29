@@ -1,6 +1,6 @@
-import { getUserInfoEmbed } from '../../../chatInputCommands/info/callback.js';
-import { UserContextMenuCommandCallback } from '../../../contextMenuCommandHandler.js';
-import { userToMember } from '../../../lib/misc.js';
+import { getUserInfoEmbed } from '../../../chatInputCommands/info/callback.ts';
+import type { UserContextMenuCommandCallback } from '../../../contextMenuCommandHandler.ts';
+import { userToMember } from '../../../lib/misc.ts';
 
 export const command: UserContextMenuCommandCallback = {
     commandName: 'Info',

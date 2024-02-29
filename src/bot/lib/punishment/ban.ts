@@ -1,12 +1,12 @@
-import { UserResolvable } from 'discord.js';
-import { db } from '../../../db/postgres.js';
-import { client, timeoutStore } from '../../bot.js';
-import { BanAppeal } from '../banAppeal.js';
-import { sendInfo } from '../embeds.js';
-import log from '../log.js';
-import { getGuild, parseUser } from '../misc.js';
-import { formatTimeDate, secondsToString } from '../time.js';
-import { ExpirablePunishment, LiftedPunishment } from './main.js';
+import type { UserResolvable } from 'discord.js';
+import { db } from '../../../db/postgres.ts';
+import { client, timeoutStore } from '../../bot.ts';
+import { BanAppeal } from '../banAppeal.ts';
+import { sendInfo } from '../embeds.ts';
+import log from '../log.ts';
+import { getGuild, parseUser } from '../misc.ts';
+import { formatTimeDate, secondsToString } from '../time.ts';
+import { ExpirablePunishment, LiftedPunishment } from './main.ts';
 
 export class Ban extends ExpirablePunishment {
     readonly TYPE_STRING: string = 'Ban';

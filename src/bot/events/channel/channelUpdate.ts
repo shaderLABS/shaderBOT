@@ -1,6 +1,6 @@
 import { ChannelType, Events } from 'discord.js';
-import { Event } from '../../eventHandler.js';
-import { Project } from '../../lib/project.js';
+import type { Event } from '../../eventHandler.ts';
+import { Project } from '../../lib/project.ts';
 
 export const event: Event = {
     name: Events.ChannelUpdate,

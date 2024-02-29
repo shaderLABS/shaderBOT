@@ -1,5 +1,5 @@
-import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { ChannelLock } from '../../lib/channelRestriction/lock.js';
+import { ApplicationCommandOptionType, PermissionFlagsBits, type ApplicationCommandData } from 'discord.js';
+import { ChannelLock } from '../../lib/channelRestriction/lock.ts';
 
 export default {
     name: 'lock',

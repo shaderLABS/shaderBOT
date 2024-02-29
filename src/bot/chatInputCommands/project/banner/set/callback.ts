@@ -1,9 +1,9 @@
 import { AttachmentBuilder, EmbedBuilder, resolveFile } from 'discord.js';
 import sharp from 'sharp';
-import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon, replyError } from '../../../../lib/embeds.js';
-import { escapeXml, parseUser } from '../../../../lib/misc.js';
-import { Project } from '../../../../lib/project.js';
+import type { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon, replyError } from '../../../../lib/embeds.ts';
+import { escapeXml, parseUser } from '../../../../lib/misc.ts';
+import { Project } from '../../../../lib/project.ts';
 
 export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {

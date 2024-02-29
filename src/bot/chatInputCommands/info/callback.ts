@@ -1,8 +1,8 @@
 import { EmbedBuilder, GuildMember, User } from 'discord.js';
-import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
-import { EmbedColor, EmbedIcon } from '../../lib/embeds.js';
-import { userToMember } from '../../lib/misc.js';
-import { formatRelativeTime } from '../../lib/time.js';
+import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
+import { EmbedColor, EmbedIcon } from '../../lib/embeds.ts';
+import { userToMember } from '../../lib/misc.ts';
+import { formatRelativeTime } from '../../lib/time.ts';
 
 export function getUserInfoEmbed(targetUser: User, targetMember?: GuildMember) {
     const embed = new EmbedBuilder({

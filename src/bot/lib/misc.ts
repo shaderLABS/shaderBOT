@@ -1,6 +1,6 @@
-import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, UserResolvable } from 'discord.js';
-import { db } from '../../db/postgres.js';
-import { client, settings } from '../bot.js';
+import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, type UserResolvable } from 'discord.js';
+import { db } from '../../db/postgres.ts';
+import { client, settings } from '../bot.ts';
 
 // https://www.unicode.org/reports/tr18/#Line_Boundaries
 export const unicodeLineBoundaries = /\r\n|[\n\v\f\r\x85\u2028\u2029]/;
