@@ -37,7 +37,7 @@ export async function registerAutomaticResponses(dir: string) {
         dirEntries.map(async (dirEntry) => {
             if (!dirEntry.name.endsWith('.json')) return;
 
-            const automaticResponse = AutomaticResponse.fromJSON(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
+            const automaticResponse = new AutomaticResponse(await Bun.file(path.join(dirPath, dirEntry.name)).json());
             automaticResponseStore.set(automaticResponse.alias, automaticResponse);
         })
     );

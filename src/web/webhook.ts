@@ -17,7 +17,7 @@ export function verifySignature(signature: string, data: crypto.BinaryLike, key:
     return crypto.timingSafeEqual(signatureBuffer, signedDataBuffer);
 }
 
-export const GitHubReleaseWebhookBody = t.Object(
+export const GITHUB_RELEASE_WEBHOOK_BODY = t.Object(
     {
         action: t.Literal('published'),
         release: t.Object({
@@ -44,7 +44,7 @@ export const GitHubReleaseWebhookBody = t.Object(
     { additionalProperties: true }
 );
 
-export async function releaseNotification(channelID: string, roleID: string, body: Static<typeof GitHubReleaseWebhookBody>): Promise<number> {
+export async function releaseNotification(channelID: string, roleID: string, body: Static<typeof GITHUB_RELEASE_WEBHOOK_BODY>): Promise<number> {
     const channel = client.channels.cache.get(channelID);
     if (channel?.type !== ChannelType.GuildText) return 500;
 

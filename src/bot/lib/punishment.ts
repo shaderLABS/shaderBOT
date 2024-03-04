@@ -270,7 +270,7 @@ export class Punishment {
 
     static async getByUserID(userID: string, type: 'ban' | 'mute') {
         const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE "type" = $1 AND user_id = $2;`, values: [type, userID], name: 'punishment-user-id' });
-        if (result.rowCount === 0) return Promise.reject(`The specified user does not have any past ${type}s.`);
+        if (result.rowCount === 0) return Promise.reject(`The specified user does not have any ${type}s.`);
         return new Punishment(result.rows[0]);
     }
 

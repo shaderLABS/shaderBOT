@@ -10,7 +10,7 @@ import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.ts';
 import { getGuild } from '../bot/lib/misc.ts';
 import { db } from '../db/postgres.ts';
 import type { API } from './api.ts';
-import { GitHubReleaseWebhookBody, releaseNotification, verifySignature } from './webhook.ts';
+import { GITHUB_RELEASE_WEBHOOK_BODY, releaseNotification, verifySignature } from './webhook.ts';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
 
@@ -39,7 +39,7 @@ export function startWebserver() {
     const app = new Elysia()
         .use(
             cors({
-                origin: IS_DEVELOPMENT_ENVIRONMENT ? ['localhost:3000'] : false,
+                origin: IS_DEVELOPMENT_ENVIRONMENT,
                 methods: ['GET', 'POST'],
                 credentials: true,
             })
@@ -222,7 +222,7 @@ export function startWebserver() {
         },
         {
             type: 'json',
-            body: GitHubReleaseWebhookBody,
+            body: GITHUB_RELEASE_WEBHOOK_BODY,
             params: t.Object({ channelID: t.String({ pattern: '^[0-9]+$', default: '0', examples: '1044804143455420539' }) }),
             headers: t.Object({ 'x-hub-signature-256': t.String({ pattern: '^sha256=[0-9a-f]{64}$', default: 'sha256=0' }), 'x-github-event': t.Literal('release') }),
         }

@@ -1,5 +1,4 @@
 import { AttachmentBuilder, ChannelType, EmbedBuilder, type EmbedData } from 'discord.js';
-import fs from 'fs/promises';
 import path from 'path';
 import { automaticResponsePath } from '../automaticResponseHandler.ts';
 import { client, cooldownStore, settings } from '../bot.ts';
@@ -51,10 +50,6 @@ export class AutomaticResponse {
         this.deleteAfter = data.deleteAfter;
         this.maxMemberDuration = data.maxMemberDuration;
         this.cooldown = data.cooldown;
-    }
-
-    public static fromJSON(json: string) {
-        return new AutomaticResponse(JSON.parse(json));
     }
 
     public toData(): AutomaticResponseData {
@@ -117,11 +112,6 @@ export class AutomaticResponse {
     }
 
     public async save() {
-        await fs.stat(automaticResponsePath).catch(async (error) => {
-            if (error.code === 'ENOENT') await fs.mkdir(automaticResponsePath, { recursive: true });
-            else throw error;
-        });
-
-        fs.writeFile(path.join(automaticResponsePath, this.getFileName()), this.toJSON());
+        await Bun.write(path.join(automaticResponsePath, this.getFileName()), this.toJSON(), { createPath: true });
     }
 }
