@@ -45,10 +45,6 @@ export class Pasta {
         this.attachments = data.attachmentURLs ? data.attachmentURLs.map((url) => new AttachmentBuilder(url)) : [];
     }
 
-    public static fromJSON(json: string) {
-        return new Pasta(JSON.parse(json));
-    }
-
     public toData(): PastaData {
         return {
             alias: this.alias,
@@ -67,12 +63,7 @@ export class Pasta {
     }
 
     public async save() {
-        await fs.stat(pastaPath).catch(async (error) => {
-            if (error.code === 'ENOENT') await fs.mkdir(pastaPath, { recursive: true });
-            else throw error;
-        });
-
-        await fs.writeFile(path.join(pastaPath, this.getFileName()), this.toJSON());
+        await Bun.write(path.join(pastaPath, this.getFileName()), this.toJSON(), { createPath: true });
     }
 
     public async delete() {

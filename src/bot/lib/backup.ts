@@ -49,17 +49,12 @@ export class Backup {
     }
 
     public static async read(fileName: string) {
-        const file = await fs.readFile(path.join(Backup.DIRECTORY, fileName));
-        return new Backup({ fileName, content: file.toString() }, true);
+        const content = await Bun.file(path.join(Backup.DIRECTORY, fileName)).text();
+        return new Backup({ fileName, content }, true);
     }
 
     public async write() {
-        await fs.stat(Backup.DIRECTORY).catch(async (error) => {
-            if (error.code === 'ENOENT') await fs.mkdir(Backup.DIRECTORY, { recursive: true });
-            else throw error;
-        });
-
-        await fs.writeFile(path.join(Backup.DIRECTORY, this.fileName), Backup.encryptContent(this.content));
+        await Bun.write(path.join(Backup.DIRECTORY, this.fileName), Backup.encryptContent(this.content), { createPath: true });
     }
 
     private static decryptContent(content: string) {
