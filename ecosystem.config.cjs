@@ -2,8 +2,8 @@ module.exports = {
     apps: [
         {
             name: 'shaderBOT',
-            script: 'build/index.js',
-            node_args: '-r dotenv/config',
+            script: 'src/index.ts',
+            interpreter: '~/.bun/bin/bun',
             time: true,
         },
     ],
