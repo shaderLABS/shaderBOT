@@ -1,3 +1,4 @@
+import { Message } from 'discord.js';
 import { db } from '../../db/postgres.js';
 import { client } from '../bot.js';
 import { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.js';
@@ -39,8 +40,20 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
 
         return message.url;
     } else {
-        const targetLastMessage = interaction.channel.messages.cache.filter((message) => message.author?.id === targetID).last()?.url;
-        if (targetLastMessage) return targetLastMessage;
+        let targetLastMessage: Message | undefined;
+
+        console.time('Finding context URL in message caches');
+        for (const [_, channel] of interaction.guild.channels.cache) {
+            if (!channel.isTextBased() || channel.messages.cache.size === 0) continue;
+
+            const channelTargetLastMessage = channel.messages.cache.filter((message) => message.author?.id === targetID).last();
+            if (!channelTargetLastMessage) continue;
+
+            if (!targetLastMessage || channelTargetLastMessage.createdTimestamp > targetLastMessage.createdTimestamp) targetLastMessage = channelTargetLastMessage;
+        }
+        console.timeEnd('Finding context URL in message caches');
+
+        if (targetLastMessage) return targetLastMessage.url;
 
         const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
         if (channelLastMessage) return channelLastMessage;
