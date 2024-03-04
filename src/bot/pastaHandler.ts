@@ -21,7 +21,7 @@ export async function registerPastas(dir: string) {
         dirEntries.map(async (dirEntry) => {
             if (!dirEntry.name.endsWith('.json')) return;
 
-            const pasta = Pasta.fromJSON(await fs.readFile(path.join(dirPath, dirEntry.name), 'utf-8'));
+            const pasta = new Pasta(await Bun.file(path.join(dirPath, dirEntry.name)).json());
             pastaStore.set(pasta.alias, pasta);
         })
     );
