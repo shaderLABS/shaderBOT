@@ -42,7 +42,11 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
     } else {
         let targetLastMessage: Message | undefined;
 
-        console.time('Finding context URL in message caches');
+        // Prioritize the current channel's message cache.
+        targetLastMessage = interaction.channel.messages.cache.filter((message) => message.author?.id === targetID).last();
+        if (targetLastMessage) return targetLastMessage.url;
+
+        // Fall back to the rest of the guild's message caches.
         for (const [_, channel] of interaction.guild.channels.cache) {
             if (!channel.isTextBased() || channel.messages.cache.size === 0) continue;
 
@@ -51,10 +55,10 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
 
             if (!targetLastMessage || channelTargetLastMessage.createdTimestamp > targetLastMessage.createdTimestamp) targetLastMessage = channelTargetLastMessage;
         }
-        console.timeEnd('Finding context URL in message caches');
 
         if (targetLastMessage) return targetLastMessage.url;
 
+        // Fall back to fetching the last message from the current channel.
         const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
         if (channelLastMessage) return channelLastMessage;
 
