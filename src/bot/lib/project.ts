@@ -18,6 +18,18 @@ export class Project {
     public static readonly CHANNEL_TYPES = [ChannelType.GuildText] as const;
     public static readonly CATEGORY_CHANNEL_TYPES = [ChannelType.GuildCategory] as const;
 
+    static readonly OWNER_OVERWRITES: { APPLY: PermissionOverwriteOptions; LIFT: PermissionOverwriteOptions; BITFIELD: bigint } = {
+        APPLY: {
+            ManageWebhooks: true,
+            ManageThreads: true,
+        },
+        LIFT: {
+            ManageWebhooks: null,
+            ManageThreads: null,
+        },
+        BITFIELD: PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageThreads,
+    } as const;
+
     constructor(data: { id: string; channel_id: string; owners: string[]; role_id?: string }) {
         this.id = data.id;
         this.channelID = data.channel_id;
@@ -254,7 +266,8 @@ export class Project {
         const result = await db.query({ text: /*sql*/ `UPDATE project SET owners = $1 WHERE id = $2;`, values: [newOwnerIDs, this.id], name: 'project-update-owner' });
         if (result.rowCount === 0) return Promise.reject('Failed to add an owner to the project.');
 
-        channel.permissionOverwrites.create(member, Project.OWNER_OVERWRITES, { type: OverwriteType.Member, reason: 'Add project owner.' });
+        await this.applyPermissions(member, channel);
+
         this.ownerIDs = newOwnerIDs;
 
         const logString = `${parseUser(moderatorID)} added ${parseUser(member.user)} to the owners of the project linked to <#${this.channelID}> (${this.id}).`;
@@ -267,7 +280,6 @@ export class Project {
         this.assertNotArchived();
 
         const channel = this.getChannel();
-        const member = await userToMember(user.id);
 
         const newOwnerIDs = this.ownerIDs.filter((id) => id !== user.id);
         if (this.ownerIDs.length === newOwnerIDs.length) return Promise.reject('The specified user is not an owner.');
@@ -275,7 +287,13 @@ export class Project {
         const result = await db.query({ text: /*sql*/ `UPDATE project SET owners = $1 WHERE id = $2;`, values: [newOwnerIDs, this.id], name: 'project-update-owner' });
         if (result.rowCount === 0) return Promise.reject('Failed to remove an owner from the project.');
 
-        if (member) channel.permissionOverwrites.delete(member, 'Remove project owner.');
+        const currentOverwrite = channel.permissionOverwrites.cache.get(user.id);
+
+        if (currentOverwrite) {
+            if (currentOverwrite.allow.equals(Project.OWNER_OVERWRITES.BITFIELD) && currentOverwrite.deny.equals(0n)) await currentOverwrite.delete('Remove project owner.');
+            else await currentOverwrite.edit(Project.OWNER_OVERWRITES.LIFT, 'Remove project owner.');
+        }
+
         this.ownerIDs = newOwnerIDs;
 
         const logString = `${parseUser(moderatorID)} removed ${parseUser(user)} from the owners of the project linked to <#${this.channelID}> (${this.id}).`;
@@ -320,13 +338,8 @@ export class Project {
         return logString;
     }
 
-    public static readonly OWNER_OVERWRITES: PermissionOverwriteOptions = {
-        ManageWebhooks: true,
-        ManageThreads: true,
-    };
-
     public async applyPermissions(owner: GuildMember | User | string, channel: TextChannel = this.getChannel()) {
-        await channel.permissionOverwrites.create(owner, Project.OWNER_OVERWRITES, { type: OverwriteType.Member, reason: 'Apply project owner permissions.' });
+        await channel.permissionOverwrites.edit(owner, Project.OWNER_OVERWRITES.APPLY, { type: OverwriteType.Member, reason: 'Apply project owner permissions.' });
     }
 
     public static async isOwner(userID: string, channelID: string): Promise<Boolean> {
@@ -434,6 +447,29 @@ export class ProjectMute {
     public readonly userID: string;
     public readonly timestamp: Date;
 
+    static readonly MUTE_OVERWRITES: { APPLY: PermissionOverwriteOptions; LIFT: PermissionOverwriteOptions; BITFIELD: bigint } = {
+        APPLY: {
+            SendMessages: false,
+            SendMessagesInThreads: false,
+            AddReactions: false,
+            CreatePublicThreads: false,
+            CreatePrivateThreads: false,
+        },
+        LIFT: {
+            SendMessages: null,
+            SendMessagesInThreads: null,
+            AddReactions: null,
+            CreatePublicThreads: null,
+            CreatePrivateThreads: null,
+        },
+        BITFIELD:
+            PermissionFlagsBits.SendMessages |
+            PermissionFlagsBits.SendMessagesInThreads |
+            PermissionFlagsBits.AddReactions |
+            PermissionFlagsBits.CreatePublicThreads |
+            PermissionFlagsBits.CreatePrivateThreads,
+    } as const;
+
     constructor(data: { id: string; project_id: string; user_id: string; timestamp: string | number | Date }) {
         this.id = data.id;
         this.projectID = data.project_id;
@@ -488,7 +524,8 @@ export class ProjectMute {
         if (result.rowCount === 0) return Promise.reject('Failed to create project mute.');
         const { id } = result.rows[0];
 
-        if (member) channel.permissionOverwrites.edit(member, { SendMessages: false, AddReactions: false }, { type: OverwriteType.Member, reason: 'Create project mute.' });
+        const projectMute = new ProjectMute({ id, project_id: project.id, user_id: user.id, timestamp });
+        await projectMute.applyPermissions(channel);
 
         const logString = `${parseUser(ownerID)} muted ${parseUser(user)} in their project <#${channel.id}> (${project.id}).\n\n**Created At:** ${formatTimeDate(timestamp)}\n**ID:** ${id}`;
 
@@ -496,11 +533,13 @@ export class ProjectMute {
         return logString;
     }
 
-    public async applyPermissions() {
-        const project = await this.getProject();
-        const channel = project.getChannel();
+    public async applyPermissions(channel?: TextChannel) {
+        if (!channel) {
+            const project = await this.getProject();
+            channel = project.getChannel();
+        }
 
-        await channel.permissionOverwrites.edit(this.userID, { SendMessages: false, AddReactions: false }, { type: OverwriteType.Member, reason: 'Apply project mute permissions.' });
+        await channel.permissionOverwrites.edit(this.userID, ProjectMute.MUTE_OVERWRITES.APPLY, { type: OverwriteType.Member, reason: 'Apply project mute permissions.' });
     }
 
     public async lift(ownerID: string) {
@@ -513,8 +552,8 @@ export class ProjectMute {
         const currentOverwrite = channel.permissionOverwrites.cache.get(this.userID);
 
         if (currentOverwrite) {
-            if (currentOverwrite.allow.equals(0n) && currentOverwrite.deny.equals([PermissionFlagsBits.SendMessages, PermissionFlagsBits.AddReactions])) currentOverwrite.delete('Lift project mute.');
-            else currentOverwrite.edit({ SendMessages: null, AddReactions: null }, 'Lift project mute.');
+            if (currentOverwrite.allow.equals(0n) && currentOverwrite.deny.equals(ProjectMute.MUTE_OVERWRITES.BITFIELD)) await currentOverwrite.delete('Lift project mute.');
+            else await currentOverwrite.edit(ProjectMute.MUTE_OVERWRITES.LIFT, 'Lift project mute.');
         }
 
         const logString = `${parseUser(ownerID)} unmuted ${parseUser(this.userID)} in their project <#${channel.id}> (${project.id}).\n\n**ID:** ${this.id}\n**Created At:** ${formatTimeDate(
