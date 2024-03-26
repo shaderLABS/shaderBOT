@@ -24,6 +24,9 @@ CREATE TABLE "project_mute" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP INDEX IF EXISTS "IDX_project_mute_project_id";
+CREATE INDEX "IDX_project_mute_user_id" ON "project_mute" ("user_id");
+
 DROP TABLE IF EXISTS "warn";
 CREATE TABLE "warn" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -36,6 +39,9 @@ CREATE TABLE "warn" (
     edited_mod_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+DROP INDEX IF EXISTS "IDX_warn_user_id";
+CREATE INDEX "IDX_warn_user_id" ON "warn" ("user_id");
 
 DROP TABLE IF EXISTS "punishment";
 CREATE TABLE "punishment" (
@@ -50,6 +56,9 @@ CREATE TABLE "punishment" (
     expire_timestamp TIMESTAMP WITH TIME ZONE,
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+DROP INDEX IF EXISTS "IDX_punishment_user_id";
+CREATE INDEX "IDX_punishment_user_id" ON "punishment" ("user_id");
 
 DROP TABLE IF EXISTS "past_punishment";
 CREATE TABLE "past_punishment" (
@@ -66,6 +75,9 @@ CREATE TABLE "past_punishment" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
+DROP INDEX IF EXISTS "IDX_past_punishment_user_id";
+CREATE INDEX "IDX_past_punishment_user_id" ON "past_punishment" ("user_id");
+
 DROP TABLE IF EXISTS "note";
 CREATE TABLE "note" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -77,6 +89,9 @@ CREATE TABLE "note" (
     edited_mod_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+DROP INDEX IF EXISTS "IDX_note_user_id";
+CREATE INDEX "IDX_note_user_id" ON "note" ("user_id");
 
 DROP TABLE IF EXISTS "lock_slowmode";
 CREATE TABLE "lock_slowmode" (
@@ -101,6 +116,9 @@ CREATE TABLE "appeal" (
     message_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
+
+DROP INDEX IF EXISTS "IDX_appeal_user_id";
+CREATE INDEX "IDX_appeal_user_id" ON "appeal" ("user_id");
 
 DROP TABLE IF EXISTS "sticky_thread";
 CREATE TABLE "sticky_thread" (
