@@ -1,4 +1,4 @@
-import { ChannelType, Client, Events, GatewayIntentBits, OverwriteType } from 'discord.js';
+import { ChannelType, Client, Events, GatewayIntentBits } from 'discord.js';
 import { BotSettings, SettingsFile } from '../bot/lib/settings.js';
 import { connectPostgreSQL, db } from '../db/postgres.js';
 
@@ -39,8 +39,14 @@ client.once(Events.ClientReady, async () => {
             continue;
         }
 
-        await channel.permissionOverwrites.edit(
-            projectMute.user_id,
+        const overwrite = channel.permissionOverwrites.cache.get(projectMute.user_id);
+
+        if (!overwrite) {
+            console.log(`Skipping ${projectMute.id} because permission overwrite does not exist...`);
+            continue;
+        }
+
+        await overwrite.edit(
             {
                 SendMessages: false,
                 SendMessagesInThreads: false,
@@ -48,7 +54,7 @@ client.once(Events.ClientReady, async () => {
                 CreatePublicThreads: false,
                 CreatePrivateThreads: false,
             },
-            { type: OverwriteType.Member, reason: 'Migrate project mute permissions.' }
+            'Migrate project mute permissions.'
         );
 
         console.log(`Successfully migrated project mute ${projectMute.id} (Channel ID: ${projectMute.channel_id}).`);
