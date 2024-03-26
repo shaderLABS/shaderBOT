@@ -47,5 +47,17 @@ await connectPostgreSQL();
     }
 }
 
+// 2024-03-25
+{
+    const MIGRATION_NAME = '2024-03-25';
+    const result = await db.query(/*sql*/ `SELECT 1 FROM pg_indexes WHERE indexname = 'IDX_appeal_user_id';`);
+    if (result.rowCount === 0) {
+        console.log(`Applying migration ${MIGRATION_NAME}...`);
+        applyMigration(MIGRATION_NAME);
+    } else {
+        console.log(`Migration ${MIGRATION_NAME} has already been applied.`);
+    }
+}
+
 console.log('All migrations have been applied.');
 process.exit();
