@@ -62,17 +62,17 @@ client.once(Events.ClientReady, async () => {
 
     console.log('Indexing database tables...');
 
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_project_mute_user_id" ON "project_mute" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_project_mute_user_id" ON "project_mute" USING HASH ("user_id");`);
     console.log('Successfully created IDX_project_mute_user_id.');
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_warn_user_id" ON "warn" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_warn_user_id" ON "warn" USING HASH ("user_id");`);
     console.log('Successfully created IDX_warn_user_id.');
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_punishment_user_id" ON "punishment" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_punishment_user_id" ON "punishment" USING HASH ("user_id");`);
     console.log('Successfully created IDX_punishment_user_id.');
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_past_punishment_user_id" ON "past_punishment" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_past_punishment_user_id" ON "past_punishment" USING HASH ("user_id");`);
     console.log('Successfully created IDX_past_punishment_user_id.');
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_note_user_id" ON "note" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_note_user_id" ON "note" USING HASH ("user_id");`);
     console.log('Successfully created IDX_note_user_id.');
-    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_appeal_user_id" ON "appeal" ("user_id");`);
+    await db.query(/*sql*/ `CREATE INDEX CONCURRENTLY IF NOT EXISTS "IDX_appeal_user_id" ON "appeal" USING HASH ("user_id");`);
     console.log('Successfully created IDX_appeal_user_id.');
 
     await client.destroy();
