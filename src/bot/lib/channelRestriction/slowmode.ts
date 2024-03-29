@@ -11,19 +11,19 @@ export class ChannelSlowmode extends ChannelRestriction {
 
     public readonly originalSlowmode: number;
 
-    constructor(data: { id: string; channel_id: string; previous_state: number; expire_timestamp: string | number | Date }) {
+    constructor(data: { id: string; channel_id: string; original_slowmode: number; expire_timestamp: string | number | Date }) {
         super(data);
-        this.originalSlowmode = data.previous_state;
+        this.originalSlowmode = data.original_slowmode;
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = 'slowmode' AND id = $1;`, values: [uuid], name: 'slowmode-uuid' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_slowmode WHERE id = $1;`, values: [uuid], name: 'slowmode-uuid' });
         if (result.rowCount === 0) return Promise.reject('A channel slowmode with the specified UUID does not exist.');
         return new ChannelSlowmode(result.rows[0]);
     }
 
     static async getByChannelID(channelID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = 'slowmode' AND channel_id = $1;`, values: [channelID], name: 'slowmode-channel-id' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_slowmode WHERE channel_id = $1;`, values: [channelID], name: 'slowmode-channel-id' });
         if (result.rowCount === 0) return Promise.reject(`The specified channel does not have an active channel slowmode.`);
         return new ChannelSlowmode(result.rows[0]);
     }
@@ -31,8 +31,8 @@ export class ChannelSlowmode extends ChannelRestriction {
     static async getExpiringToday() {
         const result = await db.query({
             text: /*sql*/ `
-                SELECT * FROM lock_slowmode
-                WHERE "type" = 'slowmode' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
+                SELECT * FROM channel_slowmode
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
             name: 'slowmode-expiring-today',
         });
 
@@ -42,8 +42,8 @@ export class ChannelSlowmode extends ChannelRestriction {
     static async getExpiringTomorrow() {
         const result = await db.query({
             text: /*sql*/ `
-                SELECT * FROM lock_slowmode
-                WHERE "type" = 'slowmode' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
+                SELECT * FROM channel_slowmode
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
             name: 'slowmode-expiring-tomorrow',
         });
 
@@ -70,8 +70,8 @@ export class ChannelSlowmode extends ChannelRestriction {
 
         const result = await db.query({
             text: /*sql*/ `
-                INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
-                VALUES ('slowmode', $1, $2, $3)
+                INSERT INTO channel_slowmode (channel_id, original_slowmode, expire_timestamp)
+                VALUES ($1, $2, $3)
                 RETURNING id;`,
             values: [channel.id, originalSlowmode, expireTimestamp],
             name: 'create-slowmode',
@@ -83,7 +83,7 @@ export class ChannelSlowmode extends ChannelRestriction {
         const slowmode = new ChannelSlowmode({
             id,
             channel_id: channel.id,
-            previous_state: originalSlowmode,
+            original_slowmode: originalSlowmode,
             expire_timestamp: expireTimestamp,
         });
 
@@ -138,7 +138,7 @@ export class ChannelSlowmode extends ChannelRestriction {
     }
 
     async delete() {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM lock_slowmode WHERE id = $1 RETURNING id;`, values: [this.id], name: 'slowmode-delete' });
-        if (result.rowCount === 0) return Promise.reject(`Failed to delete channel slowmode.`);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM channel_slowmode WHERE id = $1 RETURNING id;`, values: [this.id], name: 'slowmode-delete' });
+        if (result.rowCount === 0) return Promise.reject('Failed to delete channel slowmode.');
     }
 }

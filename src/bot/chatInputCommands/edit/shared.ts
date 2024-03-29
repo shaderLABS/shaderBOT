@@ -149,15 +149,21 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const context = await requireContext(value);
 
                 let uuid: string;
-                let table: 'warn' | 'punishment' | 'past_punishment' | 'note';
+                let table: 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
                 if (target instanceof User) {
                     const entry = (
                         await db.query({
                             text: /*sql*/ `
                                 WITH entries AS (
-                                    (SELECT id, timestamp, tableoid::regclass FROM punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    (SELECT id, timestamp, tableoid::regclass FROM ban WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
                                     UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM past_punishment WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    (SELECT id, timestamp, tableoid::regclass FROM mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM kick WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM lifted_ban WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
                                     UNION ALL
                                     (SELECT id, timestamp, tableoid::regclass FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
                                     UNION ALL
@@ -182,9 +188,15 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     const entry = (
                         await db.query({
                             text: /*sql*/ `
-                                (SELECT user_id, tableoid::regclass FROM punishment WHERE id = $1)
+                                (SELECT user_id, tableoid::regclass FROM ban WHERE id = $1)
                                 UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM past_punishment WHERE id = $1)
+                                (SELECT user_id, tableoid::regclass FROM mute WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM kick WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM lifted_ban WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM lifted_mute WHERE id = $1)
                                 UNION ALL
                                 (SELECT user_id, tableoid::regclass FROM note WHERE id = $1)
                                 UNION ALL
