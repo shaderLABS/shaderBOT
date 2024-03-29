@@ -2,7 +2,9 @@ import { PermissionFlagsBits } from 'discord.js';
 import uuid from 'uuid-random';
 import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
-import { PastPunishment } from '../../../../lib/punishment.js';
+import { LiftedBan } from '../../../../lib/punishment/ban.js';
+import { Kick } from '../../../../lib/punishment/kick.js';
+import { LiftedMute } from '../../../../lib/punishment/mute.js';
 import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
 
 export const command: ChatInputCommandCallback = {
@@ -15,11 +17,12 @@ export const command: ChatInputCommandCallback = {
         }
 
         try {
-            const entry = await PastPunishment.getAnyByUUID(id);
-            if (!(await hasPermissionForTarget(interaction, entry.userID))) return;
-            const logString = await entry.delete(interaction.user.id);
+            const punishment = await Promise.any([Kick.getByUUID(id), LiftedBan.getByUUID(id), LiftedMute.getByUUID(id)]).catch(() => Promise.reject('The specified UUID does not exist.'));
 
-            replySuccess(interaction, logString, 'Delete Past Punishment Entry');
+            if (!(await hasPermissionForTarget(interaction, punishment.userID))) return;
+            const logString = await punishment.delete(interaction.user.id);
+
+            replySuccess(interaction, logString, 'Delete ' + punishment.TYPE_STRING);
         } catch (error) {
             replyError(interaction, String(error));
         }

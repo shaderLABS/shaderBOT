@@ -1,95 +1,59 @@
 import { client } from '../bot.js';
-import { LockSlowmode } from './lockSlowmode.js';
-import { Punishment } from './punishment.js';
+import { ChannelLock } from './channelRestriction/lock.js';
+import { ChannelSlowmode } from './channelRestriction/slowmode.js';
+import { Ban } from './punishment/ban.js';
+import { Mute } from './punishment/mute.js';
+
+export interface TimeoutEntry {
+    id: string;
+    expireTimestamp?: Date;
+
+    refresh(): Promise<TimeoutEntry>;
+    expire(): Promise<void>;
+}
 
 export class TimeoutStore {
-    private mutes = new Map<string, NodeJS.Timeout>();
-    private bans = new Map<string, NodeJS.Timeout>();
+    private entries = new Map<string, NodeJS.Timeout>();
 
-    private locks = new Map<string, NodeJS.Timeout>();
-    private slowmodes = new Map<string, NodeJS.Timeout>();
-
-    public set(entry: Punishment | LockSlowmode, onlyExpiringToday: boolean) {
+    public set(entry: TimeoutEntry, onlyExpiringToday: boolean) {
         if (!entry.expireTimestamp || (onlyExpiringToday && entry.expireTimestamp.getTime() > new Date().setHours(24, 0, 0, 0))) return;
 
-        if (entry instanceof Punishment) {
-            const timeout = setTimeout(async () => {
-                (await Punishment.getByUUID(entry.id, entry.type)).expire();
+        const timeout = setTimeout(async () => {
+            entry = await entry.refresh();
+            await entry.expire();
+            this.entries.delete(entry.id);
+        }, entry.expireTimestamp.getTime() - Date.now());
 
-                if (entry.type === 'ban') this.bans.delete(entry.userID);
-                else this.mutes.delete(entry.userID);
-            }, entry.expireTimestamp.getTime() - Date.now());
-
-            if (entry.type === 'ban') {
-                const previousTimeout = this.bans.get(entry.userID);
-                if (previousTimeout) clearTimeout(previousTimeout);
-                this.bans.set(entry.userID, timeout);
-            } else {
-                const previousTimeout = this.mutes.get(entry.userID);
-                if (previousTimeout) clearTimeout(previousTimeout);
-                this.mutes.set(entry.userID, timeout);
-            }
-        } else if (entry instanceof LockSlowmode) {
-            const timeout = setTimeout(async () => {
-                entry.expire();
-
-                if (entry.type === 'lock') this.locks.delete(entry.channelID);
-                else this.slowmodes.delete(entry.channelID);
-            }, entry.expireTimestamp.getTime() - Date.now());
-
-            if (entry.type === 'lock') {
-                const previousTimeout = this.locks.get(entry.channelID);
-                if (previousTimeout) clearTimeout(previousTimeout);
-                this.locks.set(entry.channelID, timeout);
-            } else {
-                const previousTimeout = this.slowmodes.get(entry.channelID);
-                if (previousTimeout) clearTimeout(previousTimeout);
-                this.slowmodes.set(entry.channelID, timeout);
-            }
-        }
+        const previousTimeout = this.entries.get(entry.id);
+        if (previousTimeout) clearTimeout(previousTimeout);
+        this.entries.set(entry.id, timeout);
     }
 
-    public delete(entry: Punishment | LockSlowmode) {
-        if (entry instanceof Punishment) {
-            if (entry.type === 'ban') {
-                const timeout = this.bans.get(entry.userID);
-                if (timeout) {
-                    clearTimeout(timeout);
-                    this.bans.delete(entry.userID);
-                }
-            } else if (entry.type === 'mute') {
-                const timeout = this.mutes.get(entry.userID);
-                if (timeout) {
-                    clearTimeout(timeout);
-                    this.mutes.delete(entry.userID);
-                }
-            }
-        } else if (entry instanceof LockSlowmode) {
-            if (entry.type === 'lock') {
-                const timeout = this.locks.get(entry.channelID);
-                if (timeout) {
-                    clearTimeout(timeout);
-                    this.locks.delete(entry.channelID);
-                }
-            } else if (entry.type === 'slowmode') {
-                const timeout = this.slowmodes.get(entry.channelID);
-                if (timeout) {
-                    clearTimeout(timeout);
-                    this.slowmodes.delete(entry.channelID);
-                }
-            }
+    public delete(entry: TimeoutEntry) {
+        const timeout = this.entries.get(entry.id);
+        if (timeout) {
+            clearTimeout(timeout);
+            this.entries.delete(entry.id);
         }
     }
 
     public load(includeTomorrow: boolean) {
         if (!client.user) throw 'The client is not logged in.';
 
-        console.log('Loading expiring punishments...');
-        const expiringPunishments = includeTomorrow ? Punishment.getExpiringTomorrow() : Punishment.getExpiringToday();
-        expiringPunishments.then((punishments) => punishments.forEach((punishment) => this.set(punishment, false)));
+        console.log('Loading expiring bans...');
+        const expiringBans = includeTomorrow ? Ban.getExpiringTomorrow() : Ban.getExpiringToday();
+        expiringBans.then((bans) => bans.forEach((ban) => this.set(ban, false)));
 
-        console.log('Loading expiring locks and slowmodes...');
-        const expiringLockSlowmodes = includeTomorrow ? LockSlowmode.getExpiringTomorrow() : LockSlowmode.getExpiringToday();
-        expiringLockSlowmodes.then((lockSlowmodes) => lockSlowmodes.forEach((lockSlowmode) => this.set(lockSlowmode, false)));
+        console.log('Loading expiring mutes...');
+        const expiringMutes = includeTomorrow ? Mute.getExpiringTomorrow() : Mute.getExpiringToday();
+        expiringMutes.then((mutes) => mutes.forEach((mute) => this.set(mute, false)));
+
+        console.log('Loading expiring channel locks...');
+        const expiringLocks = includeTomorrow ? ChannelLock.getExpiringTomorrow() : ChannelLock.getExpiringToday();
+        expiringLocks.then((locks) => locks.forEach((lock) => this.set(lock, false)));
+
+        console.log('Loading expiring channel slowmodes...');
+        const expiringSlowmodes = includeTomorrow ? ChannelSlowmode.getExpiringTomorrow() : ChannelSlowmode.getExpiringToday();
+        expiringSlowmodes.then((slowmodes) => slowmodes.forEach((slowmode) => this.set(slowmode, false)));
     }
 }

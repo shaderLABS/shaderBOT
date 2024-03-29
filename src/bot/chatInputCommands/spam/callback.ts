@@ -3,7 +3,7 @@ import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getContextURL } from '../../lib/context.js';
 import { replySuccess } from '../../lib/embeds.js';
 import log from '../../lib/log.js';
-import { Punishment } from '../../lib/punishment.js';
+import { Mute } from '../../lib/punishment/mute.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 import { kickSpammer } from '../../lib/spamProtection.js';
 
@@ -18,8 +18,8 @@ export const command: ChatInputCommandCallback = {
         if (!contextURL) return;
 
         const logString = await kickSpammer(targetUser, interaction.user.id, contextURL);
-        const mute = await Punishment.getByUserID(targetUser.id, 'mute').catch(() => undefined);
-        mute?.move(interaction.user.id).catch(() => undefined);
+        const mute = await Mute.getByUserID(targetUser.id).catch(() => undefined);
+        mute?.lift(interaction.user.id).catch(() => undefined);
 
         replySuccess(interaction, logString, 'Kick Spammer');
         log(logString, 'Kick Spammer');

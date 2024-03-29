@@ -1,7 +1,9 @@
 import { PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
 import { replyError, replySuccess } from '../../../../lib/embeds.js';
-import { PastPunishment } from '../../../../lib/punishment.js';
+import { LiftedBan } from '../../../../lib/punishment/ban.js';
+import { Kick } from '../../../../lib/punishment/kick.js';
+import { LiftedMute } from '../../../../lib/punishment/mute.js';
 import { hasPermissionForTarget } from '../../../../lib/searchMessage.js';
 
 export const command: ChatInputCommandCallback = {
@@ -10,11 +12,14 @@ export const command: ChatInputCommandCallback = {
         const targetUser = interaction.options.getUser('user', true);
 
         try {
-            const entry = await PastPunishment.getAnyLatestByUserID(targetUser.id);
-            if (!(await hasPermissionForTarget(interaction, entry.userID))) return;
-            const logString = await entry.delete(interaction.user.id);
+            const punishment = await Promise.any([Kick.getLatestByUserID(targetUser.id), LiftedBan.getLatestByUserID(targetUser.id), LiftedMute.getLatestByUserID(targetUser.id)]).catch(() =>
+                Promise.reject('The specified user does not have any kicks, lifted bans or lifted mutes.')
+            );
 
-            replySuccess(interaction, logString, 'Delete Past Punishment Entry');
+            if (!(await hasPermissionForTarget(interaction, punishment.userID))) return;
+            const logString = await punishment.delete(interaction.user.id);
+
+            replySuccess(interaction, logString, 'Delete ' + punishment.TYPE_STRING);
         } catch (error) {
             replyError(interaction, String(error));
         }

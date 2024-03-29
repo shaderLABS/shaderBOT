@@ -251,7 +251,8 @@ export async function replyButtonPages(
     title: string,
     color: number = EmbedColor.Blue,
     iconURL: string = EmbedIcon.Info,
-    ephemeral: boolean = false
+    ephemeral: boolean = false,
+    footer?: string
 ) {
     const embed = new EmbedBuilder({
         color,
@@ -260,6 +261,7 @@ export async function replyButtonPages(
             name: title,
             iconURL,
         },
+        footer: footer ? { text: footer } : undefined,
     });
 
     if (pages.length <= 1) {

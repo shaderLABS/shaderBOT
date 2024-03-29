@@ -2,7 +2,7 @@ import { GuildMember, PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
-import { PastPunishment } from '../../lib/punishment.js';
+import { Kick } from '../../lib/punishment/kick.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 
 export const command: ChatInputCommandCallback = {
@@ -22,7 +22,7 @@ export const command: ChatInputCommandCallback = {
         if (!contextURL) return;
 
         try {
-            const logString = await PastPunishment.createKick(targetMember, reason, interaction.member.id, contextURL);
+            const logString = await Kick.create(targetMember, reason, interaction.member.id, contextURL);
             replySuccess(interaction, logString, 'Kick');
         } catch (error) {
             if (error) replyError(interaction, String(error));

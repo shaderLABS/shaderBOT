@@ -6,7 +6,7 @@ import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
 import log from './log.js';
 import { getNumberWithOrdinalSuffix, parseUser, trimString } from './misc.js';
-import { Punishment } from './punishment.js';
+import { Ban } from './punishment/ban.js';
 import { StickyThread } from './stickyThread.js';
 import { formatTimeDate } from './time.js';
 
@@ -373,7 +373,7 @@ export class BanAppeal {
 }
 
 export async function getUserAppealData(userID: string): Promise<API.BanInformation> {
-    const [ban, appeal] = await Promise.all([Punishment.getByUserID(userID, 'ban'), BanAppeal.getLatestByUserID(userID).catch(() => undefined)]);
+    const [ban, appeal] = await Promise.all([Ban.getByUserID(userID), BanAppeal.getLatestByUserID(userID).catch(() => undefined)]);
     const banModerator = ban.moderatorID ? await client.users.fetch(ban.moderatorID).catch(() => undefined) : undefined;
 
     return {

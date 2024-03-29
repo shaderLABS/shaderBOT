@@ -3,7 +3,8 @@ import { db } from '../../db/postgres.js';
 import { settings } from '../bot.js';
 import log from './log.js';
 import { parseUser } from './misc.js';
-import { Punishment } from './punishment.js';
+import { Ban } from './punishment/ban.js';
+import { Mute } from './punishment/mute.js';
 
 function interpolateTime(range: number[], values: number[], punishmentPoints: number) {
     return values[0] + ((values[1] - values[0]) * (punishmentPoints - range[0])) / (range[1] - range[0]);
@@ -63,14 +64,14 @@ export default async function (user: User) {
     try {
         if (punishmentPoints >= settings.data.warnings.punishment.muteRange[0] && punishmentPoints < settings.data.warnings.punishment.muteRange[1]) {
             const duration = interpolateTime(settings.data.warnings.punishment.muteRange, settings.data.warnings.punishment.muteValues, punishmentPoints);
-            await Punishment.createMute(user, 'Too many warnings.', duration);
+            await Mute.create(user, 'Too many warnings.', duration);
             return 1;
         } else if (punishmentPoints >= settings.data.warnings.punishment.tempbanRange[0] && punishmentPoints < settings.data.warnings.punishment.tempbanRange[1]) {
             const duration = interpolateTime(settings.data.warnings.punishment.tempbanRange, settings.data.warnings.punishment.tempbanValues, punishmentPoints);
-            await Punishment.createBan(user, 'Too many warnings.', duration);
+            await Ban.create(user, 'Too many warnings.', duration);
             return 2;
         } else if (punishmentPoints >= settings.data.warnings.punishment.ban) {
-            await Punishment.createBan(user, 'Too many warnings.');
+            await Ban.create(user, 'Too many warnings.');
             return 3;
         }
     } catch (error) {
