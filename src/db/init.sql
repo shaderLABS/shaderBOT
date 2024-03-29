@@ -43,11 +43,10 @@ CREATE TABLE "warn" (
 DROP INDEX IF EXISTS "IDX_warn_user_id";
 CREATE INDEX "IDX_warn_user_id" ON "warn" USING HASH ("user_id");
 
-DROP TABLE IF EXISTS "punishment";
-CREATE TABLE "punishment" (
+DROP TABLE IF EXISTS "ban";
+CREATE TABLE "ban" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) NOT NULL,
-    type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
     reason TEXT NOT NULL,
     context_url TEXT,
@@ -57,26 +56,73 @@ CREATE TABLE "punishment" (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-DROP INDEX IF EXISTS "IDX_punishment_user_id";
-CREATE INDEX "IDX_punishment_user_id" ON "punishment" USING HASH ("user_id");
+DROP INDEX IF EXISTS "IDX_ban_user_id";
+CREATE INDEX "IDX_ban_user_id" ON "ban" USING HASH ("user_id");
 
-DROP TABLE IF EXISTS "past_punishment";
-CREATE TABLE "past_punishment" (
+DROP TABLE IF EXISTS "mute";
+CREATE TABLE "mute" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id NUMERIC(20) NOT NULL,
-    type TEXT NOT NULL, -- ban, mute, kick
     mod_id NUMERIC(20),
     reason TEXT NOT NULL,
     context_url TEXT,
     edited_timestamp TIMESTAMP WITH TIME ZONE,
     edited_mod_id NUMERIC(20),
-    lifted_timestamp TIMESTAMP WITH TIME ZONE,
+    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL, -- NOT NULL because timeouts must expire
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP INDEX IF EXISTS "IDX_mute_user_id";
+CREATE INDEX "IDX_mute_user_id" ON "mute" USING HASH ("user_id");
+
+DROP TABLE IF EXISTS "kick";
+CREATE TABLE "kick" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20),
+    reason TEXT NOT NULL,
+    context_url TEXT,
+    edited_timestamp TIMESTAMP WITH TIME ZONE,
+    edited_mod_id NUMERIC(20),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP INDEX IF EXISTS "IDX_kick_user_id";
+CREATE INDEX "IDX_kick_user_id" ON "kick" USING HASH ("user_id");
+
+DROP TABLE IF EXISTS "lifted_ban";
+CREATE TABLE "lifted_ban" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20),
+    reason TEXT NOT NULL,
+    context_url TEXT,
+    edited_timestamp TIMESTAMP WITH TIME ZONE,
+    edited_mod_id NUMERIC(20),
+    lifted_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     lifted_mod_id NUMERIC(20),
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 
-DROP INDEX IF EXISTS "IDX_past_punishment_user_id";
-CREATE INDEX "IDX_past_punishment_user_id" ON "past_punishment" USING HASH ("user_id");
+DROP INDEX IF EXISTS "IDX_lifted_ban_user_id";
+CREATE INDEX "IDX_lifted_ban_user_id" ON "lifted_ban" USING HASH ("user_id");
+
+DROP TABLE IF EXISTS "lifted_mute";
+CREATE TABLE "lifted_mute" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20),
+    reason TEXT NOT NULL,
+    context_url TEXT,
+    edited_timestamp TIMESTAMP WITH TIME ZONE,
+    edited_mod_id NUMERIC(20),
+    lifted_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    lifted_mod_id NUMERIC(20),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP INDEX IF EXISTS "IDX_lifted_mute_user_id";
+CREATE INDEX "IDX_lifted_mute_user_id" ON "lifted_mute" USING HASH ("user_id");
 
 DROP TABLE IF EXISTS "note";
 CREATE TABLE "note" (
@@ -93,12 +139,19 @@ CREATE TABLE "note" (
 DROP INDEX IF EXISTS "IDX_note_user_id";
 CREATE INDEX "IDX_note_user_id" ON "note" USING HASH ("user_id");
 
-DROP TABLE IF EXISTS "lock_slowmode";
-CREATE TABLE "lock_slowmode" (
+DROP TABLE IF EXISTS "channel_lock";
+CREATE TABLE "channel_lock" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     channel_id NUMERIC(20) NOT NULL,
-    type TEXT NOT NULL, -- lock, slowmode
-    previous_state SMALLINT NOT NULL, -- SMALLINT = 2 bytes, currently needs 6 bits
+    original_permissions SMALLINT NOT NULL, -- SMALLINT = 2 bytes, currently needs 6 bits
+    expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP TABLE IF EXISTS "channel_slowmode";
+CREATE TABLE "channel_slowmode" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    channel_id NUMERIC(20) NOT NULL,
+    original_slowmode SMALLINT NOT NULL, -- SMALLINT = 2 bytes, maximum is 6 hours (21600 seconds, maximum value is 32767)
     expire_timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
 

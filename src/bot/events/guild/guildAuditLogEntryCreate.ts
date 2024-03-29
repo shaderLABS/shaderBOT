@@ -35,8 +35,8 @@ export const event: Event = {
                     const appeal = await BanAppeal.getPendingByUserID(auditLogEntry.targetId).catch(() => undefined);
                     if (appeal) await appeal.close('accepted', 'You have been unbanned.', auditLogEntry.executorId);
 
-                    const punishment = await Ban.getByUserID(auditLogEntry.targetId);
-                    await punishment.lift(auditLogEntry.executorId);
+                    const ban = await Ban.getByUserID(auditLogEntry.targetId);
+                    await ban.lift(auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to remove ban entry of ${parseUser(auditLogEntry.targetId)}.`, 'Unban');

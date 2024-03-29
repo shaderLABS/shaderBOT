@@ -116,28 +116,28 @@ export class ChannelLock extends ChannelRestriction {
 
     public readonly originalPermissions: ChannelLockPermissions;
 
-    constructor(data: { id: string; channel_id: string; previous_state: number; expire_timestamp: string | number | Date }) {
+    constructor(data: { id: string; channel_id: string; original_permissions: number; expire_timestamp: string | number | Date }) {
         super(data);
-        this.originalPermissions = new ChannelLockPermissions(data.previous_state);
+        this.originalPermissions = new ChannelLockPermissions(data.original_permissions);
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = 'lock' AND id = $1;`, values: [uuid], name: 'lock-uuid' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_lock WHERE id = $1;`, values: [uuid], name: 'lock-uuid' });
         if (result.rowCount === 0) return Promise.reject('A channel lock with the specified UUID does not exist.');
         return new ChannelLock(result.rows[0]);
     }
 
     static async getByChannelID(channelID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lock_slowmode WHERE "type" = 'lock' AND channel_id = $1;`, values: [channelID], name: 'lock-channel-id' });
-        if (result.rowCount === 0) return Promise.reject(`The specified channel does not have an active channel lock.`);
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_lock WHERE channel_id = $1;`, values: [channelID], name: 'lock-channel-id' });
+        if (result.rowCount === 0) return Promise.reject('The specified channel does not have an active channel lock.');
         return new ChannelLock(result.rows[0]);
     }
 
     static async getExpiringToday() {
         const result = await db.query({
             text: /*sql*/ `
-                SELECT * FROM lock_slowmode
-                WHERE "type" = 'lock' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
+                SELECT * FROM channel_lock
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
             name: 'lock-expiring-today',
         });
 
@@ -147,8 +147,8 @@ export class ChannelLock extends ChannelRestriction {
     static async getExpiringTomorrow() {
         const result = await db.query({
             text: /*sql*/ `
-                SELECT * FROM lock_slowmode
-                WHERE "type" = 'lock' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
+                SELECT * FROM channel_lock
+                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
             name: 'lock-expiring-tomorrow',
         });
 
@@ -171,8 +171,8 @@ export class ChannelLock extends ChannelRestriction {
 
         const result = await db.query({
             text: /*sql*/ `
-                INSERT INTO lock_slowmode ("type", channel_id, previous_state, expire_timestamp)
-                VALUES ('lock', $1, $2, $3)
+                INSERT INTO channel_lock (channel_id, original_permissions, expire_timestamp)
+                VALUES ($1, $2, $3)
                 RETURNING id;`,
             values: [channel.id, originalPermissions, expireTimestamp],
             name: 'create-lock',
@@ -184,7 +184,7 @@ export class ChannelLock extends ChannelRestriction {
         const lock = new ChannelLock({
             id,
             channel_id: channel.id,
-            previous_state: originalPermissions.toPostgres(),
+            original_permissions: originalPermissions.toPostgres(),
             expire_timestamp: expireTimestamp,
         });
 
@@ -241,7 +241,7 @@ export class ChannelLock extends ChannelRestriction {
     }
 
     async delete() {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM lock_slowmode WHERE id = $1 RETURNING id;`, values: [this.id], name: 'lock-delete' });
-        if (result.rowCount === 0) return Promise.reject(`Failed to delete channel lock.`);
+        const result = await db.query({ text: /*sql*/ `DELETE FROM channel_lock WHERE id = $1 RETURNING id;`, values: [this.id], name: 'lock-delete' });
+        if (result.rowCount === 0) return Promise.reject('Failed to delete channel lock.');
     }
 }

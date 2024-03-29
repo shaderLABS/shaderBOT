@@ -7,10 +7,13 @@ import log from './log.js';
 import { parseUser } from './misc.js';
 
 const tableToString = {
-    warn: 'warning',
-    punishment: 'punishment',
-    past_punishment: 'past punishment',
+    ban: 'ban',
+    mute: 'mute',
+    kick: 'kick',
+    lifted_ban: 'lifted ban',
+    lifted_mute: 'lifted mute',
     note: 'note',
+    warn: 'warning',
 };
 
 export async function getContextURL(interaction: GuildChatInputCommandInteraction, targetID?: string): Promise<string | undefined> {
@@ -67,7 +70,7 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
     }
 }
 
-export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: 'warn' | 'punishment' | 'past_punishment' | 'note') {
+export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn') {
     const editTimestamp = new Date();
 
     const result = await db.query({

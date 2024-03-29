@@ -24,7 +24,7 @@ export async function getPunishmentPoints(userID: string) {
                 FROM warn
                 WHERE severity > 0 AND user_id = $1;`,
             values: [userID],
-            name: 'warn-points-total-severity',
+            name: 'punishment-points-total-severity',
         })
     ).rows;
 
@@ -35,23 +35,34 @@ export async function getPunishmentPoints(userID: string) {
             db.query({
                 text: /*sql*/ `
                     SELECT (
-                        SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
-                        FROM past_punishment
-                        WHERE ("type" = 'ban' OR "type" = 'mute') AND lifted_timestamp IS NOT NULL AND lifted_timestamp >= $1::TIMESTAMP AND user_id = $2
-                    ) AS past_exclude, (
-                        SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (NOW() - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
-                        FROM punishment
-                        WHERE ("type" = 'ban' OR "type" = 'mute') AND user_id = $2
-                    ) AS exclude;`,
+                        (
+                            SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                            FROM lifted_ban
+                            WHERE lifted_timestamp >= $1::TIMESTAMP AND user_id = $2
+                        ) + (
+                            SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (lifted_timestamp - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                            FROM lifted_mute
+                            WHERE lifted_timestamp >= $1::TIMESTAMP AND user_id = $2
+                        ) + (
+                            SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (NOW() - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                            FROM ban
+                            WHERE user_id = $2
+                        ) + (
+                            SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (NOW() - GREATEST(timestamp, $1::TIMESTAMP)))), 0)
+                            FROM mute
+                            WHERE user_id = $2
+                        )
+                    ) AS excluded_time;
+                `,
                 values: [new Date(warning.timestamp), userID],
-                name: 'past-punishment-points-total-punished-time',
+                name: 'punishment-points-total-excluded-time',
             })
         )
     );
 
     const points: number = warnings.reduce((total, warning, index) => {
-        const { exclude, past_exclude }: { exclude: number; past_exclude: number } = excludedTimes[index].rows[0];
-        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + exclude * 1000.0 + past_exclude * 1000.0);
+        const { excluded_time }: { excluded_time: number } = excludedTimes[index].rows[0];
+        return total + warningToPoints(warning.severity, new Date(warning.timestamp).getTime() + excluded_time * 1000.0);
     }, 0);
 
     return Math.round(points * 1000) / 1000;

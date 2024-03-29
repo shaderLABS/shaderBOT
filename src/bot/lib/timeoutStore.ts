@@ -40,19 +40,17 @@ export class TimeoutStore {
     public load(includeTomorrow: boolean) {
         if (!client.user) throw 'The client is not logged in.';
 
-        console.log('Loading expiring bans...');
+        console.log('Loading expiring entries...');
+
         const expiringBans = includeTomorrow ? Ban.getExpiringTomorrow() : Ban.getExpiringToday();
         expiringBans.then((bans) => bans.forEach((ban) => this.set(ban, false)));
 
-        console.log('Loading expiring mutes...');
         const expiringMutes = includeTomorrow ? Mute.getExpiringTomorrow() : Mute.getExpiringToday();
         expiringMutes.then((mutes) => mutes.forEach((mute) => this.set(mute, false)));
 
-        console.log('Loading expiring channel locks...');
         const expiringLocks = includeTomorrow ? ChannelLock.getExpiringTomorrow() : ChannelLock.getExpiringToday();
         expiringLocks.then((locks) => locks.forEach((lock) => this.set(lock, false)));
 
-        console.log('Loading expiring channel slowmodes...');
         const expiringSlowmodes = includeTomorrow ? ChannelSlowmode.getExpiringTomorrow() : ChannelSlowmode.getExpiringToday();
         expiringSlowmodes.then((slowmodes) => slowmodes.forEach((slowmode) => this.set(slowmode, false)));
     }

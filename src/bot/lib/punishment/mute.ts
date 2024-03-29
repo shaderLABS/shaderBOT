@@ -17,18 +17,18 @@ export class Mute extends ExpirablePunishment {
     }
 
     static async has(userID: string): Promise<boolean> {
-        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM punishment WHERE "type" = 'mute' AND user_id = $2;`, values: [userID], name: 'mute-has' });
+        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM mute WHERE user_id = $1;`, values: [userID], name: 'mute-has' });
         return Boolean(result.rows[0]);
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE "type" = 'mute' AND id = $1;`, values: [uuid], name: 'mute-uuid' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM mute WHERE id = $1;`, values: [uuid], name: 'mute-uuid' });
         if (result.rowCount === 0) return Promise.reject('A mute with the specified UUID does not exist.');
         return new Mute(result.rows[0]);
     }
 
     static async getByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM punishment WHERE "type" = 'mute' AND user_id = $1;`, values: [userID], name: 'mute-user-id' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM mute WHERE user_id = $1;`, values: [userID], name: 'mute-user-id' });
         if (result.rowCount === 0) return Promise.reject('The specified user does not have any past mutes.');
         return new Mute(result.rows[0]);
     }
@@ -36,8 +36,8 @@ export class Mute extends ExpirablePunishment {
     static async getExpiringToday() {
         const result = await db.query({
             text: /*sql*/ `
-            	SELECT * FROM punishment
-            	WHERE "type" = 'mute' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
+            	SELECT * FROM mute
+            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
             name: 'mute-expiring-today',
         });
 
@@ -47,8 +47,8 @@ export class Mute extends ExpirablePunishment {
     static async getExpiringTomorrow() {
         const result = await db.query({
             text: /*sql*/ `
-            	SELECT * FROM punishment
-            	WHERE "type" = 'mute' AND expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
+            	SELECT * FROM mute
+            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
             name: 'mute-expiring-tomorrow',
         });
 
@@ -56,25 +56,25 @@ export class Mute extends ExpirablePunishment {
     }
 
     private async move(liftedModeratorID?: string) {
-        const pastPunishment = LiftedMute.fromMute(this, liftedModeratorID);
+        const liftedMute = LiftedMute.fromMute(this, liftedModeratorID);
 
         const result = await db.query({
             text: /*sql*/ `
             	WITH moved_rows AS (
-            	    DELETE FROM punishment
+            	    DELETE FROM mute
             	    WHERE id = $1
-            	    RETURNING id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, expire_timestamp, timestamp
+            	    RETURNING id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
             	)
-            	INSERT INTO past_punishment (id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
-            	SELECT id, user_id, type, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            values: [pastPunishment.id, pastPunishment.liftedTimestamp, pastPunishment.liftedModeratorID],
-            name: 'punishment-move-entry',
+            	INSERT INTO lifted_mute (id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
+            	SELECT id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
+            values: [liftedMute.id, liftedMute.liftedTimestamp, liftedMute.liftedModeratorID],
+            name: 'mute-move-entry',
         });
 
         if (result.rowCount === 0) return Promise.reject('Failed to move entry.');
 
         timeoutStore.delete(this);
-        return pastPunishment;
+        return liftedMute;
     }
 
     public async lift(liftedModeratorID?: string): Promise<string> {
@@ -116,7 +116,7 @@ export class Mute extends ExpirablePunishment {
 
         const result = await db.query({
             text: /*sql*/ `
-            	UPDATE punishment
+            	UPDATE mute
             	SET expire_timestamp = $1, edited_timestamp = $2, edited_mod_id = $3
             	WHERE id = $4;`,
             values: [newExpireTimestamp, editTimestamp, editModeratorID, this.id],
@@ -150,7 +150,7 @@ export class Mute extends ExpirablePunishment {
 
         const result = await db.query({
             text: /*sql*/ `
-            	UPDATE punishment
+            	UPDATE mute
             	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
             	WHERE id = $4;`,
             values: [newReason, editTimestamp, editModeratorID, this.id],
@@ -190,8 +190,8 @@ export class Mute extends ExpirablePunishment {
 
         const result = await db.query({
             text: /*sql*/ `
-            	INSERT INTO punishment (user_id, "type", mod_id, reason, context_url, expire_timestamp, timestamp)
-            	VALUES ($1, 'mute', $2, $3, $4, $5, $6)
+            	INSERT INTO mute (user_id, mod_id, reason, context_url, expire_timestamp, timestamp)
+            	VALUES ($1, $2, $3, $4, $5, $6)
             	RETURNING id;`,
             values: [user.id, moderatorID, reason, contextURL, expireTimestamp, timestamp],
             name: 'mute-create',
@@ -246,14 +246,14 @@ export class LiftedMute extends LiftedPunishment {
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM past_punishment WHERE "type" = 'mute' AND id = $1;`, values: [uuid], name: 'lifted-mute-uuid' });
+        const result = await db.query({ text: /*sql*/ `SELECT * FROM lifted_mute WHERE id = $1;`, values: [uuid], name: 'lifted-mute-uuid' });
         if (result.rowCount === 0) return Promise.reject('A lifted mute with the specified UUID does not exist.');
         return new LiftedMute(result.rows[0]);
     }
 
     static async getLatestByUserID(userID: string) {
         const result = await db.query({
-            text: /*sql*/ `SELECT * FROM past_punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
+            text: /*sql*/ `SELECT * FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
             values: [userID],
             name: 'lifted-mute-latest-user-id',
         });
@@ -263,7 +263,7 @@ export class LiftedMute extends LiftedPunishment {
 
     static async getAllByUserID(userID: string) {
         const result = await db.query({
-            text: /*sql*/ `SELECT * FROM past_punishment WHERE "type" = 'mute' AND user_id = $1 ORDER BY timestamp DESC;`,
+            text: /*sql*/ `SELECT * FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC;`,
             values: [userID],
             name: 'lifted-mute-all-user-id',
         });
@@ -278,7 +278,7 @@ export class LiftedMute extends LiftedPunishment {
 
         const result = await db.query({
             text: /*sql*/ `
-            	UPDATE past_punishment
+            	UPDATE lifted_mute
             	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
             	WHERE id = $4;`,
             values: [newReason, editTimestamp, moderatorID, this.id],
@@ -297,7 +297,7 @@ export class LiftedMute extends LiftedPunishment {
     }
 
     public async delete(moderatorID: string) {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM past_punishment WHERE id = $1;`, values: [this.id], name: 'lifted-mute-delete' });
+        const result = await db.query({ text: /*sql*/ `DELETE FROM lifted_mute WHERE id = $1;`, values: [this.id], name: 'lifted-mute-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted mute.');
 
         const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s lifted mute.\n\n${this.toString(true)}`;
