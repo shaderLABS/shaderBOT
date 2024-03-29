@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from 'discord.js';
 import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
-import { Punishment } from '../../lib/punishment.js';
+import { Mute } from '../../lib/punishment/mute.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 
@@ -28,7 +28,7 @@ export const command: ChatInputCommandCallback = {
         if (!contextURL) return;
 
         try {
-            const logString = await Punishment.createMute(targetUser, reason, duration, member.id, contextURL);
+            const logString = await Mute.create(targetUser, reason, duration, member.id, contextURL);
             replySuccess(interaction, logString, 'Mute');
         } catch (error) {
             if (error) replyError(interaction, String(error));

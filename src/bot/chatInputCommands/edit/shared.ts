@@ -5,7 +5,9 @@ import { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.
 import { editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { Note } from '../../lib/note.js';
-import { PastPunishment, Punishment } from '../../lib/punishment.js';
+import { Ban, LiftedBan } from '../../lib/punishment/ban.js';
+import { Kick } from '../../lib/punishment/kick.js';
+import { LiftedMute, Mute } from '../../lib/punishment/mute.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 import { Warning } from '../../lib/warning.js';
@@ -35,7 +37,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             case 'banduration': {
                 const time = stringToSeconds(splitString(value));
 
-                const ban = target instanceof User ? await Punishment.getByUserID(target.id, 'ban') : await Punishment.getByUUID(target, 'ban');
+                const ban = target instanceof User ? await Ban.getByUserID(target.id) : await Ban.getByUUID(target);
                 if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
                 const logString = await ban.editDuration(time, interaction.user.id);
 
@@ -44,18 +46,18 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             }
 
             case 'banreason': {
-                let ban: Punishment | PastPunishment | undefined;
+                let ban: Ban | LiftedBan | undefined;
                 if (target instanceof User) {
-                    ban = await Punishment.getByUserID(target.id, 'ban').catch(() => undefined);
-                    ban ??= await PastPunishment.getLatestByUserID(target.id, 'ban').catch(() => undefined);
+                    ban = await Ban.getByUserID(target.id).catch(() => undefined);
+                    ban ??= await LiftedBan.getLatestByUserID(target.id).catch(() => undefined);
 
                     if (!ban) {
                         replyError(interaction, 'The specified user does not have any bans.');
                         return;
                     }
                 } else {
-                    ban = await Punishment.getByUUID(target, 'ban').catch(() => undefined);
-                    ban ??= await PastPunishment.getByUUID(target, 'ban').catch(() => undefined);
+                    ban = await Ban.getByUUID(target).catch(() => undefined);
+                    ban ??= await LiftedBan.getByUUID(target).catch(() => undefined);
 
                     if (!ban) {
                         replyError(interaction, 'A ban with the specified UUID does not exist.');
@@ -71,7 +73,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             }
 
             case 'kickreason': {
-                const kick = target instanceof User ? await PastPunishment.getLatestByUserID(target.id, 'kick') : await PastPunishment.getByUUID(target, 'kick');
+                const kick = target instanceof User ? await Kick.getLatestByUserID(target.id) : await Kick.getByUUID(target);
                 if (!(await hasPermissionForTarget(interaction, kick.userID))) return;
                 const logString = await kick.editReason(value, interaction.user.id);
 
@@ -82,7 +84,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             case 'muteduration': {
                 const time = stringToSeconds(splitString(value));
 
-                const mute = target instanceof User ? await Punishment.getByUserID(target.id, 'mute') : await Punishment.getByUUID(target, 'mute');
+                const mute = target instanceof User ? await Mute.getByUserID(target.id) : await Mute.getByUUID(target);
                 if (!(await hasPermissionForTarget(interaction, mute.userID, 'moderatable'))) return;
                 const logString = await mute.editDuration(time, interaction.user.id);
 
@@ -91,18 +93,18 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
             }
 
             case 'mutereason': {
-                let mute: Punishment | PastPunishment | undefined;
+                let mute: Mute | LiftedMute | undefined;
                 if (target instanceof User) {
-                    mute = await Punishment.getByUserID(target.id, 'mute').catch(() => undefined);
-                    mute ??= await PastPunishment.getLatestByUserID(target.id, 'mute').catch(() => undefined);
+                    mute = await Mute.getByUserID(target.id).catch(() => undefined);
+                    mute ??= await LiftedMute.getLatestByUserID(target.id).catch(() => undefined);
 
                     if (!mute) {
                         replyError(interaction, 'The specified user does not have any mutes.');
                         return;
                     }
                 } else {
-                    mute = await Punishment.getByUUID(target, 'mute').catch(() => undefined);
-                    mute ??= await PastPunishment.getByUUID(target, 'mute').catch(() => undefined);
+                    mute = await Mute.getByUUID(target).catch(() => undefined);
+                    mute ??= await LiftedMute.getByUUID(target).catch(() => undefined);
 
                     if (!mute) {
                         replyError(interaction, 'A mute with the specified UUID does not exist.');

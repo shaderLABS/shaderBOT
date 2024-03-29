@@ -4,7 +4,9 @@ import { Event } from '../../eventHandler.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
 import log from '../../lib/log.js';
 import { parseUser } from '../../lib/misc.js';
-import { PastPunishment, Punishment } from '../../lib/punishment.js';
+import { Ban } from '../../lib/punishment/ban.js';
+import { Kick } from '../../lib/punishment/kick.js';
+import { Mute } from '../../lib/punishment/mute.js';
 import { StickyThread } from '../../lib/stickyThread.js';
 
 function parseChangeTimestamp(timestamp: APIAuditLogChange['old_value']) {
@@ -19,7 +21,7 @@ export const event: Event = {
                 if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 try {
-                    await Punishment.createBan(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', undefined, auditLogEntry.executorId);
+                    await Ban.create(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', undefined, auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to create ban entry for ${parseUser(auditLogEntry.targetId)}.`, 'Permanent Ban');
@@ -33,8 +35,8 @@ export const event: Event = {
                     const appeal = await BanAppeal.getPendingByUserID(auditLogEntry.targetId).catch(() => undefined);
                     if (appeal) await appeal.close('accepted', 'You have been unbanned.', auditLogEntry.executorId);
 
-                    const punishment = await Punishment.getByUserID(auditLogEntry.targetId, 'ban');
-                    await punishment.move(auditLogEntry.executorId);
+                    const punishment = await Ban.getByUserID(auditLogEntry.targetId);
+                    await punishment.lift(auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to remove ban entry of ${parseUser(auditLogEntry.targetId)}.`, 'Unban');
@@ -45,7 +47,7 @@ export const event: Event = {
                 if (!auditLogEntry.executorId || !auditLogEntry.targetId || auditLogEntry.executorId === client.user?.id) return;
 
                 try {
-                    await PastPunishment.createKick(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', auditLogEntry.executorId);
+                    await Kick.create(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', auditLogEntry.executorId);
                 } catch (error) {
                     console.error(error);
                     log(`Failed to add kick entry for ${parseUser(auditLogEntry.targetId)}.`, 'Kick');
@@ -63,15 +65,15 @@ export const event: Event = {
 
                 if (oldTimestamp <= auditLogEntry.createdTimestamp && newTimestamp > auditLogEntry.createdTimestamp) {
                     try {
-                        await Punishment.createMute(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', (newTimestamp - Date.now()) / 1000, auditLogEntry.executorId);
+                        await Mute.create(auditLogEntry.targetId, auditLogEntry.reason || 'No reason provided.', (newTimestamp - Date.now()) / 1000, auditLogEntry.executorId);
                     } catch (error) {
                         console.error(error);
                         log(`Failed to create mute entry for ${parseUser(auditLogEntry.targetId)}.`, 'Mute');
                     }
                 } else if (oldTimestamp > auditLogEntry.createdTimestamp && newTimestamp <= auditLogEntry.createdTimestamp) {
                     try {
-                        const mute = await Punishment.getByUserID(auditLogEntry.targetId, 'mute');
-                        await mute?.move(auditLogEntry.executorId);
+                        const mute = await Mute.getByUserID(auditLogEntry.targetId);
+                        await mute?.lift(auditLogEntry.executorId);
                     } catch (error) {
                         console.error(error);
                         log(`Failed to remove mute entry of ${parseUser(auditLogEntry.targetId)}.`, 'Unmute');

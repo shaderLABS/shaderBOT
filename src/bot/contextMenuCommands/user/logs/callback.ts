@@ -9,7 +9,7 @@ export const command: UserContextMenuCommandCallback = {
     callback: async (interaction) => {
         const { targetUser } = interaction;
 
-        const pages = await getUserModerationLogPages(targetUser);
-        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.username}`, undefined, undefined, true);
+        const { pages, quickInformation } = await getUserModerationLogPages(targetUser);
+        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.username}`, undefined, undefined, true, quickInformation);
     },
 };

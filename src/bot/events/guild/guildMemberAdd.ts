@@ -4,7 +4,8 @@ import { Event } from '../../eventHandler.js';
 import log from '../../lib/log.js';
 import { parseUser, similarityLevenshtein } from '../../lib/misc.js';
 import { Project, ProjectMute } from '../../lib/project.js';
-import { Punishment } from '../../lib/punishment.js';
+import { Ban } from '../../lib/punishment/ban.js';
+import { Mute } from '../../lib/punishment/mute.js';
 
 type CachedMember = {
     displayName: string;
@@ -43,10 +44,9 @@ export const event: Event = {
                 if (raidMember.banned) continue;
 
                 raidMember.banned = true;
-                Punishment.createBan(
-                    raidMemberID,
-                    `Flagged by raid protection. If you are not a bot, please [submit a ban appeal](${settings.data.raidProtection.appealURL}) or contact the staff team.`
-                ).catch(() => undefined);
+                Ban.create(raidMemberID, `Flagged by raid protection. If you are not a bot, please [submit a ban appeal](${settings.data.raidProtection.appealURL}) or contact the staff team.`).catch(
+                    () => undefined
+                );
             }
         }
 
@@ -58,7 +58,7 @@ export const event: Event = {
          ******************/
 
         const [mute, projects, projectMutes] = await Promise.all([
-            Punishment.getByUserID(member.id, 'mute').catch(() => undefined),
+            Mute.getByUserID(member.id).catch(() => undefined),
             Project.getAllUnarchivedByOwnerID(member.id),
             ProjectMute.getAllByUserID(member.id),
         ]);

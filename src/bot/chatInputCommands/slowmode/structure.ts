@@ -1,5 +1,5 @@
 import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { LockSlowmode } from '../../lib/lockSlowmode.js';
+import { ChannelSlowmode } from '../../lib/channelRestriction/slowmode';
 
 export default {
     name: 'slowmode',
@@ -27,7 +27,7 @@ export default {
                     name: 'channel',
                     description: 'The channel that should be used. Not specifying a value will default to the current channel.',
                     type: ApplicationCommandOptionType.Channel,
-                    channelTypes: LockSlowmode.SLOWMODE_CHANNEL_TYPES,
+                    channelTypes: ChannelSlowmode.CHANNEL_TYPES,
                     required: false,
                 },
             ],
@@ -41,7 +41,7 @@ export default {
                     name: 'channel',
                     description: 'The channel that should be used. Not specifying a value will default to the current channel.',
                     type: ApplicationCommandOptionType.Channel,
-                    channelTypes: LockSlowmode.SLOWMODE_CHANNEL_TYPES,
+                    channelTypes: ChannelSlowmode.CHANNEL_TYPES,
                     required: false,
                 },
             ],

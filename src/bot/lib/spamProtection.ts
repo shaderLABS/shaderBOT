@@ -4,7 +4,8 @@ import { GuildMessage } from '../events/message/messageCreate.js';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.js';
 import log from './log.js';
 import { getGuild, parseUser, similarityLevenshtein } from './misc.js';
-import { PastPunishment, Punishment } from './punishment.js';
+import { Kick } from './punishment/kick.js';
+import { Mute } from './punishment/mute.js';
 
 type CachedMessage = {
     id: string;
@@ -37,14 +38,14 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
         return;
     }
 
-    const mute = await Punishment.getByUserID(id, 'mute').catch(() => undefined);
+    const mute = await Mute.getByUserID(id).catch(() => undefined);
 
     if (interaction.customId.startsWith('kickSpam')) {
         await kickSpammer(targetUser, interaction.user.id, interaction.message.url);
-        mute?.move(interaction.user.id).catch(() => undefined);
+        mute?.lift(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
     } else {
-        mute?.move(interaction.user.id).catch(() => undefined);
+        mute?.lift(interaction.user.id).catch(() => undefined);
         replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
     }
 }
@@ -91,9 +92,9 @@ export async function checkSpam(message: GuildMessage) {
 
         spamMessages.push(currentMessage);
 
-        if (!(await Punishment.has(message.author.id, 'mute'))) {
-            Punishment.createMute(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch(
-                (error) => log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute')
+        if (!(await Mute.has(message.author.id))) {
+            Mute.create(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch((error) =>
+                log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute')
             );
 
             const kickButton = new ButtonBuilder({
@@ -155,7 +156,7 @@ export async function kickSpammer(user: User, moderatorID?: string, contextURL?:
     ).catch(() => undefined);
 
     try {
-        const logString = await PastPunishment.createKick(user, 'Phished account used for spam.', moderatorID, contextURL, 86400);
+        const logString = await Kick.create(user, 'Phished account used for spam.', moderatorID, contextURL, 86400);
         return logString;
     } catch (error) {
         console.error(error);

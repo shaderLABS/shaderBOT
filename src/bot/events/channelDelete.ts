@@ -1,7 +1,8 @@
 import { ChannelType, Events } from 'discord.js';
 import { Event } from '../eventHandler.js';
 import { Backup } from '../lib/backup.js';
-import { LockSlowmode } from '../lib/lockSlowmode.js';
+import { ChannelLock } from '../lib/channelRestriction/lock.js';
+import { ChannelSlowmode } from '../lib/channelRestriction/slowmode.js';
 import log from '../lib/log.js';
 import { Project } from '../lib/project.js';
 
@@ -21,10 +22,16 @@ export const event: Event = {
         const backup = await Backup.create(channel).catch(() => undefined);
         logContent += backup ? `${backup.size} cached messages have been encrypted and saved. ` : 'There were no cached messages to save. ';
 
-        const lockSlowmodes = await LockSlowmode.getAllByChannelID(channel.id);
-        if (lockSlowmodes.length > 0) {
-            lockSlowmodes.forEach((lockSlowmode) => lockSlowmode.delete());
-            logContent += 'The existing locks and slowmodes have been deleted. ';
+        const channelLock = await ChannelLock.getByChannelID(channel.id).catch(() => undefined);
+        if (channelLock) {
+            channelLock.delete();
+            logContent += 'The existing lock has been deleted. ';
+        }
+
+        const channelSlowmode = await ChannelSlowmode.getByChannelID(channel.id).catch(() => undefined);
+        if (channelSlowmode) {
+            channelSlowmode.delete();
+            logContent += 'The existing slowmode has been deleted. ';
         }
 
         log(logContent, 'Delete Channel');
