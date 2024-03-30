@@ -1,4 +1,4 @@
-import { PermissionFlagsBits, User } from 'discord.js';
+import { APIEmbedField, PermissionFlagsBits, User } from 'discord.js';
 import { ChatInputCommandCallback } from '../../chatInputCommandHandler.js';
 import { getPunishmentPoints } from '../../lib/automaticPunishment.js';
 import { BanAppeal } from '../../lib/banAppeal.js';
@@ -22,7 +22,7 @@ export async function getUserModerationLogPages(targetUser: User) {
     ]);
 
     let pages: string[] = [];
-    const quickInformation: string[] = [];
+    const quickInformation: APIEmbedField[] = [];
 
     function pageCategory(title: string, content: string[]) {
         const totalPageCount = Math.ceil(content.length / 3);
@@ -57,12 +57,16 @@ export async function getUserModerationLogPages(targetUser: User) {
 
     if (queries[2]) {
         pageSingle('Current Ban', queries[2].toString(false));
-        quickInformation.push('Banned');
+        quickInformation.push({ name: 'Banned', value: 'Yes', inline: true });
+    } else {
+        quickInformation.push({ name: 'Banned', value: 'No', inline: true });
     }
 
     if (queries[3]) {
         pageSingle('Current Mute', queries[3].toString(false));
-        quickInformation.push('Muted');
+        quickInformation.push({ name: 'Muted', value: 'Yes', inline: true });
+    } else {
+        quickInformation.push({ name: 'Muted', value: 'No', inline: true });
     }
 
     if (queries[4].length) {
@@ -96,9 +100,9 @@ export async function getUserModerationLogPages(targetUser: User) {
     if (!pages[0]) pages[0] = 'There are no entries for this user.';
 
     const punishmentPoints = await getPunishmentPoints(targetUser.id);
-    if (punishmentPoints !== 0) quickInformation.push(`${punishmentPoints} Punishment Points`);
+    if (punishmentPoints !== 0) quickInformation.push({ name: 'Punishment Points', value: punishmentPoints.toString(), inline: true });
 
-    return { pages, quickInformation: quickInformation.join(' • ') };
+    return { pages, quickInformation: quickInformation };
 }
 
 export const command: ChatInputCommandCallback = {

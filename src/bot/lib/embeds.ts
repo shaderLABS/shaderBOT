@@ -1,4 +1,5 @@
 import {
+    APIEmbedField,
     ActionRowBuilder,
     AnySelectMenuInteraction,
     ApplicationCommandType,
@@ -252,7 +253,7 @@ export async function replyButtonPages(
     color: number = EmbedColor.Blue,
     iconURL: string = EmbedIcon.Info,
     ephemeral: boolean = false,
-    footer?: string
+    fields?: APIEmbedField[]
 ) {
     const embed = new EmbedBuilder({
         color,
@@ -261,7 +262,7 @@ export async function replyButtonPages(
             name: title,
             iconURL,
         },
-        footer: footer ? { text: footer } : undefined,
+        fields,
     });
 
     if (pages.length <= 1) {
