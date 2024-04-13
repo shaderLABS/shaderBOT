@@ -6,7 +6,11 @@ import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser } from './misc.js';
 
-const tableToString = {
+export type PunishmentTable = 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
+
+const PUNISHMENT_TABLE_TO_STRING: {
+    [key in PunishmentTable]: string;
+} = {
     ban: 'ban',
     mute: 'mute',
     kick: 'kick',
@@ -70,7 +74,7 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
     }
 }
 
-export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn') {
+export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: PunishmentTable) {
     const editTimestamp = new Date();
 
     const result = await db.query({
@@ -87,7 +91,7 @@ export async function editContextURL(id: string, contextURL: string, editModerat
 
     const { user_id, old_context } = result.rows[0];
 
-    const logString = `${parseUser(editModeratorID)} edited the context of ${parseUser(user_id)}'s ${tableToString[table]} (${id}).\n\n**Before**\n${
+    const logString = `${parseUser(editModeratorID)} edited the context of ${parseUser(user_id)}'s ${PUNISHMENT_TABLE_TO_STRING[table]} (${id}).\n\n**Before**\n${
         old_context || 'No context exists.'
     }\n\n**After**\n${contextURL}`;
 

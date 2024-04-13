@@ -2,7 +2,7 @@ import { User } from 'discord.js';
 import { db } from '../../../db/postgres.js';
 import { client } from '../../bot.js';
 import { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.js';
-import { editContextURL } from '../../lib/context.js';
+import { PunishmentTable, editContextURL } from '../../lib/context.js';
 import { replyError, replySuccess } from '../../lib/embeds.js';
 import { Note } from '../../lib/note.js';
 import { Ban, LiftedBan } from '../../lib/punishment/ban.js';
@@ -149,7 +149,8 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const context = await requireContext(value);
 
                 let uuid: string;
-                let table: 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
+                let table: PunishmentTable;
+
                 if (target instanceof User) {
                     const entry = (
                         await db.query({

@@ -102,7 +102,7 @@ export async function getUserModerationLogPages(targetUser: User) {
     const punishmentPoints = await getPunishmentPoints(targetUser.id);
     if (punishmentPoints !== 0) quickInformation.push({ name: 'Punishment Points', value: punishmentPoints.toString(), inline: true });
 
-    return { pages, quickInformation: quickInformation };
+    return { pages, quickInformation };
 }
 
 export const command: ChatInputCommandCallback = {
