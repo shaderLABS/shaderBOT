@@ -7,10 +7,9 @@ import { Track } from '../../lib/punishment/track.js';
 export const event: Event = {
     name: Events.GuildMemberRemove,
     callback: async (member) => {
-        const track = Track.getByUserID(member.id).catch(() => undefined);
+        const track = await Track.getByUserID(member.id).catch(() => undefined);
+        if (!track) return;
 
-        if (track !== undefined) {
-            log(`${parseUser(member.user)} has left.\n\n${track.toString()}`, 'Track Leave');
-        }
+        log(`${parseUser(member.user)} has left.\n\n${track.toString()}`, 'Track Leave');
     },
 };
