@@ -71,5 +71,17 @@ await connectPostgreSQL();
     }
 }
 
+// 2024-04-14
+{
+    const MIGRATION_NAME = '2024-04-14';
+    const result = await db.query(/*sql*/ `SELECT 1 FROM information_schema.tables WHERE table_name = 'track';`);
+    if (result.rowCount === 0) {
+        console.log(`Applying migration ${MIGRATION_NAME}...`);
+        applyMigration(MIGRATION_NAME);
+    } else {
+        console.log(`Migration ${MIGRATION_NAME} has already been applied.`);
+    }
+}
+
 console.log('All migrations have been applied.');
 process.exit();

@@ -6,6 +6,7 @@ import { parseUser, similarityLevenshtein } from '../../lib/misc.js';
 import { Project, ProjectMute } from '../../lib/project.js';
 import { Ban } from '../../lib/punishment/ban.js';
 import { Mute } from '../../lib/punishment/mute.js';
+import { Track } from '../../lib/punishment/track.js';
 
 type CachedMember = {
     displayName: string;
@@ -57,8 +58,9 @@ export const event: Event = {
          * Parallel Fetch *
          ******************/
 
-        const [mute, projects, projectMutes] = await Promise.all([
+        const [mute, track, projects, projectMutes] = await Promise.all([
             Mute.getByUserID(member.id).catch(() => undefined),
+            Track.getByUserID(member.id).catch(() => undefined),
             Project.getAllUnarchivedByOwnerID(member.id),
             ProjectMute.getAllByUserID(member.id),
         ]);
@@ -73,6 +75,14 @@ export const event: Event = {
         } else if (member.isCommunicationDisabled()) {
             // member is not muted, but still has a timeout. remove the timeout.
             member.timeout(null);
+        }
+
+        /*********
+         * Track *
+         *********/
+
+        if (track !== undefined) {
+            log(`${parseUser(member.user)} has joined.\n\n${track.toString()}`, 'Track Join');
         }
 
         /******************

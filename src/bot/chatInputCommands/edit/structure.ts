@@ -31,6 +31,10 @@ export default {
                             value: 'banreason',
                         },
                         {
+                            name: 'Track Reason',
+                            value: 'trackreason',
+                        },
+                        {
                             name: 'Kick Reason',
                             value: 'kickreason',
                         },

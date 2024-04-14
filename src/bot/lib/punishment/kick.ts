@@ -115,7 +115,7 @@ export class Kick extends Punishment {
 
     public async delete(moderatorID: string) {
         const result = await db.query({ text: /*sql*/ `DELETE FROM kick WHERE id = $1;`, values: [this.id], name: 'kick-delete' });
-        if (result.rowCount === 0) return Promise.reject('Failed to delete past punishment.');
+        if (result.rowCount === 0) return Promise.reject('Failed to delete kick.');
 
         const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s kick.\n\n${this.toString()}`;
         log(logString, 'Delete Kick');

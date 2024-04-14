@@ -7,6 +7,7 @@ import { Note } from '../../lib/note.js';
 import { Ban, LiftedBan } from '../../lib/punishment/ban.js';
 import { Kick } from '../../lib/punishment/kick.js';
 import { LiftedMute, Mute } from '../../lib/punishment/mute.js';
+import { Track } from '../../lib/punishment/track.js';
 import { Warning } from '../../lib/warning.js';
 
 export async function getUserModerationLogPages(targetUser: User) {
@@ -15,6 +16,7 @@ export async function getUserModerationLogPages(targetUser: User) {
         Note.getAllByUserID(targetUser.id),
         Ban.getByUserID(targetUser.id).catch(() => undefined),
         Mute.getByUserID(targetUser.id).catch(() => undefined),
+        Track.getByUserID(targetUser.id).catch(() => undefined),
         Kick.getAllByUserID(targetUser.id),
         LiftedBan.getAllByUserID(targetUser.id),
         LiftedMute.getAllByUserID(targetUser.id),
@@ -69,31 +71,38 @@ export async function getUserModerationLogPages(targetUser: User) {
         quickInformation.push({ name: 'Muted', value: 'No', inline: true });
     }
 
-    if (queries[4].length) {
-        pageCategory(
-            `Kicks (${queries[4].length})`,
-            queries[4].map((kick) => kick.toString(false))
-        );
+    if (queries[4]) {
+        pageSingle('Track Entry', queries[4].toString(false));
+        quickInformation.push({ name: 'Tracked', value: 'Yes', inline: true });
+    } else {
+        quickInformation.push({ name: 'Tracked', value: 'No', inline: true });
     }
 
     if (queries[5].length) {
         pageCategory(
-            `Lifted Bans (${queries[5].length})`,
-            queries[5].map((liftedBan) => liftedBan.toString(false))
+            `Kicks (${queries[5].length})`,
+            queries[5].map((kick) => kick.toString(false))
         );
     }
 
     if (queries[6].length) {
         pageCategory(
-            `Lifted Mutes (${queries[6].length})`,
-            queries[6].map((liftedMute) => liftedMute.toString(false))
+            `Lifted Bans (${queries[6].length})`,
+            queries[6].map((liftedBan) => liftedBan.toString(false))
         );
     }
 
     if (queries[7].length) {
         pageCategory(
-            `Ban Appeals (${queries[7].length})`,
-            queries[7].map((banAppeal) => banAppeal.toString(false))
+            `Lifted Mutes (${queries[7].length})`,
+            queries[7].map((liftedMute) => liftedMute.toString(false))
+        );
+    }
+
+    if (queries[8].length) {
+        pageCategory(
+            `Ban Appeals (${queries[8].length})`,
+            queries[8].map((banAppeal) => banAppeal.toString(false))
         );
     }
 

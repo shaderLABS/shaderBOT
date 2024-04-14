@@ -8,6 +8,7 @@ import { Note } from '../../lib/note.js';
 import { Ban, LiftedBan } from '../../lib/punishment/ban.js';
 import { Kick } from '../../lib/punishment/kick.js';
 import { LiftedMute, Mute } from '../../lib/punishment/mute.js';
+import { Track } from '../../lib/punishment/track.js';
 import { hasPermissionForTarget } from '../../lib/searchMessage.js';
 import { splitString, stringToSeconds } from '../../lib/time.js';
 import { Warning } from '../../lib/warning.js';
@@ -69,6 +70,14 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const logString = await ban.editReason(value, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Ban Reason');
+                break;
+            }
+
+            case 'trackreason': {
+                const track = target instanceof User ? await Track.getByUserID(target.id) : await Track.getByUUID(target);
+                const logString = await track.editReason(value, interaction.user.id);
+
+                replySuccess(interaction, logString, 'Edit Track Reason');
                 break;
             }
 
@@ -156,9 +165,11 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                         await db.query({
                             text: /*sql*/ `
                                 WITH entries AS (
-                                    (SELECT id, timestamp, tableoid::regclass FROM ban WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    (SELECT id, timestamp, tableoid::regclass FROM ban WHERE user_id = $1)
                                     UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
+                                    (SELECT id, timestamp, tableoid::regclass FROM mute WHERE user_id = $1)
+                                    UNION ALL
+                                    (SELECT id, timestamp, tableoid::regclass FROM track WHERE user_id = $1)
                                     UNION ALL
                                     (SELECT id, timestamp, tableoid::regclass FROM kick WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
                                     UNION ALL
@@ -192,6 +203,8 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                                 (SELECT user_id, tableoid::regclass FROM ban WHERE id = $1)
                                 UNION ALL
                                 (SELECT user_id, tableoid::regclass FROM mute WHERE id = $1)
+                                UNION ALL
+                                (SELECT user_id, tableoid::regclass FROM track WHERE id = $1)
                                 UNION ALL
                                 (SELECT user_id, tableoid::regclass FROM kick WHERE id = $1)
                                 UNION ALL

@@ -6,7 +6,7 @@ import { replyError } from './embeds.js';
 import log from './log.js';
 import { parseUser } from './misc.js';
 
-export type PunishmentTable = 'ban' | 'mute' | 'kick' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
+export type PunishmentTable = 'ban' | 'mute' | 'kick' | 'track' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
 
 const PUNISHMENT_TABLE_TO_STRING: {
     [key in PunishmentTable]: string;
@@ -14,6 +14,7 @@ const PUNISHMENT_TABLE_TO_STRING: {
     ban: 'ban',
     mute: 'mute',
     kick: 'kick',
+    track: 'track',
     lifted_ban: 'lifted ban',
     lifted_mute: 'lifted mute',
     note: 'note',

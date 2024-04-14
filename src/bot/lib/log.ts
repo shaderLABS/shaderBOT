@@ -2,7 +2,7 @@ import { ChannelType, EmbedBuilder } from 'discord.js';
 import { client, settings } from '../bot.js';
 import { EmbedColor, EmbedIcon } from './embeds.js';
 
-export default function (content: string | EmbedBuilder, title?: string) {
+export default function (content: string | EmbedBuilder, title?: string, files?: string[]) {
     const logChannel = client.channels.cache.get(settings.data.logging.moderationChannelID);
     if (logChannel?.type !== ChannelType.GuildText) return;
 
@@ -10,8 +10,8 @@ export default function (content: string | EmbedBuilder, title?: string) {
         content.data.author ??= { name: 'Log', icon_url: EmbedIcon.Log };
         content.data.color ??= EmbedColor.Blue;
 
-        return logChannel.send({ embeds: [content] });
+        return logChannel.send({ embeds: [content], files });
     } else {
-        return logChannel.send({ embeds: [new EmbedBuilder({ author: { name: 'Log', iconURL: EmbedIcon.Log }, title, color: EmbedColor.Blue, description: content })] });
+        return logChannel.send({ embeds: [new EmbedBuilder({ author: { name: 'Log', iconURL: EmbedIcon.Log }, title, color: EmbedColor.Blue, description: content })], files });
     }
 }

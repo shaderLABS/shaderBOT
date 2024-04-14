@@ -90,6 +90,21 @@ CREATE TABLE "kick" (
 DROP INDEX IF EXISTS "IDX_kick_user_id";
 CREATE INDEX "IDX_kick_user_id" ON "kick" USING HASH ("user_id");
 
+DROP TABLE IF EXISTS "track";
+CREATE TABLE "track" (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id NUMERIC(20) NOT NULL,
+    mod_id NUMERIC(20),
+    reason TEXT NOT NULL,
+    context_url TEXT,
+    edited_timestamp TIMESTAMP WITH TIME ZONE,
+    edited_mod_id NUMERIC(20),
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+DROP INDEX IF EXISTS "IDX_track_user_id";
+CREATE INDEX "IDX_track_user_id" ON "track" USING HASH ("user_id");
+
 DROP TABLE IF EXISTS "lifted_ban";
 CREATE TABLE "lifted_ban" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

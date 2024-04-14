@@ -1,5 +1,5 @@
 import { ApplicationCommandData, ApplicationCommandOptionType, PermissionFlagsBits } from 'discord.js';
-import { ChannelSlowmode } from '../../lib/channelRestriction/slowmode';
+import { ChannelSlowmode } from '../../lib/channelRestriction/slowmode.js';
 
 export default {
     name: 'slowmode',
