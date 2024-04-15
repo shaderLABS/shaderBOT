@@ -1,10 +1,10 @@
 import { ChannelType, Events } from 'discord.js';
-import { Event } from '../eventHandler.js';
-import { Backup } from '../lib/backup.js';
-import { ChannelLock } from '../lib/channelRestriction/lock.js';
-import { ChannelSlowmode } from '../lib/channelRestriction/slowmode.js';
-import log from '../lib/log.js';
-import { Project } from '../lib/project.js';
+import { Event } from '../../eventHandler.js';
+import { Backup } from '../../lib/backup.js';
+import { ChannelLock } from '../../lib/channelRestriction/lock.js';
+import { ChannelSlowmode } from '../../lib/channelRestriction/slowmode.js';
+import log from '../../lib/log.js';
+import { Project } from '../../lib/project.js';
 
 export const event: Event = {
     name: Events.ChannelDelete,
