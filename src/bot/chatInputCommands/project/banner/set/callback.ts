@@ -1,4 +1,4 @@
-import { AttachmentBuilder, DataResolver, EmbedBuilder } from 'discord.js';
+import { AttachmentBuilder, EmbedBuilder, resolveFile } from 'discord.js';
 import sharp from 'sharp';
 import { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.js';
 import { EmbedColor, EmbedIcon, replyError } from '../../../../lib/embeds.js';
@@ -25,7 +25,7 @@ export const command: ChatInputCommandCallback = {
             const bannerMessageID = (await interaction.deferReply({ fetchReply: true })).id;
 
             try {
-                const bannerSharp = sharp((await DataResolver.resolveFile(banner.url)).data, { failOnError: false });
+                const bannerSharp = sharp((await resolveFile(banner.url)).data, { failOnError: false });
 
                 const bannerWidth = 1920;
                 const bannerHeight = 1080;
