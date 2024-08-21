@@ -76,6 +76,7 @@ export class Project {
         return channel.guild.roles.create({
             name: channel.name,
             mentionable: false,
+            permissions: [],
             reason: `Create notification role for #${channel.name}.`,
         });
     }
