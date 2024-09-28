@@ -16,7 +16,7 @@ import {
     MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     PermissionFlagsBits,
-    TextBasedChannel,
+    SendableChannels,
     User,
     UserContextMenuCommandInteraction,
 } from 'discord.js';
@@ -61,7 +61,7 @@ function getInteractionName(interaction: ApplicationCommandInteraction | ButtonI
     return 'Unknown Interaction';
 }
 
-export function sendSuccess(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string) {
+export function sendSuccess(channel: SendableChannels | User | GuildMember, description?: string, title?: string) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
@@ -83,19 +83,21 @@ export function replySuccess(
         color: EmbedColor.Green,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () =>
-        interaction.channel?.send({
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () => {
+        if (!interaction.channel?.isSendable()) return;
+
+        return interaction.channel.send({
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
                     text: `${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
-        })
-    );
+        });
+    });
 }
 
-export function sendError(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string) {
+export function sendError(channel: SendableChannels | User | GuildMember, description?: string, title?: string) {
     const embed = new EmbedBuilder({
         author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
@@ -117,19 +119,21 @@ export function replyError(
         color: EmbedColor.Red,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () =>
-        interaction.channel?.send({
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () => {
+        if (!interaction.channel?.isSendable()) return;
+
+        return interaction.channel.send({
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
                     text: `${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
-        })
-    );
+        });
+    });
 }
 
-export function sendInfo(channel: TextBasedChannel | User | GuildMember, description?: string, title?: string, message?: string, footer?: string) {
+export function sendInfo(channel: SendableChannels | User | GuildMember, description?: string, title?: string, message?: string, footer?: string) {
     const embed = new EmbedBuilder({
         author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
         description,
@@ -155,7 +159,9 @@ export function replyInfo(
         footer: footer ? { text: footer } : undefined,
     });
 
-    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(async () =>
+    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(async () => {
+        if (!interaction.channel?.isSendable()) return;
+
         interaction.channel?.send({
             embeds: [
                 embed.setFooter({
@@ -163,12 +169,12 @@ export function replyInfo(
                     text: `${footer ? footer + '\n' : ''}${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
-        })
-    );
+        });
+    });
 }
 
 export async function sendButtonPages(
-    channel: TextBasedChannel | User | GuildMember,
+    channel: SendableChannels | User | GuildMember,
     authorID: string,
     pages: string[],
     title: string,

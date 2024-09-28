@@ -137,7 +137,7 @@ export class Project {
         });
 
         const announcementChannel = client.channels.cache.get(settings.data.logging.announcementChannelID);
-        if (announcementChannel?.isTextBased()) {
+        if (announcementChannel?.isSendable()) {
             sendInfo(announcementChannel, `${channel.toString()} (${channel.parent?.toString() || 'No Category'})`, 'A new project has been created!');
         }
 
