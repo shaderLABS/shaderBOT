@@ -95,7 +95,7 @@ export function startWebserver() {
                     ...COOKIE_CONFIGURATION,
                 });
 
-                discord_oauth_state.remove(COOKIE_CONFIGURATION);
+                discord_oauth_state.remove();
 
                 set.redirect = '/';
                 return;
@@ -119,10 +119,7 @@ export function startWebserver() {
             return 'Unauthorized';
         }
 
-        discord_auth.remove({
-            path: '/',
-            ...COOKIE_CONFIGURATION,
-        });
+        discord_auth.remove();
 
         set.status = 200;
         return 'OK';
