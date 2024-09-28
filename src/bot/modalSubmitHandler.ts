@@ -1,7 +1,7 @@
 import { Collection, ModalSubmitInteraction } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
-import url from 'url';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import url from 'node:url';
 
 export type ModalSubmitCallback = {
     readonly customID: string;

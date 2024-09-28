@@ -1,7 +1,7 @@
-import crypto from 'crypto';
 import { ChannelType, Collection, Message, TextChannel, VoiceChannel, type AnyThreadChannel } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
+import crypto from 'node:crypto';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 function parseProperty(prop: string | undefined | null) {
     return prop ? '\n\t' + prop.replaceAll(/\r?\n|\r/g, ' ') : '';

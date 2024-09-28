@@ -1,6 +1,6 @@
 import { AttachmentBuilder, AutocompleteInteraction, CommandInteraction, EmbedBuilder, type EmbedData } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { pastaPath, pastaStore } from '../pastaHandler.ts';
 import { stringToFileName } from './misc.ts';
 
