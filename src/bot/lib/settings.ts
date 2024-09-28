@@ -1,8 +1,8 @@
 import JSONC from 'comment-json';
-import { Console } from 'console';
 import type { Snowflake } from 'discord.js';
-import fssync from 'fs';
-import fsasync from 'fs/promises';
+import { Console } from 'node:console';
+import fssync from 'node:fs';
+import fsasync from 'node:fs/promises';
 import { getObjectInvalidProperties } from './objectManipulation.ts';
 
 export class SettingsFile<Data> {

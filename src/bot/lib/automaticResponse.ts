@@ -1,5 +1,5 @@
 import { AttachmentBuilder, ChannelType, EmbedBuilder, type EmbedData } from 'discord.js';
-import path from 'path';
+import path from 'node:path';
 import { automaticResponsePath } from '../automaticResponseHandler.ts';
 import { client, cooldownStore, settings } from '../bot.ts';
 import type { GuildMessage } from '../events/message/messageCreate.ts';

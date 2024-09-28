@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import os from 'os';
+import os from 'node:os';
 import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
 import { EmbedColor, EmbedIcon } from '../../lib/embeds.ts';
 import { formatBytes } from '../../lib/misc.ts';

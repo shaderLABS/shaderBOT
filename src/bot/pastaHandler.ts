@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { Pasta } from './lib/pasta.ts';
 
 export const pastaPath = 'customContent/pasta';

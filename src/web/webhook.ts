@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { t, type Static } from 'elysia';
+import crypto from 'node:crypto';
 import { client } from '../bot/bot.ts';
 import { EmbedColor } from '../bot/lib/embeds.ts';
 import { formatBytes, trimString } from '../bot/lib/misc.ts';

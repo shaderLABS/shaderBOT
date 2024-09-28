@@ -1,7 +1,7 @@
 import { ChannelType, ChatInputCommandInteraction, Collection, GuildMember, TextChannel, VoiceChannel, type AnyThreadChannel, type PermissionResolvable } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
-import url from 'url';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import url from 'node:url';
 import type { MessageContextMenuCommandCallback, UserContextMenuCommandCallback } from './contextMenuCommandHandler.ts';
 import { replyError } from './lib/embeds.ts';
 

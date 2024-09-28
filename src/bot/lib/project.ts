@@ -1,6 +1,6 @@
-import crypto from 'crypto';
 import type { GuildTextBasedChannel, PermissionOverwriteOptions } from 'discord.js';
 import { CategoryChannel, ChannelType, EmbedBuilder, Guild, GuildMember, OverwriteType, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import crypto from 'node:crypto';
 import { db } from '../../db/postgres.ts';
 import { client, settings } from '../bot.ts';
 import { EmbedColor, EmbedIcon, sendInfo } from './embeds.ts';

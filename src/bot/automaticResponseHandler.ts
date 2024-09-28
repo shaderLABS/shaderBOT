@@ -1,6 +1,6 @@
 import { Collection } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import type { GuildMessage } from './events/message/messageCreate.ts';
 import { AutomaticResponse } from './lib/automaticResponse.ts';
 

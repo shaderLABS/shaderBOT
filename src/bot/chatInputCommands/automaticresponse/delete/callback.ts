@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from 'discord.js';
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { automaticResponsePath, automaticResponseStore } from '../../../automaticResponseHandler.ts';
 import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 import { replyError, replySuccess } from '../../../lib/embeds.ts';
