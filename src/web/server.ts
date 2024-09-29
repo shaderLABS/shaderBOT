@@ -3,7 +3,7 @@ import jwt from '@elysiajs/jwt';
 import { Discord, OAuth2RequestError, generateState } from 'arctic';
 import type { APIUser } from 'discord.js';
 import { Elysia, t, type CookieOptions } from 'elysia';
-import fssync from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { client } from '../bot/bot.ts';
 import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.ts';
@@ -55,7 +55,7 @@ export function startWebserver() {
      * ROUTES *
      **********/
 
-    app.get('/api/auth/login', async ({ cookie: { discord_oauth_state }, set }) => {
+    app.get('/api/auth/login', async ({ cookie: { discord_oauth_state }, redirect }) => {
         const state = generateState();
         const url = await discordOAuthProvider.createAuthorizationURL(state, { scopes: ['identify'] });
 
@@ -66,15 +66,14 @@ export function startWebserver() {
             ...COOKIE_CONFIGURATION,
         });
 
-        set.redirect = url.toString();
+        return redirect(url.toString());
     });
 
     app.get(
         '/api/auth/redirect',
-        async ({ query: { code, state }, cookie: { discord_oauth_state, discord_auth }, set, jwt }) => {
+        async ({ query: { code, state }, cookie: { discord_oauth_state, discord_auth }, jwt, error, redirect }) => {
             if (state !== discord_oauth_state.value) {
-                set.status = 400;
-                return 'Bad Request';
+                return error('Bad Request');
             }
 
             try {
@@ -97,49 +96,42 @@ export function startWebserver() {
 
                 discord_oauth_state.remove();
 
-                set.redirect = '/';
-                return;
-            } catch (error) {
-                if (error instanceof OAuth2RequestError) {
-                    set.status = 400;
-                    return 'Bad Request';
+                return redirect('/');
+            } catch (errorMessage) {
+                if (errorMessage instanceof OAuth2RequestError) {
+                    return error('Bad Request');
                 } else {
-                    console.error(error);
-                    set.status = 500;
-                    return 'Internal Server Error';
+                    console.error(errorMessage);
+                    return error('Internal Server Error');
                 }
             }
         },
         { query: t.Object({ code: t.String(), state: t.String() }) }
     );
 
-    app.post('/api/auth/logout', async ({ user, set, cookie: { discord_auth } }) => {
+    app.post('/api/auth/logout', async ({ user, cookie: { discord_auth }, error }) => {
         if (!user) {
-            set.status = 401;
-            return 'Unauthorized';
+            return error('Unauthorized');
         }
 
         discord_auth.remove();
 
-        set.status = 200;
-        return 'OK';
+        return error('No Content');
     });
 
-    app.get('/api/user/me', async ({ user, set }) => {
+    app.get('/api/user/me', async ({ user, error }) => {
         // 200 OK - user is logged in, data in response
         // 204 No Content - user not logged in, no data available
         // 404 Not Found - user not found in Discord, no data available
 
         if (!user) {
-            set.status = 204;
-            return 'No Content';
+            return error('No Content');
         }
 
         const discordUser = await client.users.fetch(user.id)?.catch(() => undefined);
 
         if (!discordUser) {
-            set.status = 404;
-            return 'Not Found';
+            return error('Not Found');
         }
 
         const data: API.UserInformation = {
@@ -156,37 +148,32 @@ export function startWebserver() {
         return data;
     });
 
-    app.get('/api/ban/me', async ({ set, user }) => {
+    app.get('/api/ban/me', async ({ user, error }) => {
         if (!user) {
-            set.status = 401;
-            return 'Unauthorized';
+            return error('Unauthorized');
         }
 
         try {
             return await getUserAppealData(user.id);
-        } catch (error) {
-            console.error('/api/ban/me', user.id, error);
-            set.status = 400;
-            return 'Bad Request';
+        } catch (errorMessage) {
+            console.error('/api/ban/me', user.id, errorMessage);
+            return error('Internal Server Error');
         }
     });
 
     app.post(
         '/api/appeal',
-        async ({ user, set, body: { reason } }) => {
+        async ({ user, body: { reason }, error }) => {
             if (!user) {
-                set.status = 401;
-                return 'Unauthorized';
+                return error('Unauthorized');
             }
 
             try {
                 await BanAppeal.create(user.id, reason);
-                set.status = 200;
-                return 'OK';
-            } catch (error) {
-                console.error('/api/appeal', user.id, error);
-                set.status = 400;
-                return 'Bad Request';
+                return error('No Content');
+            } catch (errorMessage) {
+                console.error('/api/appeal', user.id, errorMessage);
+                return error('Bad Request');
             }
         },
         { body: t.Object({ reason: t.String() }) }
@@ -194,7 +181,7 @@ export function startWebserver() {
 
     app.post(
         '/api/webhook/release/:channelID',
-        async ({ params: { channelID }, set, body, request, headers: { 'x-hub-signature-256': signature } }) => {
+        async ({ params: { channelID }, body, request, headers: { 'x-hub-signature-256': signature }, error }) => {
             const project = (
                 await db.query({
                     text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
@@ -204,18 +191,16 @@ export function startWebserver() {
             ).rows[0];
 
             if (!project || !project.webhook_secret || !project.role_id) {
-                set.status = 404;
-                return 'Not Found';
+                return error('Not Found');
             }
 
             const rawBodyBuffer = Buffer.from(await request.clone().arrayBuffer());
             if (!verifySignature(signature, rawBodyBuffer, project.webhook_secret)) {
-                set.status = 403;
-                return 'Forbidden';
+                return error('Forbidden');
             }
 
-            set.status = await releaseNotification(channelID, project.role_id, body);
-            return;
+            const statusCode = await releaseNotification(channelID, project.role_id, body);
+            return error(statusCode);
         },
         {
             type: 'json',
@@ -235,19 +220,19 @@ export function startWebserver() {
         const udsPath = process.env.UDS_PATH;
         const udsDirectory = path.dirname(udsPath);
 
-        if (fssync.existsSync(udsDirectory)) {
-            const previousFile = fssync.statSync(udsPath, { throwIfNoEntry: false });
+        if (fs.existsSync(udsDirectory)) {
+            const previousFile = fs.statSync(udsPath, { throwIfNoEntry: false });
 
             if (previousFile) {
                 if (previousFile.isSocket()) {
-                    fssync.unlinkSync(udsPath);
+                    fs.unlinkSync(udsPath);
                     console.log(`Removed previous UNIX socket "${udsPath}".`);
                 } else {
                     throw new Error(`File "${udsPath}" already exists and is not a socket.`);
                 }
             }
         } else {
-            fssync.mkdirSync(udsDirectory, { recursive: true });
+            fs.mkdirSync(udsDirectory, { recursive: true });
             console.log(`Created directory for UNIX socket "${udsDirectory}".`);
         }
 
@@ -255,12 +240,12 @@ export function startWebserver() {
             console.log(`Started HTTP API on UNIX socket "${udsPath}".`);
 
             if (process.env.UDS_UID || process.env.UDS_GID) {
-                fssync.chownSync(udsPath, Number(process.env.UDS_UID || -1), Number(process.env.UDS_GID || -1));
+                fs.chownSync(udsPath, Number(process.env.UDS_UID || -1), Number(process.env.UDS_GID || -1));
             }
 
-            fssync.chmodSync(udsPath, 0o660);
+            fs.chmodSync(udsPath, 0o660);
 
-            const udsStat = fssync.statSync(udsPath);
+            const udsStat = fs.statSync(udsPath);
             console.log(`Set UID to ${udsStat.uid}, GID to ${udsStat.gid} and mode to ${udsStat.mode.toString(8)} for UNIX socket "${udsPath}".`);
         });
     } else {
