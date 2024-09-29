@@ -8,7 +8,7 @@ The following information is for developers and contributors. If you're a user, 
 ## Install Dependencies
 
 ```properties
-npm install
+bun install
 ```
 
 ## Configuration (required)
@@ -42,7 +42,7 @@ Environment variables are read from `.env` and specifiy sensitive information li
 | `UDS_UID`                   |     NONE     | The UID of the user that will own the UNIX domain socket file.                                                                                       |
 | `UDS_GID`                   |     NONE     | The GID of the group that will own the UNIX domain socket file.                                                                                      |
 | `DOMAIN`                    | `localhost`  | The domain that the HTTP API will run on.                                                                                                            |
-| `BOT_ONLY`                  |   `false`    | Run the server in bot-only mode, which disables the Polka server (HTTP API).                                                                         |
+| `BOT_ONLY`                  |   `false`    | Run the application in bot-only mode, which disables the HTTP server.                                                                                |
 | `PG_USER`                   |  `postgres`  | The name used for accessing the PostgreSQL database.                                                                                                 |
 | `PG_PASSWORD`               |  `postgres`  | The password used for accessing the PostgreSQL database.                                                                                             |
 | `PG_HOST`                   | `localhost`  | The hostname used for connecting to the PostgreSQL server.                                                                                           |
@@ -59,23 +59,22 @@ If the API runs through a reverse proxy like NGINX, which is usually in the `www
 
 ## Running the Application
 
-### npm (development)
+### bun (development)
 
 ```properties
-npm run dev
+bun run dev
 ```
 
-This will transpile the TypeScript files, run the server and watch for changes.
-You can also manually transpile the TypeScript files with `npm run build` and then run the server using `npm run start`.
+This will run the application and watch for changes.
+You can also manually run the application without watching for changes using `bun run start`.
 
 ### PM2 (production)
 
 ```properties
-npm run build
 pm2 start ecosystem.config.cjs
 ```
 
-This will daemonize and run the server with [PM2](https://pm2.keymetrics.io/) using the [`ecosystem.config.cjs`](ecosystem.config.cjs) configuration file.
+This will daemonize and run the application with [PM2](https://pm2.keymetrics.io/) using the [`ecosystem.config.cjs`](ecosystem.config.cjs) configuration file.
 
 ### Docker (production)
 
@@ -92,7 +91,7 @@ docker-compose up
 You must upload the command structure to Discord in order to be able to view and use commands. You can do that by running the following command after building the application:
 
 ```properties
-npm run update
+bun run update
 ```
 
 ## Updating the Application
@@ -108,7 +107,7 @@ Additionally, [re-uploading the command structure](#Uploading-Command-Structure)
 After certain updates, the database tables and other dynamic content might have to be migrated before starting the application. If new migrations are available, you can see them in the console output while pulling from GitHub. You can apply all migrations that have not been applied so far by running the following command after building the application:
 
 ```properties
-npm run migrate
+bun run migrate
 ```
 
 ## Recommended Visual Studio Code Settings and Extensions

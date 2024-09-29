@@ -8,3 +8,4 @@ customContent/
 .dockerignore
 docker_compose.yml
 Dockerfile
+tsconfig.tsbuildinfo
