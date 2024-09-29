@@ -72,7 +72,7 @@ export class Backup {
         const authTag = Buffer.from(rawAuthTag, 'hex');
         const encrypted = Buffer.from(contentParts.join(':'), 'hex');
 
-        const decipher = crypto.createDecipheriv('chacha20-poly1305', Buffer.from(process.env.BACKUP_ENCRYPTION_KEY), iv, { authTagLength: 16 });
+        const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(process.env.BACKUP_ENCRYPTION_KEY), iv, { authTagLength: 16 });
         const decrypted = decipher.update(encrypted);
         decipher.setAuthTag(authTag);
 
@@ -84,7 +84,7 @@ export class Backup {
         if (process.env.BACKUP_ENCRYPTION_KEY.length !== 32) throw "The 'BACKUP_ENCRYPTION_KEY' must be 32 characters (256 bits) long.";
 
         const iv = crypto.randomBytes(12);
-        const cipher = crypto.createCipheriv('chacha20-poly1305', Buffer.from(process.env.BACKUP_ENCRYPTION_KEY), iv, { authTagLength: 16 });
+        const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(process.env.BACKUP_ENCRYPTION_KEY), iv, { authTagLength: 16 });
         const encrypted = cipher.update(content);
 
         return iv.toString('hex') + ':' + Buffer.concat([encrypted, cipher.final()]).toString('hex') + ':' + cipher.getAuthTag().toString('hex');

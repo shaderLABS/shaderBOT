@@ -12,33 +12,29 @@ import { TimeoutStore } from './lib/timeoutStore.ts';
 import { registerModals } from './modalSubmitHandler.ts';
 import { pastaPath, registerPastas } from './pastaHandler.ts';
 
-export let client: Client;
-export let cooldownStore: CooldownStore;
-export let timeoutStore: TimeoutStore;
-export let settings: SettingsFile<BotSettings>;
+export const settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
+
+export const cooldownStore = new CooldownStore();
+export const timeoutStore = new TimeoutStore();
+
+export const client = new Client({
+    allowedMentions: {
+        parse: ['roles', 'users'],
+        repliedUser: false,
+    },
+    partials: [Partials.Message, Partials.GuildMember],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildModeration,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.MessageContent,
+    ],
+    presence: RandomPresence.PRESENCE,
+});
 
 export async function startBot() {
-    cooldownStore = new CooldownStore();
-    timeoutStore = new TimeoutStore();
-    settings = new SettingsFile<BotSettings>('customContent/settings.jsonc', 'settings.template.jsonc');
-
-    client = new Client({
-        allowedMentions: {
-            parse: ['roles', 'users'],
-            repliedUser: false,
-        },
-        partials: [Partials.Message, Partials.GuildMember],
-        intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildMembers,
-            GatewayIntentBits.GuildModeration,
-            GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.GuildVoiceStates,
-            GatewayIntentBits.MessageContent,
-        ],
-        presence: RandomPresence.PRESENCE,
-    });
-
     registerEvents('src/bot/events');
     registerChatInputCommands('src/bot/chatInputCommands');
     registerMessageContextMenuCommands('src/bot/contextMenuCommands/message');
@@ -46,6 +42,7 @@ export async function startBot() {
     registerModals('src/bot/modals');
     registerPastas(pastaPath);
     registerAutomaticResponses(automaticResponsePath);
+
     Backup.clean();
 
     client.login(process.env.TOKEN);

@@ -1,8 +1,7 @@
 import JSONC from 'comment-json';
 import type { Snowflake } from 'discord.js';
 import { Console } from 'node:console';
-import fssync from 'node:fs';
-import fsasync from 'node:fs/promises';
+import fs from 'node:fs';
 import { getObjectInvalidProperties } from './objectManipulation.ts';
 
 export class SettingsFile<Data> {
@@ -10,8 +9,8 @@ export class SettingsFile<Data> {
     public readonly path: string;
 
     constructor(settingsPath: string, templatePath: string) {
-        const settingsData = JSONC.parse(fssync.readFileSync(settingsPath, 'utf-8'));
-        const templateData = JSONC.parse(fssync.readFileSync(templatePath, 'utf-8'));
+        const settingsData = JSONC.parse(fs.readFileSync(settingsPath, 'utf-8'));
+        const templateData = JSONC.parse(fs.readFileSync(templatePath, 'utf-8'));
 
         const invalidProperties = getObjectInvalidProperties(settingsData, templateData);
         if (invalidProperties.length !== 0) {
@@ -24,7 +23,7 @@ export class SettingsFile<Data> {
     }
 
     public async save() {
-        return fsasync.writeFile(this.path, JSONC.stringify(this.data, null, '\t'), 'utf-8');
+        return Bun.write(this.path, JSONC.stringify(this.data, null, '\t'));
     }
 }
 
