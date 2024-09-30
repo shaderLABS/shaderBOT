@@ -3,7 +3,7 @@ module.exports = {
         {
             name: 'shaderBOT',
             script: 'src/index.ts',
-            interpreter: '~/.bun/bin/bun',
+            interpreter: 'bun',
             time: true,
         },
     ],
