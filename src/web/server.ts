@@ -2,7 +2,7 @@ import cors from '@elysiajs/cors';
 import jwt from '@elysiajs/jwt';
 import { Discord, OAuth2RequestError, generateState } from 'arctic';
 import type { APIUser } from 'discord.js';
-import { Elysia, t, type CookieOptions } from 'elysia';
+import { Elysia, t } from 'elysia';
 import fs from 'node:fs';
 import path from 'node:path';
 import { client } from '../bot/bot.ts';
@@ -13,11 +13,6 @@ import type { API } from './api.ts';
 import { GITHUB_RELEASE_WEBHOOK_BODY, releaseNotification, verifySignature } from './webhook.ts';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
-
-const COOKIE_CONFIGURATION: Pick<CookieOptions, 'sameSite' | 'secure'> = {
-    sameSite: IS_DEVELOPMENT_ENVIRONMENT ? 'lax' : 'strict',
-    secure: !IS_DEVELOPMENT_ENVIRONMENT,
-};
 
 export function startWebserver() {
     if (process.env.BOT_ONLY === 'true') return;
@@ -63,7 +58,8 @@ export function startWebserver() {
             value: state,
             maxAge: 600, // 10 minutes
             httpOnly: true,
-            ...COOKIE_CONFIGURATION,
+            sameSite: 'lax',
+            secure: !IS_DEVELOPMENT_ENVIRONMENT,
         });
 
         return redirect(url.toString());
@@ -91,7 +87,8 @@ export function startWebserver() {
                     path: '/',
                     maxAge: 86_400, // 1 day
                     httpOnly: true,
-                    ...COOKIE_CONFIGURATION,
+                    sameSite: IS_DEVELOPMENT_ENVIRONMENT ? 'lax' : 'strict',
+                    secure: !IS_DEVELOPMENT_ENVIRONMENT,
                 });
 
                 discord_oauth_state.remove();
