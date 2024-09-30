@@ -17,5 +17,5 @@ jobs:
                   bun-version: latest
             - name: Install Dependencies
               run: bun install --frozen-lockfile
-            - name: Run TSC
-              run: bunx tsc --noEmit --skipLibCheck
+            - name: Run Checks
+              run: bun run check
