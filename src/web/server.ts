@@ -10,7 +10,8 @@ import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.ts';
 import { getGuild } from '../bot/lib/misc.ts';
 import { db } from '../db/postgres.ts';
 import type { API } from './api.ts';
-import { GITHUB_RELEASE_WEBHOOK_BODY, releaseNotification, verifySignature } from './webhook.ts';
+import { GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY, pingNotification, releaseNotification } from './webhook.ts';
+import { verify as verifyGitHubWebhook } from '@octokit/webhooks-methods';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
 
@@ -176,9 +177,9 @@ export function startWebserver() {
         { body: t.Object({ reason: t.String() }) }
     );
 
-    app.post(
+    app.decorate('bodyText', '' as string).post(
         '/api/webhook/release/:channelID',
-        async ({ params: { channelID }, body, request, headers: { 'x-hub-signature-256': signature }, error }) => {
+        async ({ params: { channelID }, body, bodyText, headers: { 'x-hub-signature-256': signature, 'x-github-event': event }, error }) => {
             const project = (
                 await db.query({
                     text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
@@ -191,19 +192,43 @@ export function startWebserver() {
                 return error('Not Found');
             }
 
-            const rawBodyBuffer = Buffer.from(await request.clone().arrayBuffer());
-            if (!verifySignature(signature, rawBodyBuffer, project.webhook_secret)) {
+            if (!(await verifyGitHubWebhook(project.webhook_secret, bodyText, signature))) {
                 return error('Forbidden');
             }
 
-            const statusCode = await releaseNotification(channelID, project.role_id, body);
+            let statusCode = 400;
+
+            if (event === 'ping' && 'hook' in body) {
+                statusCode = await pingNotification(channelID, body);
+            } else if (event === 'release' && 'release' in body) {
+                statusCode = await releaseNotification(channelID, project.role_id, body);
+            }
+
             return error(statusCode);
         },
         {
-            type: 'json',
-            body: GITHUB_RELEASE_WEBHOOK_BODY,
+            type: ['json', 'urlencoded'],
+            body: t.Union([GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY]),
             params: t.Object({ channelID: t.String({ pattern: '^[0-9]+$', default: '0', examples: '1044804143455420539' }) }),
-            headers: t.Object({ 'x-hub-signature-256': t.String({ pattern: '^sha256=[0-9a-f]{64}$', default: 'sha256=0' }), 'x-github-event': t.Literal('release') }),
+            headers: t.Object({ 'x-hub-signature-256': t.String({ pattern: '^sha256=[0-9a-f]{64}$', default: 'sha256=0' }), 'x-github-event': t.Union([t.Literal('ping'), t.Literal('release')]) }),
+            parse: async (context) => {
+                if (context.contentType === 'application/json') {
+                    const bodyText = await context.request.text();
+                    context.bodyText = bodyText;
+
+                    return JSON.parse(bodyText);
+                } else if (context.contentType === 'application/x-www-form-urlencoded') {
+                    const encodedBodyText = await context.request.text();
+
+                    const bodyText = decodeURIComponent(encodedBodyText);
+                    context.bodyText = bodyText;
+
+                    const payload = new URLSearchParams(bodyText).get('payload');
+                    if (!payload) return;
+
+                    return JSON.parse(payload);
+                }
+            },
         }
     );
 

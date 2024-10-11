@@ -26,6 +26,7 @@
     "dependencies": {
         "@elysiajs/cors": "1.1.1",
         "@elysiajs/jwt": "1.1.1",
+        "@octokit/webhooks-methods": "5.1.0",
         "arctic": "1.9.2",
         "comment-json": "4.2.5",
         "discord.js": "14.16.2",

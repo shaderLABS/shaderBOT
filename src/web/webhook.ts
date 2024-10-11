@@ -1,21 +1,15 @@
 import { ChannelType, EmbedBuilder } from 'discord.js';
 import { t, type Static } from 'elysia';
-import crypto from 'node:crypto';
 import { client } from '../bot/bot.ts';
 import { EmbedColor } from '../bot/lib/embeds.ts';
 import { formatBytes, trimString } from '../bot/lib/misc.ts';
 
-function signData(data: crypto.BinaryLike, key: crypto.BinaryLike) {
-    return 'sha256=' + crypto.createHmac('sha256', key).update(data).digest('hex');
-}
+// export async function verifySignature(rawSignature: string, data: Uint8Array, rawKey: Buffer): Promise<boolean> {
+//     const key = await crypto.subtle.importKey('raw', rawKey, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['verify']);
+//     const signature = Buffer.from(rawSignature.replace('sha256=', ''), 'hex');
 
-export function verifySignature(signature: string, data: crypto.BinaryLike, key: crypto.BinaryLike) {
-    const signatureBuffer = Buffer.from(signature);
-    const signedDataBuffer = Buffer.from(signData(data, key));
-
-    if (signatureBuffer.length !== signedDataBuffer.length) return false;
-    return crypto.timingSafeEqual(signatureBuffer, signedDataBuffer);
-}
+//     return await crypto.subtle.verify('HMAC', key, signature, data);
+// }
 
 export const GITHUB_RELEASE_WEBHOOK_BODY = t.Object(
     {
@@ -39,10 +33,58 @@ export const GITHUB_RELEASE_WEBHOOK_BODY = t.Object(
         }),
         repository: t.Object({
             full_name: t.String(),
+            html_url: t.String(),
         }),
     },
     { additionalProperties: true }
 );
+
+export const GITHUB_PING_WEBHOOK_BODY = t.Object(
+    {
+        hook: t.Object({
+            events: t.Array(t.String()),
+        }),
+        repository: t.Object({
+            full_name: t.String(),
+            html_url: t.String(),
+        }),
+        sender: t.Object({
+            login: t.String(),
+            avatar_url: t.Optional(t.String()),
+            html_url: t.Optional(t.String()),
+        }),
+    },
+    { additionalProperties: true }
+);
+
+export async function pingNotification(channelID: string, body: Static<typeof GITHUB_PING_WEBHOOK_BODY>): Promise<number> {
+    const channel = client.channels.cache.get(channelID);
+    if (channel?.type !== ChannelType.GuildText) return 500;
+
+    let description = 'A webhook has been added to this project.';
+
+    if (!body.hook.events.includes('release') && !body.hook.events.includes('*')) {
+        description += '\n\nThis webhook does not have the `release` event enabled. Please enable it to receive release notifications.';
+    }
+
+    await channel.send({
+        embeds: [
+            new EmbedBuilder({
+                author: {
+                    name: body.sender.login || 'Unknown Author',
+                    iconURL: body.sender.avatar_url,
+                    url: body.sender.html_url,
+                },
+                title: body.repository.full_name,
+                url: body.repository.html_url,
+                description,
+                color: EmbedColor.Green,
+            }),
+        ],
+    });
+
+    return 200;
+}
 
 export async function releaseNotification(channelID: string, roleID: string, body: Static<typeof GITHUB_RELEASE_WEBHOOK_BODY>): Promise<number> {
     const channel = client.channels.cache.get(channelID);
@@ -70,6 +112,7 @@ export async function releaseNotification(channelID: string, roleID: string, bod
                     url: body.release.author.html_url,
                 },
                 title: body.repository.full_name,
+                url: body.repository.html_url,
                 description,
                 color: EmbedColor.Blue,
             }),
