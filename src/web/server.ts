@@ -1,7 +1,9 @@
 import cors from '@elysiajs/cors';
 import jwt from '@elysiajs/jwt';
+import { verify as verifyGitHubWebhook } from '@octokit/webhooks-methods';
 import { Discord, OAuth2RequestError, generateState } from 'arctic';
 import type { APIUser } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { Elysia, t } from 'elysia';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,9 +11,9 @@ import { client } from '../bot/bot.ts';
 import { BanAppeal, getUserAppealData } from '../bot/lib/banAppeal.ts';
 import { getGuild } from '../bot/lib/misc.ts';
 import { db } from '../db/postgres.ts';
+import * as schema from '../db/schema.ts';
 import type { API } from './api.ts';
 import { GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY, pingNotification, releaseNotification } from './webhook.ts';
-import { verify as verifyGitHubWebhook } from '@octokit/webhooks-methods';
 
 const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
 
@@ -25,7 +27,7 @@ export function startWebserver() {
     const discordOAuthProvider = new Discord(
         process.env.APPLICATION_CLIENT_ID,
         process.env.APPLICATION_CLIENT_SECRET,
-        IS_DEVELOPMENT_ENVIRONMENT ? 'http://localhost:3001/api/auth/redirect' : `https://${process.env.DOMAIN}/api/auth/redirect`
+        IS_DEVELOPMENT_ENVIRONMENT ? 'http://localhost:3001/api/auth/redirect' : `https://${process.env.DOMAIN}/api/auth/redirect`,
     );
 
     /**************
@@ -38,7 +40,7 @@ export function startWebserver() {
                 origin: IS_DEVELOPMENT_ENVIRONMENT,
                 methods: ['GET', 'POST'],
                 credentials: true,
-            })
+            }),
         )
         .use(jwt({ secret: process.env.SESSION_SECRET, schema: t.Object({ id: t.String() }), exp: '1d' }))
         .derive(async ({ cookie: { discord_auth }, jwt }): Promise<{ user: { id: string } | null }> => {
@@ -104,7 +106,7 @@ export function startWebserver() {
                 }
             }
         },
-        { query: t.Object({ code: t.String(), state: t.String() }) }
+        { query: t.Object({ code: t.String(), state: t.String() }) },
     );
 
     app.post('/api/auth/logout', async ({ user, cookie: { discord_auth }, error }) => {
@@ -139,7 +141,7 @@ export function startWebserver() {
             isBanned: Boolean(
                 await getGuild()
                     .bans.fetch(discordUser)
-                    .catch(() => undefined)
+                    .catch(() => undefined),
             ),
         };
 
@@ -174,25 +176,22 @@ export function startWebserver() {
                 return error('Bad Request');
             }
         },
-        { body: t.Object({ reason: t.String() }) }
+        { body: t.Object({ reason: t.String() }) },
     );
 
     app.decorate('bodyText', '' as string).post(
         '/api/webhook/release/:channelID',
         async ({ params: { channelID }, body, bodyText, headers: { 'x-hub-signature-256': signature, 'x-github-event': event }, error }) => {
-            const project = (
-                await db.query({
-                    text: /*sql*/ `SELECT role_id, encode(webhook_secret, 'hex') AS webhook_secret FROM project WHERE channel_id = $1;`,
-                    values: [channelID],
-                    name: 'project-get-webhook-secret',
-                })
-            ).rows[0];
+            const project = await db.query.project.findFirst({
+                columns: { roleId: true, webhookSecret: true },
+                where: sql.eq(schema.project.channelId, channelID),
+            });
 
-            if (!project || !project.webhook_secret || !project.role_id) {
+            if (!project || !project.webhookSecret || !project.roleId) {
                 return error('Not Found');
             }
 
-            if (!(await verifyGitHubWebhook(project.webhook_secret, bodyText, signature))) {
+            if (!(await verifyGitHubWebhook(project.webhookSecret.toString('hex'), bodyText, signature))) {
                 return error('Forbidden');
             }
 
@@ -201,7 +200,7 @@ export function startWebserver() {
             if (event === 'ping' && 'hook' in body) {
                 statusCode = await pingNotification(channelID, body);
             } else if (event === 'release' && 'release' in body) {
-                statusCode = await releaseNotification(channelID, project.role_id, body);
+                statusCode = await releaseNotification(channelID, project.roleId, body);
             }
 
             return error(statusCode);
@@ -229,7 +228,7 @@ export function startWebserver() {
                     return JSON.parse(payload);
                 }
             },
-        }
+        },
     );
 
     /*********

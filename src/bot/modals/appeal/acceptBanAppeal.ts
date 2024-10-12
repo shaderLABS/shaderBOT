@@ -12,7 +12,7 @@ export const modal: ModalSubmitCallback = {
             const appeal = await BanAppeal.getByUUID(appealID);
             const logString = await appeal.close('accepted', interaction.fields.getTextInputValue('reasonInput'), interaction.user.id);
 
-            const ban = await Ban.getByUserID(appeal.userID);
+            const ban = await Ban.getByUserID(appeal.userId);
             await ban.lift(interaction.user.id);
 
             replySuccess(interaction, logString, 'Accept Ban Appeal');

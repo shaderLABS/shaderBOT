@@ -19,7 +19,7 @@ export const command: ChatInputCommandCallback = {
         try {
             const punishment = await Promise.any([Kick.getByUUID(id), LiftedBan.getByUUID(id), LiftedMute.getByUUID(id)]).catch(() => Promise.reject('The specified UUID does not exist.'));
 
-            if (!(await hasPermissionForTarget(interaction, punishment.userID))) return;
+            if (!(await hasPermissionForTarget(interaction, punishment.userId))) return;
             const logString = await punishment.delete(interaction.user.id);
 
             replySuccess(interaction, logString, 'Delete ' + punishment.TYPE_STRING);

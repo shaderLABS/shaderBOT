@@ -1,5 +1,7 @@
 import { type UserResolvable } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client, timeoutStore } from '../../bot.ts';
 import { sendInfo } from '../embeds.ts';
 import log from '../log.ts';
@@ -34,25 +36,19 @@ export class Mute extends ExpirablePunishment {
     }
 
     static async getExpiringToday() {
-        const result = await db.query({
-            text: /*sql*/ `
-            	SELECT * FROM mute
-            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            name: 'mute-expiring-today',
+        const result = await db.query.mute.findMany({
+            where: sql.and(sql.isNotNull(schema.mute.expireTimestamp), sql.lte(sql.sql`${schema.mute.expireTimestamp}::DATE`, sql.sql`NOW()::DATE`)),
         });
 
-        return result.rows.map((row) => new Mute(row));
+        return result.map((entry) => new Mute(entry));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query({
-            text: /*sql*/ `
-            	SELECT * FROM mute
-            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            name: 'mute-expiring-tomorrow',
+        const result = await db.query.mute.findMany({
+            where: sql.and(sql.isNotNull(schema.mute.expireTimestamp), sql.lte(sql.sql`${schema.mute.expireTimestamp}::DATE`, sql.sql`NOW()::DATE + INTERVAL '1 day'`)),
         });
 
-        return result.rows.map((row) => new Mute(row));
+        return result.map((entry) => new Mute(entry));
     }
 
     private async move(liftedModeratorID?: string) {
@@ -67,7 +63,7 @@ export class Mute extends ExpirablePunishment {
             	)
             	INSERT INTO lifted_mute (id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
             	SELECT id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            values: [liftedMute.id, liftedMute.liftedTimestamp, liftedMute.liftedModeratorID],
+            values: [liftedMute.id, liftedMute.liftedTimestamp, liftedMute.liftedModeratorId],
             name: 'mute-move-entry',
         });
 
@@ -81,10 +77,10 @@ export class Mute extends ExpirablePunishment {
         const guild = getGuild();
         const pastPunishment = await this.move(liftedModeratorID);
 
-        const member = await userToMember(this.userID, guild);
+        const member = await userToMember(this.userId, guild);
         if (member) member.timeout(null);
 
-        let logString = `${parseUser(this.userID)} has been unmuted.`;
+        let logString = `${parseUser(this.userId)} has been unmuted.`;
         if (this.expireTimestamp) logString += `\nTheir mute would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
         logString += '\n\n' + pastPunishment.toString();
 
@@ -97,10 +93,10 @@ export class Mute extends ExpirablePunishment {
             await this.move();
 
             // timeout is lifted by discord
-            log(`${parseUser(this.userID)}'s mute (${this.id}) has expired.`, 'Expire Mute');
+            log(`${parseUser(this.userId)}'s mute (${this.id}) has expired.`, 'Expire Mute');
         } catch (error) {
             console.error(error);
-            log(`An error occurred while trying to expire ${parseUser(this.userID)}'s mute (${this.id}).`, 'Expire Mute');
+            log(`An error occurred while trying to expire ${parseUser(this.userId)}'s mute (${this.id}).`, 'Expire Mute');
         }
     }
 
@@ -126,15 +122,15 @@ export class Mute extends ExpirablePunishment {
 
         this.expireTimestamp = newExpireTimestamp;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = editModeratorID;
+        this.editModeratorId = editModeratorID;
 
-        const member = await userToMember(this.userID);
+        const member = await userToMember(this.userId);
         if (member) member.disableCommunicationUntil(this.expireTimestamp);
 
         timeoutStore.delete(this);
         timeoutStore.set(this, true);
 
-        const logString = `${parseUser(this.editModeratorID)} edited the expiry date of ${parseUser(this.userID)}'s current mute (${this.id}).\n\n**Before**\n${
+        const logString = `${parseUser(this.editModeratorId)} edited the expiry date of ${parseUser(this.userId)}'s current mute (${this.id}).\n\n**Before**\n${
             formatTimeDate(oldExpireTimestamp) + ` (${secondsToString((oldExpireTimestamp.getTime() - this.timestamp.getTime()) / 1000)})`
         }\n\n**After**\n${formatTimeDate(newExpireTimestamp)} (${secondsToString((newExpireTimestamp.getTime() - this.timestamp.getTime()) / 1000)})`;
 
@@ -160,9 +156,9 @@ export class Mute extends ExpirablePunishment {
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = editModeratorID;
+        this.editModeratorId = editModeratorID;
 
-        const logString = `${parseUser(this.editModeratorID)} edited the reason of ${parseUser(this.userID)}'s current mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
+        const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s current mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
         log(logString, 'Edit Mute Reason');
         return logString;
@@ -204,10 +200,10 @@ export class Mute extends ExpirablePunishment {
             id,
             reason,
             timestamp,
-            user_id: user.id,
-            context_url: contextURL,
-            mod_id: moderatorID,
-            expire_timestamp: expireTimestamp,
+            userId: user.id,
+            contextUrl: contextURL,
+            moderatorId: moderatorID,
+            expireTimestamp: expireTimestamp,
         });
 
         let sentDM = true;
@@ -233,14 +229,14 @@ export class LiftedMute extends LiftedPunishment {
     public static fromMute(mute: Mute, liftedModeratorID?: string) {
         return new LiftedMute({
             id: mute.id,
-            user_id: mute.userID,
-            mod_id: mute.moderatorID,
+            userId: mute.userId,
+            moderatorId: mute.moderatorId,
             reason: mute.reason,
-            context_url: mute.contextURL,
-            edited_timestamp: mute.editTimestamp,
-            edited_mod_id: mute.editModeratorID,
-            lifted_timestamp: new Date(),
-            lifted_mod_id: liftedModeratorID,
+            contextUrl: mute.contextUrl,
+            editTimestamp: mute.editTimestamp,
+            editModeratorId: mute.editModeratorId,
+            liftedTimestamp: new Date(),
+            liftedModeratorId: liftedModeratorID,
             timestamp: mute.timestamp,
         });
     }
@@ -288,9 +284,9 @@ export class LiftedMute extends LiftedPunishment {
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = moderatorID;
+        this.editModeratorId = moderatorID;
 
-        const logString = `${parseUser(this.editModeratorID)} edited the reason of ${parseUser(this.userID)}'s lifted mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
+        const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s lifted mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
         log(logString, 'Edit Lifted Mute Reason');
         return logString;
@@ -300,7 +296,7 @@ export class LiftedMute extends LiftedPunishment {
         const result = await db.query({ text: /*sql*/ `DELETE FROM lifted_mute WHERE id = $1;`, values: [this.id], name: 'lifted-mute-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted mute.');
 
-        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s lifted mute.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s lifted mute.\n\n${this.toString(true)}`;
         log(logString, 'Delete Lifted Mute Entry');
         return logString;
     }

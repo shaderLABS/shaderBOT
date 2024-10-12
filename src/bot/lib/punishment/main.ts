@@ -4,33 +4,33 @@ import type { TimeoutEntry } from '../timeoutStore.ts';
 
 export abstract class Punishment {
     public readonly id: string;
-    public readonly userID: string;
-    public readonly moderatorID?: string;
+    public readonly userId: string;
+    public readonly moderatorId: string | null;
     public readonly timestamp: Date;
 
     public reason: string;
-    public contextURL?: string;
-    public editTimestamp?: Date;
-    public editModeratorID?: string;
+    public contextUrl: string | null;
+    public editTimestamp: Date | null;
+    public editModeratorId: string | null;
 
     constructor(data: {
         id: string;
-        user_id: string;
-        mod_id?: string;
+        userId: string;
+        moderatorId: string | null;
         reason: string;
-        context_url?: string;
-        edited_timestamp?: string | number | Date;
-        edited_mod_id?: string;
-        timestamp: string | number | Date;
+        contextUrl: string | null;
+        editTimestamp: Date | null;
+        editModeratorId: string | null;
+        timestamp: Date;
     }) {
         this.id = data.id;
-        this.userID = data.user_id;
-        this.moderatorID = data.mod_id;
-        this.timestamp = new Date(data.timestamp);
+        this.userId = data.userId;
+        this.moderatorId = data.moderatorId;
+        this.timestamp = data.timestamp;
         this.reason = data.reason;
-        this.contextURL = data.context_url;
-        this.editTimestamp = data.edited_timestamp ? new Date(data.edited_timestamp) : undefined;
-        this.editModeratorID = data.edited_mod_id;
+        this.contextUrl = data.contextUrl;
+        this.editTimestamp = data.editTimestamp;
+        this.editModeratorId = data.editModeratorId;
     }
 
     abstract readonly TYPE_STRING: string;
@@ -40,18 +40,18 @@ export abstract class Punishment {
         let string = '';
 
         if (includeUser) {
-            string += `**User:** ${parseUser(this.userID)}\n`;
+            string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
         string +=
             `**Reason:** ${this.reason}\n` +
-            `**Moderator:** ${this.moderatorID ? parseUser(this.moderatorID) : 'System'}\n` +
-            `**Context:** ${formatContextURL(this.contextURL)}\n` +
+            `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n` +
+            `**Context:** ${formatContextURL(this.contextUrl)}\n` +
             `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
             `**ID:** ${this.id}`;
 
-        if (this.editTimestamp && this.editModeratorID) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorID)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (this.editTimestamp && this.editModeratorId) {
+            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
         }
 
         return string;
@@ -59,21 +59,21 @@ export abstract class Punishment {
 }
 
 export abstract class ExpirablePunishment extends Punishment implements TimeoutEntry {
-    public expireTimestamp?: Date;
+    public expireTimestamp: Date | null;
 
     constructor(data: {
         id: string;
-        user_id: string;
-        mod_id?: string;
+        userId: string;
+        moderatorId: string | null;
         reason: string;
-        context_url?: string;
-        edited_timestamp?: string | number | Date;
-        edited_mod_id?: string;
-        expire_timestamp?: string | number | Date;
-        timestamp: string | number | Date;
+        contextUrl: string | null;
+        editTimestamp: Date | null;
+        editModeratorId: string | null;
+        expireTimestamp: Date | null;
+        timestamp: Date;
     }) {
         super(data);
-        this.expireTimestamp = data.expire_timestamp ? new Date(data.expire_timestamp) : undefined;
+        this.expireTimestamp = data.expireTimestamp;
     }
 
     abstract refresh(): Promise<TimeoutEntry>;
@@ -86,19 +86,19 @@ export abstract class ExpirablePunishment extends Punishment implements TimeoutE
         let string = '';
 
         if (includeUser) {
-            string += `**User:** ${parseUser(this.userID)}\n`;
+            string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
         string +=
             `**Reason:** ${this.reason}\n` +
-            `**Moderator:** ${this.moderatorID ? parseUser(this.moderatorID) : 'System'}\n` +
-            `**Context:** ${formatContextURL(this.contextURL)}\n` +
+            `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n` +
+            `**Context:** ${formatContextURL(this.contextUrl)}\n` +
             `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
             `**Expiring At:** ${this.expireTimestamp ? formatTimeDate(this.expireTimestamp) : 'Permanent'}\n` +
             `**ID:** ${this.id}`;
 
-        if (this.editTimestamp && this.editModeratorID) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorID)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (this.editTimestamp && this.editModeratorId) {
+            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
         }
 
         return string;
@@ -107,23 +107,23 @@ export abstract class ExpirablePunishment extends Punishment implements TimeoutE
 
 export abstract class LiftedPunishment extends Punishment {
     public readonly liftedTimestamp: Date;
-    public readonly liftedModeratorID?: string;
+    public readonly liftedModeratorId: string | null;
 
     constructor(data: {
         id: string;
-        user_id: string;
-        mod_id?: string;
+        userId: string;
+        moderatorId: string | null;
         reason: string;
-        context_url?: string;
-        edited_timestamp?: string | number | Date;
-        edited_mod_id?: string;
-        lifted_timestamp: string | number | Date;
-        lifted_mod_id?: string;
-        timestamp: string | number | Date;
+        contextUrl: string | null;
+        editTimestamp: Date | null;
+        editModeratorId: string | null;
+        liftedTimestamp: Date;
+        liftedModeratorId: string | null;
+        timestamp: Date;
     }) {
         super(data);
-        this.liftedTimestamp = new Date(data.lifted_timestamp);
-        this.liftedModeratorID = data.lifted_mod_id;
+        this.liftedTimestamp = data.liftedTimestamp;
+        this.liftedModeratorId = data.liftedModeratorId;
     }
 
     abstract delete(moderatorID: string): Promise<string>;

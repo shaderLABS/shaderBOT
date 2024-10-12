@@ -1,9 +1,10 @@
-import { drizzle } from 'drizzle-orm/connect';
-import { PgDialect } from 'drizzle-orm/pg-core';
-import * as schema from './schema.ts';
+import { defineConfig } from 'drizzle-kit';
 
-export const db = await drizzle('node-postgres', {
-    connection: {
+export default defineConfig({
+    out: './drizzle',
+    schema: './src/db/schema.ts',
+    dialect: 'postgresql',
+    dbCredentials: {
         ssl: false,
         user: process.env.PG_USER || 'postgres',
         password: process.env.PG_PASSWORD || 'postgres',
@@ -11,7 +12,4 @@ export const db = await drizzle('node-postgres', {
         port: process.env.PG_PORT ? Number.parseInt(process.env.PG_PORT) : 5432,
         database: process.env.PG_DATABASE || 'shaderBOT',
     },
-    schema,
 });
-
-export const dialect = new PgDialect();

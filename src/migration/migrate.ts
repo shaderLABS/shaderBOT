@@ -1,4 +1,4 @@
-import { connectPostgreSQL, db } from '../db/postgres.ts';
+import { connectPostgreSQL, db } from './shared.ts';
 
 function applyMigration(filename: string) {
     const { exitCode, success } = Bun.spawnSync(['bun', `src/migration/${filename}.ts`], { env: process.env, stdio: ['ignore', 'inherit', 'inherit'] });

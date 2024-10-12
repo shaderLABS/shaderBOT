@@ -39,7 +39,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const time = stringToSeconds(splitString(value));
 
                 const ban = target instanceof User ? await Ban.getByUserID(target.id) : await Ban.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, ban.userId))) return;
                 const logString = await ban.editDuration(time, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Ban Duration');
@@ -66,7 +66,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     }
                 }
 
-                if (!(await hasPermissionForTarget(interaction, ban.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, ban.userId))) return;
                 const logString = await ban.editReason(value, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Ban Reason');
@@ -83,7 +83,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
 
             case 'kickreason': {
                 const kick = target instanceof User ? await Kick.getLatestByUserID(target.id) : await Kick.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, kick.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, kick.userId))) return;
                 const logString = await kick.editReason(value, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Kick Reason');
@@ -94,7 +94,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const time = stringToSeconds(splitString(value));
 
                 const mute = target instanceof User ? await Mute.getByUserID(target.id) : await Mute.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, mute.userID, 'moderatable'))) return;
+                if (!(await hasPermissionForTarget(interaction, mute.userId, 'moderatable'))) return;
                 const logString = await mute.editDuration(time, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Mute Duration');
@@ -121,7 +121,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     }
                 }
 
-                if (!(await hasPermissionForTarget(interaction, mute.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, mute.userId))) return;
                 const logString = await mute.editReason(value, interaction.user.id);
 
                 replySuccess(interaction, logString, 'Edit Mute Reason');
@@ -138,7 +138,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
 
             case 'warnreason': {
                 const warning = target instanceof User ? await Warning.getLatestByUserID(target.id) : await Warning.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, warning.userId))) return;
 
                 const logString = await warning.editReason(value, interaction.user.id);
                 replySuccess(interaction, logString, 'Edit Warning Reason');
@@ -147,7 +147,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
 
             case 'warnseverity': {
                 const warning = target instanceof User ? await Warning.getLatestByUserID(target.id) : await Warning.getByUUID(target);
-                if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
+                if (!(await hasPermissionForTarget(interaction, warning.userId))) return;
 
                 const logString = await warning.editSeverity(Number.parseInt(value), interaction.user.id);
                 replySuccess(interaction, logString, 'Edit Warning Severity');

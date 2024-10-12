@@ -1,5 +1,7 @@
 import type { UserResolvable } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client, timeoutStore } from '../../bot.ts';
 import { BanAppeal } from '../banAppeal.ts';
 import { sendInfo } from '../embeds.ts';
@@ -33,25 +35,19 @@ export class Ban extends ExpirablePunishment {
     }
 
     static async getExpiringToday() {
-        const result = await db.query({
-            text: /*sql*/ `
-            	SELECT * FROM ban
-            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            name: 'ban-expiring-today',
+        const result = await db.query.ban.findMany({
+            where: sql.and(sql.isNotNull(schema.ban.expireTimestamp), sql.lte(sql.sql`${schema.ban.expireTimestamp}::DATE`, sql.sql`NOW()::DATE`)),
         });
 
-        return result.rows.map((row) => new Ban(row));
+        return result.map((entry) => new Ban(entry));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query({
-            text: /*sql*/ `
-            	SELECT * FROM ban
-            	WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            name: 'ban-expiring-tomorrow',
+        const result = await db.query.ban.findMany({
+            where: sql.and(sql.isNotNull(schema.ban.expireTimestamp), sql.lte(sql.sql`${schema.ban.expireTimestamp}::DATE`, sql.sql`NOW()::DATE + INTERVAL '1 day'`)),
         });
 
-        return result.rows.map((row) => new Ban(row));
+        return result.map((entry) => new Ban(entry));
     }
 
     public static async create(userResolvable: UserResolvable, reason: string, duration?: number, moderatorID?: string, contextURL?: string, deleteMessageSeconds?: number) {
@@ -89,10 +85,10 @@ export class Ban extends ExpirablePunishment {
             id,
             reason,
             timestamp,
-            user_id: user.id,
-            context_url: contextURL,
-            mod_id: moderatorID,
-            expire_timestamp: expireTimestamp,
+            userId: user.id,
+            contextUrl: contextURL,
+            moderatorId: moderatorID,
+            expireTimestamp: expireTimestamp,
         });
 
         let sentDM = true;
@@ -133,7 +129,7 @@ export class Ban extends ExpirablePunishment {
             	)
             	INSERT INTO lifted_ban (id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
             	SELECT id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            values: [liftedBan.id, liftedBan.liftedTimestamp, liftedBan.liftedModeratorID],
+            values: [liftedBan.id, liftedBan.liftedTimestamp, liftedBan.liftedModeratorId],
             name: 'ban-move-entry',
         });
 
@@ -147,9 +143,9 @@ export class Ban extends ExpirablePunishment {
         const guild = getGuild();
         const liftedBan = await this.move(liftedModeratorID);
 
-        await guild.members.unban(this.userID).catch(() => undefined);
+        await guild.members.unban(this.userId).catch(() => undefined);
 
-        let logString = `${parseUser(this.userID)} has been unbanned.`;
+        let logString = `${parseUser(this.userId)} has been unbanned.`;
         if (this.expireTimestamp) logString += `\nTheir temporary ban would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
         logString += '\n\n' + liftedBan.toString();
 
@@ -163,15 +159,15 @@ export class Ban extends ExpirablePunishment {
         try {
             await this.move();
 
-            await guild.members.unban(this.userID).catch(() => undefined);
+            await guild.members.unban(this.userId).catch(() => undefined);
 
-            const appeal = await BanAppeal.getPendingByUserID(this.userID).catch(() => undefined);
+            const appeal = await BanAppeal.getPendingByUserID(this.userId).catch(() => undefined);
             if (appeal) await appeal.expire();
 
-            log(`${parseUser(this.userID)}'s temporary ban (${this.id}) has expired.`, 'Expire Temporary Ban');
+            log(`${parseUser(this.userId)}'s temporary ban (${this.id}) has expired.`, 'Expire Temporary Ban');
         } catch (error) {
             console.error(error);
-            log(`An error occurred while trying to expire ${parseUser(this.userID)}'s temporary ban (${this.id}).`, 'Expire Temporary Ban');
+            log(`An error occurred while trying to expire ${parseUser(this.userId)}'s temporary ban (${this.id}).`, 'Expire Temporary Ban');
         }
     }
 
@@ -197,12 +193,12 @@ export class Ban extends ExpirablePunishment {
 
         this.expireTimestamp = newExpireTimestamp;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = moderatorID;
+        this.editModeratorId = moderatorID;
 
         timeoutStore.delete(this);
         timeoutStore.set(this, true);
 
-        const logString = `${parseUser(this.editModeratorID)} edited the expiry date of ${parseUser(this.userID)}'s current ban (${this.id}).\n\n**Before**\n${
+        const logString = `${parseUser(this.editModeratorId)} edited the expiry date of ${parseUser(this.userId)}'s current ban (${this.id}).\n\n**Before**\n${
             oldExpireTimestamp ? formatTimeDate(oldExpireTimestamp) + ` (${secondsToString((oldExpireTimestamp.getTime() - this.timestamp.getTime()) / 1000)})` : 'Permanent'
         }\n\n**After**\n${formatTimeDate(newExpireTimestamp)} (${secondsToString((newExpireTimestamp.getTime() - this.timestamp.getTime()) / 1000)})`;
 
@@ -228,9 +224,9 @@ export class Ban extends ExpirablePunishment {
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = editModeratorID;
+        this.editModeratorId = editModeratorID;
 
-        const logString = `${parseUser(this.editModeratorID)} edited the reason of ${parseUser(this.userID)}'s current ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
+        const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s current ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
         log(logString, 'Edit Ban Reason');
         return logString;
@@ -243,14 +239,14 @@ export class LiftedBan extends LiftedPunishment {
     public static fromBan(ban: Ban, liftedModeratorID?: string) {
         return new LiftedBan({
             id: ban.id,
-            user_id: ban.userID,
-            mod_id: ban.moderatorID,
+            userId: ban.userId,
+            moderatorId: ban.moderatorId,
             reason: ban.reason,
-            context_url: ban.contextURL,
-            edited_timestamp: ban.editTimestamp,
-            edited_mod_id: ban.editModeratorID,
-            lifted_timestamp: new Date(),
-            lifted_mod_id: liftedModeratorID,
+            contextUrl: ban.contextUrl,
+            editTimestamp: ban.editTimestamp,
+            editModeratorId: ban.editModeratorId,
+            liftedTimestamp: new Date(),
+            liftedModeratorId: liftedModeratorID,
             timestamp: ban.timestamp,
         });
     }
@@ -298,9 +294,9 @@ export class LiftedBan extends LiftedPunishment {
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = moderatorID;
+        this.editModeratorId = moderatorID;
 
-        const logString = `${parseUser(this.editModeratorID)} edited the reason of ${parseUser(this.userID)}'s lifted ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
+        const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s lifted ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
         log(logString, 'Edit Lifted Ban Reason');
         return logString;
@@ -310,7 +306,7 @@ export class LiftedBan extends LiftedPunishment {
         const result = await db.query({ text: /*sql*/ `DELETE FROM lifted_ban WHERE id = $1;`, values: [this.id], name: 'lifted-ban-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted ban.');
 
-        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s lifted ban.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s lifted ban.\n\n${this.toString(true)}`;
         log(logString, 'Delete Lifted Ban Entry');
         return logString;
     }

@@ -1,5 +1,7 @@
 import { ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client, settings } from '../../bot.ts';
 import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
 import { replyInfo } from '../../lib/embeds.ts';
@@ -9,11 +11,15 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         await interaction.deferReply();
 
-        const projectChannels = (await db.query({ text: /*sql*/ `SELECT channel_id FROM project WHERE role_id IS NOT NULL;`, name: 'project-all-unarchived-channel-id' })).rows;
+        const projectChannels = await db.query.project.findMany({
+            columns: { channelId: true },
+            where: sql.isNotNull(schema.project.roleId),
+        });
+
         const eligibleProjectChannelPromises: Promise<TextChannel | null>[] = [];
 
-        for (const { channel_id } of projectChannels) {
-            const channel = client.channels.cache.get(channel_id);
+        for (const { channelId } of projectChannels) {
+            const channel = client.channels.cache.get(channelId);
             if (channel?.type !== ChannelType.GuildText) continue;
 
             eligibleProjectChannelPromises.push(
@@ -21,7 +27,7 @@ export const command: ChatInputCommandCallback = {
                     const oldestMessage = messages.last();
                     if (!oldestMessage || Date.now() - oldestMessage.createdTimestamp > settings.data.archive.maximumMessageAge * 1000) return channel;
                     else return null;
-                })
+                }),
             );
         }
 
@@ -34,7 +40,7 @@ export const command: ChatInputCommandCallback = {
                 : eligibleProjectChannels
                       .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
                       .reduce((list, channel) => list + channel.toString() + '\n', ''),
-            'Archive Candidates'
+            'Archive Candidates',
         );
     },
 };

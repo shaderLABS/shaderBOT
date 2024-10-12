@@ -1,7 +1,7 @@
 import { AttachmentBuilder, Client, EmbedBuilder, Events, GatewayIntentBits } from 'discord.js';
 import { EmbedColor, EmbedIcon } from '../bot/lib/embeds.ts';
 import { SettingsFile, type BotSettings } from '../bot/lib/settings.ts';
-import { connectPostgreSQL, db } from '../db/postgres.ts';
+import { connectPostgreSQL, db } from './shared.ts';
 
 // Renames the column `banner_url` to `banner_message_id` in the `project` table.
 // Updates existing project banner URLs to message IDs by sending a migration message.

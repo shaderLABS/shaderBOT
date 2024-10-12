@@ -1,4 +1,4 @@
-import { connectPostgreSQL, db } from '../db/postgres.ts';
+import { connectPostgreSQL, db } from './shared.ts';
 
 // Adds a new table called 'track' to the database.
 console.group();

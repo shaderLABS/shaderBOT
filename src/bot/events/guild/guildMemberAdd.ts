@@ -35,7 +35,7 @@ export const event: Event = {
             (previousMember) =>
                 similarityLevenshtein(currentMember.displayName, previousMember.displayName) > settings.data.raidProtection.usernameSimilarityThreshold ||
                 (currentMember.avatarHash && currentMember.avatarHash === previousMember.avatarHash) ||
-                Math.abs(currentMember.createdTimestamp - previousMember.createdTimestamp) < settings.data.raidProtection.creationTimeThreshold * 1000
+                Math.abs(currentMember.createdTimestamp - previousMember.createdTimestamp) < settings.data.raidProtection.creationTimeThreshold * 1000,
         );
 
         if (potentialRaid.size >= settings.data.raidProtection.userThreshold - 1) {
@@ -46,7 +46,7 @@ export const event: Event = {
 
                 raidMember.banned = true;
                 Ban.create(raidMemberID, `Flagged by raid protection. If you are not a bot, please [submit a ban appeal](${settings.data.raidProtection.appealURL}) or contact the staff team.`).catch(
-                    () => undefined
+                    () => undefined,
                 );
             }
         }
@@ -91,7 +91,7 @@ export const event: Event = {
 
         for (const project of projects) {
             project.applyPermissions(member).catch((error) => {
-                log(`Failed to restore permissions for ${parseUser(member.user)}'s project channel <#${project.channelID}> (${project.id}).\n${error}`, 'Restore Project Owner');
+                log(`Failed to restore permissions for ${parseUser(member.user)}'s project channel <#${project.channelId}> (${project.id}).\n${error}`, 'Restore Project Owner');
             });
         }
 

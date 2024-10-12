@@ -48,7 +48,7 @@ export const command: ChatInputCommandCallback = {
                         <rect x="0" y="0" width="100%" height="100%" style="fill: rgba(0, 0, 0, 50%)" />
                         <text x="50%" y="100%" dx="0.05em" dy="-0.30em" text-anchor="middle" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900" style="fill: black">#${escapedLabelText};</text>
                         <text x="50%" y="100%" dx="0.05em" dy="-0.35em" text-anchor="middle" font-family="Consolas" font-size="${overlayFontSize}" font-style="normal" font-weight="900"><tspan style="fill: #b676c7">#</tspan><tspan style="fill: #63b1dc">${escapedLabelText}</tspan><tspan style="fill: #afb2bc">;</tspan></text>
-                    </svg>`
+                    </svg>`,
                     );
 
                     bannerSharp.composite([{ input: overlay, top: Math.round(bannerHeight - 40.0 - overlayHeight), left: Math.round((bannerWidth - overlayWidth) * 0.5) }]);
@@ -56,7 +56,7 @@ export const command: ChatInputCommandCallback = {
 
                 const embed = new EmbedBuilder({
                     author: { name: 'Set Project Banner', iconURL: EmbedIcon.Success },
-                    description: `${parseUser(interaction.user)} set the banner image of their project <#${project.channelID}> (${project.id}).`,
+                    description: `${parseUser(interaction.user)} set the banner image of their project <#${project.channelId}> (${project.id}).`,
                     image: { url: 'attachment://banner.png' },
                     color: EmbedColor.Green,
                     footer: { text: 'Do not delete this message.' },

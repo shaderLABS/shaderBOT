@@ -1,5 +1,4 @@
 import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, type UserResolvable } from 'discord.js';
-import { db } from '../../db/postgres.ts';
 import { client, settings } from '../bot.ts';
 
 // https://www.unicode.org/reports/tr18/#Line_Boundaries
@@ -19,7 +18,6 @@ export function getGuild() {
 
 export function shutdown(code: number = 0) {
     console.log('Shutting down...');
-    db.end().catch(() => undefined);
     client?.destroy();
     process.exit(code);
 }
@@ -175,7 +173,7 @@ function levenshteinDistance(s: string, t: string) {
             d[i][j] = Math.min(
                 d[i - 1][j] + 1, // deletion
                 d[i][j - 1] + 1, // insertion
-                d[i - 1][j - 1] + cost // substitution
+                d[i - 1][j - 1] + cost, // substitution
             );
 
             // transposition

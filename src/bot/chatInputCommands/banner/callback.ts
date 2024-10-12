@@ -1,5 +1,7 @@
 import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
 import { EmbedColor, EmbedIcon, replyError } from '../../lib/embeds.ts';
 
@@ -11,17 +13,13 @@ export const command: ChatInputCommandCallback = {
             return;
         }
 
-        const currentBannerProject = (
-            await db.query({
-                text: /*sql*/ `
-                    SELECT channel_id
-                    FROM project
-                    WHERE banner_last_timestamp IS NOT NULL
-                    ORDER BY banner_last_timestamp DESC
-                    LIMIT 1;`,
-                name: 'project-rotate-banner-current',
-            })
-        ).rows[0];
+        const currentBannerProject = await db.query.project.findFirst({
+            columns: {
+                channelId: true,
+            },
+            where: sql.isNotNull(schema.project.bannerLastTimestamp),
+            orderBy: sql.desc(schema.project.bannerLastTimestamp),
+        });
 
         const banner = guild.bannerURL({ size: 1024 });
         if (!currentBannerProject || !banner) {
@@ -37,7 +35,7 @@ export const command: ChatInputCommandCallback = {
                         iconURL: EmbedIcon.Info,
                         name: 'Current Banner',
                     },
-                    description: `The current banner was submitted by <#${currentBannerProject.channel_id}>.`,
+                    description: `The current banner was submitted by <#${currentBannerProject.channelId}>.`,
                     image: {
                         url: banner,
                     },
