@@ -1,6 +1,6 @@
 import { ChannelType, Client, Events, GatewayIntentBits } from 'discord.js';
 import { type BotSettings, SettingsFile } from '../bot/lib/settings.ts';
-import { connectPostgreSQL, db } from '../db/postgres.ts';
+import { connectPostgreSQL, db } from './shared.ts';
 
 // Adds indices to table.
 // Updates existing project mute permissions.
@@ -54,7 +54,7 @@ client.once(Events.ClientReady, async () => {
                 CreatePublicThreads: false,
                 CreatePrivateThreads: false,
             },
-            'Migrate project mute permissions.'
+            'Migrate project mute permissions.',
         );
 
         console.log(`Successfully migrated project mute ${projectMute.id} (Channel ID: ${projectMute.channel_id}).`);

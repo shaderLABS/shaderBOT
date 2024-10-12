@@ -1,5 +1,7 @@
 import { type AnyThreadChannel, ChannelType, TextChannel } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client, timeoutStore } from '../../bot.ts';
 import log from '../log.ts';
 import { parseUser } from '../misc.ts';
@@ -11,43 +13,37 @@ export class ChannelSlowmode extends ChannelRestriction {
 
     public readonly originalSlowmode: number;
 
-    constructor(data: { id: string; channel_id: string; original_slowmode: number; expire_timestamp: string | number | Date }) {
+    constructor(data: typeof schema.channelSlowmode.$inferSelect) {
         super(data);
-        this.originalSlowmode = data.original_slowmode;
+        this.originalSlowmode = data.originalSlowmode;
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_slowmode WHERE id = $1;`, values: [uuid], name: 'slowmode-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A channel slowmode with the specified UUID does not exist.');
-        return new ChannelSlowmode(result.rows[0]);
+        const result = await db.query.channelSlowmode.findFirst({ where: sql.eq(schema.channelSlowmode.id, uuid) });
+        if (!result) return Promise.reject('A channel slowmode with the specified UUID does not exist.');
+        return new ChannelSlowmode(result);
     }
 
-    static async getByChannelID(channelID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_slowmode WHERE channel_id = $1;`, values: [channelID], name: 'slowmode-channel-id' });
-        if (result.rowCount === 0) return Promise.reject(`The specified channel does not have an active channel slowmode.`);
-        return new ChannelSlowmode(result.rows[0]);
+    static async getByChannelID(channelId: string) {
+        const result = await db.query.channelSlowmode.findFirst({ where: sql.eq(schema.channelSlowmode.channelId, channelId) });
+        if (!result) return Promise.reject(`The specified channel does not have an active channel slowmode.`);
+        return new ChannelSlowmode(result);
     }
 
     static async getExpiringToday() {
-        const result = await db.query({
-            text: /*sql*/ `
-                SELECT * FROM channel_slowmode
-                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            name: 'slowmode-expiring-today',
+        const result = await db.query.channelSlowmode.findMany({
+            where: sql.lte(sql.sql`${schema.channelSlowmode.expireTimestamp}::DATE`, sql.sql`NOW()::DATE`),
         });
 
-        return result.rows.map((row) => new ChannelSlowmode(row));
+        return result.map((entry) => new ChannelSlowmode(entry));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query({
-            text: /*sql*/ `
-                SELECT * FROM channel_slowmode
-                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            name: 'slowmode-expiring-tomorrow',
+        const result = await db.query.channelSlowmode.findMany({
+            where: sql.lte(sql.sql`${schema.channelSlowmode.expireTimestamp}::DATE`, sql.sql`NOW()::DATE + INTERVAL '1 day'`),
         });
 
-        return result.rows.map((row) => new ChannelSlowmode(row));
+        return result.map((entry) => new ChannelSlowmode(entry));
     }
 
     public static async create(moderatorID: string, channel: TextChannel | AnyThreadChannel, duration: number, length: number): Promise<string> {
@@ -68,24 +64,18 @@ export class ChannelSlowmode extends ChannelRestriction {
             await overwrittenSlowmode.delete();
         }
 
-        const result = await db.query({
-            text: /*sql*/ `
-                INSERT INTO channel_slowmode (channel_id, original_slowmode, expire_timestamp)
-                VALUES ($1, $2, $3)
-                RETURNING id;`,
-            values: [channel.id, originalSlowmode, expireTimestamp],
-            name: 'create-slowmode',
-        });
+        const data = {
+            channelId: channel.id,
+            originalSlowmode,
+            expireTimestamp,
+        } satisfies typeof schema.channelSlowmode.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert channel slowmode.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.channelSlowmode).values(data).returning({ id: schema.channelSlowmode.id });
 
-        const slowmode = new ChannelSlowmode({
-            id,
-            channel_id: channel.id,
-            original_slowmode: originalSlowmode,
-            expire_timestamp: expireTimestamp,
-        });
+        if (result.length === 0) return Promise.reject('Failed to insert channel slowmode.');
+        const { id } = result[0];
+
+        const slowmode = new ChannelSlowmode({ id, ...data });
 
         await channel.setRateLimitPerUser(length);
         timeoutStore.set(slowmode, true);
@@ -102,29 +92,29 @@ export class ChannelSlowmode extends ChannelRestriction {
     }
 
     async expire() {
-        const channel = client.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelId);
 
         try {
             if (!channel || (channel.type !== ChannelType.GuildText && !channel.isThread())) {
-                log(`Failed to expire slowmode. The channel <#${this.channelID}> could not be resolved.`, 'Expire Slowmode');
+                log(`Failed to expire slowmode. The channel <#${this.channelId}> could not be resolved.`, 'Expire Slowmode');
                 return;
             }
 
             await channel.setRateLimitPerUser(this.originalSlowmode);
             await this.delete();
 
-            log(`The channel slowmode in <#${this.channelID}> has expired.`, 'Expire Slowmode');
+            log(`The channel slowmode in <#${this.channelId}> has expired.`, 'Expire Slowmode');
         } catch (error) {
             console.error(error);
-            log(`An error occurred while trying to expire ${this.channelID}'s channel slowmode.`, 'Expire Slowmode');
+            log(`An error occurred while trying to expire ${this.channelId}'s channel slowmode.`, 'Expire Slowmode');
         }
     }
 
     public async lift(moderatorID: string): Promise<string> {
-        const channel = client.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelId);
 
         if (!channel || (channel.type !== ChannelType.GuildText && !channel.isThread())) {
-            return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);
+            return Promise.reject(`The channel <#${this.channelId}> could not be resolved.`);
         }
 
         await channel.setRateLimitPerUser(this.originalSlowmode);
@@ -132,13 +122,13 @@ export class ChannelSlowmode extends ChannelRestriction {
 
         timeoutStore.delete(this);
 
-        let logString = `${parseUser(moderatorID)} has lifted the channel slowmode in <#${this.channelID}>. \nIt would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
+        let logString = `${parseUser(moderatorID)} has lifted the channel slowmode in <#${this.channelId}>. \nIt would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
         log(logString, 'Lift Slowmode');
         return logString;
     }
 
     async delete() {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM channel_slowmode WHERE id = $1 RETURNING id;`, values: [this.id], name: 'slowmode-delete' });
+        const result = await db.delete(schema.channelSlowmode).where(sql.eq(schema.channelSlowmode.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete channel slowmode.');
     }
 }

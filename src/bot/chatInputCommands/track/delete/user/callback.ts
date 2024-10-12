@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const track = await Track.getByUserID(targetUser.id);
-            if (!(await hasPermissionForTarget(interaction, track.userID))) return;
+            if (!(await hasPermissionForTarget(interaction, track.userId))) return;
 
             const logString = await track.delete(interaction.member.id);
             replySuccess(interaction, logString, 'Delete Track');

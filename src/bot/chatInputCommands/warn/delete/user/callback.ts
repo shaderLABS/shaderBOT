@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const warning = await Warning.getLatestByUserID(targetUser.id);
-            if (!(await hasPermissionForTarget(interaction, warning.userID))) return;
+            if (!(await hasPermissionForTarget(interaction, warning.userId))) return;
 
             const logString = await warning.delete(interaction.member.id);
             replySuccess(interaction, logString, 'Delete Warning');

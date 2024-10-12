@@ -6,7 +6,7 @@ import { Mute } from './punishment/mute.ts';
 
 export interface TimeoutEntry {
     id: string;
-    expireTimestamp?: Date;
+    expireTimestamp: Date | null;
 
     refresh(): Promise<TimeoutEntry>;
     expire(): Promise<void>;

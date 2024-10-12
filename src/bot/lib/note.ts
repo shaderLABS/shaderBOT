@@ -1,5 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../db/postgres.ts';
+import * as schema from '../../db/schema.ts';
 import { EmbedColor, EmbedIcon } from './embeds.ts';
 import log from './log.ts';
 import { formatContextURL, parseUser } from './misc.ts';
@@ -8,77 +10,66 @@ import { formatTimeDate } from './time.ts';
 export class Note {
     public readonly id: string;
     public readonly timestamp: Date;
-    public readonly userID: string;
-    public readonly moderatorID: string;
+    public readonly userId: string;
+    public readonly moderatorId: string;
 
     public content: string;
-    public contextURL?: string;
-    public editTimestamp?: Date;
-    public editModeratorID?: string;
+    public contextUrl: string | null;
+    public editTimestamp: Date | null;
+    public editModeratorId: string | null;
 
-    constructor(data: {
-        id: string;
-        timestamp: string | number | Date;
-        user_id: string;
-        mod_id: string;
-        content?: string;
-        context_url?: string;
-        edited_timestamp?: string | number | Date;
-        edited_mod_id?: string;
-    }) {
+    constructor(data: typeof schema.note.$inferSelect) {
         this.id = data.id;
-        this.timestamp = new Date(data.timestamp);
-        this.userID = data.user_id;
-        this.moderatorID = data.mod_id;
+        this.timestamp = data.timestamp;
+        this.userId = data.userId;
+        this.moderatorId = data.userId;
         this.content = data.content || '';
-        this.contextURL = data.context_url;
-        this.editTimestamp = data.edited_timestamp ? new Date(data.edited_timestamp) : undefined;
-        this.editModeratorID = data.edited_mod_id;
+        this.contextUrl = data.contextUrl;
+        this.editTimestamp = data.editTimestamp;
+        this.editModeratorId = data.editModeratorId;
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE id = $1;`, values: [uuid], name: 'note-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A note with the specified UUID does not exist.');
-        return new Note(result.rows[0]);
+        const result = await db.query.note.findFirst({ where: sql.eq(schema.note.id, uuid) });
+        if (!result) return Promise.reject('A note with the specified UUID does not exist.');
+        return new Note(result);
     }
 
-    static async getLatestByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`, values: [userID], name: 'note-latest-user-id' });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any notes.');
-        return new Note(result.rows[0]);
+    static async getLatestByUserID(userId: string) {
+        const result = await db.query.note.findFirst({ where: sql.eq(schema.note.userId, userId), orderBy: [sql.desc(schema.note.timestamp)] });
+        if (!result) return Promise.reject('The specified user does not have any notes.');
+        return new Note(result);
     }
 
-    static async getAllByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM note WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'note-all-user-id' });
-        return result.rows.map((row) => new Note(row));
+    static async getAllByUserID(userId: string) {
+        const result = await db.query.note.findMany({ where: sql.eq(schema.note.userId, userId), orderBy: [sql.desc(schema.note.timestamp)] });
+        return result.map((entry) => new Note(entry));
     }
 
-    static async create(userID: string, moderatorID: string, content: string, contextURL?: string) {
+    static async create(userId: string, moderatorId: string, content: string, contextUrl: string | null = null) {
         if (content.length < 1 || content.length > 512) return Promise.reject('The content must be between 1 and 512 characters long.');
 
-        const timestamp = new Date();
-        const result = await db.query({
-            text: /*sql*/ `
-                INSERT INTO note (user_id, mod_id, content, context_url, timestamp)
-                VALUES ($1, $2, $3, $4, $5)
-                RETURNING id;`,
-            values: [userID, moderatorID, content, contextURL, timestamp],
-            name: 'note-create',
-        });
+        const data = {
+            userId,
+            moderatorId,
+            timestamp: new Date(),
+            contextUrl,
+            content,
+        } satisfies typeof schema.note.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert note.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.note).values(data).returning({ id: schema.note.id });
+
+        if (result.length === 0) return Promise.reject('Failed to insert note.');
+        const { id } = result[0];
 
         const note = new Note({
             id,
-            mod_id: moderatorID,
-            user_id: userID,
-            timestamp,
-            content: content,
-            context_url: contextURL,
+            editModeratorId: null,
+            editTimestamp: null,
+            ...data,
         });
 
-        const logString = `${parseUser(userID)} has received a note.\n\n${note.toString()}`;
+        const logString = `${parseUser(userId)} has received a note.\n\n${note.toString()}`;
 
         log(logString, 'Add Note');
         return logString;
@@ -93,18 +84,18 @@ export class Note {
         let string = '';
 
         if (includeUser) {
-            string += `**User:** ${parseUser(this.userID)}\n`;
+            string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
         string +=
             `**Content:** ${this.content}\n` +
-            `**Moderator:** ${parseUser(this.moderatorID)}\n` +
-            `**Context:** ${formatContextURL(this.contextURL)}\n` +
+            `**Moderator:** ${parseUser(this.moderatorId)}\n` +
+            `**Context:** ${formatContextURL(this.contextUrl)}\n` +
             `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
             `**ID:** ${this.id}`;
 
-        if (this.editTimestamp && this.editModeratorID) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorID)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (this.editTimestamp && this.editModeratorId) {
+            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
         }
 
         return string;
@@ -130,11 +121,11 @@ export class Note {
     /**
      * Delete the note.
      */
-    public async delete(moderatorID: string) {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM note WHERE id = $1;`, values: [this.id], name: 'note-delete' });
+    public async delete(moderatorId: string) {
+        const result = await db.delete(schema.note).where(sql.eq(schema.note.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete note.');
 
-        const logString = `${parseUser(moderatorID)} deleted ${parseUser(this.userID)}'s note.\n\n${this.toString()}`;
+        const logString = `${parseUser(moderatorId)} deleted ${parseUser(this.userId)}'s note.\n\n${this.toString()}`;
 
         log(logString, 'Delete Note');
         return logString;
@@ -143,29 +134,29 @@ export class Note {
     /**
      * Edit the content of the note.
      * @param newContent The new content.
-     * @param moderatorID The moderator who is responsible for the edit.
+     * @param moderatorId The moderator who is responsible for the edit.
      * @returns The old content.
      */
-    public async editContent(newContent: string, moderatorID: string) {
+    public async editContent(newContent: string, moderatorId: string) {
         const timestamp = new Date();
         const oldContent = this.content;
 
-        const result = await db.query({
-            text: /*sql*/ `
-                UPDATE note
-                SET content = $1, edited_timestamp = $2, edited_mod_id = $3
-                WHERE id = $4;`,
-            values: [newContent, timestamp, moderatorID, this.id],
-            name: 'note-edit-content',
-        });
+        const result = await db
+            .update(schema.note)
+            .set({
+                content: newContent,
+                editTimestamp: timestamp,
+                editModeratorId: moderatorId,
+            })
+            .where(sql.eq(schema.note.id, this.id));
 
         if (result.rowCount === 0) return Promise.reject('Failed to edit note content.');
 
         this.content = newContent;
         this.editTimestamp = timestamp;
-        this.editModeratorID = moderatorID;
+        this.editModeratorId = moderatorId;
 
-        const logString = `${parseUser(moderatorID)} edited the content of ${parseUser(this.userID)}'s note (${this.id}).\n\n**Before**\n${oldContent}\n\n**After**\n${newContent}`;
+        const logString = `${parseUser(moderatorId)} edited the content of ${parseUser(this.userId)}'s note (${this.id}).\n\n**Before**\n${oldContent}\n\n**After**\n${newContent}`;
 
         log(logString, 'Edit Note');
         return logString;

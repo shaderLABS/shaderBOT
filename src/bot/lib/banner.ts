@@ -1,5 +1,7 @@
 import { GuildPremiumTier, messageLink } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../db/postgres.ts';
+import * as schema from '../../db/schema.ts';
 import log from './log.ts';
 import { getGuild } from './misc.ts';
 import { Project } from './project.ts';
@@ -8,40 +10,32 @@ export async function rotateBanner() {
     const guild = getGuild();
     if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) return;
 
-    const rawProjects: {
-        id: string;
-        banner_message_id: string;
-        channel_id: string;
-    }[] = (
-        await db.query({
-            text: /*sql*/ `
-            	SELECT id, banner_message_id, channel_id
-            	FROM project
-            	WHERE banner_message_id IS NOT NULL AND role_id IS NOT NULL
-            	ORDER BY banner_last_timestamp ASC NULLS FIRST;`,
-            name: 'project-rotate-banner-list',
-        })
-    ).rows;
+    const projects = await db.query.project.findMany({
+        columns: {
+            id: true,
+            bannerMessageId: true,
+            channelId: true,
+        },
+        where: sql.and(sql.isNotNull(schema.project.bannerMessageId), sql.isNotNull(schema.project.roleId)),
+        orderBy: sql.asc(schema.project.bannerLastTimestamp).append(sql.sql`NULLS FIRST`),
+    });
 
-    for (const rawProject of rawProjects) {
+    for (const project of projects) {
         try {
-            const bannerURL = await Project.bannerMessageToCDNURL(rawProject.channel_id, rawProject.banner_message_id);
+            const bannerURL = await Project.bannerMessageToCDNURL(project.channelId, project.bannerMessageId!);
 
             await guild.setBanner(bannerURL);
-            await db.query({
-                text: /*sql*/ `
-                    UPDATE project
-                    SET banner_last_timestamp = NOW()
-                    WHERE id = $1;`,
-                values: [rawProject.id],
-                name: 'project-rotate-banner-set',
-            });
+
+            await db
+                .update(schema.project)
+                .set({ bannerLastTimestamp: sql.sql`NOW()` })
+                .where(sql.eq(schema.project.id, project.id));
 
             break;
         } catch (error) {
             console.error(error);
-            const bannerMessageURL = messageLink(rawProject.channel_id, rawProject.banner_message_id, guild.id);
-            log(`Failed to rotate banner to [this image](${bannerMessageURL}) by <#${rawProject.channel_id}> (${rawProject.id}). Skipping...`, 'Rotate Project Banner');
+            const bannerMessageURL = messageLink(project.channelId, project.bannerMessageId!, guild.id);
+            log(`Failed to rotate banner to [this image](${bannerMessageURL}) by <#${project.channelId}> (${project.id}). Skipping...`, 'Rotate Project Banner');
         }
     }
 }

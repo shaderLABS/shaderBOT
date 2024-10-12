@@ -1,15 +1,25 @@
 import { Message } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../db/postgres.ts';
+import * as schema from '../../db/schema.ts';
 import { client } from '../bot.ts';
 import type { GuildChatInputCommandInteraction } from '../chatInputCommandHandler.ts';
 import { replyError } from './embeds.ts';
 import log from './log.ts';
 import { parseUser } from './misc.ts';
 
-export type PunishmentTable = 'ban' | 'mute' | 'kick' | 'track' | 'lifted_ban' | 'lifted_mute' | 'note' | 'warn';
+export type PunishmentTable =
+    | typeof schema.ban
+    | typeof schema.mute
+    | typeof schema.kick
+    | typeof schema.track
+    | typeof schema.liftedBan
+    | typeof schema.liftedMute
+    | typeof schema.note
+    | typeof schema.warn;
 
 const PUNISHMENT_TABLE_TO_STRING: {
-    [key in PunishmentTable]: string;
+    [key in PunishmentTable['_']['name']]: string;
 } = {
     ban: 'ban',
     mute: 'mute',
@@ -75,26 +85,20 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
     }
 }
 
-export async function editContextURL(id: string, contextURL: string, editModeratorID: string, table: PunishmentTable) {
-    const editTimestamp = new Date();
+export async function editContextURL(id: string, contextUrl: string, editModeratorId: string, table: PunishmentTable) {
+    const result = await db.select({ oldContextUrl: table.contextUrl, userId: table.userId }).from(table).where(sql.eq(table.id, id));
 
-    const result = await db.query({
-        text: /*sql*/ `
-            UPDATE ${table}
-            SET context_url = $1, edited_timestamp = $2, edited_mod_id = $3
-            FROM ${table} old_table
-            WHERE ${table}.id = $4 AND old_table.id = ${table}.id
-            RETURNING ${table}.user_id::TEXT, old_table.context_url AS old_context;`,
-        values: [contextURL, editTimestamp, editModeratorID, id],
-        name: `${table}-edit-context-url`,
-    });
-    if (result.rowCount === 0) return Promise.reject('There is no entry with the specified UUID.');
+    if (result.length === 0) return Promise.reject('There is no entry with the specified UUID.');
+    const { oldContextUrl, userId } = result[0];
 
-    const { user_id, old_context } = result.rows[0];
+    await db
+        .update(table)
+        .set({ contextUrl, editTimestamp: sql.sql`NOW()`, editModeratorId })
+        .where(sql.eq(table.id, id));
 
-    const logString = `${parseUser(editModeratorID)} edited the context of ${parseUser(user_id)}'s ${PUNISHMENT_TABLE_TO_STRING[table]} (${id}).\n\n**Before**\n${
-        old_context || 'No context exists.'
-    }\n\n**After**\n${contextURL}`;
+    const logString = `${parseUser(editModeratorId)} edited the context of ${parseUser(userId)}'s ${PUNISHMENT_TABLE_TO_STRING[table._.name]} (${id}).\n\n**Before**\n${
+        oldContextUrl || 'No context exists.'
+    }\n\n**After**\n${contextUrl}`;
 
     log(logString, 'Edit Context');
     return logString;

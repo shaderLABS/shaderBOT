@@ -20,7 +20,7 @@ export const command: ChatInputCommandCallback = {
                 appeal = await BanAppeal.getByThreadID(interaction.channelId);
             }
 
-            if (!(await hasPermissionForTarget(interaction, appeal.userID))) return;
+            if (!(await hasPermissionForTarget(interaction, appeal.userId))) return;
 
             if (appeal.result === 'pending') throw 'The specified ban appeal is still pending.';
             if (appeal.result === 'expired') throw 'The specified ban appeal is expired.';
@@ -29,7 +29,7 @@ export const command: ChatInputCommandCallback = {
                 customId: 'reasonInput',
                 label: 'Reason',
                 style: TextInputStyle.Paragraph,
-                value: appeal.resultReason,
+                value: appeal.resultReason ?? undefined,
                 maxLength: 2048,
                 required: true,
             });

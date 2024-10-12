@@ -1,5 +1,7 @@
 import { BitField, ChannelType, OverwriteType, PermissionFlagsBits, type PermissionOverwriteOptions, TextChannel, VoiceChannel } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client, timeoutStore } from '../../bot.ts';
 import log from '../log.ts';
 import { parseUser } from '../misc.ts';
@@ -116,43 +118,37 @@ export class ChannelLock extends ChannelRestriction {
 
     public readonly originalPermissions: ChannelLockPermissions;
 
-    constructor(data: { id: string; channel_id: string; original_permissions: number; expire_timestamp: string | number | Date }) {
+    constructor(data: typeof schema.channelLock.$inferSelect) {
         super(data);
-        this.originalPermissions = new ChannelLockPermissions(data.original_permissions);
+        this.originalPermissions = new ChannelLockPermissions(data.originalPermissions);
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_lock WHERE id = $1;`, values: [uuid], name: 'lock-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A channel lock with the specified UUID does not exist.');
-        return new ChannelLock(result.rows[0]);
+        const result = await db.query.channelLock.findFirst({ where: sql.eq(schema.channelLock.id, uuid) });
+        if (!result) return Promise.reject('A channel lock with the specified UUID does not exist.');
+        return new ChannelLock(result);
     }
 
-    static async getByChannelID(channelID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM channel_lock WHERE channel_id = $1;`, values: [channelID], name: 'lock-channel-id' });
-        if (result.rowCount === 0) return Promise.reject('The specified channel does not have an active channel lock.');
-        return new ChannelLock(result.rows[0]);
+    static async getByChannelID(channelId: string) {
+        const result = await db.query.channelLock.findFirst({ where: sql.eq(schema.channelLock.channelId, channelId) });
+        if (!result) return Promise.reject('The specified channel does not have an active channel lock.');
+        return new ChannelLock(result);
     }
 
     static async getExpiringToday() {
-        const result = await db.query({
-            text: /*sql*/ `
-                SELECT * FROM channel_lock
-                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE;`,
-            name: 'lock-expiring-today',
+        const result = await db.query.channelLock.findMany({
+            where: sql.lte(sql.sql`${schema.channelLock.expireTimestamp}::DATE`, sql.sql`NOW()::DATE`),
         });
 
-        return result.rows.map((row) => new ChannelLock(row));
+        return result.map((entry) => new ChannelLock(entry));
     }
 
     static async getExpiringTomorrow() {
-        const result = await db.query({
-            text: /*sql*/ `
-                SELECT * FROM channel_lock
-                WHERE expire_timestamp IS NOT NULL AND expire_timestamp::DATE <= NOW()::DATE + INTERVAL '1 day';`,
-            name: 'lock-expiring-tomorrow',
+        const result = await db.query.channelLock.findMany({
+            where: sql.lte(sql.sql`${schema.channelLock.expireTimestamp}::DATE`, sql.sql`NOW()::DATE + INTERVAL '1 day'`),
         });
 
-        return result.rows.map((row) => new ChannelLock(row));
+        return result.map((entry) => new ChannelLock(entry));
     }
 
     public static async create(moderatorID: string, channel: TextChannel | VoiceChannel, duration: number): Promise<string> {
@@ -169,29 +165,23 @@ export class ChannelLock extends ChannelRestriction {
             await overwrittenLock.delete();
         }
 
-        const result = await db.query({
-            text: /*sql*/ `
-                INSERT INTO channel_lock (channel_id, original_permissions, expire_timestamp)
-                VALUES ($1, $2, $3)
-                RETURNING id;`,
-            values: [channel.id, originalPermissions, expireTimestamp],
-            name: 'create-lock',
-        });
+        const data = {
+            channelId: channel.id,
+            originalPermissions: originalPermissions.toPostgres(),
+            expireTimestamp,
+        } satisfies typeof schema.channelLock.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert channel lock.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.channelLock).values(data).returning({ id: schema.channelLock.id });
 
-        const lock = new ChannelLock({
-            id,
-            channel_id: channel.id,
-            original_permissions: originalPermissions.toPostgres(),
-            expire_timestamp: expireTimestamp,
-        });
+        if (result.length === 0) return Promise.reject('Failed to insert channel lock.');
+        const { id } = result[0];
+
+        const lock = new ChannelLock({ id, ...data });
 
         await channel.permissionOverwrites.edit(
             channel.guild.roles.everyone,
             { SendMessages: false, CreatePublicThreads: false, CreatePrivateThreads: false, Speak: false },
-            { type: OverwriteType.Role }
+            { type: OverwriteType.Role },
         );
 
         timeoutStore.set(lock, true);
@@ -208,40 +198,40 @@ export class ChannelLock extends ChannelRestriction {
     }
 
     async expire() {
-        const channel = client.channels.cache.get(this.channelID);
+        const channel = client.channels.cache.get(this.channelId);
 
         try {
             if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) {
-                log(`Failed to expire lock. The channel <#${this.channelID}> could not be resolved.`, 'Expire Lock');
+                log(`Failed to expire lock. The channel <#${this.channelId}> could not be resolved.`, 'Expire Lock');
                 return;
             }
 
             await this.originalPermissions.apply(channel);
             await this.delete();
 
-            log(`The channel lock in <#${this.channelID}> has expired.`, 'Expire Lock');
+            log(`The channel lock in <#${this.channelId}> has expired.`, 'Expire Lock');
         } catch (error) {
             console.error(error);
-            log(`An error occurred while trying to expire ${this.channelID}'s channel lock.`, 'Expire Lock');
+            log(`An error occurred while trying to expire ${this.channelId}'s channel lock.`, 'Expire Lock');
         }
     }
 
     public async lift(moderatorID: string): Promise<string> {
-        const channel = client.channels.cache.get(this.channelID);
-        if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) return Promise.reject(`The channel <#${this.channelID}> could not be resolved.`);
+        const channel = client.channels.cache.get(this.channelId);
+        if (!channel || (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice)) return Promise.reject(`The channel <#${this.channelId}> could not be resolved.`);
 
         await this.originalPermissions.apply(channel);
         await this.delete();
 
         timeoutStore.delete(this);
 
-        let logString = `${parseUser(moderatorID)} has lifted the channel lock in <#${this.channelID}>. \nIt would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
+        let logString = `${parseUser(moderatorID)} has lifted the channel lock in <#${this.channelId}>. \nIt would have expired at ${formatTimeDate(this.expireTimestamp)}.`;
         log(logString, 'Lift Lock');
         return logString;
     }
 
     async delete() {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM channel_lock WHERE id = $1 RETURNING id;`, values: [this.id], name: 'lock-delete' });
+        const result = await db.delete(schema.channelLock).where(sql.eq(schema.channelLock.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete channel lock.');
     }
 }

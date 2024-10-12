@@ -2,13 +2,13 @@ import type { TimeoutEntry } from '../timeoutStore.ts';
 
 export abstract class ChannelRestriction implements TimeoutEntry {
     public readonly id: string;
-    public readonly channelID: string;
+    public readonly channelId: string;
     public readonly expireTimestamp: Date;
 
-    constructor(data: { id: string; channel_id: string; expire_timestamp: string | number | Date }) {
+    constructor(data: { id: string; channelId: string; expireTimestamp: Date }) {
         this.id = data.id;
-        this.channelID = data.channel_id;
-        this.expireTimestamp = new Date(data.expire_timestamp);
+        this.channelId = data.channelId;
+        this.expireTimestamp = data.expireTimestamp;
     }
 
     abstract refresh(): Promise<ChannelRestriction>;

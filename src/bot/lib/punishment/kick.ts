@@ -55,11 +55,11 @@ export class Kick extends Punishment {
 
         const kick = new Kick({
             id,
-            user_id: user.id,
-            mod_id: moderatorID,
+            userId: user.id,
+            moderatorId: moderatorID,
             timestamp,
             reason,
-            context_url: contextURL,
+            contextUrl: contextURL,
         });
 
         let sentDM = true;
@@ -105,9 +105,9 @@ export class Kick extends Punishment {
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorID = moderatorID;
+        this.editModeratorId = moderatorID;
 
-        const logString = `${parseUser(this.editModeratorID)} edited the reason of ${parseUser(this.userID)}'s kick (${this.id}).\n\n**Before**\n${previousReason}\n\n**After**\n${newReason}`;
+        const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s kick (${this.id}).\n\n**Before**\n${previousReason}\n\n**After**\n${newReason}`;
 
         log(logString, 'Edit Kick Reason');
         return logString;
@@ -117,7 +117,7 @@ export class Kick extends Punishment {
         const result = await db.query({ text: /*sql*/ `DELETE FROM kick WHERE id = $1;`, values: [this.id], name: 'kick-delete' });
         if (result.rowCount === 0) return Promise.reject('Failed to delete kick.');
 
-        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userID)}'s kick.\n\n${this.toString()}`;
+        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s kick.\n\n${this.toString()}`;
         log(logString, 'Delete Kick');
         return logString;
     }
