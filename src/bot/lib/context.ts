@@ -8,18 +8,21 @@ import { replyError } from './embeds.ts';
 import log from './log.ts';
 import { parseUser } from './misc.ts';
 
-export type PunishmentTable =
-    | typeof schema.ban
-    | typeof schema.mute
-    | typeof schema.kick
-    | typeof schema.track
-    | typeof schema.liftedBan
-    | typeof schema.liftedMute
-    | typeof schema.note
-    | typeof schema.warn;
+const PUNISHMENT_TABLE_LIST = [schema.ban, schema.mute, schema.kick, schema.track, schema.liftedBan, schema.liftedMute, schema.note, schema.warn] as const;
+
+export type PunishmentTable = (typeof PUNISHMENT_TABLE_LIST)[number];
+export type PunishmentTableOid = PunishmentTable['_']['name'];
+
+export const PUNISHMENT_TABLEOID_TO_SCHEMA = PUNISHMENT_TABLE_LIST.reduce(
+    (acc, table) => {
+        acc[table._.name] = table;
+        return acc;
+    },
+    {} as Record<PunishmentTableOid, PunishmentTable>,
+);
 
 const PUNISHMENT_TABLE_TO_STRING: {
-    [key in PunishmentTable['_']['name']]: string;
+    [key in PunishmentTableOid]: string;
 } = {
     ban: 'ban',
     mute: 'mute',

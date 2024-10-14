@@ -18,21 +18,21 @@ export class Mute extends ExpirablePunishment {
         return await Mute.getByUUID(this.id);
     }
 
-    static async has(userID: string): Promise<boolean> {
-        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM mute WHERE user_id = $1;`, values: [userID], name: 'mute-has' });
-        return Boolean(result.rows[0]);
+    static async has(userId: string): Promise<boolean> {
+        const result = await db.query.mute.findFirst({ columns: {}, where: sql.eq(schema.mute.userId, userId) });
+        return result !== undefined;
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM mute WHERE id = $1;`, values: [uuid], name: 'mute-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A mute with the specified UUID does not exist.');
-        return new Mute(result.rows[0]);
+        const result = await db.query.mute.findFirst({ where: sql.eq(schema.mute.id, uuid) });
+        if (!result) return Promise.reject('A mute with the specified UUID does not exist.');
+        return new Mute(result);
     }
 
-    static async getByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM mute WHERE user_id = $1;`, values: [userID], name: 'mute-user-id' });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any past mutes.');
-        return new Mute(result.rows[0]);
+    static async getByUserID(userId: string) {
+        const result = await db.query.mute.findFirst({ where: sql.eq(schema.mute.userId, userId) });
+        if (!result) return Promise.reject('The specified user does not have any past mutes.');
+        return new Mute(result);
     }
 
     static async getExpiringToday() {
@@ -51,23 +51,14 @@ export class Mute extends ExpirablePunishment {
         return result.map((entry) => new Mute(entry));
     }
 
-    private async move(liftedModeratorID?: string) {
-        const liftedMute = LiftedMute.fromMute(this, liftedModeratorID);
+    private async move(liftedModeratorId: string | null = null) {
+        const liftedMute = LiftedMute.fromMute(this, liftedModeratorId);
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	WITH moved_rows AS (
-            	    DELETE FROM mute
-            	    WHERE id = $1
-            	    RETURNING id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
-            	)
-            	INSERT INTO lifted_mute (id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
-            	SELECT id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            values: [liftedMute.id, liftedMute.liftedTimestamp, liftedMute.liftedModeratorId],
-            name: 'mute-move-entry',
-        });
+        const deleteResult = await db.delete(schema.mute).where(sql.eq(schema.mute.id, liftedMute.id));
+        if (deleteResult.rowCount === 0) return Promise.reject('Failed to delete mute entry.');
 
-        if (result.rowCount === 0) return Promise.reject('Failed to move entry.');
+        const createResult = await db.insert(schema.liftedMute).values(liftedMute);
+        if (createResult.rowCount === 0) return Promise.reject('Failed to insert lifted mute entry.');
 
         timeoutStore.delete(this);
         return liftedMute;
@@ -100,7 +91,7 @@ export class Mute extends ExpirablePunishment {
         }
     }
 
-    public async editDuration(duration: number, editModeratorID: string) {
+    public async editDuration(duration: number, editModeratorId: string) {
         if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
         if (duration < 10) return Promise.reject("You can't mute someone for less than 10 seconds.");
         if (duration > 2419200) return Promise.reject("You can't mute someone for more than 28 days.");
@@ -110,19 +101,20 @@ export class Mute extends ExpirablePunishment {
 
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE mute
-            	SET expire_timestamp = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newExpireTimestamp, editTimestamp, editModeratorID, this.id],
-            name: 'mute-edit-duration',
-        });
+        const result = await db
+            .update(schema.mute)
+            .set({
+                expireTimestamp: newExpireTimestamp,
+                editTimestamp,
+                editModeratorId,
+            })
+            .where(sql.eq(schema.mute.id, this.id));
+
         if (result.rowCount === 0) return Promise.reject('Failed to edit the duration of the mute.');
 
         this.expireTimestamp = newExpireTimestamp;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = editModeratorID;
+        this.editModeratorId = editModeratorId;
 
         const member = await userToMember(this.userId);
         if (member) member.disableCommunicationUntil(this.expireTimestamp);
@@ -138,25 +130,26 @@ export class Mute extends ExpirablePunishment {
         return logString;
     }
 
-    public async editReason(newReason: string, editModeratorID: string) {
+    public async editReason(newReason: string, editModeratorId: string) {
         if (newReason.length > 512) return Promise.reject('The mute reason must not be more than 512 characters long.');
 
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE mute
-            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newReason, editTimestamp, editModeratorID, this.id],
-            name: 'mute-edit-reason',
-        });
+        const result = await db
+            .update(schema.mute)
+            .set({
+                reason: newReason,
+                editTimestamp,
+                editModeratorId,
+            })
+            .where(sql.eq(schema.mute.id, this.id));
+
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the mute.');
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = editModeratorID;
+        this.editModeratorId = editModeratorId;
 
         const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s current mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
@@ -164,7 +157,7 @@ export class Mute extends ExpirablePunishment {
         return logString;
     }
 
-    public static async create(userResolvable: UserResolvable, reason: string, duration: number, moderatorID?: string, contextURL?: string) {
+    public static async create(userResolvable: UserResolvable, reason: string, duration: number, moderatorId: string | null = null, contextUrl: string | null = null) {
         if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
         if (duration < 10) return Promise.reject("You can't mute someone for less than 10 seconds.");
         if (duration > 2419200) return Promise.reject("You can't mute someone for more than 28 days.");
@@ -179,31 +172,30 @@ export class Mute extends ExpirablePunishment {
         const member = await userToMember(user.id);
 
         const overwrittenMute = await Mute.getByUserID(user.id).catch(() => undefined);
-        await overwrittenMute?.move(moderatorID);
+        await overwrittenMute?.move(moderatorId);
 
         const timestamp = new Date();
-        const expireTimestamp = duration ? new Date(timestamp.getTime() + duration * 1000) : undefined;
+        const expireTimestamp = new Date(timestamp.getTime() + duration * 1000);
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	INSERT INTO mute (user_id, mod_id, reason, context_url, expire_timestamp, timestamp)
-            	VALUES ($1, $2, $3, $4, $5, $6)
-            	RETURNING id;`,
-            values: [user.id, moderatorID, reason, contextURL, expireTimestamp, timestamp],
-            name: 'mute-create',
-        });
+        const data = {
+            userId: user.id,
+            moderatorId,
+            reason,
+            contextUrl,
+            expireTimestamp,
+            timestamp,
+        } satisfies typeof schema.mute.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert mute.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.mute).values(data).returning({ id: schema.mute.id });
+
+        if (result.length === 0) return Promise.reject('Failed to insert mute.');
+        const { id } = result[0];
 
         const mute = new Mute({
             id,
-            reason,
-            timestamp,
-            userId: user.id,
-            contextUrl: contextURL,
-            moderatorId: moderatorID,
-            expireTimestamp: expireTimestamp,
+            editModeratorId: null,
+            editTimestamp: null,
+            ...data,
         });
 
         let sentDM = true;
@@ -226,7 +218,7 @@ export class Mute extends ExpirablePunishment {
 export class LiftedMute extends LiftedPunishment {
     readonly TYPE_STRING: string = 'Lifted Mute';
 
-    public static fromMute(mute: Mute, liftedModeratorID?: string) {
+    public static fromMute(mute: Mute, liftedModeratorId: string | null = null) {
         return new LiftedMute({
             id: mute.id,
             userId: mute.userId,
@@ -236,55 +228,56 @@ export class LiftedMute extends LiftedPunishment {
             editTimestamp: mute.editTimestamp,
             editModeratorId: mute.editModeratorId,
             liftedTimestamp: new Date(),
-            liftedModeratorId: liftedModeratorID,
+            liftedModeratorId: liftedModeratorId,
             timestamp: mute.timestamp,
         });
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lifted_mute WHERE id = $1;`, values: [uuid], name: 'lifted-mute-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A lifted mute with the specified UUID does not exist.');
-        return new LiftedMute(result.rows[0]);
+        const result = await db.query.liftedMute.findFirst({ where: sql.eq(schema.liftedMute.id, uuid) });
+        if (!result) return Promise.reject('A lifted mute with the specified UUID does not exist.');
+        return new LiftedMute(result);
     }
 
-    static async getLatestByUserID(userID: string) {
-        const result = await db.query({
-            text: /*sql*/ `SELECT * FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
-            values: [userID],
-            name: 'lifted-mute-latest-user-id',
+    static async getLatestByUserID(userId: string) {
+        const result = await db.query.liftedMute.findFirst({
+            where: sql.eq(schema.liftedMute.userId, userId),
+            orderBy: sql.desc(schema.liftedMute.timestamp),
         });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any lifted mutes.');
-        return new LiftedMute(result.rows[0]);
+
+        if (!result) return Promise.reject('The specified user does not have any lifted mutes.');
+        return new LiftedMute(result);
     }
 
-    static async getAllByUserID(userID: string) {
-        const result = await db.query({
-            text: /*sql*/ `SELECT * FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            values: [userID],
-            name: 'lifted-mute-all-user-id',
+    static async getAllByUserID(userId: string) {
+        const result = await db.query.liftedMute.findMany({
+            where: sql.eq(schema.liftedMute.userId, userId),
+            orderBy: sql.desc(schema.liftedMute.timestamp),
         });
-        return result.rows.map((row) => new LiftedMute(row));
+
+        return result.map((entry) => new LiftedMute(entry));
     }
 
-    public async editReason(newReason: string, moderatorID: string) {
+    public async editReason(newReason: string, editModeratorId: string) {
         if (newReason.length > 512) return Promise.reject('The mute reason must not be more than 512 characters long.');
 
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE lifted_mute
-            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newReason, editTimestamp, moderatorID, this.id],
-            name: 'lifted-mute-edit-reason',
-        });
+        const result = await db
+            .update(schema.liftedMute)
+            .set({
+                reason: newReason,
+                editModeratorId,
+                editTimestamp,
+            })
+            .where(sql.eq(schema.liftedMute.id, this.id));
+
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the lifted mute.');
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = moderatorID;
+        this.editModeratorId = editModeratorId;
 
         const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s lifted mute (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
@@ -292,11 +285,11 @@ export class LiftedMute extends LiftedPunishment {
         return logString;
     }
 
-    public async delete(moderatorID: string) {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM lifted_mute WHERE id = $1;`, values: [this.id], name: 'lifted-mute-delete' });
+    public async delete(moderatorId: string) {
+        const result = await db.delete(schema.liftedMute).where(sql.eq(schema.liftedMute.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted mute.');
 
-        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s lifted mute.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted mute.\n\n${this.toString(true)}`;
         log(logString, 'Delete Lifted Mute Entry');
         return logString;
     }

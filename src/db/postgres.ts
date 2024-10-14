@@ -1,5 +1,4 @@
 import { drizzle } from 'drizzle-orm/connect';
-import { PgDialect } from 'drizzle-orm/pg-core';
 import * as schema from './schema.ts';
 
 export const db = await drizzle('node-postgres', {
@@ -13,5 +12,3 @@ export const db = await drizzle('node-postgres', {
     },
     schema,
 });
-
-export const dialect = new PgDialect();

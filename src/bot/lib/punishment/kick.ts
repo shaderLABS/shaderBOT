@@ -1,5 +1,7 @@
 import type { UserResolvable } from 'discord.js';
+import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
+import * as schema from '../../../db/schema.ts';
 import { client } from '../../bot.ts';
 import { sendInfo } from '../embeds.ts';
 import log from '../log.ts';
@@ -10,27 +12,31 @@ export class Kick extends Punishment {
     readonly TYPE_STRING: string = 'Kick';
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM kick WHERE id = $1;`, values: [uuid], name: 'kick-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A kick with the specified UUID does not exist.');
-        return new Kick(result.rows[0]);
+        const result = await db.query.kick.findFirst({ where: sql.eq(schema.kick.id, uuid) });
+        if (!result) return Promise.reject('A kick with the specified UUID does not exist.');
+        return new Kick(result);
     }
 
-    static async getLatestByUserID(userID: string) {
-        const result = await db.query({
-            text: /*sql*/ `SELECT * FROM kick WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
-            values: [userID],
-            name: 'kick-latest-user-id',
+    static async getLatestByUserID(userId: string) {
+        const result = await db.query.kick.findFirst({
+            where: sql.eq(schema.kick.userId, userId),
+            orderBy: sql.desc(schema.kick.timestamp),
         });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any kicks.');
-        return new Kick(result.rows[0]);
+
+        if (!result) return Promise.reject('The specified user does not have any kicks.');
+        return new Kick(result);
     }
 
-    static async getAllByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM kick WHERE user_id = $1 ORDER BY timestamp DESC;`, values: [userID], name: 'kick-all-user-id' });
-        return result.rows.map((row) => new Kick(row));
+    static async getAllByUserID(userId: string) {
+        const result = await db.query.kick.findMany({
+            where: sql.eq(schema.kick.userId, userId),
+            orderBy: sql.desc(schema.kick.timestamp),
+        });
+
+        return result.map((entry) => new Kick(entry));
     }
 
-    static async create(userResolvable: UserResolvable, reason: string, moderatorID?: string, contextURL?: string, deleteMessageSeconds?: number) {
+    static async create(userResolvable: UserResolvable, reason: string, moderatorId: string | null = null, contextUrl: string | null = null, deleteMessageSeconds?: number) {
         if (reason.length > 512) return Promise.reject('The kick reason must not be more than 512 characters long.');
 
         const guild = getGuild();
@@ -39,27 +45,25 @@ export class Kick extends Punishment {
         if (!user) return Promise.reject('Failed to resolve the user.');
 
         const member = await userToMember(user.id, guild);
-        const timestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	INSERT INTO kick (user_id, mod_id, reason, context_url, timestamp)
-            	VALUES ($1, $2, $3, $4, $5)
-            	RETURNING id;`,
-            values: [user.id, moderatorID, reason, contextURL, timestamp],
-            name: 'kick-create',
-        });
+        const data = {
+            userId: user.id,
+            moderatorId,
+            reason,
+            contextUrl,
+            timestamp: new Date(),
+        } satisfies typeof schema.kick.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert kick entry.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.kick).values(data).returning({ id: schema.kick.id });
+
+        if (result.length === 0) return Promise.reject('Failed to insert kick entry.');
+        const { id } = result[0];
 
         const kick = new Kick({
             id,
-            userId: user.id,
-            moderatorId: moderatorID,
-            timestamp,
-            reason,
-            contextUrl: contextURL,
+            editModeratorId: null,
+            editTimestamp: null,
+            ...data,
         });
 
         let sentDM = true;
@@ -86,26 +90,26 @@ export class Kick extends Punishment {
         return logString;
     }
 
-    public async editReason(newReason: string, moderatorID: string) {
+    public async editReason(newReason: string, editModeratorId: string) {
         if (newReason.length > 512) return Promise.reject('The kick reason must not be more than 512 characters long.');
 
         const previousReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE kick
-            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newReason, editTimestamp, moderatorID, this.id],
-            name: 'kick-edit-reason',
-        });
+        const result = await db
+            .update(schema.kick)
+            .set({
+                reason: newReason,
+                editModeratorId,
+                editTimestamp,
+            })
+            .where(sql.eq(schema.kick.id, this.id));
 
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the specified kick.');
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = moderatorID;
+        this.editModeratorId = editModeratorId;
 
         const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s kick (${this.id}).\n\n**Before**\n${previousReason}\n\n**After**\n${newReason}`;
 
@@ -114,7 +118,7 @@ export class Kick extends Punishment {
     }
 
     public async delete(moderatorID: string) {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM kick WHERE id = $1;`, values: [this.id], name: 'kick-delete' });
+        const result = await db.delete(schema.kick).where(sql.eq(schema.kick.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete kick.');
 
         const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s kick.\n\n${this.toString()}`;
