@@ -49,7 +49,7 @@ Environment variables are read from `.env` and specifiy sensitive information li
 | `PG_PASSWORD`               |  `postgres`  | The password used for accessing the PostgreSQL database.                                                                                             |
 | `PG_HOST`                   | `localhost`  | The hostname used for connecting to the PostgreSQL server.                                                                                           |
 | `PG_PORT`                   |    `5432`    | The port which the PostgreSQL server is running on.                                                                                                  |
-| `PG_DATABASE`               | `shaderBOT`  | The name of the PostgreSQL database which is **already populated** using the [`init.sql`](src/db/init.sql) file.                                     |
+| `PG_DATABASE`               | `shaderBOT`  | The name of the PostgreSQL database.                                                                                                                 |
 
 ## UNIX Domain Sockets
 

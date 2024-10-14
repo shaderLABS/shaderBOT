@@ -1,8 +1,8 @@
 import { User } from 'discord.js';
-import { db } from '../../../db/postgres.ts';
+import { Query } from '../../../db/query.ts';
 import { client } from '../../bot.ts';
 import type { GuildChatInputCommandInteraction } from '../../chatInputCommandHandler.ts';
-import { type PunishmentTable, editContextURL } from '../../lib/context.ts';
+import { PUNISHMENT_TABLEOID_TO_SCHEMA, type PunishmentTable, editContextURL } from '../../lib/context.ts';
 import { replyError, replySuccess } from '../../lib/embeds.ts';
 import { Note } from '../../lib/note.ts';
 import { Ban, LiftedBan } from '../../lib/punishment/ban.ts';
@@ -161,31 +161,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 let table: PunishmentTable;
 
                 if (target instanceof User) {
-                    const entry = (
-                        await db.query({
-                            text: /*sql*/ `
-                                WITH entries AS (
-                                    (SELECT id, timestamp, tableoid::regclass FROM ban WHERE user_id = $1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM mute WHERE user_id = $1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM track WHERE user_id = $1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM kick WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM lifted_ban WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM lifted_mute WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM note WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                    UNION ALL
-                                    (SELECT id, timestamp, tableoid::regclass FROM warn WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1)
-                                )
-                                SELECT id, tableoid FROM entries ORDER BY timestamp DESC LIMIT 1;`,
-                            values: [target.id],
-                            name: 'context-latest-user-id',
-                        })
-                    ).rows[0];
+                    const [entry] = await Query.Context.LATEST_BY_USERID.execute({ userId: target.id });
 
                     if (!entry) {
                         replyError(interaction, 'The specified user does not have any entries.');
@@ -195,40 +171,19 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     if (!(await hasPermissionForTarget(interaction, target))) return;
 
                     uuid = entry.id;
-                    table = entry.tableoid;
+                    table = PUNISHMENT_TABLEOID_TO_SCHEMA[entry.tableoid];
                 } else {
-                    const entry = (
-                        await db.query({
-                            text: /*sql*/ `
-                                (SELECT user_id, tableoid::regclass FROM ban WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM mute WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM track WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM kick WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM lifted_ban WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM lifted_mute WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM note WHERE id = $1)
-                                UNION ALL
-                                (SELECT user_id, tableoid::regclass FROM warn WHERE id = $1)`,
-                            values: [target],
-                            name: 'context-uuid',
-                        })
-                    ).rows[0];
+                    const [entry] = await Query.Context.BY_UUID.execute({ uuid: target });
 
                     if (!entry) {
                         replyError(interaction, 'There is no entry with the specified UUID.');
                         return;
                     }
 
-                    if (!(await hasPermissionForTarget(interaction, entry.user_id))) return;
+                    if (!(await hasPermissionForTarget(interaction, entry.userId))) return;
 
                     uuid = target;
-                    table = entry.tableoid;
+                    table = PUNISHMENT_TABLEOID_TO_SCHEMA[entry.tableoid];
                 }
 
                 const logString = await editContextURL(uuid, context, interaction.user.id, table);

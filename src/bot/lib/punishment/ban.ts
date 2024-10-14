@@ -17,21 +17,21 @@ export class Ban extends ExpirablePunishment {
         return await Ban.getByUUID(this.id);
     }
 
-    static async has(userID: string): Promise<boolean> {
-        const result = await db.query({ text: /*sql*/ `SELECT 1 FROM ban WHERE user_id = $1;`, values: [userID], name: 'ban-has' });
-        return Boolean(result.rows[0]);
+    static async has(userId: string): Promise<boolean> {
+        const result = await db.query.ban.findFirst({ columns: {}, where: sql.eq(schema.ban.userId, userId) });
+        return result !== undefined;
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM ban WHERE id = $1;`, values: [uuid], name: 'ban-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A ban with the specified UUID does not exist.');
-        return new Ban(result.rows[0]);
+        const result = await db.query.ban.findFirst({ where: sql.eq(schema.ban.id, uuid) });
+        if (!result) return Promise.reject('A ban with the specified UUID does not exist.');
+        return new Ban(result);
     }
 
-    static async getByUserID(userID: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM ban WHERE user_id = $1;`, values: [userID], name: 'ban-user-id' });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any past bans.');
-        return new Ban(result.rows[0]);
+    static async getByUserID(userId: string) {
+        const result = await db.query.ban.findFirst({ where: sql.eq(schema.ban.userId, userId) });
+        if (!result) return Promise.reject('The specified user does not have any past bans.');
+        return new Ban(result);
     }
 
     static async getExpiringToday() {
@@ -50,9 +50,16 @@ export class Ban extends ExpirablePunishment {
         return result.map((entry) => new Ban(entry));
     }
 
-    public static async create(userResolvable: UserResolvable, reason: string, duration?: number, moderatorID?: string, contextURL?: string, deleteMessageSeconds?: number) {
+    public static async create(
+        userResolvable: UserResolvable,
+        reason: string,
+        duration: number | null = null,
+        moderatorId: string | null = null,
+        contextUrl: string | null = null,
+        deleteMessageSeconds?: number,
+    ) {
         if (duration) {
-            if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
+            if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exc,eeds the range of UNIX time.');
             if (duration < 10) return Promise.reject("You can't ban someone for less than 10 seconds.");
         }
 
@@ -64,31 +71,30 @@ export class Ban extends ExpirablePunishment {
         if (!user) return Promise.reject('Failed to resolve the user.');
 
         const overwrittenBan = await Ban.getByUserID(user.id).catch(() => undefined);
-        await overwrittenBan?.move(moderatorID);
+        await overwrittenBan?.move(moderatorId);
 
         const timestamp = new Date();
-        const expireTimestamp = duration ? new Date(timestamp.getTime() + duration * 1000) : undefined;
+        const expireTimestamp = duration ? new Date(timestamp.getTime() + duration * 1000) : null;
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	INSERT INTO ban (user_id, mod_id, reason, context_url, expire_timestamp, timestamp)
-            	VALUES ($1, $2, $3, $4, $5, $6)
-            	RETURNING id;`,
-            values: [user.id, moderatorID, reason, contextURL, expireTimestamp, timestamp],
-            name: 'ban-create',
-        });
+        const data = {
+            userId: user.id,
+            moderatorId,
+            reason,
+            contextUrl,
+            expireTimestamp,
+            timestamp,
+        } satisfies typeof schema.ban.$inferInsert;
 
-        if (result.rowCount === 0) return Promise.reject('Failed to insert ban entry.');
-        const { id } = result.rows[0];
+        const result = await db.insert(schema.ban).values(data).returning({ id: schema.ban.id });
+
+        if (result.length === 0) return Promise.reject('Failed to insert ban entry.');
+        const { id } = result[0];
 
         const ban = new Ban({
             id,
-            reason,
-            timestamp,
-            userId: user.id,
-            contextUrl: contextURL,
-            moderatorId: moderatorID,
-            expireTimestamp: expireTimestamp,
+            editModeratorId: null,
+            editTimestamp: null,
+            ...data,
         });
 
         let sentDM = true;
@@ -117,23 +123,14 @@ export class Ban extends ExpirablePunishment {
         return logString;
     }
 
-    private async move(liftedModeratorID?: string) {
-        const liftedBan = LiftedBan.fromBan(this, liftedModeratorID);
+    private async move(liftedModeratorId: string | null = null) {
+        const liftedBan = LiftedBan.fromBan(this, liftedModeratorId);
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	WITH moved_rows AS (
-            	    DELETE FROM ban
-            	    WHERE id = $1
-            	    RETURNING id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, timestamp
-            	)
-            	INSERT INTO lifted_ban (id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, lifted_timestamp, lifted_mod_id, timestamp)
-            	SELECT id, user_id, mod_id, reason, context_url, edited_timestamp, edited_mod_id, $2::TIMESTAMP AS lifted_timestamp, $3::NUMERIC AS lifted_mod_id, timestamp FROM moved_rows;`,
-            values: [liftedBan.id, liftedBan.liftedTimestamp, liftedBan.liftedModeratorId],
-            name: 'ban-move-entry',
-        });
+        const deleteResult = await db.delete(schema.ban).where(sql.eq(schema.ban.id, liftedBan.id));
+        if (deleteResult.rowCount === 0) return Promise.reject('Failed to delete ban entry.');
 
-        if (result.rowCount === 0) return Promise.reject('Failed to move entry.');
+        const createResult = await db.insert(schema.liftedBan).values(liftedBan);
+        if (createResult.rowCount === 0) return Promise.reject('Failed to insert lifted ban entry.');
 
         timeoutStore.delete(this);
         return liftedBan;
@@ -171,7 +168,7 @@ export class Ban extends ExpirablePunishment {
         }
     }
 
-    public async editDuration(duration: number, moderatorID: string) {
+    public async editDuration(duration: number, editModeratorId: string) {
         if (isNaN(duration)) return Promise.reject('The specified duration is not a number or exceeds the range of UNIX time.');
         if (duration < 10) return Promise.reject("You can't ban someone for less than 10 seconds.");
 
@@ -180,20 +177,20 @@ export class Ban extends ExpirablePunishment {
 
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE ban
-            	SET expire_timestamp = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newExpireTimestamp, editTimestamp, moderatorID, this.id],
-            name: 'ban-edit-duration',
-        });
+        const result = await db
+            .update(schema.ban)
+            .set({
+                expireTimestamp: newExpireTimestamp,
+                editTimestamp,
+                editModeratorId,
+            })
+            .where(sql.eq(schema.ban.id, this.id));
 
         if (result.rowCount === 0) return Promise.reject('Failed to edit the duration of the ban.');
 
         this.expireTimestamp = newExpireTimestamp;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = moderatorID;
+        this.editModeratorId = editModeratorId;
 
         timeoutStore.delete(this);
         timeoutStore.set(this, true);
@@ -206,25 +203,26 @@ export class Ban extends ExpirablePunishment {
         return logString;
     }
 
-    public async editReason(newReason: string, editModeratorID: string) {
+    public async editReason(newReason: string, editModeratorId: string) {
         if (newReason.length > 512) return Promise.reject('The ban reason must not be more than 512 characters long.');
 
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE ban
-            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newReason, editTimestamp, editModeratorID, this.id],
-            name: 'ban-edit-reason',
-        });
+        const result = await db
+            .update(schema.ban)
+            .set({
+                reason: newReason,
+                editTimestamp,
+                editModeratorId,
+            })
+            .where(sql.eq(schema.ban.id, this.id));
+
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the ban.');
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = editModeratorID;
+        this.editModeratorId = editModeratorId;
 
         const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s current ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
@@ -236,7 +234,7 @@ export class Ban extends ExpirablePunishment {
 export class LiftedBan extends LiftedPunishment {
     readonly TYPE_STRING: string = 'Lifted Ban';
 
-    public static fromBan(ban: Ban, liftedModeratorID?: string) {
+    public static fromBan(ban: Ban, liftedModeratorId: string | null = null) {
         return new LiftedBan({
             id: ban.id,
             userId: ban.userId,
@@ -246,55 +244,59 @@ export class LiftedBan extends LiftedPunishment {
             editTimestamp: ban.editTimestamp,
             editModeratorId: ban.editModeratorId,
             liftedTimestamp: new Date(),
-            liftedModeratorId: liftedModeratorID,
+            liftedModeratorId,
             timestamp: ban.timestamp,
         });
     }
 
+    // TODO: consider using prepared statements
+    // private static readonly QUERY_GET_BY_UUID = ...;
+
     static async getByUUID(uuid: string) {
-        const result = await db.query({ text: /*sql*/ `SELECT * FROM lifted_ban WHERE id = $1;`, values: [uuid], name: 'lifted-ban-uuid' });
-        if (result.rowCount === 0) return Promise.reject('A lifted ban with the specified UUID does not exist.');
-        return new LiftedBan(result.rows[0]);
+        const result = await db.query.liftedBan.findFirst({ where: sql.eq(schema.liftedBan.id, uuid) });
+        if (!result) return Promise.reject('A lifted ban with the specified UUID does not exist.');
+        return new LiftedBan(result);
     }
 
-    static async getLatestByUserID(userID: string) {
-        const result = await db.query({
-            text: /*sql*/ `SELECT * FROM lifted_ban WHERE user_id = $1 ORDER BY timestamp DESC LIMIT 1;`,
-            values: [userID],
-            name: 'lifted-ban-latest-user-id',
+    static async getLatestByUserID(userId: string) {
+        const result = await db.query.liftedBan.findFirst({
+            where: sql.eq(schema.liftedBan.userId, userId),
+            orderBy: sql.desc(schema.liftedBan.timestamp),
         });
-        if (result.rowCount === 0) return Promise.reject('The specified user does not have any lifted bans.');
-        return new LiftedBan(result.rows[0]);
+
+        if (!result) return Promise.reject('The specified user does not have any lifted bans.');
+        return new LiftedBan(result);
     }
 
-    static async getAllByUserID(userID: string) {
-        const result = await db.query({
-            text: /*sql*/ `SELECT * FROM lifted_ban WHERE user_id = $1 ORDER BY timestamp DESC;`,
-            values: [userID],
-            name: 'lifted-ban-all-user-id',
+    static async getAllByUserID(userId: string) {
+        const result = await db.query.liftedBan.findMany({
+            where: sql.eq(schema.liftedBan.userId, userId),
+            orderBy: sql.desc(schema.liftedBan.timestamp),
         });
-        return result.rows.map((row) => new LiftedBan(row));
+
+        return result.map((entry) => new LiftedBan(entry));
     }
 
-    public async editReason(newReason: string, moderatorID: string) {
+    public async editReason(newReason: string, editModeratorId: string) {
         if (newReason.length > 512) return Promise.reject('The ban reason must not be more than 512 characters long.');
 
         const oldReason = this.reason;
         const editTimestamp = new Date();
 
-        const result = await db.query({
-            text: /*sql*/ `
-            	UPDATE lifted_ban
-            	SET reason = $1, edited_timestamp = $2, edited_mod_id = $3
-            	WHERE id = $4;`,
-            values: [newReason, editTimestamp, moderatorID, this.id],
-            name: 'lifted-ban-edit-reason',
-        });
+        const result = await db
+            .update(schema.liftedBan)
+            .set({
+                reason: newReason,
+                editTimestamp,
+                editModeratorId,
+            })
+            .where(sql.eq(schema.liftedBan.id, this.id));
+
         if (result.rowCount === 0) return Promise.reject('Failed to edit the reason of the lifted ban.');
 
         this.reason = newReason;
         this.editTimestamp = editTimestamp;
-        this.editModeratorId = moderatorID;
+        this.editModeratorId = editModeratorId;
 
         const logString = `${parseUser(this.editModeratorId)} edited the reason of ${parseUser(this.userId)}'s lifted ban (${this.id}).\n\n**Before**\n${oldReason}\n\n**After**\n${newReason}`;
 
@@ -302,11 +304,11 @@ export class LiftedBan extends LiftedPunishment {
         return logString;
     }
 
-    public async delete(moderatorID: string) {
-        const result = await db.query({ text: /*sql*/ `DELETE FROM lifted_ban WHERE id = $1;`, values: [this.id], name: 'lifted-ban-delete' });
+    public async delete(moderatorId: string) {
+        const result = await db.delete(schema.liftedBan).where(sql.eq(schema.liftedBan.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted ban.');
 
-        const logString = `${parseUser(moderatorID)} deleted the log entry of ${parseUser(this.userId)}'s lifted ban.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted ban.\n\n${this.toString(true)}`;
         log(logString, 'Delete Lifted Ban Entry');
         return logString;
     }
