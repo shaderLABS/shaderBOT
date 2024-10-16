@@ -11,6 +11,8 @@ The following information is for developers and contributors. If you're a user, 
 bun install
 ```
 
+Use the `--production` flag to only install runtime dependencies. The `--frozen-lockfile` flag can be used to enforce the usage of the exact versions specified in the lock file and prevent it from being modified.
+
 ## Configuration (required)
 
 ### Discord Application
