@@ -1,6 +1,5 @@
 import JSONC from 'comment-json';
 import type { Snowflake } from 'discord.js';
-import { Console } from 'node:console';
 import fs from 'node:fs';
 import { getObjectInvalidProperties } from './objectManipulation.ts';
 
@@ -14,7 +13,7 @@ export class SettingsFile<Data> {
 
         const invalidProperties = getObjectInvalidProperties(settingsData, templateData);
         if (invalidProperties.length !== 0) {
-            new Console(process.stderr).table(invalidProperties);
+            console.error(Bun.inspect.table(invalidProperties));
             throw new Error(`Invalid properties found in ${settingsPath}.`);
         }
 
