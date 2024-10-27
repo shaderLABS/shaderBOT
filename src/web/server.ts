@@ -1,8 +1,8 @@
 import cors from '@elysiajs/cors';
 import jwt from '@elysiajs/jwt';
 import { verify as verifyGitHubWebhook } from '@octokit/webhooks-methods';
-import { Discord, OAuth2RequestError, generateState } from 'arctic';
-import type { APIUser } from 'discord.js';
+import { Discord, generateState, OAuth2RequestError } from 'arctic';
+import { DefaultRestOptions, RequestMethod, Routes, type APIUser } from 'discord.js';
 import * as sql from 'drizzle-orm/sql';
 import { Elysia, t } from 'elysia';
 import fs from 'node:fs';
@@ -15,9 +15,10 @@ import * as schema from '../db/schema.ts';
 import type { API } from './api.ts';
 import { GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY, pingNotification, releaseNotification } from './webhook.ts';
 
-const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
-
 export function startWebserver() {
+    const IS_DEVELOPMENT_ENVIRONMENT = process.env.NODE_ENV === 'development';
+    const REST_CURRENT_USER_URL = `${DefaultRestOptions.api}/v${DefaultRestOptions.version}${Routes.user()}`;
+
     if (process.env.BOT_ONLY === 'true') return;
     if (!process.env.SESSION_SECRET) throw "The 'SESSION_SECRET' environment variable is required.";
     if (!process.env.APPLICATION_CLIENT_ID) throw "The 'APPLICATION_CLIENT_ID' environment variable is required.";
@@ -55,7 +56,7 @@ export function startWebserver() {
 
     app.get('/api/auth/login', async ({ cookie: { discord_oauth_state }, redirect }) => {
         const state = generateState();
-        const url = await discordOAuthProvider.createAuthorizationURL(state, { scopes: ['identify'] });
+        const url = discordOAuthProvider.createAuthorizationURL(state, ['identify']);
 
         discord_oauth_state.set({
             value: state,
@@ -77,9 +78,11 @@ export function startWebserver() {
 
             try {
                 const tokens = await discordOAuthProvider.validateAuthorizationCode(code);
-                const discordUserResponse = await fetch('https://discord.com/api/users/@me', {
+
+                const discordUserResponse = await fetch(REST_CURRENT_USER_URL, {
+                    method: RequestMethod.Get,
                     headers: {
-                        Authorization: `Bearer ${tokens.accessToken}`,
+                        Authorization: `${tokens.tokenType()} ${tokens.accessToken()}`,
                     },
                 });
 

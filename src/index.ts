@@ -1,4 +1,4 @@
-import { migrate } from 'drizzle-orm/connect';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import drizzleConfig from '../drizzle.config.ts';
 import { startBot } from './bot/bot.ts';
 import { db } from './db/postgres.ts';

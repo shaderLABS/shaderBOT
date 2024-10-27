@@ -1,7 +1,7 @@
-import { drizzle } from 'drizzle-orm/connect';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema.ts';
 
-export const db = await drizzle('node-postgres', {
+export const db = drizzle({
     connection: {
         ssl: false,
         user: process.env.PG_USER || 'postgres',
