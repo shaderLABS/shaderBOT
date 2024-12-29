@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import { getTableName } from 'drizzle-orm';
 import * as sql from 'drizzle-orm/sql';
 import { db } from '../../db/postgres.ts';
 import * as schema from '../../db/schema.ts';
@@ -13,13 +14,10 @@ const PUNISHMENT_TABLE_LIST = [schema.ban, schema.mute, schema.kick, schema.trac
 export type PunishmentTable = (typeof PUNISHMENT_TABLE_LIST)[number];
 export type PunishmentTableOid = PunishmentTable['_']['name'];
 
-export const PUNISHMENT_TABLEOID_TO_SCHEMA = PUNISHMENT_TABLE_LIST.reduce(
-    (acc, table) => {
-        acc[table._.name] = table;
-        return acc;
-    },
-    {} as Record<PunishmentTableOid, PunishmentTable>,
-);
+export const PUNISHMENT_TABLEOID_TO_SCHEMA = PUNISHMENT_TABLE_LIST.reduce((map, table) => {
+    map[getTableName(table)] = table;
+    return map;
+}, {} as Record<PunishmentTableOid, PunishmentTable>);
 
 const PUNISHMENT_TABLE_TO_STRING: {
     [key in PunishmentTableOid]: string;
@@ -99,7 +97,7 @@ export async function editContextURL(id: string, contextUrl: string, editModerat
         .set({ contextUrl, editTimestamp: sql.sql`NOW()`, editModeratorId })
         .where(sql.eq(table.id, id));
 
-    const logString = `${parseUser(editModeratorId)} edited the context of ${parseUser(userId)}'s ${PUNISHMENT_TABLE_TO_STRING[table._.name]} (${id}).\n\n**Before**\n${
+    const logString = `${parseUser(editModeratorId)} edited the context of ${parseUser(userId)}'s ${PUNISHMENT_TABLE_TO_STRING[getTableName(table)]} (${id}).\n\n**Before**\n${
         oldContextUrl || 'No context exists.'
     }\n\n**After**\n${contextUrl}`;
 
