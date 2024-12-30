@@ -104,14 +104,6 @@ Be aware that new settings could have been added to the configuration file. The 
 
 Additionally, [re-uploading the command structure](#Uploading-Command-Structure) may be neccessary if it has changed.
 
-### Applying Migrations
-
-After certain updates, the database tables and other dynamic content might have to be migrated before starting the application. If new migrations are available, you can see them in the console output while pulling from GitHub. You can apply all migrations that have not been applied so far by running the following command after building the application:
-
-```properties
-bun run migrate
-```
-
 ## Recommended Visual Studio Code Settings and Extensions
 
 ### Settings

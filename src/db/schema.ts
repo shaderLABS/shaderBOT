@@ -1,4 +1,5 @@
-import { customType, foreignKey, index, numeric, pgTable, smallint, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { check, customType, foreignKey, index, numeric, pgTable, smallint, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import * as sql from 'drizzle-orm/sql';
 
 const bytea = customType<{
     data: Buffer;
@@ -22,11 +23,7 @@ export const mute = pgTable(
         expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxMuteUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const kick = pgTable(
@@ -41,11 +38,7 @@ export const kick = pgTable(
         editModeratorId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxKickUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const track = pgTable(
@@ -60,11 +53,7 @@ export const track = pgTable(
         editModeratorId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxTrackUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const channelLock = pgTable('channel_lock', {
@@ -94,11 +83,7 @@ export const ban = pgTable(
         expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxBanUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const liftedMute = pgTable(
@@ -115,11 +100,7 @@ export const liftedMute = pgTable(
         liftedModeratorId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxLiftedMuteUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const note = pgTable(
@@ -134,11 +115,7 @@ export const note = pgTable(
         editModeratorId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxNoteUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const liftedBan = pgTable(
@@ -155,11 +132,7 @@ export const liftedBan = pgTable(
         liftedModeratorId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxLiftedBanUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const appeal = pgTable(
@@ -177,11 +150,7 @@ export const appeal = pgTable(
         messageId: numeric({ precision: 20, scale: 0 }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxAppealUserId: index().using('hash', table.userId),
-        };
-    },
+    (table) => [index().using('hash', table.userId)],
 );
 
 export const project = pgTable(
@@ -195,12 +164,7 @@ export const project = pgTable(
         bannerLastTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
         webhookSecret: bytea('webhook_secret'),
     },
-    (table) => {
-        return {
-            projectChannelIdKey: unique().on(table.channelId),
-            projectRoleIdKey: unique().on(table.roleId),
-        };
-    },
+    (table) => [unique().on(table.channelId), unique().on(table.roleId)],
 );
 
 export const projectMute = pgTable(
@@ -211,15 +175,13 @@ export const projectMute = pgTable(
         userId: numeric({ precision: 20, scale: 0 }).notNull(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
-    (table) => {
-        return {
-            idxProjectMuteUserId: index().using('hash', table.userId),
-            projectMuteProjectIdFkey: foreignKey({
-                columns: [table.projectId],
-                foreignColumns: [project.id],
-            }),
-        };
-    },
+    (table) => [
+        index().using('hash', table.userId),
+        foreignKey({
+            columns: [table.projectId],
+            foreignColumns: [project.id],
+        }),
+    ],
 );
 
 export const warn = pgTable(
@@ -235,12 +197,7 @@ export const warn = pgTable(
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
         contextUrl: text(),
     },
-    (table) => {
-        return {
-            idxWarnUserId: index().using('hash', table.userId),
-            // checkWarnSeverity: check('test', sql.between(warn.severity, 0, 3)),
-        };
-    },
+    (table) => [index().using('hash', table.userId), check('severity_range_check', sql.between(table.severity, 0, 3).inlineParams())],
 );
 
 export const stickyThread = pgTable(
@@ -251,9 +208,5 @@ export const stickyThread = pgTable(
         threadId: numeric({ precision: 20, scale: 0 }).notNull(),
         moderatorId: numeric({ precision: 20, scale: 0 }),
     },
-    (table) => {
-        return {
-            stickyThreadThreadIdKey: unique().on(table.threadId),
-        };
-    },
+    (table) => [unique().on(table.threadId)],
 );

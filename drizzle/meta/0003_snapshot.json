@@ -1,0 +1,1047 @@
+{
+  "id": "cd330b01-21ad-4691-be17-81e0df55b38a",
+  "prevId": "432a84ee-2b33-4f13-9453-d1b9a8e6b18b",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.appeal": {
+      "name": "appeal",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result": {
+          "name": "result",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resultReason": {
+          "name": "resultReason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resultModeratorId": {
+          "name": "resultModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resultTimestamp": {
+          "name": "resultTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resultEditModeratorId": {
+          "name": "resultEditModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resultEditTimestamp": {
+          "name": "resultEditTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageId": {
+          "name": "messageId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "appeal_userId_index": {
+          "name": "appeal_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ban": {
+      "name": "ban",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expireTimestamp": {
+          "name": "expireTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ban_userId_index": {
+          "name": "ban_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.channel_lock": {
+      "name": "channel_lock",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "channelId": {
+          "name": "channelId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "originalPermissions": {
+          "name": "originalPermissions",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expireTimestamp": {
+          "name": "expireTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.channel_slowmode": {
+      "name": "channel_slowmode",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "channelId": {
+          "name": "channelId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "originalSlowmode": {
+          "name": "originalSlowmode",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expireTimestamp": {
+          "name": "expireTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.kick": {
+      "name": "kick",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "kick_userId_index": {
+          "name": "kick_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lifted_ban": {
+      "name": "lifted_ban",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "liftedTimestamp": {
+          "name": "liftedTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "liftedModeratorId": {
+          "name": "liftedModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "lifted_ban_userId_index": {
+          "name": "lifted_ban_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lifted_mute": {
+      "name": "lifted_mute",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "liftedTimestamp": {
+          "name": "liftedTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "liftedModeratorId": {
+          "name": "liftedModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "lifted_mute_userId_index": {
+          "name": "lifted_mute_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.mute": {
+      "name": "mute",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expireTimestamp": {
+          "name": "expireTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "mute_userId_index": {
+          "name": "mute_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.note": {
+      "name": "note",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "note_userId_index": {
+          "name": "note_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project": {
+      "name": "project",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "channelId": {
+          "name": "channelId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ownerIds": {
+          "name": "ownerIds",
+          "type": "numeric(20, 0)[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "roleId": {
+          "name": "roleId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bannerMessageId": {
+          "name": "bannerMessageId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bannerLastTimestamp": {
+          "name": "bannerLastTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "webhook_secret": {
+          "name": "webhook_secret",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "project_channelId_unique": {
+          "name": "project_channelId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "channelId"
+          ]
+        },
+        "project_roleId_unique": {
+          "name": "project_roleId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "roleId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project_mute": {
+      "name": "project_mute",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "project_mute_userId_index": {
+          "name": "project_mute_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "project_mute_projectId_project_id_fk": {
+          "name": "project_mute_projectId_project_id_fk",
+          "tableFrom": "project_mute",
+          "tableTo": "project",
+          "columnsFrom": [
+            "projectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sticky_thread": {
+      "name": "sticky_thread",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "channelId": {
+          "name": "channelId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "threadId": {
+          "name": "threadId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "sticky_thread_threadId_unique": {
+          "name": "sticky_thread_threadId_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "threadId"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.track": {
+      "name": "track",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "track_userId_index": {
+          "name": "track_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.warn": {
+      "name": "warn",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "userId": {
+          "name": "userId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "moderatorId": {
+          "name": "moderatorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "severity": {
+          "name": "severity",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "editTimestamp": {
+          "name": "editTimestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "editModeratorId": {
+          "name": "editModeratorId",
+          "type": "numeric(20, 0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contextUrl": {
+          "name": "contextUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "warn_userId_index": {
+          "name": "warn_userId_index",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "hash",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "severity_range_check": {
+          "name": "severity_range_check",
+          "value": "\"warn\".\"severity\" between 0 and 3"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
