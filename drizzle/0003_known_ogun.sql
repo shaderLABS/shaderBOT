@@ -1,0 +1,1 @@
+ALTER TABLE "warn" ADD CONSTRAINT "severity_range_check" CHECK ("warn"."severity" between 0 and 3);
