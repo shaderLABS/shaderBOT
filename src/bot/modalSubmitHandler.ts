@@ -8,7 +8,7 @@ export type ModalSubmitCallback = {
     readonly callback: (interaction: ModalSubmitInteraction<'cached'>, state: string | undefined) => void;
 };
 
-export const modals = new Collection<string, ModalSubmitCallback>();
+const modals = new Collection<string, ModalSubmitCallback>();
 
 /***********
  * EXECUTE *
@@ -37,6 +37,6 @@ export async function registerModals(dir: string, directories: string[] = []) {
                 const { modal }: { modal: ModalSubmitCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 modals.set(modal.customID, modal);
             }
-        })
+        }),
     );
 }

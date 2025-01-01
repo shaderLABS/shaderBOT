@@ -25,8 +25,8 @@ export type UserContextMenuCommandCallback = {
     readonly callback: (interaction: UserContextMenuCommandInteraction<'cached'>) => void;
 };
 
-export const messageContextMenuCommands = new Collection<string, MessageContextMenuCommandCallback>();
-export const userContextMenuCommands = new Collection<string, UserContextMenuCommandCallback>();
+const messageContextMenuCommands = new Collection<string, MessageContextMenuCommandCallback>();
+const userContextMenuCommands = new Collection<string, UserContextMenuCommandCallback>();
 
 /***********
  * EXECUTE *
@@ -90,7 +90,7 @@ export async function registerMessageContextMenuCommands(dir: string, directorie
                 const { command }: { command: MessageContextMenuCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 messageContextMenuCommands.set(command.commandName, command);
             }
-        })
+        }),
     );
 }
 
@@ -106,6 +106,6 @@ export async function registerUserContextMenuCommands(dir: string, directories: 
                 const { command }: { command: UserContextMenuCommandCallback } = await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href);
                 userContextMenuCommands.set(command.commandName, command);
             }
-        })
+        }),
     );
 }
