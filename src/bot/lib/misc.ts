@@ -1,9 +1,6 @@
 import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, type UserResolvable } from 'discord.js';
 import { client, settings } from '../bot.ts';
 
-// https://www.unicode.org/reports/tr18/#Line_Boundaries
-export const unicodeLineBoundaries = /\r\n|[\n\v\f\r\x85\u2028\u2029]/;
-
 // Create an object type containing the properties K from object type T.
 // Make the property types T[P] of that temporary object type NonNullable and all its properties P Required.
 // Return the intersection between the object type T and the temporary object type.
@@ -102,17 +99,6 @@ export function escapeXml(unsafe: string) {
 
 export function getMaximumUploadBytes(guild: Guild | null | undefined) {
     return [8388608, 52428800, 104857600][(guild?.premiumTier || 1) - 1] - 324;
-}
-
-export function makeBoldUnicode(str: string) {
-    return [...str]
-        .map((char) => {
-            const n = char.charCodeAt(0);
-            if (n >= 65 && n < 91) return String.fromCodePoint(n + 120211);
-            if (n >= 97 && n < 123) return String.fromCodePoint(n + 120205);
-            return char;
-        })
-        .join('');
 }
 
 export function getNumberWithOrdinalSuffix(n: number) {

@@ -11,7 +11,7 @@ type EventGeneric<K extends keyof ClientEvents> = {
 
 export type Event = { [K in keyof ClientEvents]: EventGeneric<K> }[keyof ClientEvents];
 
-export const events = new Collection<string, Event>();
+const events = new Collection<string, Event>();
 
 /************
  * REGISTER *
@@ -36,6 +36,6 @@ export async function registerEvents(dir: string) {
                     client.on(event.name, event.callback as any);
                 }
             }
-        })
+        }),
     );
 }

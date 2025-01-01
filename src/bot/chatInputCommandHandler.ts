@@ -13,7 +13,7 @@ export type ChatInputCommandCallback = {
 };
 
 type ChatInputCommandCollection = Collection<string, ChatInputCommandCollection | ChatInputCommandCallback>;
-export const chatInputCommands: ChatInputCommandCollection = new Collection();
+const chatInputCommands: ChatInputCommandCollection = new Collection();
 
 export type GuildChatInputCommandInteraction = ChatInputCommandInteraction<'cached'> & {
     channel: TextChannel | AnyThreadChannel | VoiceChannel;
@@ -30,7 +30,7 @@ function isGuildChatInputCommandInteraction(interaction: ChatInputCommandInterac
 export function hasPermissionsForCommand(
     member: GuildMember,
     channel: TextChannel | AnyThreadChannel | VoiceChannel | string,
-    command: ChatInputCommandCallback | MessageContextMenuCommandCallback | UserContextMenuCommandCallback
+    command: ChatInputCommandCallback | MessageContextMenuCommandCallback | UserContextMenuCommandCallback,
 ) {
     if (command.requiredPermissions) {
         if (command.permissionOverwrites === true) {
@@ -102,6 +102,6 @@ export async function registerChatInputCommands(dir: string, directories: string
 
                 commandName && collection.set(commandName, command);
             }
-        })
+        }),
     );
 }
