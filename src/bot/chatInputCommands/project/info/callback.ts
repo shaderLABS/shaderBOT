@@ -43,7 +43,7 @@ export const command: ChatInputCommandCallback = {
 
             interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const { guild } = interaction;
         if (guild.premiumTier === GuildPremiumTier.None || guild.premiumTier === GuildPremiumTier.Tier1) {
-            replyError(interaction, 'The banner feature requires a boost level of 2.');
+            replyError(interaction, { description: 'The banner feature requires a boost level of 2.' });
             return;
         }
 
@@ -23,7 +23,7 @@ export const command: ChatInputCommandCallback = {
 
         const banner = guild.bannerURL({ size: 1024 });
         if (!currentBannerProject || !banner) {
-            replyError(interaction, 'There is no banner at the moment.');
+            replyError(interaction, { description: 'There is no banner at the moment.' });
             return;
         }
 

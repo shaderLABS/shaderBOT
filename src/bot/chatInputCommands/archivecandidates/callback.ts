@@ -33,14 +33,14 @@ export const command: ChatInputCommandCallback = {
 
         const eligibleProjectChannels = (await Promise.all(eligibleProjectChannelPromises)).filter((channel): channel is NonNullable<typeof channel> => channel !== null);
 
-        replyInfo(
-            interaction,
-            eligibleProjectChannels.length === 0
-                ? 'No project channels are currently eligible for archiving.'
-                : eligibleProjectChannels
-                      .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
-                      .reduce((list, channel) => list + channel.toString() + '\n', ''),
-            'Archive Candidates',
-        );
+        replyInfo(interaction, {
+            description:
+                eligibleProjectChannels.length === 0
+                    ? 'No project channels are currently eligible for archiving.'
+                    : eligibleProjectChannels
+                          .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'))
+                          .reduce((list, channel) => list + channel.toString() + '\n', ''),
+            title: 'Archive Candidates',
+        });
     },
 };

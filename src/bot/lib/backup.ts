@@ -31,16 +31,19 @@ export class Backup {
 
         const creationTime = new Date().toUTCString();
 
-        const messageArray = [...messages.values()];
+        const messageArray = messages.values().toArray();
         if (backupMessages) messageArray.reverse();
 
-        const content = messageArray.reduce((content, message) => {
-            let messageContent = `${message.author.username} (${message.author.id}) - ${message.content.replaceAll(/\r?\n|\r/g, ' ')}`;
-            for (const embed of message.embeds) messageContent += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
-            for (const attachment of message.attachments.values()) messageContent += '\n\t' + attachment.url;
+        const content = messageArray.reduce(
+            (content, message) => {
+                let messageContent = `${message.author.username} (${message.author.id}) - ${message.content.replaceAll(/\r?\n|\r/g, ' ')}`;
+                for (const embed of message.embeds) messageContent += (parseProperty(embed.title) + parseProperty(embed.author?.name) + parseProperty(embed.description)).trim();
+                for (const attachment of message.attachments.values()) messageContent += '\n\t' + attachment.url;
 
-            return content + `${message.createdAt.toUTCString()} - ${messageContent}\n`;
-        }, `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${introduction ? '\n' + introduction : ''}\n\n`);
+                return content + `${message.createdAt.toUTCString()} - ${messageContent}\n`;
+            },
+            `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${introduction ? '\n' + introduction : ''}\n\n`,
+        );
 
         const backup = new Backup({ fileName: `#${channel.name} - ${creationTime} - ${messages.size}.txt`, content }, false);
         await backup.write();

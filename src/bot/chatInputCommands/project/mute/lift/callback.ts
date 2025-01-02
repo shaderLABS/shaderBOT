@@ -13,9 +13,9 @@ export const command: ChatInputCommandCallback = {
 
             const projectMute = await ProjectMute.getByUserIDAndProjectID(targetUser.id, project.id);
             const logString = await projectMute.lift(interaction.user.id);
-            replySuccess(interaction, logString, 'Project Lift Mute');
+            replySuccess(interaction, { description: logString, title: 'Project Lift Mute' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

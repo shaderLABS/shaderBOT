@@ -67,7 +67,10 @@ export class Kick extends Punishment {
         });
 
         let sentDM = true;
-        await sendInfo(user, kick.toString(false), `You have been kicked from ${guild.name}.`).catch(() => {
+        await sendInfo(user, {
+            description: kick.toString(false),
+            title: `You have been kicked from ${guild.name}.`,
+        }).catch(() => {
             sentDM = false;
         });
 

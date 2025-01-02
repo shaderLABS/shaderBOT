@@ -23,6 +23,6 @@ export async function registerPastas(dir: string) {
 
             const pasta = new Pasta(await Bun.file(path.join(dirPath, dirEntry.name)).json());
             pastaStore.set(pasta.alias, pasta);
-        })
+        }),
     );
 }

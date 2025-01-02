@@ -7,16 +7,19 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const projectChannel = interaction.options.getChannel('project', false, Project.CHANNEL_TYPES) || interaction.channel;
         if (projectChannel.type !== ChannelType.GuildText) {
-            replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+            replyError(interaction, {
+                description: 'This command is only usable in text channels.',
+                title: 'Invalid Channel',
+            });
             return;
         }
 
         try {
             const project = await Project.getByChannelID(projectChannel.id);
             const logString = await project.removeSubscriber(interaction.member);
-            replySuccess(interaction, logString, undefined, true);
+            replySuccess(interaction, { description: logString, title: 'Unsubscribe' }, true);
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

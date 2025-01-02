@@ -20,10 +20,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} created the automatic response \`${automaticResponse.alias}\`.`;
 
-            replySuccess(interaction, logString, 'Create Automatic Response');
+            replySuccess(interaction, { description: logString, title: 'Create Automatic Response' });
             log(logString, 'Create Automatic Response');
         } catch {
-            replyError(interaction, 'Failed to save the automatic response.');
+            replyError(interaction, { description: 'Failed to save the automatic response.' });
         }
     },
 };

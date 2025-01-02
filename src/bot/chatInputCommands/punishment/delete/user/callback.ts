@@ -19,9 +19,9 @@ export const command: ChatInputCommandCallback = {
             if (!(await hasPermissionForTarget(interaction, punishment.userId))) return;
             const logString = await punishment.delete(interaction.user.id);
 
-            replySuccess(interaction, logString, 'Delete ' + punishment.TYPE_STRING);
+            replySuccess(interaction, { description: logString, title: 'Delete ' + punishment.TYPE_STRING });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

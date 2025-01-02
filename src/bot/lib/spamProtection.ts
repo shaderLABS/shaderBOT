@@ -20,7 +20,7 @@ const interactionUserLocks = new Set<string>();
 
 export async function handleSpamInteraction(interaction: ButtonInteraction<'cached'>) {
     if (!interaction.memberPermissions.has(PermissionFlagsBits.KickMembers)) {
-        replyError(interaction, undefined, 'Insufficient Permissions');
+        replyError(interaction, { title: 'Insufficient Permissions' });
         return;
     }
 
@@ -34,7 +34,7 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
 
     const targetUser = await client.users.fetch(id).catch(() => undefined);
     if (!targetUser) {
-        replyError(interaction, "Failed to resolve the spammer's ID. Please deal with them manually.", undefined, false);
+        replyError(interaction, { description: "Failed to resolve the spammer's ID. Please deal with them manually." }, false);
         return;
     }
 
@@ -43,10 +43,16 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
     if (interaction.customId.startsWith('kickSpam')) {
         await kickSpammer(targetUser, interaction.user.id, interaction.message.url);
         mute?.lift(interaction.user.id).catch(() => undefined);
-        replyInfo(interaction, `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`, 'Kick Spammer');
+        replyInfo(interaction, {
+            description: `${parseUser(interaction.user)} kicked ${parseUser(targetUser)}.`,
+            title: 'Kick Spammer',
+        });
     } else {
         mute?.lift(interaction.user.id).catch(() => undefined);
-        replyInfo(interaction, `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`, 'Forgive Spammer');
+        replyInfo(interaction, {
+            description: `${parseUser(interaction.user)} forgave ${parseUser(targetUser)}.`,
+            title: 'Forgive Spammer',
+        });
     }
 }
 
@@ -78,7 +84,7 @@ export async function checkSpam(message: GuildMessage) {
                 currentMessage.authorID === previousMessage.authorID &&
                 similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.data.spamProtection.similarityThreshold &&
                 currentMessage.channelID !== previousMessage.channelID &&
-                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000
+                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000,
         );
 
         isSpamSimilarMessage = potentialSpam.length >= settings.data.spamProtection.messageThreshold - 1;
@@ -94,7 +100,7 @@ export async function checkSpam(message: GuildMessage) {
 
         if (!(await Mute.has(message.author.id))) {
             Mute.create(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch((error) =>
-                log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute')
+                log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute'),
             );
 
             const kickButton = new ButtonBuilder({
@@ -147,13 +153,11 @@ export async function checkSpam(message: GuildMessage) {
 export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {
     const guild = getGuild();
 
-    await sendInfo(
-        user,
-        `Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin ${guild.name} using [this invite link](${settings.data.spamProtection.inviteURL} "Invite for ${guild.name}").`,
-        'Your account has been compromised.',
-        undefined,
-        "DON'T FALL FOR PHISHING! ALWAYS CHECK THE URL BEFORE SIGNING IN. NEVER SCAN ANY QR CODES."
-    ).catch(() => undefined);
+    await sendInfo(user, {
+        description: `Your account has been used for spam. Please [reset your password](https://support.discord.com/hc/en-us/articles/218410947-I-forgot-my-Password-Where-can-I-set-a-new-one- "Guide for resetting your password"). After that, feel free to rejoin ${guild.name} using [this invite link](${settings.data.spamProtection.inviteURL} "Invite for ${guild.name}").`,
+        title: 'Your account has been compromised.',
+        footer: "DON'T FALL FOR PHISHING! ALWAYS CHECK THE URL BEFORE SIGNING IN. NEVER SCAN ANY QR CODES.",
+    }).catch(() => undefined);
 
     try {
         const logString = await Kick.create(user, 'Phished account used for spam.', moderatorID, contextURL, 86400);

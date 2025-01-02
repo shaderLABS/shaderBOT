@@ -7,7 +7,7 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.ManageChannels,
     callback: async (interaction) => {
         if (interaction.channel.type !== ChannelType.GuildText) {
-            replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+            replyError(interaction, { description: 'This command is only usable in text channels.', title: 'Invalid Channel' });
             return;
         }
 
@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
             const initializationEmbed = await Project.create(interaction.channel, interaction.user.id);
             interaction.reply({ embeds: [initializationEmbed] });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

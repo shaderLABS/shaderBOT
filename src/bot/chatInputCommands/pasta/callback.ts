@@ -8,14 +8,14 @@ export const command: ChatInputCommandCallback = {
 
         const pasta = pastaStore.get(alias);
         if (!pasta) {
-            replyError(interaction, 'Pasta not found.');
+            replyError(interaction, { description: 'Pasta not found.' });
             return;
         }
 
         try {
             await pasta.reply(interaction);
         } catch (error) {
-            replyError(interaction, `The pasta \`${pasta.alias}\` is invalid: \`${error}\``);
+            replyError(interaction, { description: `The pasta \`${pasta.alias}\` is invalid: \`${error}\`` });
         }
     },
 };

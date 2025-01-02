@@ -21,7 +21,7 @@ export const command: ChatInputCommandCallback = {
         const mute = await Mute.getByUserID(targetUser.id).catch(() => undefined);
         mute?.lift(interaction.user.id).catch(() => undefined);
 
-        replySuccess(interaction, logString, 'Kick Spammer');
+        replySuccess(interaction, { description: logString, title: 'Kick Spammer' });
         log(logString, 'Kick Spammer');
     },
 };

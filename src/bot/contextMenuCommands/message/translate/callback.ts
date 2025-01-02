@@ -13,7 +13,9 @@ type Translation = {
     fetchedTimestamp: number;
 };
 
-const cache = new LimitedCollection<string, Translation>({ maxSize: settings.data.messageTranslation.cacheLength });
+const cache = new LimitedCollection<string, Translation>({
+    maxSize: settings.data.messageTranslation.cacheLength,
+});
 
 export const command: MessageContextMenuCommandCallback = {
     commandName: 'Translate',
@@ -22,7 +24,7 @@ export const command: MessageContextMenuCommandCallback = {
 
         try {
             if (targetMessage.content.replaceAll(/https?:\/\/[\n\S]+/g, '').trim().length < 5) {
-                replyInfo(interaction, undefined, 'The source text is empty or too short.', undefined, undefined, true);
+                replyInfo(interaction, { title: 'The source text is empty or too short.' }, true);
                 return;
             }
 
@@ -61,7 +63,13 @@ export const command: MessageContextMenuCommandCallback = {
                         'Translate Message Rate Limit',
                     );
 
-                    replyInfo(interaction, undefined, 'There have been too many translation requests. Please try again later.', undefined, undefined, true);
+                    replyInfo(
+                        interaction,
+                        {
+                            title: 'There have been too many translation requests. Please try again later.',
+                        },
+                        true,
+                    );
                     return;
                 }
 
@@ -101,9 +109,13 @@ export const command: MessageContextMenuCommandCallback = {
             const logChannel = client.channels.cache.get(settings.data.logging.messageChannelID);
 
             if (translation.language === 'en') {
-                if (logChannel?.type === ChannelType.GuildText) logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\nThe source text is already in English.')] });
+                if (logChannel?.type === ChannelType.GuildText) {
+                    logChannel.send({
+                        embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\nThe source text is already in English.')],
+                    });
+                }
 
-                replyInfo(interaction, undefined, 'The source text is already in English.', undefined, undefined, true);
+                replyInfo(interaction, { title: 'The source text is already in English.' }, true);
                 return;
             }
 
@@ -119,12 +131,18 @@ export const command: MessageContextMenuCommandCallback = {
                 });
 
                 if (logChannel?.type === ChannelType.GuildText) {
-                    logChannel.send({ embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\n' + header + '\n' + blockQuote(translation.text))] });
+                    logChannel.send({
+                        embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\n' + header + '\n' + blockQuote(translation.text))],
+                    });
                 }
             } else {
                 interaction.reply({
                     content: header,
-                    files: [new AttachmentBuilder(Buffer.from(translation.text), { name: 'translation.txt' })],
+                    files: [
+                        new AttachmentBuilder(Buffer.from(translation.text), {
+                            name: 'translation.txt',
+                        }),
+                    ],
                     allowedMentions: { parse: [] },
                     flags: MessageFlags.Ephemeral,
                 });
@@ -132,13 +150,19 @@ export const command: MessageContextMenuCommandCallback = {
                 if (logChannel?.type === ChannelType.GuildText) {
                     logChannel.send({
                         embeds: [logEmbed.setDescription(logEmbed.data.description + '\n\n' + header)],
-                        files: [new AttachmentBuilder(Buffer.from(translation.text), { name: 'translation.txt' })],
+                        files: [
+                            new AttachmentBuilder(Buffer.from(translation.text), {
+                                name: 'translation.txt',
+                            }),
+                        ],
                     });
                 }
             }
         } catch (error) {
             console.error(error);
-            replyError(interaction, 'An error occured while performing your translation request.');
+            replyError(interaction, {
+                description: 'An error occured while performing your translation request.',
+            });
         }
     },
 };

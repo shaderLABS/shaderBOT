@@ -36,7 +36,7 @@ export const command: ChatInputCommandCallback = {
                 flags: MessageFlags.Ephemeral,
             });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

@@ -22,7 +22,7 @@ export const command: ChatInputCommandCallback = {
         });
 
         if (files.length === 0) {
-            replyInfo(interaction, 'There are no backups.');
+            replyInfo(interaction, { description: 'There are no backups.' });
             return;
         }
 
@@ -76,7 +76,7 @@ export const command: ChatInputCommandCallback = {
             filter: (messageInteraction) => {
                 if (messageInteraction.user.id === interaction.user.id) return true;
 
-                replyError(messageInteraction, undefined, 'Insufficient Permissions');
+                replyError(messageInteraction, { title: 'Insufficient Permissions' });
                 return false;
             },
             idle: 300_000, // 5min = 300,000ms
@@ -103,7 +103,7 @@ export const command: ChatInputCommandCallback = {
                     const backup = await Backup.read(backupEntry.fileName);
                     interaction.channel.send({ files: [new AttachmentBuilder(Buffer.from(backup.content), { name: backup.fileName })] });
                 } catch (error) {
-                    sendError(interaction.channel, String(error));
+                    sendError(interaction.channel, { description: String(error) });
                 }
 
                 messageInteraction.update({

@@ -12,18 +12,18 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) {
-            replyError(interaction, 'The specified UUID is invalid.');
+            replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }
 
         try {
             const punishment = await Promise.any([Ban.getByUUID(id), Mute.getByUUID(id), Track.getByUUID(id), Kick.getByUUID(id), LiftedBan.getByUUID(id), LiftedMute.getByUUID(id)]).catch(() =>
-                Promise.reject('The specified UUID does not exist.')
+                Promise.reject('The specified UUID does not exist.'),
             );
 
-            replyInfo(interaction, punishment.toString(true), punishment.TYPE_STRING);
+            replyInfo(interaction, { description: punishment.toString(true), title: punishment.TYPE_STRING });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

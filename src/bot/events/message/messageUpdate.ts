@@ -29,7 +29,7 @@ export const event: Event = {
         let attachments: Attachment[] = [];
 
         const metadata = `**Author:** ${newMessage.author ? parseUser(newMessage.author) : 'Unknown'}\n**Channel:** <#${newMessage.channelId}>\n**Sent At:** ${formatLongTimeDate(
-            newMessage.createdAt
+            newMessage.createdAt,
         )}\n**Edited At:** ${formatLongTimeDate(new Date())}`;
 
         let content = '';

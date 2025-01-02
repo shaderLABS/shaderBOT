@@ -9,9 +9,9 @@ export const command: ChatInputCommandCallback = {
             project.assertOwner(interaction.user.id).assertNotArchived();
 
             const logString = await project.removeBannerMessageID(interaction.user.id);
-            replySuccess(interaction, logString, 'Remove Project Banner');
+            replySuccess(interaction, { description: logString, title: 'Remove Project Banner' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

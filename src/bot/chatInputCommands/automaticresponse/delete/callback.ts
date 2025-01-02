@@ -14,7 +14,7 @@ export const command: ChatInputCommandCallback = {
 
         try {
             if (!automaticResponseStore.delete(alias)) {
-                replyError(interaction, 'The specified automatic response does not exist.');
+                replyError(interaction, { description: 'The specified automatic response does not exist.' });
                 return;
             }
 
@@ -22,10 +22,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} deleted the automatic response \`${alias}\`.`;
 
-            replySuccess(interaction, logString, 'Delete Automatic Response');
+            replySuccess(interaction, { description: logString, title: 'Delete Automatic Response' });
             log(logString, 'Delete Automatic Response');
         } catch {
-            replyError(interaction, `Failed to delete automatic response \`${alias}\` from the file system.`);
+            replyError(interaction, { description: `Failed to delete automatic response \`${alias}\` from the file system.` });
         }
     },
 };

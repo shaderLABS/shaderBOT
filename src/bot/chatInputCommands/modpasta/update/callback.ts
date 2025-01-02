@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
         try {
             const oldPasta = pastaStore.get(alias);
             if (!oldPasta) {
-                replyError(interaction, 'The specified pasta does not exist.');
+                replyError(interaction, { description: 'The specified pasta does not exist.' });
                 return;
             }
 
@@ -39,10 +39,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} updated the pasta \`${newPasta.alias}\`.`;
 
-            replySuccess(interaction, logString, 'Update Pasta');
+            replySuccess(interaction, { description: logString, title: 'Update Pasta' });
             log(logString, 'Update Pasta');
         } catch (error) {
-            replyError(interaction, 'Invalid path or JSON value.');
+            replyError(interaction, { description: 'Invalid path or JSON value.' });
         }
     },
 };

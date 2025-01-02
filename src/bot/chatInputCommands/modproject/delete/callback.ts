@@ -9,9 +9,9 @@ export const command: ChatInputCommandCallback = {
         try {
             const project = await Project.getByChannelID(interaction.channelId);
             const logString = await project.delete(interaction.user.id);
-            replySuccess(interaction, logString, 'Delete Project');
+            replySuccess(interaction, { description: logString, title: 'Delete Project' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

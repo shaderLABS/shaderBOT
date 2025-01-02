@@ -10,7 +10,7 @@ export const command: ChatInputCommandCallback = {
 
         const pasta = pastaStore.get(alias);
         if (!pasta) {
-            replyError(interaction, 'The specified pasta does not exist.');
+            replyError(interaction, { description: 'The specified pasta does not exist.' });
             return;
         }
 
@@ -18,7 +18,7 @@ export const command: ChatInputCommandCallback = {
             const attachment = new AttachmentBuilder(Buffer.from(pasta.toJSON()), { name: pasta.getFileName() });
             interaction.reply({ files: [attachment] });
         } catch {
-            replyError(interaction, 'Failed to send pasta.');
+            replyError(interaction, { description: 'Failed to send pasta.' });
         }
     },
 };

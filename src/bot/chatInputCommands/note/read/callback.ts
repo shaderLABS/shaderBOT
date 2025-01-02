@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) {
-            replyError(interaction, 'The specified UUID is invalid.');
+            replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }
 
@@ -18,7 +18,7 @@ export const command: ChatInputCommandCallback = {
 
             interaction.reply({ embeds: [Note.toEmbed('Note', note.toString())] });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

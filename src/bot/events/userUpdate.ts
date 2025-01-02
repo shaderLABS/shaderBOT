@@ -21,7 +21,7 @@ export const event: Event = {
         } else if (changedGlobalName) {
             log(
                 `${parseUser(newUser)} has updated their global name.\n\n**Before**\n${oldUser.globalName ?? 'None'}\n\n**After**\n${newUser.globalName ?? 'None'}\n\n${track.toString()}`,
-                'Track Global Name'
+                'Track Global Name',
             );
         } else if (changedAvatar) {
             log(`${parseUser(newUser)} has updated their avatar.\n\n**Before**\nFirst attachment.\n\n**After**\nSecond attachment.\n\n${track.toString()}`, 'Track Avatar', [

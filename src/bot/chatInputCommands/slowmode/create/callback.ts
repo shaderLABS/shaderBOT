@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false, ChannelSlowmode.CHANNEL_TYPES) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && !channel.isThread()) {
-            replyError(interaction, 'This command is only usable in text or thread channels.', 'Invalid Channel');
+            replyError(interaction, { description: 'This command is only usable in text or thread channels.', title: 'Invalid Channel' });
             return;
         }
 
@@ -20,15 +20,15 @@ export const command: ChatInputCommandCallback = {
             var length = stringToSeconds(splitString(lengthString));
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
             return;
         }
 
         try {
             const logString = await ChannelSlowmode.create(interaction.user.id, channel, duration, length);
-            replySuccess(interaction, logString, 'Create Slowmode');
+            replySuccess(interaction, { description: logString, title: 'Create Slowmode' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

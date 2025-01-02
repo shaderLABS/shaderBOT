@@ -11,9 +11,9 @@ export const command: ChatInputCommandCallback = {
         try {
             const project = await Project.getByChannelID(interaction.channelId);
             const logString = await project.removeOwner(targetUser, interaction.user.id);
-            replySuccess(interaction, logString, 'Remove Project Owner');
+            replySuccess(interaction, { description: logString, title: 'Remove Project Owner' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

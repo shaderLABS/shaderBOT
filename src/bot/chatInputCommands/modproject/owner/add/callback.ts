@@ -8,16 +8,16 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const targetMember = interaction.options.getMember('user');
         if (!(targetMember instanceof GuildMember)) {
-            replyError(interaction, 'The specified user is not a member of this guild.');
+            replyError(interaction, { description: 'The specified user is not a member of this guild.' });
             return;
         }
 
         try {
             const project = await Project.getByChannelID(interaction.channelId);
             const logString = await project.addOwner(targetMember, interaction.user.id);
-            replySuccess(interaction, logString, 'Add Project Owner');
+            replySuccess(interaction, { description: logString, title: 'Add Project Owner' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

@@ -21,9 +21,9 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const logString = await Warning.create(targetUser, severity, reason, member.id, contextURL);
-            replySuccess(interaction, logString, 'Create Warning');
+            replySuccess(interaction, { description: logString, title: 'Create Warning' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

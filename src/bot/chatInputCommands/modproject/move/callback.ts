@@ -11,9 +11,9 @@ export const command: ChatInputCommandCallback = {
         try {
             const project = await Project.getByChannelID(interaction.channel.id);
             const logString = await project.move(categoryChannel, interaction.user.id);
-            replySuccess(interaction, logString, 'Move Project');
+            replySuccess(interaction, { description: logString, title: 'Move Project' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

@@ -18,7 +18,10 @@ export class Ban extends ExpirablePunishment {
     }
 
     static async has(userId: string): Promise<boolean> {
-        const result = await db.query.ban.findFirst({ columns: {}, where: sql.eq(schema.ban.userId, userId) });
+        const result = await db.query.ban.findFirst({
+            columns: {},
+            where: sql.eq(schema.ban.userId, userId),
+        });
         return result !== undefined;
     }
 
@@ -98,7 +101,10 @@ export class Ban extends ExpirablePunishment {
         });
 
         let sentDM = true;
-        await sendInfo(user, ban.toString(false), `You have been banned from ${guild.name}.`).catch(() => {
+        await sendInfo(user, {
+            description: ban.toString(false),
+            title: `You have been banned from ${guild.name}.`,
+        }).catch(() => {
             sentDM = false;
         });
 
@@ -253,7 +259,9 @@ export class LiftedBan extends LiftedPunishment {
     // private static readonly QUERY_GET_BY_UUID = ...;
 
     static async getByUUID(uuid: string) {
-        const result = await db.query.liftedBan.findFirst({ where: sql.eq(schema.liftedBan.id, uuid) });
+        const result = await db.query.liftedBan.findFirst({
+            where: sql.eq(schema.liftedBan.id, uuid),
+        });
         if (!result) return Promise.reject('A lifted ban with the specified UUID does not exist.');
         return new LiftedBan(result);
     }

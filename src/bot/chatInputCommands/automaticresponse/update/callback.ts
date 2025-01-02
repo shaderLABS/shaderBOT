@@ -17,7 +17,7 @@ export const command: ChatInputCommandCallback = {
         try {
             let automaticResponseData = automaticResponseStore.get(alias)?.toData();
             if (!automaticResponseData) {
-                replyError(interaction, 'The specified automatic response does not exist.');
+                replyError(interaction, { description: 'The specified automatic response does not exist.' });
                 return;
             }
 
@@ -41,10 +41,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} updated the automatic response \`${alias}\`.`;
 
-            replySuccess(interaction, logString, 'Update Automatic Response');
+            replySuccess(interaction, { description: logString, title: 'Update Automatic Response' });
             log(logString, 'Update Automatic Response');
         } catch (error) {
-            replyError(interaction, 'Invalid path or JSON value.');
+            replyError(interaction, { description: 'Invalid path or JSON value.' });
         }
     },
 };

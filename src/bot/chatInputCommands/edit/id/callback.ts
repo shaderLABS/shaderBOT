@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: (interaction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) {
-            replyError(interaction, 'The specified UUID is invalid.');
+            replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }
 

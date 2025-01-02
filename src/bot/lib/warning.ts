@@ -40,13 +40,19 @@ export class Warning {
     }
 
     static async getLatestByUserID(userId: string) {
-        const result = await db.query.warn.findFirst({ where: sql.eq(schema.warn.userId, userId), orderBy: sql.desc(schema.warn.timestamp) });
+        const result = await db.query.warn.findFirst({
+            where: sql.eq(schema.warn.userId, userId),
+            orderBy: sql.desc(schema.warn.timestamp),
+        });
         if (!result) return Promise.reject('The specified user does not have any warnings.');
         return new Warning(result);
     }
 
     static async getAllByUserID(userId: string) {
-        const result = await db.query.warn.findMany({ where: sql.eq(schema.warn.userId, userId), orderBy: sql.desc(schema.warn.timestamp) });
+        const result = await db.query.warn.findMany({
+            where: sql.eq(schema.warn.userId, userId),
+            orderBy: sql.desc(schema.warn.timestamp),
+        });
         return result.map((entry) => new Warning(entry));
     }
 
@@ -81,7 +87,10 @@ export class Warning {
         });
 
         let sentDM = true;
-        await sendInfo(user, warning.toString(false), `You have been warned in ${guild.name}.`).catch(() => {
+        await sendInfo(user, {
+            description: warning.toString(false),
+            title: `You have been warned in ${guild.name}.`,
+        }).catch(() => {
             sentDM = false;
         });
 

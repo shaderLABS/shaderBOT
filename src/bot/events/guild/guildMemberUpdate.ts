@@ -15,7 +15,7 @@ export const event: Event = {
 
         log(
             `The nickname of ${parseUser(newMember.user)} has been updated.\n\n**Before**\n${oldMember.nickname ?? 'None'}\n\n**After**\n${newMember.nickname ?? 'None'}\n\n${track.toString()}`,
-            'Track Nickname'
+            'Track Nickname',
         );
     },
 };

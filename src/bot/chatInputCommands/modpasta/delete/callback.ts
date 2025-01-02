@@ -13,7 +13,7 @@ export const command: ChatInputCommandCallback = {
         try {
             const pasta = pastaStore.get(alias);
             if (!pasta) {
-                replyError(interaction, 'The specified pasta does not exist.');
+                replyError(interaction, { description: 'The specified pasta does not exist.' });
                 return;
             }
 
@@ -22,10 +22,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} deleted the pasta \`${alias}\`.`;
 
-            replySuccess(interaction, logString, 'Delete Pasta');
+            replySuccess(interaction, { description: logString, title: 'Delete Pasta' });
             log(logString, 'Delete Pasta');
         } catch {
-            replyError(interaction, `Failed to delete pasta \`${alias}\` from the file system.`);
+            replyError(interaction, { description: `Failed to delete pasta \`${alias}\` from the file system.` });
         }
     },
 };
