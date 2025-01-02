@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.ts';
 import { Project } from '../../../lib/project.ts';
@@ -33,7 +33,7 @@ export const command: ChatInputCommandCallback = {
                         color: EmbedColor.Green,
                     }),
                 ],
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         } catch (error) {
             replyError(interaction, String(error));

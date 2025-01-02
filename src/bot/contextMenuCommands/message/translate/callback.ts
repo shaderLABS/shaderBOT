@@ -44,7 +44,7 @@ export const command: MessageContextMenuCommandCallback = {
             const cachedTranslation = cache.get(translationID);
             if (cachedTranslation) {
                 logEmbed.setDescription(
-                    `${parseUser(interaction.user)} requested a translation for [this message](${targetMessage.url} "Jump to Message") (${targetMessage.id}). The translation was cached.`
+                    `${parseUser(interaction.user)} requested a translation for [this message](${targetMessage.url} "Jump to Message") (${targetMessage.id}). The translation was cached.`,
                 );
 
                 translation = cachedTranslation;
@@ -58,7 +58,7 @@ export const command: MessageContextMenuCommandCallback = {
                         `${parseUser(interaction.user)} requested a translation for [this message](${targetMessage.url} "Jump to Message") (${
                             targetMessage.id
                         }), but has hit the fetch rate limit. Look at the message log for more information.`,
-                        'Translate Message Rate Limit'
+                        'Translate Message Rate Limit',
                     );
 
                     replyInfo(interaction, undefined, 'There have been too many translation requests. Please try again later.', undefined, undefined, true);
@@ -66,7 +66,7 @@ export const command: MessageContextMenuCommandCallback = {
                 }
 
                 logEmbed.setDescription(
-                    `${parseUser(interaction.user)} requested a translation for [this message](${targetMessage.url} "Jump to Message") (${targetMessage.id}). The translation was fetched.`
+                    `${parseUser(interaction.user)} requested a translation for [this message](${targetMessage.url} "Jump to Message") (${targetMessage.id}). The translation was fetched.`,
                 );
 
                 const response = await fetch(
@@ -80,7 +80,7 @@ export const command: MessageContextMenuCommandCallback = {
                             'Content-Type': 'application/x-www-form-urlencoded',
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0',
                         },
-                    }
+                    },
                 );
 
                 if (response.status !== 200) throw 'The API request failed with code ' + response.status + '.';
@@ -114,9 +114,8 @@ export const command: MessageContextMenuCommandCallback = {
             if (header.length + translation.text.length < 2000) {
                 interaction.reply({
                     content: header + '\n' + blockQuote(translation.text),
-                    flags: MessageFlags.SuppressEmbeds,
+                    flags: MessageFlags.Ephemeral | MessageFlags.SuppressEmbeds,
                     allowedMentions: { parse: [] },
-                    ephemeral: true,
                 });
 
                 if (logChannel?.type === ChannelType.GuildText) {
@@ -127,7 +126,7 @@ export const command: MessageContextMenuCommandCallback = {
                     content: header,
                     files: [new AttachmentBuilder(Buffer.from(translation.text), { name: 'translation.txt' })],
                     allowedMentions: { parse: [] },
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 });
 
                 if (logChannel?.type === ChannelType.GuildText) {

@@ -1,4 +1,4 @@
-import { EmbedBuilder, GuildPremiumTier } from 'discord.js';
+import { EmbedBuilder, GuildPremiumTier, MessageFlags } from 'discord.js';
 import * as sql from 'drizzle-orm/sql';
 import { db } from '../../../db/postgres.ts';
 import * as schema from '../../../db/schema.ts';
@@ -41,7 +41,7 @@ export const command: ChatInputCommandCallback = {
                     },
                 }),
             ],
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     },
 };

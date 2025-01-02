@@ -14,6 +14,7 @@ import {
     GuildMember,
     InteractionType,
     MessageContextMenuCommandInteraction,
+    MessageFlags,
     ModalSubmitInteraction,
     PermissionFlagsBits,
     type SendableChannels,
@@ -77,13 +78,15 @@ export function replySuccess(
     title?: string,
     ephemeral: boolean = false
 ) {
+    const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+
     const embed = new EmbedBuilder({
         author: { name: title || 'Success', iconURL: EmbedIcon.Success },
         description,
         color: EmbedColor.Green,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () => {
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], flags })).catch(async () => {
         if (!interaction.channel?.isSendable()) return;
 
         return interaction.channel.send({
@@ -113,13 +116,15 @@ export function replyError(
     title?: string,
     ephemeral: boolean = true
 ) {
+    const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+
     const embed = new EmbedBuilder({
         author: { name: title || 'Error', iconURL: EmbedIcon.Error },
         description,
         color: EmbedColor.Red,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], ephemeral })).catch(async () => {
+    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], flags })).catch(async () => {
         if (!interaction.channel?.isSendable()) return;
 
         return interaction.channel.send({
@@ -152,6 +157,8 @@ export function replyInfo(
     footer?: string,
     ephemeral: boolean = false
 ) {
+    const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+
     const embed = new EmbedBuilder({
         author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
         description,
@@ -159,7 +166,7 @@ export function replyInfo(
         footer: footer ? { text: footer } : undefined,
     });
 
-    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], ephemeral })).catch(async () => {
+    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], flags })).catch(async () => {
         if (!interaction.channel?.isSendable()) return;
 
         interaction.channel?.send({
@@ -261,6 +268,8 @@ export async function replyButtonPages(
     ephemeral: boolean = false,
     fields?: APIEmbedField[]
 ) {
+    const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
+
     const embed = new EmbedBuilder({
         color,
         description: pages[0],
@@ -272,7 +281,7 @@ export async function replyButtonPages(
     });
 
     if (pages.length <= 1) {
-        await interaction.reply({ embeds: [embed], ephemeral });
+        await interaction.reply({ embeds: [embed], flags });
         return;
     }
 
@@ -289,18 +298,17 @@ export async function replyButtonPages(
         emoji: { name: '➡️' },
     });
 
-    const message = await interaction.reply({
+    const interactionResponse = await interaction.reply({
         embeds: [embed],
         components: [
             new ActionRowBuilder<ButtonBuilder>({
                 components: [backwardButton, forwardButton],
             }),
         ],
-        fetchReply: true,
-        ephemeral,
+        flags,
     });
 
-    const collector = message.createMessageComponentCollector({
+    const collector = interactionResponse.createMessageComponentCollector({
         componentType: ComponentType.Button,
         filter: (buttonInteraction) => {
             if (buttonInteraction.user.id === interaction.user.id || (buttonInteraction.inCachedGuild() && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages))) return true;
@@ -331,6 +339,7 @@ export async function replyButtonPages(
     });
 
     collector.on('end', () => {
-        message.edit({ components: [] }).catch(() => undefined);
+        // interaction must be less than 15min old
+        interaction.editReply({ components: [] }).catch(() => undefined);
     });
 }

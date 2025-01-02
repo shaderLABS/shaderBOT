@@ -47,7 +47,7 @@ export const modal: ModalSubmitCallback = {
             `${parseUser(interaction.user)} edited the their project project channel (<#${channel.id}>).\n\n**Before**\nName: ${oldChannelName}\nDescription: ${
                 oldChannelDescription || 'No description.'
             }\n\n**After**\nName: ${channel.name}\nDescription: ${channel.topic || 'No description.'}`,
-            'Edit Project Channel'
+            'Edit Project Channel',
         );
     },
 };

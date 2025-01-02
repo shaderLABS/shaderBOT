@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 import { EmbedColor, EmbedIcon, replyError } from '../../../lib/embeds.ts';
 import { Project } from '../../../lib/project.ts';
@@ -41,7 +41,7 @@ export const command: ChatInputCommandCallback = {
 
             if (banner_information) embed.setImage(banner_information.bannerURL);
 
-            interaction.reply({ embeds: [embed], ephemeral: true });
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         } catch (error) {
             replyError(interaction, String(error));
         }

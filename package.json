@@ -28,7 +28,7 @@
         "@octokit/webhooks-methods": "5.1.0",
         "arctic": "2.3.3",
         "comment-json": "4.2.5",
-        "discord.js": "14.16.3",
+        "discord.js": "14.17.2",
         "drizzle-orm": "0.38.3",
         "elysia": "1.2.9",
         "pg": "8.13.1",
