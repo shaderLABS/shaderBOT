@@ -22,7 +22,13 @@ export const command: ChatInputCommandCallback = {
                 return;
             }
 
-            const bannerMessageID = (await interaction.deferReply({ fetchReply: true })).id;
+            const interactionResponse = await interaction.deferReply({ withResponse: true });
+            const bannerMessageId = interactionResponse.resource?.message?.id;
+
+            if (!bannerMessageId) {
+                replyError(interaction, 'Failed to retrieve the banner message ID.');
+                return;
+            }
 
             try {
                 const bannerSharp = sharp((await resolveFile(banner.url)).data, { failOnError: false });
@@ -69,7 +75,7 @@ export const command: ChatInputCommandCallback = {
                 return;
             }
 
-            await project.setBannerMessageID(bannerMessageID, interaction.user.id);
+            await project.setBannerMessageID(bannerMessageId, interaction.user.id);
         } catch (error) {
             replyError(interaction, String(error));
         }

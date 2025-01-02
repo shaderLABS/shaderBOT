@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from 'discord.js';
+import { MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { settings } from '../../bot.ts';
 import type { ChatInputCommandCallback } from '../../chatInputCommandHandler.ts';
 import { replyError } from '../../lib/embeds.ts';
@@ -8,7 +8,7 @@ import { parseUser } from '../../lib/misc.ts';
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: (interaction) => {
-        interaction.reply({ files: settings.data.serverLogPaths, ephemeral: true }).catch(() => {
+        interaction.reply({ files: settings.data.serverLogPaths, flags: MessageFlags.Ephemeral }).catch(() => {
             replyError(interaction, 'Failed to retrieve and send the server logs.');
         });
 

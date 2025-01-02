@@ -51,7 +51,7 @@ export const command: ChatInputCommandCallback = {
                             description: formatTimeDateString(backupEntry.creationTime),
                         };
                     }),
-                })
+                }),
         );
 
         const backwardButton = new ButtonBuilder({
@@ -70,9 +70,9 @@ export const command: ChatInputCommandCallback = {
         const components = [new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[0]] })];
         if (backupEntryChunks.length > 1) components.push(new ActionRowBuilder<StringSelectMenuBuilder>({ components: [backwardButton, forwardButton] }));
 
-        const selectionMessage = await interaction.reply({ content: '**Select a Backup**', components, fetchReply: true });
+        const interactionResponse = await interaction.reply({ content: '**Select a Backup**', components });
 
-        const collector = selectionMessage.createMessageComponentCollector({
+        const collector = interactionResponse.createMessageComponentCollector({
             filter: (messageInteraction) => {
                 if (messageInteraction.user.id === interaction.user.id) return true;
 
@@ -119,7 +119,8 @@ export const command: ChatInputCommandCallback = {
 
         collector.on('end', (_, reason) => {
             if (reason !== 'selected') {
-                selectionMessage.edit({ components: [new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] }).catch(() => undefined);
+                // interaction must be less than 15min old
+                interaction.editReply({ components: [new ActionRowBuilder<StringSelectMenuBuilder>({ components: [menu[index].setDisabled(true)] })] }).catch(() => undefined);
             }
         });
     },
