@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const channel = interaction.options.getChannel('channel', false, ChannelLock.CHANNEL_TYPES) || interaction.channel;
         if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice) {
-            replyError(interaction, 'This command is only usable in text or voice channels.', 'Invalid Channel');
+            replyError(interaction, { description: 'This command is only usable in text or voice channels.', title: 'Invalid Channel' });
             return;
         }
 
@@ -18,15 +18,15 @@ export const command: ChatInputCommandCallback = {
         try {
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
             return;
         }
 
         try {
             const logString = await ChannelLock.create(interaction.user.id, channel, duration);
-            replySuccess(interaction, logString, 'Create Lock');
+            replySuccess(interaction, { description: logString, title: 'Create Lock' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

@@ -12,7 +12,7 @@ export const command: ChatInputCommandCallback = {
             const projectMutes = await ProjectMute.getAllByProjectID(project.id);
 
             if (projectMutes.length === 0) {
-                replyInfo(interaction, 'There are no mutes in the current project.', 'Project Mutes', undefined, undefined, true);
+                replyInfo(interaction, { description: 'There are no mutes in the current project.', title: 'Project Mutes' }, true);
                 return;
             }
 
@@ -28,9 +28,9 @@ export const command: ChatInputCommandCallback = {
                 return content + '\n\n' + page;
             }, '');
 
-            replyButtonPages(interaction, pages, 'Project Mutes', undefined, undefined, true);
+            replyButtonPages(interaction, { pages, title: 'Project Mutes' }, true);
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

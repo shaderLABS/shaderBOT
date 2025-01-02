@@ -10,7 +10,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) {
-            replyError(interaction, 'The specified UUID is invalid.');
+            replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }
 
@@ -19,9 +19,9 @@ export const command: ChatInputCommandCallback = {
             if (!(await hasPermissionForTarget(interaction, track.userId))) return;
 
             const logString = await track.delete(interaction.member.id);
-            replySuccess(interaction, logString, 'Delete Track');
+            replySuccess(interaction, { description: logString, title: 'Delete Track' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

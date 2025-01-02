@@ -107,11 +107,15 @@ export class AutomaticResponse {
         if (this.cooldown) cooldownStore.add(this.alias, message.member, this.cooldown * 1000);
 
         if (this.directMessage && channel.id !== message.channelId) {
-            sendInfo(message.channel, channel.type === ChannelType.DM ? `${message.author.toString()}, check your DMs!` : `${message.author.toString()}, go to <#${settings.data.botChannelID}>!`);
+            sendInfo(message.channel, {
+                description: channel.type === ChannelType.DM ? `${message.author.toString()}, check your DMs!` : `${message.author.toString()}, go to <#${settings.data.botChannelID}>!`,
+            });
         }
     }
 
     public async save() {
-        await Bun.write(path.join(automaticResponsePath, this.getFileName()), this.toJSON(), { createPath: true });
+        await Bun.write(path.join(automaticResponsePath, this.getFileName()), this.toJSON(), {
+            createPath: true,
+        });
     }
 }

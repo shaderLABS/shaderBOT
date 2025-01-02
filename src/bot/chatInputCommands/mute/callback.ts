@@ -20,7 +20,7 @@ export const command: ChatInputCommandCallback = {
         try {
             var duration = stringToSeconds(splitString(durationString));
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
             return;
         }
 
@@ -29,9 +29,9 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const logString = await Mute.create(targetUser, reason, duration, member.id, contextURL);
-            replySuccess(interaction, logString, 'Mute');
+            replySuccess(interaction, { description: logString, title: 'Mute' });
         } catch (error) {
-            if (error) replyError(interaction, String(error));
+            if (error) replyError(interaction, { description: String(error) });
         }
     },
 };

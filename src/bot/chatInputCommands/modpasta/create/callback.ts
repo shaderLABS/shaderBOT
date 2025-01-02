@@ -19,10 +19,10 @@ export const command: ChatInputCommandCallback = {
 
             const logString = `${parseUser(interaction.user)} created the pasta \`${pasta.alias}\`.`;
 
-            replySuccess(interaction, logString, 'Create Pasta');
+            replySuccess(interaction, { description: logString, title: 'Create Pasta' });
             log(logString, 'Create Pasta');
         } catch {
-            replyError(interaction, 'Failed to save pasta.');
+            replyError(interaction, { description: 'Failed to save pasta.' });
         }
     },
 };

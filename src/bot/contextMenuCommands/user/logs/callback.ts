@@ -10,6 +10,6 @@ export const command: UserContextMenuCommandCallback = {
         const { targetUser } = interaction;
 
         const { pages, quickInformation } = await getUserModerationLogPages(targetUser);
-        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.username}`, undefined, undefined, true, quickInformation);
+        replyButtonPages(interaction, { pages, title: `Moderation Logs - ${targetUser.username}`, fields: quickInformation }, true);
     },
 };

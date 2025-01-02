@@ -11,9 +11,9 @@ export const modal: ModalSubmitCallback = {
             const appeal = await BanAppeal.getByUUID(appealID);
             const logString = await appeal.close('declined', interaction.fields.getTextInputValue('reasonInput'), interaction.user.id);
 
-            replySuccess(interaction, logString, 'Decline Ban Appeal');
+            replySuccess(interaction, { description: logString, title: 'Decline Ban Appeal' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error), title: 'Decline Ban Appeal' });
         }
     },
 };

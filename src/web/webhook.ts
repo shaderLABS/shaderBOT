@@ -23,7 +23,7 @@ export const GITHUB_RELEASE_WEBHOOK_BODY = t.Object(
                     name: t.String(),
                     browser_download_url: t.String(),
                     size: t.Number(),
-                })
+                }),
             ),
             author: t.Object({
                 login: t.String(),
@@ -36,7 +36,7 @@ export const GITHUB_RELEASE_WEBHOOK_BODY = t.Object(
             html_url: t.String(),
         }),
     },
-    { additionalProperties: true }
+    { additionalProperties: true },
 );
 
 export const GITHUB_PING_WEBHOOK_BODY = t.Object(
@@ -54,7 +54,7 @@ export const GITHUB_PING_WEBHOOK_BODY = t.Object(
             html_url: t.Optional(t.String()),
         }),
     },
-    { additionalProperties: true }
+    { additionalProperties: true },
 );
 
 export async function pingNotification(channelID: string, body: Static<typeof GITHUB_PING_WEBHOOK_BODY>): Promise<number> {

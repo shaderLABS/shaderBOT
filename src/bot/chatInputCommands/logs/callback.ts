@@ -46,14 +46,14 @@ export async function getUserModerationLogPages(targetUser: User) {
     if (queries[0].length) {
         pageCategory(
             `Warnings (${queries[0].length})`,
-            queries[0].map((warning) => warning.toString(false))
+            queries[0].map((warning) => warning.toString(false)),
         );
     }
 
     if (queries[1].length) {
         pageCategory(
             `Notes (${queries[1].length})`,
-            queries[1].map((note) => note.toString(false))
+            queries[1].map((note) => note.toString(false)),
         );
     }
 
@@ -81,28 +81,28 @@ export async function getUserModerationLogPages(targetUser: User) {
     if (queries[5].length) {
         pageCategory(
             `Kicks (${queries[5].length})`,
-            queries[5].map((kick) => kick.toString(false))
+            queries[5].map((kick) => kick.toString(false)),
         );
     }
 
     if (queries[6].length) {
         pageCategory(
             `Lifted Bans (${queries[6].length})`,
-            queries[6].map((liftedBan) => liftedBan.toString(false))
+            queries[6].map((liftedBan) => liftedBan.toString(false)),
         );
     }
 
     if (queries[7].length) {
         pageCategory(
             `Lifted Mutes (${queries[7].length})`,
-            queries[7].map((liftedMute) => liftedMute.toString(false))
+            queries[7].map((liftedMute) => liftedMute.toString(false)),
         );
     }
 
     if (queries[8].length) {
         pageCategory(
             `Ban Appeals (${queries[8].length})`,
-            queries[8].map((banAppeal) => banAppeal.toString(false))
+            queries[8].map((banAppeal) => banAppeal.toString(false)),
         );
     }
 
@@ -120,6 +120,6 @@ export const command: ChatInputCommandCallback = {
         const targetUser = interaction.options.getUser('user', true);
 
         const { pages, quickInformation } = await getUserModerationLogPages(targetUser);
-        replyButtonPages(interaction, pages, `Moderation Logs - ${targetUser.username}`, undefined, undefined, undefined, quickInformation);
+        replyButtonPages(interaction, { pages, title: `Moderation Logs - ${targetUser.username}`, fields: quickInformation });
     },
 };

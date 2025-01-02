@@ -19,6 +19,6 @@ export const command: ChatInputCommandCallback = {
         const logString = `${parseUser(interaction.user)} triggered the automatic punishment system for ${parseUser(targetUser)}. ${actionToString[action]}`;
 
         log(logString, 'Trigger Punishment');
-        replySuccess(interaction, logString, 'Trigger Punishment');
+        replySuccess(interaction, { description: logString, title: 'Trigger Punishment' });
     },
 };

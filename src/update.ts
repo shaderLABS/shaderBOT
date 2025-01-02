@@ -19,7 +19,7 @@ async function stitchCommandStructure(dir: string) {
                 const structure: ApplicationCommandData = (await import(url.pathToFileURL(path.join(dirPath, dirEntry.name)).href)).default;
                 commandStructure.push(structure);
             }
-        })
+        }),
     );
 }
 

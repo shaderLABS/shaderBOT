@@ -19,7 +19,10 @@ export class Mute extends ExpirablePunishment {
     }
 
     static async has(userId: string): Promise<boolean> {
-        const result = await db.query.mute.findFirst({ columns: {}, where: sql.eq(schema.mute.userId, userId) });
+        const result = await db.query.mute.findFirst({
+            columns: {},
+            where: sql.eq(schema.mute.userId, userId),
+        });
         return result !== undefined;
     }
 
@@ -199,7 +202,10 @@ export class Mute extends ExpirablePunishment {
         });
 
         let sentDM = true;
-        await sendInfo(user, mute.toString(false), `You have been muted on ${guild.name}.`).catch(() => {
+        await sendInfo(user, {
+            description: mute.toString(false),
+            title: `You have been muted on ${guild.name}.`,
+        }).catch(() => {
             sentDM = false;
         });
 
@@ -234,7 +240,9 @@ export class LiftedMute extends LiftedPunishment {
     }
 
     static async getByUUID(uuid: string) {
-        const result = await db.query.liftedMute.findFirst({ where: sql.eq(schema.liftedMute.id, uuid) });
+        const result = await db.query.liftedMute.findFirst({
+            where: sql.eq(schema.liftedMute.id, uuid),
+        });
         if (!result) return Promise.reject('A lifted mute with the specified UUID does not exist.');
         return new LiftedMute(result);
     }

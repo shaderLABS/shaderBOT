@@ -14,10 +14,13 @@ const PUNISHMENT_TABLE_LIST = [schema.ban, schema.mute, schema.kick, schema.trac
 export type PunishmentTable = (typeof PUNISHMENT_TABLE_LIST)[number];
 export type PunishmentTableOid = PunishmentTable['_']['name'];
 
-export const PUNISHMENT_TABLEOID_TO_SCHEMA = PUNISHMENT_TABLE_LIST.reduce((map, table) => {
-    map[getTableName(table)] = table;
-    return map;
-}, {} as Record<PunishmentTableOid, PunishmentTable>);
+export const PUNISHMENT_TABLEOID_TO_SCHEMA = PUNISHMENT_TABLE_LIST.reduce(
+    (map, table) => {
+        map[getTableName(table)] = table;
+        return map;
+    },
+    {} as Record<PunishmentTableOid, PunishmentTable>,
+);
 
 const PUNISHMENT_TABLE_TO_STRING: {
     [key in PunishmentTableOid]: string;
@@ -41,19 +44,23 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
         const channelID = IDs.pop();
 
         if (!messageID || !channelID) {
-            replyError(interaction, 'The specified message URL is invalid.');
+            replyError(interaction, { description: 'The specified message URL is invalid.' });
             return;
         }
 
         const channel = client.channels.cache.get(channelID);
         if (!channel?.isTextBased()) {
-            replyError(interaction, 'The specified message URL points to an invalid channel.');
+            replyError(interaction, {
+                description: 'The specified message URL points to an invalid channel.',
+            });
             return;
         }
 
         const message = await channel.messages.fetch(messageID);
         if (!message) {
-            replyError(interaction, 'The specified message URL points to an invalid message.');
+            replyError(interaction, {
+                description: 'The specified message URL points to an invalid message.',
+            });
             return;
         }
 
@@ -81,7 +88,9 @@ export async function getContextURL(interaction: GuildChatInputCommandInteractio
         const channelLastMessage = (await interaction.channel.messages.fetch({ limit: 1 })).first()?.url;
         if (channelLastMessage) return channelLastMessage;
 
-        replyError(interaction, 'Failed to fetch a context URL. Please specify it manually using the `context` argument.');
+        replyError(interaction, {
+            description: 'Failed to fetch a context URL. Please specify it manually using the `context` argument.',
+        });
         return;
     }
 }

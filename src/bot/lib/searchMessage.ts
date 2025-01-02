@@ -12,12 +12,18 @@ export async function hasPermissionForTarget(interaction: GuildChatInputCommandI
     if (!targetMember) return true;
 
     if (interaction.member.roles.highest.comparePositionTo(targetMember.roles.highest) <= 0) {
-        replyError(interaction, 'The role of the targeted user is higher than or equal to yours.', 'Insufficient Permissions');
+        replyError(interaction, {
+            description: 'The role of the targeted user is higher than or equal to yours.',
+            title: 'Insufficient Permissions',
+        });
         return false;
     }
 
     if (checkProperty && targetMember[checkProperty] === false) {
-        replyError(interaction, `The targeted user is not ${checkProperty}.`, 'Insufficient Permissions');
+        replyError(interaction, {
+            description: `The targeted user is not ${checkProperty}.`,
+            title: 'Insufficient Permissions',
+        });
         return false;
     }
 
@@ -28,7 +34,7 @@ export function matchBlacklist(message: GuildMessage) {
     if (settings.data.blacklist.strings.some((str) => message.content.includes(str))) {
         if (message.deletable) message.delete();
         Mute.create(message.author, 'Sent message containing blacklisted content.', settings.data.blacklist.muteDuration).catch((e) =>
-            log(`Failed to mute ${parseUser(message.author)} due to blacklisted content: ${e}`, 'Mute')
+            log(`Failed to mute ${parseUser(message.author)} due to blacklisted content: ${e}`, 'Mute'),
         );
 
         return true;

@@ -9,15 +9,15 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
         if (!uuid.test(id)) {
-            replyError(interaction, 'The specified UUID is invalid.');
+            replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }
 
         try {
             const warning = await Warning.getByUUID(id);
-            replyInfo(interaction, warning.toString(), 'Warning');
+            replyInfo(interaction, { description: warning.toString(), title: 'Warning' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

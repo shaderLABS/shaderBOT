@@ -15,9 +15,9 @@ export const modal: ModalSubmitCallback = {
             const ban = await Ban.getByUserID(appeal.userId);
             await ban.lift(interaction.user.id);
 
-            replySuccess(interaction, logString, 'Accept Ban Appeal');
+            replySuccess(interaction, { description: logString, title: 'Accept Ban Appeal' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error), title: 'Accept Ban Appeal' });
         }
     },
 };

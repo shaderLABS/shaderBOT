@@ -11,12 +11,12 @@ export const command: ChatInputCommandCallback = {
 
         const count = interaction.options.getInteger('amount', true);
         if (isNaN(count) || count < 0 || count > 100) {
-            replyError(interaction, 'Please use a number between 0 and 100 as the first argument.');
+            replyError(interaction, { description: 'Please use a number between 0 and 100 as the first argument.' });
             return;
         }
 
         const { size } = await channel.bulkDelete(count, true);
-        replySuccess(interaction, `${size} (out of ${count}) message(s) have been deleted.`, 'Purge Messages', true);
+        replySuccess(interaction, { description: `${size} (out of ${count}) message(s) have been deleted.`, title: 'Purge Messages' }, true);
         log(`${parseUser(interaction.user)} deleted ${size} (out of ${count}) message(s) in <#${channel.id}>.`, 'Purge Messages');
     },
 };

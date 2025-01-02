@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
         const warnings = await Warning.getAllByUserID(user.id);
 
         if (warnings.length === 0) {
-            replyInfo(interaction, 'You do not have any warnings.', 'Warnings', undefined, undefined, true);
+            replyInfo(interaction, { description: 'You do not have any warnings.', title: 'Warnings' }, true);
             return;
         }
 
@@ -26,10 +26,24 @@ export const command: ChatInputCommandCallback = {
         }, '');
 
         try {
-            await sendButtonPages(user, user.id, pages, 'Warnings');
-            replySuccess(interaction, 'Your warnings have been sent to you in a DM.', 'Warnings', true);
+            await sendButtonPages(user, user.id, { pages, title: 'Warnings' });
+            replySuccess(
+                interaction,
+                {
+                    description: 'Your warnings have been sent to you in a DM.',
+                    title: 'Warnings',
+                },
+                true,
+            );
         } catch {
-            replyError(interaction, "Failed to send you a DM. Please make sure that they're open and try again.", 'Warnings', true);
+            replyError(
+                interaction,
+                {
+                    description: "Failed to send you a DM. Please make sure that they're open and try again.",
+                    title: 'Warnings',
+                },
+                true,
+            );
         }
     },
 };

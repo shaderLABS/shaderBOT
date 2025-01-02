@@ -9,9 +9,9 @@ export const command: ChatInputCommandCallback = {
             project.assertOwner(interaction.user.id).assertNotArchived();
 
             await interaction.channel.send('<@&' + project.roleId + '>');
-            replySuccess(interaction, 'All users that are subscribed to this project have been pinged.', 'Project Ping', true);
+            replySuccess(interaction, { description: 'All users that are subscribed to this project have been pinged.', title: 'Project Ping' }, true);
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

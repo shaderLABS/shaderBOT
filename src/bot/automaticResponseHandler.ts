@@ -39,6 +39,6 @@ export async function registerAutomaticResponses(dir: string) {
 
             const automaticResponse = new AutomaticResponse(await Bun.file(path.join(dirPath, dirEntry.name)).json());
             automaticResponseStore.set(automaticResponse.alias, automaticResponse);
-        })
+        }),
     );
 }

@@ -12,7 +12,7 @@ export const command: ChatInputCommandCallback = {
         const targetMember = interaction.options.getMember('member');
 
         if (!(targetMember instanceof GuildMember)) {
-            replyError(interaction, 'The specified user is not a member of this guild.');
+            replyError(interaction, { description: 'The specified user is not a member of this guild.' });
             return;
         }
 
@@ -23,9 +23,9 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const logString = await Kick.create(targetMember, reason, interaction.member.id, contextURL);
-            replySuccess(interaction, logString, 'Kick');
+            replySuccess(interaction, { description: logString, title: 'Kick' });
         } catch (error) {
-            if (error) replyError(interaction, String(error));
+            if (error) replyError(interaction, { description: String(error) });
         }
     },
 };

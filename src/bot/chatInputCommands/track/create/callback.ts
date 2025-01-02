@@ -20,9 +20,9 @@ export const command: ChatInputCommandCallback = {
 
         try {
             const logString = await Track.create(targetUser, reason, member.id, contextURL);
-            replySuccess(interaction, logString, 'Create Track');
+            replySuccess(interaction, { description: logString, title: 'Create Track' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

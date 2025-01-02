@@ -42,7 +42,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, ban.userId))) return;
                 const logString = await ban.editDuration(time, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Ban Duration');
+                replySuccess(interaction, { description: logString, title: 'Edit Ban Duration' });
                 break;
             }
 
@@ -53,7 +53,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     ban ??= await LiftedBan.getLatestByUserID(target.id).catch(() => undefined);
 
                     if (!ban) {
-                        replyError(interaction, 'The specified user does not have any bans.');
+                        replyError(interaction, { description: 'The specified user does not have any bans.' });
                         return;
                     }
                 } else {
@@ -61,7 +61,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     ban ??= await LiftedBan.getByUUID(target).catch(() => undefined);
 
                     if (!ban) {
-                        replyError(interaction, 'A ban with the specified UUID does not exist.');
+                        replyError(interaction, { description: 'A ban with the specified UUID does not exist.' });
                         return;
                     }
                 }
@@ -69,7 +69,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, ban.userId))) return;
                 const logString = await ban.editReason(value, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Ban Reason');
+                replySuccess(interaction, { description: logString, title: 'Edit Ban Reason' });
                 break;
             }
 
@@ -77,7 +77,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 const track = target instanceof User ? await Track.getByUserID(target.id) : await Track.getByUUID(target);
                 const logString = await track.editReason(value, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Track Reason');
+                replySuccess(interaction, { description: logString, title: 'Edit Track Reason' });
                 break;
             }
 
@@ -86,7 +86,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, kick.userId))) return;
                 const logString = await kick.editReason(value, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Kick Reason');
+                replySuccess(interaction, { description: logString, title: 'Edit Kick Reason' });
                 break;
             }
 
@@ -97,7 +97,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, mute.userId, 'moderatable'))) return;
                 const logString = await mute.editDuration(time, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Mute Duration');
+                replySuccess(interaction, { description: logString, title: 'Edit Mute Duration' });
                 break;
             }
 
@@ -108,7 +108,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     mute ??= await LiftedMute.getLatestByUserID(target.id).catch(() => undefined);
 
                     if (!mute) {
-                        replyError(interaction, 'The specified user does not have any mutes.');
+                        replyError(interaction, { description: 'The specified user does not have any mutes.' });
                         return;
                     }
                 } else {
@@ -116,7 +116,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     mute ??= await LiftedMute.getByUUID(target).catch(() => undefined);
 
                     if (!mute) {
-                        replyError(interaction, 'A mute with the specified UUID does not exist.');
+                        replyError(interaction, { description: 'A mute with the specified UUID does not exist.' });
                         return;
                     }
                 }
@@ -124,7 +124,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, mute.userId))) return;
                 const logString = await mute.editReason(value, interaction.user.id);
 
-                replySuccess(interaction, logString, 'Edit Mute Reason');
+                replySuccess(interaction, { description: logString, title: 'Edit Mute Reason' });
                 break;
             }
 
@@ -141,7 +141,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, warning.userId))) return;
 
                 const logString = await warning.editReason(value, interaction.user.id);
-                replySuccess(interaction, logString, 'Edit Warning Reason');
+                replySuccess(interaction, { description: logString, title: 'Edit Warning Reason' });
                 break;
             }
 
@@ -150,7 +150,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 if (!(await hasPermissionForTarget(interaction, warning.userId))) return;
 
                 const logString = await warning.editSeverity(Number.parseInt(value), interaction.user.id);
-                replySuccess(interaction, logString, 'Edit Warning Severity');
+                replySuccess(interaction, { description: logString, title: 'Edit Warning Severity' });
                 break;
             }
 
@@ -164,7 +164,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     const [entry] = await Query.Context.LATEST_BY_USERID.execute({ userId: target.id });
 
                     if (!entry) {
-                        replyError(interaction, 'The specified user does not have any entries.');
+                        replyError(interaction, { description: 'The specified user does not have any entries.' });
                         return;
                     }
 
@@ -176,7 +176,7 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                     const [entry] = await Query.Context.BY_UUID.execute({ uuid: target });
 
                     if (!entry) {
-                        replyError(interaction, 'There is no entry with the specified UUID.');
+                        replyError(interaction, { description: 'There is no entry with the specified UUID.' });
                         return;
                     }
 
@@ -187,11 +187,11 @@ export async function editApsect(interaction: GuildChatInputCommandInteraction, 
                 }
 
                 const logString = await editContextURL(uuid, context, interaction.user.id, table);
-                replySuccess(interaction, logString, 'Edit Context');
+                replySuccess(interaction, { description: logString, title: 'Edit Context' });
                 break;
             }
         }
     } catch (error) {
-        replyError(interaction, String(error));
+        replyError(interaction, { description: String(error) });
     }
 }

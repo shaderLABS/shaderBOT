@@ -22,13 +22,13 @@ export const command: ChatInputCommandCallback = {
 
             const targetUser = await client.users.fetch(appeal.userId).catch(() => undefined);
             if (!targetUser) {
-                replyError(interaction, 'The user who sent the ban appeal could not be resolved.');
+                replyError(interaction, { description: 'The user who sent the ban appeal could not be resolved.' });
                 return;
             }
 
             interaction.reply({ embeds: [appeal.toAppealEmbed(targetUser), appeal.toResultEmbed()] });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

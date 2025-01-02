@@ -47,7 +47,7 @@ async function logDeletedMessage(message: Message | PartialMessage) {
         if (overflowAttachmentURLs) overflowAttachmentURLs = '\n\n**Overflow Attachments**' + overflowAttachmentURLs;
 
         let metadata = `**Author:** ${parseUser(message.author)}\n**Channel:** <#${message.channelId}>\n**Sent At:** ${formatLongTimeDate(
-            new Date(message.createdTimestamp)
+            new Date(message.createdTimestamp),
         )}\n**Deleted At:** ${formatLongTimeDate(new Date())}`;
 
         if (message.reference) {

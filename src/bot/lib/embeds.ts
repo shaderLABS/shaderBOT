@@ -62,34 +62,48 @@ function getInteractionName(interaction: ApplicationCommandInteraction | ButtonI
     return 'Unknown Interaction';
 }
 
-export function sendSuccess(channel: SendableChannels | User | GuildMember, description?: string, title?: string) {
+export function sendSuccess(
+    channel: SendableChannels | User | GuildMember,
+    content: {
+        title?: string;
+        description?: string;
+    },
+) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: EmbedIcon.Success },
-        description,
+        author: { name: content.title || 'Success', iconURL: EmbedIcon.Success },
+        description: content.description,
         color: EmbedColor.Green,
     });
 
     return channel.send({ embeds: [embed] });
 }
 
-export function replySuccess(
+export async function replySuccess(
     interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description?: string,
-    title?: string,
-    ephemeral: boolean = false
-) {
+    content: {
+        title?: string;
+        description?: string;
+    },
+    ephemeral: boolean = false,
+): Promise<void> {
     const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
     const embed = new EmbedBuilder({
-        author: { name: title || 'Success', iconURL: EmbedIcon.Success },
-        description,
+        author: { name: content.title || 'Success', iconURL: EmbedIcon.Success },
+        description: content.description,
         color: EmbedColor.Green,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], flags })).catch(async () => {
-        if (!interaction.channel?.isSendable()) return;
+    try {
+        if (interaction.deferred) {
+            await interaction.editReply({ embeds: [embed] });
+        } else {
+            await interaction.reply({ embeds: [embed], flags });
+        }
+    } catch {
+        if (!interaction.channel?.isSendable()) return Promise.reject('Unable to send fallback message.');
 
-        return interaction.channel.send({
+        await interaction.channel.send({
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
@@ -97,37 +111,51 @@ export function replySuccess(
                 }),
             ],
         });
-    });
+    }
 }
 
-export function sendError(channel: SendableChannels | User | GuildMember, description?: string, title?: string) {
+export function sendError(
+    channel: SendableChannels | User | GuildMember,
+    content: {
+        title?: string;
+        description?: string;
+    },
+) {
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: EmbedIcon.Error },
-        description,
+        author: { name: content.title || 'Error', iconURL: EmbedIcon.Error },
+        description: content.description,
         color: EmbedColor.Red,
     });
 
     return channel.send({ embeds: [embed] });
 }
 
-export function replyError(
+export async function replyError(
     interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description?: string,
-    title?: string,
-    ephemeral: boolean = true
-) {
+    content: {
+        title?: string;
+        description?: string;
+    },
+    ephemeral: boolean = true,
+): Promise<void> {
     const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
     const embed = new EmbedBuilder({
-        author: { name: title || 'Error', iconURL: EmbedIcon.Error },
-        description,
+        author: { name: content.title || 'Error', iconURL: EmbedIcon.Error },
+        description: content.description,
         color: EmbedColor.Red,
     });
 
-    return (interaction.deferred ? interaction.editReply({ embeds: [embed] }) : interaction.reply({ embeds: [embed], flags })).catch(async () => {
-        if (!interaction.channel?.isSendable()) return;
+    try {
+        if (interaction.deferred) {
+            await interaction.editReply({ embeds: [embed] });
+        } else {
+            await interaction.reply({ embeds: [embed], flags });
+        }
+    } catch {
+        if (!interaction.channel?.isSendable()) return Promise.reject('Unable to send fallback message.');
 
-        return interaction.channel.send({
+        await interaction.channel.send({
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
@@ -135,69 +163,85 @@ export function replyError(
                 }),
             ],
         });
-    });
+    }
 }
 
-export function sendInfo(channel: SendableChannels | User | GuildMember, description?: string, title?: string, message?: string, footer?: string) {
-    const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
-        description,
-        color: EmbedColor.Blue,
-        footer: footer ? { text: footer } : undefined,
-    });
-
-    return channel.send({ content: message, embeds: [embed] });
-}
-
-export function replyInfo(
-    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    description?: string,
-    title?: string,
-    message?: string,
-    footer?: string,
-    ephemeral: boolean = false
+export function sendInfo(
+    channel: SendableChannels | User | GuildMember,
+    content: {
+        title?: string;
+        description?: string;
+        message?: string;
+        footer?: string;
+    },
 ) {
+    const embed = new EmbedBuilder({
+        author: content.title ? { name: content.title, iconURL: EmbedIcon.Info } : undefined,
+        description: content.description,
+        color: EmbedColor.Blue,
+        footer: content.footer ? { text: content.footer } : undefined,
+    });
+
+    return channel.send({ content: content.message, embeds: [embed] });
+}
+
+export async function replyInfo(
+    interaction: ApplicationCommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
+    content: {
+        title?: string;
+        description?: string;
+        message?: string;
+        footer?: string;
+    },
+    ephemeral: boolean = false,
+): Promise<void> {
     const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
     const embed = new EmbedBuilder({
-        author: title ? { name: title, iconURL: EmbedIcon.Info } : undefined,
-        description,
+        author: content.title ? { name: content.title, iconURL: EmbedIcon.Info } : undefined,
+        description: content.description,
         color: EmbedColor.Blue,
-        footer: footer ? { text: footer } : undefined,
+        footer: content.footer ? { text: content.footer } : undefined,
     });
 
-    return (interaction.deferred ? interaction.editReply({ content: message, embeds: [embed] }) : interaction.reply({ content: message, embeds: [embed], flags })).catch(async () => {
-        if (!interaction.channel?.isSendable()) return;
+    try {
+        if (interaction.deferred) {
+            await interaction.editReply({ content: content.message, embeds: [embed] });
+        } else {
+            await interaction.reply({ content: content.message, embeds: [embed], flags });
+        }
+    } catch {
+        if (!interaction.channel?.isSendable()) return Promise.reject('Unable to send fallback message.');
 
-        interaction.channel?.send({
+        await interaction.channel.send({
             embeds: [
                 embed.setFooter({
                     iconURL: interaction.user.displayAvatarURL(),
-                    text: `${footer ? footer + '\n' : ''}${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
+                    text: `${content.footer ? content.footer + '\n' : ''}${interaction.user.username} (${interaction.user.id}) used ${getInteractionName(interaction)}`,
                 }),
             ],
         });
-    });
+    }
 }
 
 export async function sendButtonPages(
     channel: SendableChannels | User | GuildMember,
-    authorID: string,
-    pages: string[],
-    title: string,
-    color: number = EmbedColor.Blue,
-    iconURL: string = EmbedIcon.Info
+    authorId: string,
+    content: {
+        title: string;
+        pages: string[];
+    },
 ) {
     const embed = new EmbedBuilder({
-        color,
-        description: pages[0],
+        color: EmbedColor.Blue,
+        description: content.pages[0],
         author: {
-            name: title,
-            iconURL,
+            name: content.title,
+            iconURL: EmbedIcon.Info,
         },
     });
 
-    if (pages.length <= 1) {
+    if (content.pages.length <= 1) {
         await channel.send({ embeds: [embed] });
         return;
     }
@@ -227,9 +271,9 @@ export async function sendButtonPages(
     const collector = message.createMessageComponentCollector({
         componentType: ComponentType.Button,
         filter: (buttonInteraction) => {
-            if (buttonInteraction.user.id === authorID || (buttonInteraction.inCachedGuild() && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages))) return true;
+            if (buttonInteraction.user.id === authorId || (buttonInteraction.inCachedGuild() && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages))) return true;
 
-            replyError(buttonInteraction, undefined, 'Insufficient Permissions');
+            replyError(buttonInteraction, { title: 'Insufficient Permissions' });
             return false;
         },
         idle: 600_000, // 10min = 600,000ms
@@ -238,20 +282,22 @@ export async function sendButtonPages(
     let index = 0;
     collector.on('collect', async (buttonInteraction) => {
         if (buttonInteraction.customId === 'backward') {
-            const content = pages[index - 1];
-            if (!content) return;
+            const page = content.pages[index - 1];
+            if (!page) return;
 
             --index;
-            await message.edit({ embeds: [embed.setDescription(content)] });
+            await message.edit({ embeds: [embed.setDescription(page)] });
         } else if (buttonInteraction.customId === 'forward') {
-            const content = pages[index + 1];
-            if (!content) return;
+            const page = content.pages[index + 1];
+            if (!page) return;
 
             ++index;
-            await message.edit({ embeds: [embed.setDescription(content)] });
+            await message.edit({ embeds: [embed.setDescription(page)] });
         }
 
-        buttonInteraction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+        buttonInteraction.update({
+            components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!content.pages[index - 1]), forwardButton.setDisabled(!content.pages[index + 1])] })],
+        });
     });
 
     collector.on('end', () => {
@@ -261,26 +307,26 @@ export async function sendButtonPages(
 
 export async function replyButtonPages(
     interaction: CommandInteraction | ButtonInteraction | ModalSubmitInteraction | AnySelectMenuInteraction,
-    pages: string[],
-    title: string,
-    color: number = EmbedColor.Blue,
-    iconURL: string = EmbedIcon.Info,
+    content: {
+        title: string;
+        pages: string[];
+        fields?: APIEmbedField[];
+    },
     ephemeral: boolean = false,
-    fields?: APIEmbedField[]
 ) {
     const flags = ephemeral ? MessageFlags.Ephemeral : undefined;
 
     const embed = new EmbedBuilder({
-        color,
-        description: pages[0],
+        color: EmbedColor.Blue,
+        description: content.pages[0],
         author: {
-            name: title,
-            iconURL,
+            name: content.title,
+            iconURL: EmbedIcon.Info,
         },
-        fields,
+        fields: content.fields,
     });
 
-    if (pages.length <= 1) {
+    if (content.pages.length <= 1) {
         await interaction.reply({ embeds: [embed], flags });
         return;
     }
@@ -313,7 +359,7 @@ export async function replyButtonPages(
         filter: (buttonInteraction) => {
             if (buttonInteraction.user.id === interaction.user.id || (buttonInteraction.inCachedGuild() && buttonInteraction.member.permissions.has(PermissionFlagsBits.ManageMessages))) return true;
 
-            replyError(buttonInteraction, undefined, 'Insufficient Permissions');
+            replyError(buttonInteraction, { title: 'Insufficient Permissions' });
             return false;
         },
         idle: 600_000, // 10min = 600,000ms
@@ -322,20 +368,22 @@ export async function replyButtonPages(
     let index = 0;
     collector.on('collect', async (buttonInteraction) => {
         if (buttonInteraction.customId === 'backward') {
-            const content = pages[index - 1];
-            if (!content) return;
+            const page = content.pages[index - 1];
+            if (!page) return;
 
             --index;
-            await interaction.editReply({ embeds: [embed.setDescription(content)] });
+            await interaction.editReply({ embeds: [embed.setDescription(page)] });
         } else if (buttonInteraction.customId === 'forward') {
-            const content = pages[index + 1];
-            if (!content) return;
+            const page = content.pages[index + 1];
+            if (!page) return;
 
             ++index;
-            await interaction.editReply({ embeds: [embed.setDescription(content)] });
+            await interaction.editReply({ embeds: [embed.setDescription(page)] });
         }
 
-        buttonInteraction.update({ components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!pages[index - 1]), forwardButton.setDisabled(!pages[index + 1])] })] });
+        buttonInteraction.update({
+            components: [new ActionRowBuilder<ButtonBuilder>({ components: [backwardButton.setDisabled(!content.pages[index - 1]), forwardButton.setDisabled(!content.pages[index + 1])] })],
+        });
     });
 
     collector.on('end', () => {

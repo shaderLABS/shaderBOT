@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
 
             const oldValue = updateObjectValueByStringPath(settings.data, path, newValue);
             if (oldValue === undefined) {
-                replyError(interaction, 'The specified path does not exist.');
+                replyError(interaction, { description: 'The specified path does not exist.' });
                 return;
             }
 
@@ -24,13 +24,13 @@ export const command: ChatInputCommandCallback = {
             const logString = `${parseUser(interaction.user)} edited the configuration \`${path}\`.\n\n**Before**\n\`${JSON.stringify(oldValue, null, '\t')}\`\n\n**After**\n\`${JSON.stringify(
                 newValue,
                 null,
-                '\t'
+                '\t',
             )}\``;
 
-            replySuccess(interaction, logString, 'Edit Configuration');
+            replySuccess(interaction, { description: logString, title: 'Edit Configuration' });
             log(logString, 'Edit Configuration');
         } catch (error) {
-            replyError(interaction, typeof error === 'string' ? error : 'Invalid path or JSON value.');
+            replyError(interaction, { description: typeof error === 'string' ? error : 'Invalid path or JSON value.' });
         }
     },
 };

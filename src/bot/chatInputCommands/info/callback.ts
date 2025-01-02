@@ -32,7 +32,12 @@ export function getUserInfoEmbed(targetUser: User, targetMember?: GuildMember) {
     if (targetMember) {
         if (targetMember.joinedAt) embed.addFields([{ name: 'Joined', value: formatRelativeTime(targetMember.joinedAt), inline: true }]);
 
-        const roles = [...targetMember.roles.cache.sort((a, b) => b.position - a.position).keys()].filter((id) => id !== targetMember.guild.roles.everyone.id);
+        const roles = targetMember.roles.cache
+            .sort((a, b) => b.position - a.position)
+            .keys()
+            .toArray()
+            .filter((id) => id !== targetMember.guild.roles.everyone.id);
+
         if (roles.length !== 0) embed.addFields([{ name: 'Roles', value: `<@&${roles.join('>, <@&')}>` }]);
     }
 

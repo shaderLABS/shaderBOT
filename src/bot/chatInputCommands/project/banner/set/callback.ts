@@ -18,7 +18,7 @@ export const command: ChatInputCommandCallback = {
             const labelText = interaction.options.getString('label_text', false)?.trim() || channel.name;
 
             if (!['image/jpeg', 'image/png', 'image/webp'].includes(banner.contentType || '')) {
-                replyError(interaction, 'Unsupported file type. You must use PNG, JPEG or WebP images.');
+                replyError(interaction, { description: 'Unsupported file type. You must use PNG, JPEG or WebP images.' });
                 return;
             }
 
@@ -26,7 +26,7 @@ export const command: ChatInputCommandCallback = {
             const bannerMessageId = interactionResponse.resource?.message?.id;
 
             if (!bannerMessageId) {
-                replyError(interaction, 'Failed to retrieve the banner message ID.');
+                replyError(interaction, { description: 'Failed to retrieve the banner message ID.' });
                 return;
             }
 
@@ -71,13 +71,13 @@ export const command: ChatInputCommandCallback = {
                 await interaction.editReply({ files: [new AttachmentBuilder(await bannerSharp.toBuffer(), { name: 'banner.png' })], embeds: [embed] });
             } catch (error) {
                 console.error(error);
-                replyError(interaction, 'Failed to process and save the banner image.');
+                replyError(interaction, { description: 'Failed to process and save the banner image.' });
                 return;
             }
 
             await project.setBannerMessageID(bannerMessageId, interaction.user.id);
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

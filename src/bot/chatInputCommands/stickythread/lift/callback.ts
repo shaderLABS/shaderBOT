@@ -8,16 +8,19 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const thread = interaction.options.getChannel('thread', false, StickyThread.CHANNEL_TYPES) || interaction.channel;
         if (!thread.isThread()) {
-            replyError(interaction, 'This command is only usable in thread channels.', 'Invalid Channel');
+            replyError(interaction, {
+                description: 'This command is only usable in thread channels.',
+                title: 'Invalid Channel',
+            });
             return;
         }
 
         try {
             const stickyThread = await StickyThread.getByThreadID(thread.id);
             const logString = await stickyThread.lift(interaction.user.id);
-            replySuccess(interaction, logString, 'Lift Sticky Thread');
+            replySuccess(interaction, { description: logString, title: 'Lift Sticky Thread' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };

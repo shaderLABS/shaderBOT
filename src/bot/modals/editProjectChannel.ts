@@ -18,7 +18,10 @@ export const modal: ModalSubmitCallback = {
         const channelNameEdited = oldChannelName !== channel.name;
 
         if (!channel.name) {
-            replyError(interaction, 'The channel name must be at least one character long.', 'Edit Project Channel');
+            replyError(interaction, {
+                description: 'The channel name must be at least one character long.',
+                title: 'Edit Project Channel',
+            });
             return;
         }
 
@@ -27,7 +30,14 @@ export const modal: ModalSubmitCallback = {
         const channelDescriptionEdited = oldChannelDescription !== channel.topic;
 
         if (!channelNameEdited && !channelDescriptionEdited) {
-            replyInfo(interaction, 'The channel was not edited because neither the name nor the description have been changed.', 'Edit Project Channel', undefined, undefined, true);
+            replyInfo(
+                interaction,
+                {
+                    description: 'The channel was not edited because neither the name nor the description have been changed.',
+                    title: 'Edit Project Channel',
+                },
+                true,
+            );
             return;
         }
 
@@ -38,11 +48,14 @@ export const modal: ModalSubmitCallback = {
                 position: channelNameEdited ? getAlphabeticalChannelPosition(channel, channel.parent) : undefined,
             });
         } catch {
-            replyError(interaction, 'Failed to edit the channel.', 'Edit Project Channel', false);
+            replyError(interaction, { description: 'Failed to edit the channel.', title: 'Edit Project Channel' }, false);
             return;
         }
 
-        replySuccess(interaction, 'The channel has been edited.', 'Edit Project Channel');
+        replySuccess(interaction, {
+            description: 'The channel has been edited.',
+            title: 'Edit Project Channel',
+        });
         log(
             `${parseUser(interaction.user)} edited the their project project channel (<#${channel.id}>).\n\n**Before**\nName: ${oldChannelName}\nDescription: ${
                 oldChannelDescription || 'No description.'

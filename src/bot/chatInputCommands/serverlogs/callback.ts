@@ -9,7 +9,7 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: (interaction) => {
         interaction.reply({ files: settings.data.serverLogPaths, flags: MessageFlags.Ephemeral }).catch(() => {
-            replyError(interaction, 'Failed to retrieve and send the server logs.');
+            replyError(interaction, { description: 'Failed to retrieve and send the server logs.' });
         });
 
         log(`${parseUser(interaction.user)} has requested the STDOUT and STDERR server logs.`, 'Server Logs');

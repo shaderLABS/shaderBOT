@@ -1,4 +1,4 @@
-import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, type UserResolvable } from 'discord.js';
+import { CategoryChannel, ChannelType, escapeMarkdown, Guild, TextChannel, User, type Snowflake, type UserResolvable } from 'discord.js';
 import { client, settings } from '../bot.ts';
 
 // Create an object type containing the properties K from object type T.
@@ -31,15 +31,15 @@ export function getAlphabeticalChannelPosition(channel: TextChannel, parent: Cat
         .set(channel.id, channel)
         .sort((a, b) => a.name.replace(/[^\x00-\x7F]/g, '').localeCompare(b.name.replace(/[^\x00-\x7F]/g, ''), 'en'));
 
-    return [...totalChannels.keys()].indexOf(channel.id);
+    return totalChannels.keys().toArray().indexOf(channel.id);
 }
 
-export function parseUser(user: User | string) {
-    let target: User | null;
+export function parseUser(user: User | Snowflake) {
+    let target: User | undefined;
     if (user instanceof User) {
         target = user;
     } else {
-        target = client.users.resolve(user);
+        target = client.users.cache.get(user);
         if (!target) return `<@${user}> (${user})`;
     }
 

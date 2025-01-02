@@ -21,15 +21,15 @@ export class Project {
     public static readonly CHANNEL_TYPES = [ChannelType.GuildText] as const;
     public static readonly CATEGORY_CHANNEL_TYPES = [ChannelType.GuildCategory] as const;
 
-    static readonly OWNER_OVERWRITES: { APPLY: PermissionOverwriteOptions; LIFT: PermissionOverwriteOptions; BITFIELD: bigint } = {
+    static readonly OWNER_OVERWRITES = {
         APPLY: {
             ManageWebhooks: true,
             ManageThreads: true,
-        },
+        } satisfies PermissionOverwriteOptions,
         LIFT: {
             ManageWebhooks: null,
             ManageThreads: null,
-        },
+        } satisfies PermissionOverwriteOptions,
         BITFIELD: PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageThreads,
     } as const;
 
@@ -60,7 +60,9 @@ export class Project {
     }
 
     public static async getByChannelID(channelId: string) {
-        const result = await db.query.project.findFirst({ where: sql.eq(schema.project.channelId, channelId) });
+        const result = await db.query.project.findFirst({
+            where: sql.eq(schema.project.channelId, channelId),
+        });
         if (!result) return Promise.reject('A project linked to the specified channel does not exist.');
         return new Project(result);
     }
@@ -138,7 +140,10 @@ export class Project {
 
         const announcementChannel = client.channels.cache.get(settings.data.logging.announcementChannelID);
         if (announcementChannel?.isSendable()) {
-            sendInfo(announcementChannel, `${channel.toString()} (${channel.parent?.toString() || 'No Category'})`, 'A new project has been created!');
+            sendInfo(announcementChannel, {
+                description: `${channel.toString()} (${channel.parent?.toString() || 'No Category'})`,
+                title: 'A new project has been created!',
+            });
         }
 
         log(`${parseUser(moderatorId)} created a project linked to <#${channel.id}> (${id}).`, 'Create Project');
@@ -339,7 +344,10 @@ export class Project {
     }
 
     public async applyPermissions(owner: GuildMember | User | string, channel: TextChannel = this.getChannel()) {
-        await channel.permissionOverwrites.edit(owner, Project.OWNER_OVERWRITES.APPLY, { type: OverwriteType.Member, reason: 'Apply project owner permissions.' });
+        await channel.permissionOverwrites.edit(owner, Project.OWNER_OVERWRITES.APPLY, {
+            type: OverwriteType.Member,
+            reason: 'Apply project owner permissions.',
+        });
     }
 
     public static async isOwner(userId: string, channelId: string): Promise<boolean> {
@@ -462,21 +470,21 @@ export class ProjectMute {
     public readonly userId: string;
     public readonly timestamp: Date;
 
-    static readonly MUTE_OVERWRITES: { APPLY: PermissionOverwriteOptions; LIFT: PermissionOverwriteOptions; BITFIELD: bigint } = {
+    static readonly MUTE_OVERWRITES = {
         APPLY: {
             SendMessages: false,
             SendMessagesInThreads: false,
             AddReactions: false,
             CreatePublicThreads: false,
             CreatePrivateThreads: false,
-        },
+        } satisfies PermissionOverwriteOptions,
         LIFT: {
             SendMessages: null,
             SendMessagesInThreads: null,
             AddReactions: null,
             CreatePublicThreads: null,
             CreatePrivateThreads: null,
-        },
+        } satisfies PermissionOverwriteOptions,
         BITFIELD:
             PermissionFlagsBits.SendMessages |
             PermissionFlagsBits.SendMessagesInThreads |
@@ -497,12 +505,18 @@ export class ProjectMute {
     }
 
     public static async getAllByUserID(userId: string) {
-        const result = await db.query.projectMute.findMany({ where: sql.eq(schema.projectMute.userId, userId), orderBy: sql.desc(schema.projectMute.timestamp) });
+        const result = await db.query.projectMute.findMany({
+            where: sql.eq(schema.projectMute.userId, userId),
+            orderBy: sql.desc(schema.projectMute.timestamp),
+        });
         return result.map((entry) => new ProjectMute(entry));
     }
 
     public static async getAllByProjectID(projectId: string) {
-        const result = await db.query.projectMute.findMany({ where: sql.eq(schema.projectMute.projectId, projectId), orderBy: sql.desc(schema.projectMute.timestamp) });
+        const result = await db.query.projectMute.findMany({
+            where: sql.eq(schema.projectMute.projectId, projectId),
+            orderBy: sql.desc(schema.projectMute.timestamp),
+        });
         return result.map((entry) => new ProjectMute(entry));
     }
 
@@ -550,7 +564,10 @@ export class ProjectMute {
             channel = project.getChannel();
         }
 
-        await channel.permissionOverwrites.edit(this.userId, ProjectMute.MUTE_OVERWRITES.APPLY, { type: OverwriteType.Member, reason: 'Apply project mute permissions.' });
+        await channel.permissionOverwrites.edit(this.userId, ProjectMute.MUTE_OVERWRITES.APPLY, {
+            type: OverwriteType.Member,
+            reason: 'Apply project mute permissions.',
+        });
     }
 
     public async lift(ownerId: string) {

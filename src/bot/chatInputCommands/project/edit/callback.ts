@@ -7,7 +7,7 @@ export const command: ChatInputCommandCallback = {
     callback: async (interaction) => {
         const { channel } = interaction;
         if (channel.type !== ChannelType.GuildText) {
-            replyError(interaction, 'This command is only usable in text channels.', 'Invalid Channel');
+            replyError(interaction, { description: 'This command is only usable in text channels.', title: 'Invalid Channel' });
             return;
         }
 
@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
             const project = await Project.getByChannelID(interaction.channelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
             return;
         }
 

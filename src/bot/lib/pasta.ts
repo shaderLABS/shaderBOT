@@ -19,7 +19,7 @@ export function handlePastaAutocomplete(interaction: AutocompleteInteraction<'ca
             pasta.content?.includes(value) ||
             (pasta.embedData &&
                 (pasta.embedData.description?.includes(value) || pasta.embedData.footer?.text.includes(value) || pasta.embedData.fields?.some((field) => field.value.includes(value)))) ||
-            false
+            false,
     );
     interaction.respond(filtered.map((_, alias) => ({ name: alias, value: alias })));
 }

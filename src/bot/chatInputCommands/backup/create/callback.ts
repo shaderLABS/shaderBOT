@@ -10,7 +10,7 @@ export const command: ChatInputCommandCallback = {
 
         const limit = interaction.options.getInteger('limit', false) || undefined;
         if (limit && limit < 1) {
-            replyError(interaction, 'The message limit must be bigger than one.');
+            replyError(interaction, { description: 'The message limit must be bigger than one.' });
             return;
         }
 
@@ -18,9 +18,9 @@ export const command: ChatInputCommandCallback = {
 
         try {
             await Backup.create(backupChannel, backupMessages);
-            replySuccess(interaction, `Backup of <#${backupChannel.id}> created. ${backupMessages.size} messages have been encrypted and saved.`, 'Backup');
+            replySuccess(interaction, { description: `Backup of <#${backupChannel.id}> created. ${backupMessages.size} messages have been encrypted and saved.`, title: 'Backup' });
         } catch (error) {
-            replyError(interaction, String(error));
+            replyError(interaction, { description: String(error) });
         }
     },
 };
