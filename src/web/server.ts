@@ -209,7 +209,6 @@ export function startWebserver() {
             return error(statusCode);
         },
         {
-            type: ['json', 'urlencoded'],
             body: t.Union([GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY]),
             params: t.Object({ channelID: t.String({ pattern: '^[0-9]+$', default: '0', examples: '1044804143455420539' }) }),
             headers: t.Object({ 'x-hub-signature-256': t.String({ pattern: '^sha256=[0-9a-f]{64}$', default: 'sha256=0' }), 'x-github-event': t.Union([t.Literal('ping'), t.Literal('release')]) }),
