@@ -56,7 +56,7 @@ export function startWebserver() {
 
     app.get('/api/auth/login', async ({ cookie: { discord_oauth_state }, redirect }) => {
         const state = generateState();
-        const url = discordOAuthProvider.createAuthorizationURL(state, ['identify']);
+        const url = discordOAuthProvider.createAuthorizationURL(state, null, ['identify']);
 
         discord_oauth_state.set({
             value: state,
@@ -77,7 +77,7 @@ export function startWebserver() {
             }
 
             try {
-                const tokens = await discordOAuthProvider.validateAuthorizationCode(code);
+                const tokens = await discordOAuthProvider.validateAuthorizationCode(code, null);
 
                 const discordUserResponse = await fetch(REST_CURRENT_USER_URL, {
                     method: RequestMethod.Get,
