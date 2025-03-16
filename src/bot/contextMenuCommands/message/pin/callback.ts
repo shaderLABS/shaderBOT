@@ -6,7 +6,13 @@ export const command: MessageContextMenuCommandCallback = {
     commandName: 'Pin/Unpin',
     callback: async (interaction) => {
         try {
-            const project = await Project.getByChannelID(interaction.channelId);
+            let projectChannelId = interaction.channelId;
+
+            if (interaction.channel?.isThread()) {
+                projectChannelId = interaction.channel.parentId!;
+            }
+
+            const project = await Project.getByChannelID(projectChannelId);
             project.assertOwner(interaction.user.id).assertNotArchived();
         } catch (error) {
             replyError(interaction, { description: String(error) });
