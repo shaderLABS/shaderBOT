@@ -1,4 +1,4 @@
-import { check, customType, foreignKey, index, numeric, pgTable, smallint, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
+import { check, customType, foreignKey, index, pgTable, smallint, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 import * as sql from 'drizzle-orm/sql';
 
 const bytea = customType<{
@@ -10,16 +10,25 @@ const bytea = customType<{
     },
 });
 
+// TODO: workaround until https://github.com/drizzle-team/drizzle-orm/issues/813
+const bigint = customType<{
+    data: string;
+}>({
+    dataType() {
+        return 'bigint';
+    },
+});
+
 export const mute = pgTable(
     'mute',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
@@ -29,13 +38,13 @@ export const mute = pgTable(
 export const kick = pgTable(
     'kick',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
@@ -44,28 +53,28 @@ export const kick = pgTable(
 export const track = pgTable(
     'track',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
 );
 
 export const channelLock = pgTable('channel_lock', {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    channelId: numeric({ precision: 20, scale: 0 }).notNull(),
+    id: uuid().defaultRandom().primaryKey(),
+    channelId: bigint().notNull(),
     originalPermissions: smallint().notNull(),
     expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
 });
 
 export const channelSlowmode = pgTable('channel_slowmode', {
-    id: uuid().defaultRandom().primaryKey().notNull(),
-    channelId: numeric({ precision: 20, scale: 0 }).notNull(),
+    id: uuid().defaultRandom().primaryKey(),
+    channelId: bigint().notNull(),
     originalSlowmode: smallint().notNull(),
     expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
 });
@@ -73,13 +82,13 @@ export const channelSlowmode = pgTable('channel_slowmode', {
 export const ban = pgTable(
     'ban',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         expireTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
@@ -89,15 +98,15 @@ export const ban = pgTable(
 export const liftedMute = pgTable(
     'lifted_mute',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         liftedTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
-        liftedModeratorId: numeric({ precision: 20, scale: 0 }),
+        liftedModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
@@ -106,13 +115,13 @@ export const liftedMute = pgTable(
 export const note = pgTable(
     'note',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }).notNull(),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint().notNull(),
         content: text(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
@@ -121,15 +130,15 @@ export const note = pgTable(
 export const liftedBan = pgTable(
     'lifted_ban',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint(),
         reason: text().notNull(),
         contextUrl: text(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         liftedTimestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
-        liftedModeratorId: numeric({ precision: 20, scale: 0 }),
+        liftedModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
@@ -138,16 +147,16 @@ export const liftedBan = pgTable(
 export const appeal = pgTable(
     'appeal',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
         reason: text().notNull(),
         result: text().$type<'pending' | 'declined' | 'accepted' | 'expired'>().notNull(),
         resultReason: text(),
-        resultModeratorId: numeric({ precision: 20, scale: 0 }),
+        resultModeratorId: bigint(),
         resultTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        resultEditModeratorId: numeric({ precision: 20, scale: 0 }),
+        resultEditModeratorId: bigint(),
         resultEditTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        messageId: numeric({ precision: 20, scale: 0 }),
+        messageId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [index().using('hash', table.userId)],
@@ -156,10 +165,10 @@ export const appeal = pgTable(
 export const project = pgTable(
     'project',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        channelId: numeric({ precision: 20, scale: 0 }).notNull(),
-        ownerIds: numeric({ precision: 20, scale: 0 }).array().notNull(),
-        roleId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        channelId: bigint().notNull(),
+        ownerIds: bigint().array().notNull(),
+        roleId: bigint(),
         bannerMessageId: text(),
         bannerLastTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
         webhookSecret: bytea('webhook_secret'),
@@ -170,9 +179,9 @@ export const project = pgTable(
 export const projectMute = pgTable(
     'project_mute',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
+        id: uuid().defaultRandom().primaryKey(),
         projectId: uuid().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
+        userId: bigint().notNull(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
     },
     (table) => [
@@ -187,13 +196,13 @@ export const projectMute = pgTable(
 export const warn = pgTable(
     'warn',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        userId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }).notNull(),
+        id: uuid().defaultRandom().primaryKey(),
+        userId: bigint().notNull(),
+        moderatorId: bigint().notNull(),
         severity: smallint().$type<0 | 1 | 2 | 3>().notNull(),
         reason: text().notNull(),
         editTimestamp: timestamp({ withTimezone: true, mode: 'date' }),
-        editModeratorId: numeric({ precision: 20, scale: 0 }),
+        editModeratorId: bigint(),
         timestamp: timestamp({ withTimezone: true, mode: 'date' }).notNull(),
         contextUrl: text(),
     },
@@ -203,10 +212,10 @@ export const warn = pgTable(
 export const stickyThread = pgTable(
     'sticky_thread',
     {
-        id: uuid().defaultRandom().primaryKey().notNull(),
-        channelId: numeric({ precision: 20, scale: 0 }).notNull(),
-        threadId: numeric({ precision: 20, scale: 0 }).notNull(),
-        moderatorId: numeric({ precision: 20, scale: 0 }),
+        id: uuid().defaultRandom().primaryKey(),
+        channelId: bigint().notNull(),
+        threadId: bigint().notNull(),
+        moderatorId: bigint(),
     },
     (table) => [unique().on(table.threadId)],
 );
