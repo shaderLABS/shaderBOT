@@ -43,8 +43,5 @@
         "@types/sharp": "0.32.0",
         "drizzle-kit": "0.30.5",
         "typescript": "5.8.2"
-    },
-    "overrides": {
-        "@types/node": "^22"
     }
 }
