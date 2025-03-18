@@ -72,7 +72,7 @@ export class BanAppeal {
 
     public static async hasPending(userId: string) {
         const result = await db.query.appeal.findFirst({
-            columns: {},
+            columns: { id: true },
             where: sql.and(sql.eq(schema.appeal.userId, userId), sql.eq(schema.appeal.result, 'pending')),
         });
 

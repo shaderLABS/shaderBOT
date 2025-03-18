@@ -19,7 +19,7 @@ export class Ban extends ExpirablePunishment {
 
     static async has(userId: string): Promise<boolean> {
         const result = await db.query.ban.findFirst({
-            columns: {},
+            columns: { id: true },
             where: sql.eq(schema.ban.userId, userId),
         });
         return result !== undefined;

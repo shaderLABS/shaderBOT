@@ -60,7 +60,10 @@ export class StickyThread {
     }
 
     public static async isSticky(threadId: string) {
-        const result = await db.query.stickyThread.findFirst({ columns: {}, where: sql.eq(schema.stickyThread.threadId, threadId) });
+        const result = await db.query.stickyThread.findFirst({
+            columns: { id: true },
+            where: sql.eq(schema.stickyThread.threadId, threadId),
+        });
         return result !== undefined;
     }
 

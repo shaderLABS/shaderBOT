@@ -20,7 +20,7 @@ export class Mute extends ExpirablePunishment {
 
     static async has(userId: string): Promise<boolean> {
         const result = await db.query.mute.findFirst({
-            columns: {},
+            columns: { id: true },
             where: sql.eq(schema.mute.userId, userId),
         });
         return result !== undefined;

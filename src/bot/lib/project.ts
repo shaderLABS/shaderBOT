@@ -361,7 +361,7 @@ export class Project {
 
     public static async isProjectChannel(channelId: string): Promise<boolean> {
         const result = db.query.project.findFirst({
-            columns: {},
+            columns: { id: true },
             where: sql.eq(schema.project.channelId, channelId),
         });
 
