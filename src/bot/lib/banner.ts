@@ -17,7 +17,7 @@ export async function rotateBanner() {
             channelId: true,
         },
         where: sql.and(sql.isNotNull(schema.project.bannerMessageId), sql.isNotNull(schema.project.roleId)),
-        orderBy: sql.asc(schema.project.bannerLastTimestamp).append(sql.sql`NULLS FIRST`),
+        orderBy: sql.asc(schema.project.bannerLastTimestamp).append(sql.sql` NULLS FIRST`),
     });
 
     for (const project of projects) {
