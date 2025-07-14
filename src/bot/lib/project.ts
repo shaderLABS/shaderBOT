@@ -360,7 +360,7 @@ export class Project {
     }
 
     public static async isProjectChannel(channelId: string): Promise<boolean> {
-        const result = db.query.project.findFirst({
+        const result = await db.query.project.findFirst({
             columns: { id: true },
             where: sql.eq(schema.project.channelId, channelId),
         });
