@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from 'discord.js';
-import uuid from 'uuid-random';
 import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 import { replyError, replyInfo } from '../../../lib/embeds.ts';
+import { isValidUuid } from '../../../lib/misc.ts';
 import { Ban, LiftedBan } from '../../../lib/punishment/ban.ts';
 import { Kick } from '../../../lib/punishment/kick.ts';
 import { LiftedMute, Mute } from '../../../lib/punishment/mute.ts';
@@ -11,7 +11,7 @@ export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.BanMembers,
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
-        if (!uuid.test(id)) {
+        if (!isValidUuid(id)) {
             replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }

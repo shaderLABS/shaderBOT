@@ -12,7 +12,7 @@ export const command: ChatInputCommandCallback = {
             if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) project.assertOwner(interaction.user.id);
 
             const logString = await ProjectMute.create(project, targetUser, interaction.user.id);
-            replySuccess(interaction, { description: logString, title: 'Project Create Mute' });
+            replySuccess(interaction, { description: logString, title: 'Project Create Mute' }, true);
         } catch (error) {
             replyError(interaction, { description: String(error) });
         }

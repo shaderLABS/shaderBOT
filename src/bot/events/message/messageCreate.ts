@@ -22,10 +22,10 @@ export const event: Event = {
     },
 };
 
-const mediaURLs = /([a-zA-Z0-9]+:\/\/)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\.[A-Za-z]{2,4})(:[0-9]+)?(\/.*)?/;
+const MEDIA_URL_REGEXP = /([a-zA-Z0-9]+:\/\/)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\.[A-Za-z]{2,4})(:[0-9]+)?(\/.*)?/;
 function checkMediaOnly(message: GuildMessage) {
     if (!settings.data.mediaChannelIDs.includes(message.channelId) || message.attachments.size !== 0 || message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return false;
-    if (mediaURLs.test(message.content)) return true;
+    if (MEDIA_URL_REGEXP.test(message.content)) return true;
 
     message.delete();
     return true;

@@ -1,14 +1,14 @@
 import { PermissionFlagsBits } from 'discord.js';
-import uuid from 'uuid-random';
 import type { ChatInputCommandCallback } from '../../../../chatInputCommandHandler.ts';
 import { replyError } from '../../../../lib/embeds.ts';
+import { isValidUuid } from '../../../../lib/misc.ts';
 import { Note } from '../../../../lib/note.ts';
 
 export const command: ChatInputCommandCallback = {
     requiredPermissions: PermissionFlagsBits.KickMembers,
     callback: async (interaction) => {
         const id = interaction.options.getString('id', true);
-        if (!uuid.test(id)) {
+        if (!isValidUuid(id)) {
             replyError(interaction, { description: 'The specified UUID is invalid.' });
             return;
         }

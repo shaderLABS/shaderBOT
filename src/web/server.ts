@@ -45,9 +45,10 @@ export function startWebserver() {
         )
         .use(jwt({ secret: process.env.SESSION_SECRET, schema: t.Object({ id: t.String() }), exp: '1d' }))
         .derive(async ({ cookie: { discord_auth }, jwt }): Promise<{ user: { id: string } | null }> => {
-            return {
-                user: (await jwt.verify(discord_auth.value)) || null,
-            };
+            if (typeof discord_auth.value !== 'string') return { user: null };
+
+            const user = await jwt.verify(discord_auth.value);
+            return { user: user || null };
         });
 
     /**********
@@ -71,9 +72,9 @@ export function startWebserver() {
 
     app.get(
         '/api/auth/redirect',
-        async ({ query: { code, state }, cookie: { discord_oauth_state, discord_auth }, jwt, error, redirect }) => {
+        async ({ query: { code, state }, cookie: { discord_oauth_state, discord_auth }, jwt, status, redirect }) => {
             if (state !== discord_oauth_state.value) {
-                return error('Bad Request');
+                return status('Bad Request');
             }
 
             try {
@@ -102,39 +103,39 @@ export function startWebserver() {
                 return redirect('/');
             } catch (errorMessage) {
                 if (errorMessage instanceof OAuth2RequestError) {
-                    return error('Bad Request');
+                    return status('Bad Request');
                 } else {
                     console.error(errorMessage);
-                    return error('Internal Server Error');
+                    return status('Internal Server Error');
                 }
             }
         },
-        { query: t.Object({ code: t.String(), state: t.String() }) },
+        { query: t.Object({ code: t.String(), state: t.String() }), cookie: t.Object({ discord_oauth_state: t.String() }) },
     );
 
-    app.post('/api/auth/logout', async ({ user, cookie: { discord_auth }, error }) => {
+    app.post('/api/auth/logout', async ({ user, cookie: { discord_auth }, status }) => {
         if (!user) {
-            return error('Unauthorized');
+            return status('Unauthorized');
         }
 
         discord_auth.remove();
 
-        return error('No Content');
+        return status('No Content');
     });
 
-    app.get('/api/user/me', async ({ user, error }) => {
+    app.get('/api/user/me', async ({ user, status }) => {
         // 200 OK - user is logged in, data in response
         // 204 No Content - user not logged in, no data available
         // 404 Not Found - user not found in Discord, no data available
 
         if (!user) {
-            return error('No Content');
+            return status('No Content');
         }
 
         const discordUser = await client.users.fetch(user.id)?.catch(() => undefined);
 
         if (!discordUser) {
-            return error('Not Found');
+            return status('Not Found');
         }
 
         const data: API.UserInformation = {
@@ -151,32 +152,32 @@ export function startWebserver() {
         return data;
     });
 
-    app.get('/api/ban/me', async ({ user, error }) => {
+    app.get('/api/ban/me', async ({ user, status }) => {
         if (!user) {
-            return error('Unauthorized');
+            return status('Unauthorized');
         }
 
         try {
             return await getUserAppealData(user.id);
         } catch (errorMessage) {
             console.error('/api/ban/me', user.id, errorMessage);
-            return error('Internal Server Error');
+            return status('Internal Server Error');
         }
     });
 
     app.post(
         '/api/appeal',
-        async ({ user, body: { reason }, error }) => {
+        async ({ user, body: { reason }, status }) => {
             if (!user) {
-                return error('Unauthorized');
+                return status('Unauthorized');
             }
 
             try {
                 await BanAppeal.create(user.id, reason);
-                return error('No Content');
+                return status('No Content');
             } catch (errorMessage) {
                 console.error('/api/appeal', user.id, errorMessage);
-                return error('Bad Request');
+                return status('Bad Request');
             }
         },
         { body: t.Object({ reason: t.String() }) },
@@ -184,18 +185,18 @@ export function startWebserver() {
 
     app.decorate('bodyText', '' as string).post(
         '/api/webhook/release/:channelID',
-        async ({ params: { channelID }, body, bodyText, headers: { 'x-hub-signature-256': signature, 'x-github-event': event }, error }) => {
+        async ({ params: { channelID }, body, bodyText, headers: { 'x-hub-signature-256': signature, 'x-github-event': event }, status }) => {
             const project = await db.query.project.findFirst({
                 columns: { roleId: true, webhookSecret: true },
                 where: sql.eq(schema.project.channelId, channelID),
             });
 
             if (!project || !project.webhookSecret || !project.roleId) {
-                return error('Not Found');
+                return status('Not Found');
             }
 
             if (!(await verifyGitHubWebhook(project.webhookSecret.toString('hex'), bodyText, signature))) {
-                return error('Forbidden');
+                return status('Forbidden');
             }
 
             let statusCode = 400;
@@ -206,7 +207,7 @@ export function startWebserver() {
                 statusCode = await releaseNotification(channelID, project.roleId, body);
             }
 
-            return error(statusCode);
+            return status(statusCode);
         },
         {
             body: t.Union([GITHUB_PING_WEBHOOK_BODY, GITHUB_RELEASE_WEBHOOK_BODY]),
