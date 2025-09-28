@@ -92,10 +92,10 @@ export class Note {
             `**Moderator:** ${parseUser(this.moderatorId)}\n` +
             `**Context:** ${formatContextURL(this.contextUrl)}\n` +
             `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
-            `**ID:** ${this.id}`;
+            `-# ${this.id}`;
 
         if (this.editTimestamp && this.editModeratorId) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
+            string += `\n-# (last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})`;
         }
 
         return string;

@@ -203,7 +203,7 @@ export class Mute extends ExpirablePunishment {
 
         let sentDM = true;
         await sendInfo(user, {
-            description: mute.toString(false),
+            description: mute.toString(false, false),
             title: `You have been muted on ${guild.name}.`,
         }).catch(() => {
             sentDM = false;
@@ -214,7 +214,7 @@ export class Mute extends ExpirablePunishment {
 
         let logString = `${parseUser(user)} has been muted for ${secondsToString(duration)}.\n\n${mute.toString()}`;
         if (overwrittenMute) logString += `\n\nTheir previous mute has been overwritten:\n` + overwrittenMute.toString();
-        if (!sentDM) logString += '\n\n*They did not receive a DM.*';
+        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
 
         log(logString, 'Mute');
         return logString;

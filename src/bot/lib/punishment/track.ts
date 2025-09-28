@@ -85,7 +85,7 @@ export class Track extends Punishment {
         const result = await db.delete(schema.track).where(sql.eq(schema.track.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete track entry.');
 
-        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s track entry.\n\n${this.toString()}`;
+        const logString = `${parseUser(moderatorId)} deleted ${parseUser(this.userId)}'s track entry.\n\n${this.toString()}`;
         log(logString, 'Delete Track');
         return logString;
     }

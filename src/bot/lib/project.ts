@@ -130,12 +130,9 @@ export class Project {
                 },
                 {
                     name: 'Information',
-                    value: 'Please take a look at the [documentation](https://github.com/shaderLABS/shaderBOT/wiki/Projects) for more information about Projects and how to manage them.',
+                    value: `Please take a look at the [documentation](https://github.com/shaderLABS/shaderBOT/wiki/Projects) for more information about Projects and how to manage them.\n-# ${id}`,
                 },
             ],
-            footer: {
-                text: 'ID: ' + id,
-            },
         });
 
         const announcementChannel = client.channels.cache.get(settings.data.logging.announcementChannelID);
@@ -552,7 +549,7 @@ export class ProjectMute {
         const projectMute = new ProjectMute({ id, ...data });
         await projectMute.applyPermissions(channel);
 
-        const logString = `${parseUser(ownerId)} muted ${parseUser(user)} in their project <#${channel.id}> (${project.id}).\n\n**Created At:** ${formatTimeDate(data.timestamp)}\n**ID:** ${id}`;
+        const logString = `${parseUser(ownerId)} muted ${parseUser(user)} in their project <#${channel.id}> (${project.id}).\n\n**Created At:** ${formatTimeDate(data.timestamp)}\n-# ${id}`;
 
         log(logString, 'Project Create Mute');
         return logString;
@@ -584,9 +581,9 @@ export class ProjectMute {
             else await currentOverwrite.edit(ProjectMute.MUTE_OVERWRITES.LIFT, 'Lift project mute.');
         }
 
-        const logString = `${parseUser(ownerId)} unmuted ${parseUser(this.userId)} in their project <#${channel.id}> (${project.id}).\n\n**ID:** ${this.id}\n**Created At:** ${formatTimeDate(
+        const logString = `${parseUser(ownerId)} unmuted ${parseUser(this.userId)} in their project <#${channel.id}> (${project.id}).\n\n**Created At:** ${formatTimeDate(
             this.timestamp,
-        )}`;
+        )}\n-# ${this.id}`;
 
         log(logString, 'Project Lift Mute');
         return logString;
@@ -598,6 +595,6 @@ export class ProjectMute {
     }
 
     public toString() {
-        return `**User:** ${parseUser(this.userId)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}`;
+        return `**User:** ${parseUser(this.userId)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n-# ${this.id}`;
     }
 }

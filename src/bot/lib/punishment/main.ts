@@ -36,22 +36,23 @@ export abstract class Punishment {
     abstract readonly TYPE_STRING: string;
     abstract editReason(newReason: string, moderatorID: string): Promise<string>;
 
-    public toString(includeUser: boolean = true) {
+    public toString(includeUser: boolean = true, includePrivateInformation: boolean = true) {
         let string = '';
 
         if (includeUser) {
             string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
-        string +=
-            `**Reason:** ${this.reason}\n` +
-            `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n` +
-            `**Context:** ${formatContextURL(this.contextUrl)}\n` +
-            `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
-            `**ID:** ${this.id}`;
+        string += `**Reason:** ${this.reason}\n`;
 
-        if (this.editTimestamp && this.editModeratorId) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (includePrivateInformation) {
+            string += `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n`;
+        }
+
+        string += `**Context:** ${formatContextURL(this.contextUrl)}\n` + `**Created At:** ${formatTimeDate(this.timestamp)}\n` + `-# ${this.id}`;
+
+        if (includePrivateInformation && this.editTimestamp && this.editModeratorId) {
+            string += `\n-# (last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})`;
         }
 
         return string;
@@ -82,23 +83,27 @@ export abstract class ExpirablePunishment extends Punishment implements TimeoutE
     abstract lift(liftedModeratorID?: string): Promise<string>;
     abstract editDuration(duration: number, moderatorID: string): Promise<string>;
 
-    public toString(includeUser: boolean = true) {
+    public toString(includeUser: boolean = true, includePrivateInformation: boolean = true) {
         let string = '';
 
         if (includeUser) {
             string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
+        string += `**Reason:** ${this.reason}\n`;
+
+        if (includePrivateInformation) {
+            string += `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n`;
+        }
+
         string +=
-            `**Reason:** ${this.reason}\n` +
-            `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n` +
             `**Context:** ${formatContextURL(this.contextUrl)}\n` +
             `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
             `**Expiring At:** ${this.expireTimestamp ? formatTimeDate(this.expireTimestamp) : 'Permanent'}\n` +
-            `**ID:** ${this.id}`;
+            `-# ${this.id}`;
 
-        if (this.editTimestamp && this.editModeratorId) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (includePrivateInformation && this.editTimestamp && this.editModeratorId) {
+            string += `\n-# (last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})`;
         }
 
         return string;

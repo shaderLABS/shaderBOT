@@ -88,14 +88,14 @@ export class Warning {
 
         let sentDM = true;
         await sendInfo(user, {
-            description: warning.toString(false),
+            description: warning.toString(false, false),
             title: `You have been warned in ${guild.name}.`,
         }).catch(() => {
             sentDM = false;
         });
 
         let logString = `${parseUser(warning.userId)} has been warned with a severity of ${warning.severity}.\n\n${warning.toString()}`;
-        if (!sentDM) logString += '\n\n*They did not receive a DM.*';
+        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
 
         automaticPunishment(user);
 
@@ -167,23 +167,23 @@ export class Warning {
         return logString;
     }
 
-    public toString(includeUser: boolean = true) {
+    public toString(includeUser: boolean = true, includePrivateInformation: boolean = true) {
         let string = '';
 
         if (includeUser) {
             string += `**User:** ${parseUser(this.userId)}\n`;
         }
 
-        string +=
-            `**Severity:** ${this.severity}\n` +
-            `**Reason:** ${this.reason}\n` +
-            `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n` +
-            `**Context:** ${formatContextURL(this.contextUrl)}\n` +
-            `**Created At:** ${formatTimeDate(this.timestamp)}\n` +
-            `**ID:** ${this.id}`;
+        string += `**Severity:** ${this.severity}\n` + `**Reason:** ${this.reason}\n`;
 
-        if (this.editTimestamp && this.editModeratorId) {
-            string += `\n*(last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})*`;
+        if (includePrivateInformation) {
+            string += `**Moderator:** ${this.moderatorId ? parseUser(this.moderatorId) : 'System'}\n`;
+        }
+
+        string += `**Context:** ${formatContextURL(this.contextUrl)}\n` + `**Created At:** ${formatTimeDate(this.timestamp)}\n` + `-# ${this.id}`;
+
+        if (includePrivateInformation && this.editTimestamp && this.editModeratorId) {
+            string += `\n-# (last edited by ${parseUser(this.editModeratorId)} at ${formatTimeDate(this.editTimestamp)})`;
         }
 
         return string;

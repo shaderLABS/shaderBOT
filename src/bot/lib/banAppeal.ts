@@ -286,7 +286,7 @@ export class BanAppeal {
                 : undefined,
             title: 'Ban Appeal',
             color: EmbedColor.Blue,
-            description: `**User:** ${parseUser(user || this.userId)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n**ID:** ${this.id}\n\n${escapeMarkdown(this.reason)}`,
+            description: `**User:** ${parseUser(user || this.userId)}\n**Created At:** ${formatTimeDate(this.timestamp)}\n-# ${this.id}\n\n${escapeMarkdown(this.reason)}`,
         });
     }
 
@@ -317,7 +317,7 @@ export class BanAppeal {
             )}`;
 
             if (this.resultEditTimestamp && this.resultEditModeratorId) {
-                description += `\n\n*(last edited by ${parseUser(this.resultEditModeratorId)} at ${formatTimeDate(this.resultEditTimestamp)})*`;
+                description += `\n\n-# (last edited by ${parseUser(this.resultEditModeratorId)} at ${formatTimeDate(this.resultEditTimestamp)})`;
             }
 
             const embed = new EmbedBuilder({ description });
@@ -366,10 +366,10 @@ export class BanAppeal {
                 `**Result Created At:** ${formatTimeDate(this.resultTimestamp)}\n`;
         }
 
-        string += `**ID:** ${this.id}`;
+        string += `-# ${this.id}`;
 
         if (this.resultEditTimestamp && this.resultEditModeratorId) {
-            string += `\n*(last edited by ${parseUser(this.resultEditModeratorId)} at ${formatTimeDate(this.resultEditTimestamp)})*`;
+            string += `\n-# (last edited by ${parseUser(this.resultEditModeratorId)} at ${formatTimeDate(this.resultEditTimestamp)})`;
         }
 
         return string;
@@ -378,16 +378,9 @@ export class BanAppeal {
 
 export async function getUserAppealData(userID: string): Promise<API.BanInformation> {
     const [ban, appeal] = await Promise.all([Ban.getByUserID(userID), BanAppeal.getLatestByUserID(userID).catch(() => undefined)]);
-    const banModerator = ban.moderatorId ? await client.users.fetch(ban.moderatorId).catch(() => undefined) : undefined;
 
     return {
         id: ban.id,
-        moderator: banModerator
-            ? {
-                  id: banModerator.id,
-                  username: banModerator.username,
-              }
-            : undefined,
         appeal: appeal
             ? {
                   result: appeal.result,

@@ -68,7 +68,7 @@ export class Kick extends Punishment {
 
         let sentDM = true;
         await sendInfo(user, {
-            description: kick.toString(false),
+            description: kick.toString(false, false),
             title: `You have been kicked from ${guild.name}.`,
         }).catch(() => {
             sentDM = false;
@@ -87,7 +87,7 @@ export class Kick extends Punishment {
         }
 
         let logString = `${parseUser(user)} has been kicked.\n\n${kick.toString()}`;
-        if (!sentDM) logString += '\n\n*They did not receive a DM.*';
+        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
 
         log(logString, 'Kick');
         return logString;

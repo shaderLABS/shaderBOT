@@ -15,7 +15,7 @@ export const command: ChatInputCommandCallback = {
 
         const pages: string[] = [];
         warnings.reduce((content, warning, index, { length }) => {
-            const page = warning.toString(false);
+            const page = warning.toString(false, false);
 
             if ((index + 1) % 3 === 0 || index === length - 1) {
                 pages.push(content + '\n\n' + page);

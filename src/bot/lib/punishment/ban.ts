@@ -102,7 +102,7 @@ export class Ban extends ExpirablePunishment {
 
         let sentDM = true;
         await sendInfo(user, {
-            description: ban.toString(false),
+            description: ban.toString(false, false),
             title: `You have been banned from ${guild.name}.`,
         }).catch(() => {
             sentDM = false;
@@ -123,7 +123,7 @@ export class Ban extends ExpirablePunishment {
 
         let logString = `${parseUser(user)} has been ${duration ? `temporarily banned for ${secondsToString(duration)}.` : 'permanently banned.'}\n\n${ban.toString()}`;
         if (overwrittenBan) logString += '\n\nTheir previous ban has been overwritten:\n' + overwrittenBan.toString();
-        if (!sentDM) logString += '\n\n*They did not receive a DM.*';
+        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
 
         log(logString, duration ? 'Temporary Ban' : 'Permanent Ban');
         return logString;
