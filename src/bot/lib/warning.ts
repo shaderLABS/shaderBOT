@@ -95,7 +95,7 @@ export class Warning {
         });
 
         let logString = `${parseUser(warning.userId)} has been warned with a severity of ${warning.severity}.\n\n${warning.toString()}`;
-        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
+        if (!sentDM) logString += '\n\n-# They did not receive a direct message.';
 
         automaticPunishment(user);
 

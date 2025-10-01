@@ -87,7 +87,7 @@ export class Kick extends Punishment {
         }
 
         let logString = `${parseUser(user)} has been kicked.\n\n${kick.toString()}`;
-        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
+        if (!sentDM) logString += '\n\n-# They did not receive a direct message.';
 
         log(logString, 'Kick');
         return logString;

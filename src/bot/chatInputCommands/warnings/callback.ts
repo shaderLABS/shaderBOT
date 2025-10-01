@@ -30,7 +30,7 @@ export const command: ChatInputCommandCallback = {
             replySuccess(
                 interaction,
                 {
-                    description: 'Your warnings have been sent to you in a DM.',
+                    description: 'Your warnings have been sent to you in a direct message.',
                     title: 'Warnings',
                 },
                 true,
@@ -39,7 +39,7 @@ export const command: ChatInputCommandCallback = {
             replyError(
                 interaction,
                 {
-                    description: "Failed to send you a DM. Please make sure that they're open and try again.",
+                    description: 'Failed to send you a direct message. Please make sure that you are able to receive direct messages and try again.',
                     title: 'Warnings',
                 },
                 true,

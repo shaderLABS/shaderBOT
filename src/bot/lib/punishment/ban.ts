@@ -123,7 +123,7 @@ export class Ban extends ExpirablePunishment {
 
         let logString = `${parseUser(user)} has been ${duration ? `temporarily banned for ${secondsToString(duration)}.` : 'permanently banned.'}\n\n${ban.toString()}`;
         if (overwrittenBan) logString += '\n\nTheir previous ban has been overwritten:\n' + overwrittenBan.toString();
-        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
+        if (!sentDM) logString += '\n\n-# They did not receive a direct message.';
 
         log(logString, duration ? 'Temporary Ban' : 'Permanent Ban');
         return logString;
@@ -167,7 +167,7 @@ export class Ban extends ExpirablePunishment {
             const appeal = await BanAppeal.getPendingByUserID(this.userId).catch(() => undefined);
             if (appeal) await appeal.expire();
 
-            log(`${parseUser(this.userId)}'s temporary ban (${this.id}) has expired.`, 'Expire Temporary Ban');
+            log(`${parseUser(this.userId)}'s temporary ban (${this.id}) has expired.\n\n${this.toString()}`, 'Expire Temporary Ban');
         } catch (error) {
             console.error(error);
             log(`An error occurred while trying to expire ${parseUser(this.userId)}'s temporary ban (${this.id}).`, 'Expire Temporary Ban');
@@ -316,7 +316,7 @@ export class LiftedBan extends LiftedPunishment {
         const result = await db.delete(schema.liftedBan).where(sql.eq(schema.liftedBan.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted ban.');
 
-        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted ban.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted ban.\n\n${this.toString()}`;
         log(logString, 'Delete Lifted Ban Entry');
         return logString;
     }

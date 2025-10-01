@@ -87,7 +87,7 @@ export class Mute extends ExpirablePunishment {
             await this.move();
 
             // timeout is lifted by discord
-            log(`${parseUser(this.userId)}'s mute (${this.id}) has expired.`, 'Expire Mute');
+            log(`${parseUser(this.userId)}'s mute (${this.id}) has expired.\n\n${this.toString()}`, 'Expire Mute');
         } catch (error) {
             console.error(error);
             log(`An error occurred while trying to expire ${parseUser(this.userId)}'s mute (${this.id}).`, 'Expire Mute');
@@ -214,7 +214,7 @@ export class Mute extends ExpirablePunishment {
 
         let logString = `${parseUser(user)} has been muted for ${secondsToString(duration)}.\n\n${mute.toString()}`;
         if (overwrittenMute) logString += `\n\nTheir previous mute has been overwritten:\n` + overwrittenMute.toString();
-        if (!sentDM) logString += '\n\n-# They did not receive a DM.';
+        if (!sentDM) logString += '\n\n-# They did not receive a direct message.';
 
         log(logString, 'Mute');
         return logString;
@@ -297,7 +297,7 @@ export class LiftedMute extends LiftedPunishment {
         const result = await db.delete(schema.liftedMute).where(sql.eq(schema.liftedMute.id, this.id));
         if (result.rowCount === 0) return Promise.reject('Failed to delete lifted mute.');
 
-        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted mute.\n\n${this.toString(true)}`;
+        const logString = `${parseUser(moderatorId)} deleted the log entry of ${parseUser(this.userId)}'s lifted mute.\n\n${this.toString()}`;
         log(logString, 'Delete Lifted Mute Entry');
         return logString;
     }

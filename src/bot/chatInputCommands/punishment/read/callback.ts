@@ -21,7 +21,7 @@ export const command: ChatInputCommandCallback = {
                 Promise.reject('The specified UUID does not exist.'),
             );
 
-            replyInfo(interaction, { description: punishment.toString(true), title: punishment.TYPE_STRING });
+            replyInfo(interaction, { description: punishment.toString(), title: punishment.TYPE_STRING });
         } catch (error) {
             replyError(interaction, { description: String(error) });
         }
