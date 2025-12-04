@@ -1,4 +1,4 @@
-import { ChannelType, Events, type PartialMessage } from 'discord.js';
+import { ChannelType, Events } from 'discord.js';
 import type { Event } from '../../eventHandler.ts';
 import { Backup } from '../../lib/backup.ts';
 import log from '../../lib/log.ts';
@@ -6,7 +6,7 @@ import log from '../../lib/log.ts';
 export const event: Event = {
     name: Events.MessageBulkDelete,
     callback: async (messages) => {
-        const backupMessages = messages.filter((message): message is Exclude<typeof message, PartialMessage> => !message.partial);
+        const backupMessages = messages.filter((message) => !message.partial);
         const firstMessage = backupMessages.first();
         if (!firstMessage) return;
 
