@@ -65,7 +65,7 @@ export async function checkSpam(message: GuildMessage) {
         !message.member.roles.color &&
         !message.member.permissions.has(PermissionFlagsBits.MentionEveryone) &&
         (message.content.includes('@everyone') || message.content.includes('@here')) &&
-        message.content.includes('http');
+        (message.content.includes('http') || message.attachments.size > 0 || message.embeds.length > 0);
 
     const currentMessage = {
         id: message.id,
@@ -84,7 +84,7 @@ export async function checkSpam(message: GuildMessage) {
                 currentMessage.authorID === previousMessage.authorID &&
                 similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.data.spamProtection.similarityThreshold &&
                 currentMessage.channelID !== previousMessage.channelID &&
-                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000,
+                currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000
         );
 
         isSpamSimilarMessage = potentialSpam.length >= settings.data.spamProtection.messageThreshold - 1;
@@ -100,7 +100,7 @@ export async function checkSpam(message: GuildMessage) {
 
         if (!(await Mute.has(message.author.id))) {
             Mute.create(message.author, isSpamSingleMessage ? 'Attempting to ping everyone.' : 'Spamming messages in multiple channels.', settings.data.spamProtection.muteDuration).catch((error) =>
-                log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute'),
+                log(`Failed to mute ${parseUser(message.author)} due to spam: ${error}`, 'Mute')
             );
 
             const kickButton = new ButtonBuilder({
