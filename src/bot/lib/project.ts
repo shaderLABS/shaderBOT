@@ -25,12 +25,14 @@ export class Project {
         APPLY: {
             ManageWebhooks: true,
             ManageThreads: true,
+            PinMessages: true,
         } satisfies PermissionOverwriteOptions,
         LIFT: {
             ManageWebhooks: null,
             ManageThreads: null,
+            PinMessages: null,
         } satisfies PermissionOverwriteOptions,
-        BITFIELD: PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageThreads,
+        BITFIELD: PermissionFlagsBits.ManageWebhooks | PermissionFlagsBits.ManageThreads | PermissionFlagsBits.PinMessages,
     } as const;
 
     constructor(data: typeof schema.project.$inferSelect) {
@@ -65,6 +67,14 @@ export class Project {
         });
         if (!result) return Promise.reject('A project linked to the specified channel does not exist.');
         return new Project(result);
+    }
+
+    public static async getAllUnarchived() {
+        const result = await db.query.project.findMany({
+            where: sql.isNotNull(schema.project.roleId),
+        });
+
+        return result.map((entry) => new Project(entry));
     }
 
     public static async getAllUnarchivedByOwnerID(userId: string) {
