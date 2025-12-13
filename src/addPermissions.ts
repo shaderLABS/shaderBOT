@@ -18,13 +18,13 @@ client.once(Events.ClientReady, async () => {
         const channel = client.channels.cache.get(project.channelId);
         if (channel?.type !== ChannelType.GuildText) return Promise.reject('The project is linked to an invalid channel.');
 
-        console.log(`Applying permissions for project channel ${channel.toString()} (${project.channelId}, ${project.id})...`);
+        console.log(`Applying permissions for project channel ${channel.name} (${project.channelId}, ${project.id})...`);
 
         for (const ownerId of project.ownerIds) {
-            const member = await channel.guild.members.fetch(ownerId).catch(() => undefined);
-
-            if (member) {
-                await project.applyPermissions(member, channel);
+            try {
+                await project.applyPermissions(ownerId, channel);
+            } catch (error) {
+                console.error(`Failed to apply permissions for user ${ownerId}: ${String(error)}`);
             }
         }
     }
