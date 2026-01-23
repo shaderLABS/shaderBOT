@@ -3,7 +3,7 @@ import { client, settings } from '../bot.ts';
 import type { GuildMessage } from '../events/message/messageCreate.ts';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.ts';
 import log from './log.ts';
-import { getGuild, parseUser, similarityLevenshtein } from './misc.ts';
+import { getGuild, getMaximumUploadBytes, parseUser, similarityLevenshtein } from './misc.ts';
 import { Kick } from './punishment/kick.ts';
 import { Mute } from './punishment/mute.ts';
 
@@ -123,11 +123,15 @@ export async function checkSpam(message: GuildMessage) {
                 description: `**User:** ${parseUser(message.author)}\n**Channels:** <#${spamMessages.map((message) => message.channelID).join('>, <#')}>\n\n\`\`\`${message.content}\`\`\``,
                 color: EmbedColor.Red,
             });
+          
+            const maxAttachmentSize = getMaximumUploadBytes(message.guild);
+            const attachments = message.attachments.values().filter((attachment) => attachment.size <= maxAttachmentSize).toArray();
 
             const logChannel = client.channels.cache.get(settings.data.logging.moderationChannelID);
             if (logChannel?.type === ChannelType.GuildText) {
                 logChannel.send({
-                    embeds: [logEmbed],
+                    embeds: [...message.embeds.slice(0, 9), logEmbed],
+                    files: attachments,
                     components: [
                         new ActionRowBuilder<ButtonBuilder>({
                             components: [kickButton, forgiveButton],
