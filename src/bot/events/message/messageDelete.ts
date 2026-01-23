@@ -30,13 +30,11 @@ async function logDeletedMessage(message: Message | PartialMessage) {
 
         attachments.push(...message.attachments.values());
 
-        let totalAttachmentSize = 0;
         let overflowAttachmentURLs = '';
         const maxAttachmentSize = getMaximumUploadBytes(message.guild);
 
         attachments = attachments.filter((attachment) => {
-            totalAttachmentSize += attachment.size;
-            if (totalAttachmentSize > maxAttachmentSize) {
+            if (attachment.size > maxAttachmentSize) {
                 overflowAttachmentURLs += '\n' + attachment.url;
                 return false;
             } else {
@@ -56,7 +54,7 @@ async function logDeletedMessage(message: Message | PartialMessage) {
         }
 
         if (message.embeds.length > 0) {
-            metadata += `\n**Embeds:** ${message.embeds.length} (attached below)`;
+            metadata += `\n**Embeds:** ${message.embeds.length} (attached above)`;
         }
 
         logEmbed
@@ -74,7 +72,7 @@ async function logDeletedMessage(message: Message | PartialMessage) {
     if (logChannel?.type !== ChannelType.GuildText) return;
 
     logChannel.send({
-        embeds: [logEmbed, ...message.embeds].slice(0, 10),
+        embeds: [...message.embeds.slice(0, 9), logEmbed],
         files: attachments,
         allowedMentions: { parse: [] },
     });
