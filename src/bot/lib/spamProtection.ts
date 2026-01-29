@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, EmbedBuilder, PermissionFlagsBits, User } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, ChannelType, codeBlock, EmbedBuilder, escapeCodeBlock, PermissionFlagsBits, User } from 'discord.js';
 import { client, settings } from '../bot.ts';
 import type { GuildMessage } from '../events/message/messageCreate.ts';
 import { EmbedColor, replyError, replyInfo, sendInfo } from './embeds.ts';
@@ -9,8 +9,8 @@ import { Mute } from './punishment/mute.ts';
 
 type CachedMessage = {
     id: string;
-    authorID: string;
-    channelID: string;
+    authorId: string;
+    channelId: string;
     content: string;
     createdTimestamp: number;
 };
@@ -70,8 +70,8 @@ export async function checkSpam(message: GuildMessage) {
     const currentMessage = {
         id: message.id,
         content: message.content,
-        authorID: message.author.id,
-        channelID: message.channelId,
+        authorId: message.author.id,
+        channelId: message.channelId,
         createdTimestamp: message.createdTimestamp,
     };
 
@@ -81,9 +81,9 @@ export async function checkSpam(message: GuildMessage) {
         const potentialSpam = cache.filter(
             (previousMessage) =>
                 previousMessage &&
-                currentMessage.authorID === previousMessage.authorID &&
+                currentMessage.authorId === previousMessage.authorId &&
                 similarityLevenshtein(currentMessage.content, previousMessage.content) > settings.data.spamProtection.similarityThreshold &&
-                currentMessage.channelID !== previousMessage.channelID &&
+                currentMessage.channelId !== previousMessage.channelId &&
                 currentMessage.createdTimestamp - previousMessage.createdTimestamp < settings.data.spamProtection.timeThreshold * 1000
         );
 
@@ -93,7 +93,7 @@ export async function checkSpam(message: GuildMessage) {
     // if message is flagged as spam, mute and delete messages
     if (isSpamSingleMessage || isSpamSimilarMessage) {
         const spamMessages = cache
-            .filter((previousMessage): previousMessage is NonNullable<typeof previousMessage> => previousMessage !== undefined && message.author.id === previousMessage.authorID)
+            .filter((previousMessage): previousMessage is NonNullable<typeof previousMessage> => previousMessage !== undefined && message.author.id === previousMessage.authorId)
             .reverse();
 
         spamMessages.push(currentMessage);
@@ -115,12 +115,17 @@ export async function checkSpam(message: GuildMessage) {
                 label: 'Forgive',
             });
 
+            let logEmbedDescription = `**User:** ${parseUser(message.author)}\n**Channels:** <#${spamMessages.map((message) => message.channelId).join('>, <#')}>`;
+            if (message.content) {
+                logEmbedDescription += '\n\n' + codeBlock(escapeCodeBlock(message.content));
+            }
+
             const logEmbed = new EmbedBuilder({
                 author: {
                     name: 'Potential Spam',
                     iconURL: message.author.displayAvatarURL(),
                 },
-                description: `**User:** ${parseUser(message.author)}\n**Channels:** <#${spamMessages.map((message) => message.channelID).join('>, <#')}>\n\n\`\`\`${message.content}\`\`\``,
+                description: logEmbedDescription,
                 color: EmbedColor.Red,
             });
           
@@ -142,7 +147,7 @@ export async function checkSpam(message: GuildMessage) {
         }
 
         for (const spam of spamMessages) {
-            const spamChannel = client.channels.cache.get(spam.channelID);
+            const spamChannel = client.channels.cache.get(spam.channelId);
             if (spamChannel && (spamChannel.type === ChannelType.GuildText || spamChannel.type === ChannelType.GuildVoice || spamChannel.isThread())) {
                 spamChannel.messages.delete(spam.id).catch(() => undefined);
             }
@@ -154,7 +159,7 @@ export async function checkSpam(message: GuildMessage) {
     cache.pop();
 }
 
-export async function kickSpammer(user: User, moderatorID?: string, contextURL?: string) {
+export async function kickSpammer(user: User, moderatorId?: string, contextURL?: string) {
     const guild = getGuild();
 
     await sendInfo(user, {
@@ -164,7 +169,7 @@ export async function kickSpammer(user: User, moderatorID?: string, contextURL?:
     }).catch(() => undefined);
 
     try {
-        const logString = await Kick.create(user, 'Phished account used for spam.', moderatorID, contextURL, 86400);
+        const logString = await Kick.create(user, 'Phished account used for spam.', moderatorId, contextURL, 86400);
         return logString;
     } catch (error) {
         console.error(error);
