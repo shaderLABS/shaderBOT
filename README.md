@@ -80,13 +80,51 @@ This will daemonize and run the application with [PM2](https://pm2.keymetrics.io
 
 ### Docker (production)
 
-Move the files in `/scripts/prod/docker/` to the root folder of this project. After configuring the `Dockerfile`, you can create and start the container using `docker-compose`:
+1. **Clone the Repository:**
+    Clone the repository to your server:
 
-```properties
-docker-compose up
-```
+    ```bash
+    git clone https://github.com/shaderLABS/shaderBOT.git
+    cd shaderBOT
+    ```
 
-**IMPORTANT:** The Docker configuration is mostly untested, so you should expect issues when using it.
+2. **Configure Environment Variables:**
+    The recommended way to configure the bot for production is through environment variables. The `docker-compose.yml` file is set up to pass environment variables to the bot and database services.
+
+    Create a `.env` file in the root of the project:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit the `.env` file and provide the following values:
+
+    ```bash
+    # Bot Configuration
+    APPLICATION_CLIENT_ID=your_discord_app_id
+    TOKEN=your_discord_bot_token
+    BOT_ONLY=true # Run the application in bot-only mode, which disables the HTTP server.
+    BACKUP_ENCRYPTION_KEY=your_backup_encryption_key
+    NODE_ENV=production
+
+    # Database Configuration
+    PG_HOST=your_database_host
+    PG_PORT=your_database_port
+    PG_USER=your_database_username
+    PG_PASSWORD=your_database_password
+    PG_DATABASE=your_database_name
+    ```
+
+3. **Build and Run with Docker Compose:**
+    The provided `docker-compose.yml` file is configured to build the bot's Docker image and run it as a service, along with a PostgreSQL database.
+
+    To build and start the services, run:
+
+    ```bash
+    docker compose up -d
+    ```
+
+    * `-d`: Runs the services in detached mode (in the background).
 
 ### Uploading Command Structure
 
