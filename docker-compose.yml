@@ -1,7 +1,6 @@
 services:
     app:
-        build: .
-        #image: kneemund/shaderbot:latest
+        image: ghcr.io/shaderlabs/shaderbot:latest
         #environment:
         #PG_HOST: db
         #PG_PORT: '${PG_PORT:-5432}'
