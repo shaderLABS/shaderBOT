@@ -1,0 +1,14 @@
+.git/
+.github/
+.vscode/
+node_modules/
+build/
+customContent/
+pgdata/
+drizzle/*.json
+.env
+.envrc
+.env.example
+*.md
+.prettierrc
+ecosystem.config.cjs

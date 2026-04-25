@@ -5,7 +5,4 @@ node_modules/
 pgdata/
 build/
 customContent/
-.dockerignore
-docker_compose.yml
-Dockerfile
 tsconfig.tsbuildinfo

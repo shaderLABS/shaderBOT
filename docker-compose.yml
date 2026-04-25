@@ -1,0 +1,46 @@
+services:
+    app:
+        build: .
+        #image: kneemund/shaderbot:latest
+        #environment:
+        #PG_HOST: db
+        #PG_PORT: '${PG_PORT:-5432}'
+        # PG_USER: "${PG_USER:-postgres}"
+        # PG_PASSWORD: "${PG_PASSWORD:-postgres}"
+        # PG_DATABASE: "${PG_DATABASE:-shaderBOT}"
+        # TOKEN: "${TOKEN}"
+        # APPLICATION_CLIENT_ID: "${APPLICATION_CLIENT_ID}"
+        # APPLICATION_CLIENT_SECRET: "${APPLICATION_CLIENT_SECRET}"
+        # SESSION_SECRET: "${SESSION_SECRET}"
+        # DOMAIN: "${DOMAIN}"
+        # BACKUP_ENCRYPTION_KEY: "${BACKUP_ENCRYPTION_KEY}"
+        env_file:
+            - path: ./.env
+        volumes:
+            - ./customContent:/app/customContent
+        depends_on:
+            db:
+                condition: service_healthy
+        restart: always
+    db:
+        image: postgres:18-alpine
+        volumes:
+            - shaderbot_db:/var/lib/postgresql
+        expose:
+            - '5432'
+        environment:
+            POSTGRES_USER: '${PG_USER:-postgres}'
+            POSTGRES_PASSWORD: '${PG_PASSWORD:-postgres}'
+            POSTGRES_DB: '${PG_DATABASE:-shaderBOT}'
+        env_file:
+            - path: ./.env
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -U ${PG_USER:-postgres}']
+            interval: 5s
+            timeout: 5s
+            retries: 5
+        restart: always
+
+volumes:
+    shaderbot_db:
+        driver: local
