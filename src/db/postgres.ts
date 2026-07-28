@@ -1,6 +1,5 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { PoolConfig } from 'pg';
-import * as schema from './schema.ts';
 import { relations } from './relation.ts';
 
 // TODO: switch to bun-sql after drizzle fixes their shit
@@ -19,6 +18,5 @@ export const DB_CREDENTIALS = {
 
 export const db = drizzle({
     connection: DB_CREDENTIALS,
-    schema,
     relations,
 });

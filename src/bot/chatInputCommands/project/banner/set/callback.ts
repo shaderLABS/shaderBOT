@@ -32,7 +32,7 @@ export const command: ChatInputCommandCallback = {
 
             try {
                 const bannerResponse = await fetch(banner.url);
-                const bannerSharp = sharp(await bannerResponse.arrayBuffer(), { failOnError: false });
+                const bannerSharp = sharp(await bannerResponse.arrayBuffer());
 
                 const bannerWidth = 1920;
                 const bannerHeight = 1080;
