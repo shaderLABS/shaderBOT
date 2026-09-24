@@ -1,6 +1,5 @@
 import { ActionRowBuilder, AttachmentBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, StringSelectMenuBuilder } from 'discord.js';
 import fs from 'node:fs/promises';
-import path from 'node:path';
 import type { ChatInputCommandCallback } from '../../../chatInputCommandHandler.ts';
 import { Backup } from '../../../lib/backup.ts';
 import { replyError, replyInfo, sendError } from '../../../lib/embeds.ts';
@@ -28,7 +27,7 @@ export const command: ChatInputCommandCallback = {
 
         const backupEntries: BackupEntry[] = files
             .map((fileName) => {
-                const [channel, creationTime, size] = path.parse(fileName).name.split(' - ');
+                const { channel, creationTime, size } = Backup.parseFileName(fileName);
                 return { fileName, channel, size, creationTime: new Date(creationTime) };
             })
             .sort((a, b) => b.creationTime.getTime() - a.creationTime.getTime());

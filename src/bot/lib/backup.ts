@@ -22,7 +22,16 @@ export class Backup {
         this.fileName = data.fileName;
         this.content = isEncrypted ? Backup.decryptContent(data.content) : data.content;
 
-        [this.channelName, this.creationTime, this.size] = path.parse(this.fileName).name.split(' - ');
+        const { channel, creationTime, size } = Backup.parseFileName(this.fileName);
+        this.channelName = channel;
+        this.creationTime = creationTime;
+        this.size = size;
+    }
+
+    public static parseFileName(fileName: string) {
+        // The channel name may itself contain ' - ' (threads have no naming restrictions), so the fixed fields must be parsed from the right.
+        const parts = path.parse(fileName).name.split(' - ');
+        return { channel: parts.slice(0, -2).join(' - '), creationTime: parts[parts.length - 2], size: parts[parts.length - 1] };
     }
 
     public static async create(channel: TextChannel | AnyThreadChannel | VoiceChannel, backupMessages?: Collection<string, Message>, introduction?: string) {
@@ -45,19 +54,26 @@ export class Backup {
             `Backup of #${channel.name} (${messages.size} messages). Created at ${creationTime}.${introduction ? '\n' + introduction : ''}\n\n`,
         );
 
-        const backup = new Backup({ fileName: `#${channel.name} - ${creationTime} - ${messages.size}.txt`, content }, false);
+        const safeChannelName = channel.name.replace(/[^a-zA-Z0-9_-]/g, '') || 'untitled';
+        const backup = new Backup({ fileName: `#${safeChannelName} - ${creationTime} - ${messages.size}.txt`, content }, false);
         await backup.write();
 
         return backup;
     }
 
     public static async read(fileName: string) {
+        Backup.assertSafeFileName(fileName);
         const content = await Bun.file(path.join(Backup.DIRECTORY, fileName)).text();
         return new Backup({ fileName, content }, true);
     }
 
     public async write() {
+        Backup.assertSafeFileName(this.fileName);
         await Bun.write(path.join(Backup.DIRECTORY, this.fileName), Backup.encryptContent(this.content), { createPath: true });
+    }
+
+    private static assertSafeFileName(fileName: string) {
+        if (path.basename(fileName) !== fileName) throw 'Backup file names must not contain path separators.';
     }
 
     private static decryptContent(content: string) {
@@ -102,7 +118,7 @@ export class Backup {
                 const { birthtime } = await fs.stat(path.join(Backup.DIRECTORY, backup));
                 if (Date.now() - birthtime.getTime() > 2_419_200_000) {
                     // 4w = 2,419,200,000ms
-                    fs.rm(path.join(Backup.DIRECTORY, backup));
+                    await fs.rm(path.join(Backup.DIRECTORY, backup));
                 }
             }
         } catch (error) {
