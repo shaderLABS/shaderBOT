@@ -57,12 +57,14 @@ export async function handleSpamInteraction(interaction: ButtonInteraction<'cach
 }
 
 export async function checkSpam(message: GuildMessage) {
+    // exclude all messages by authors with a colored role
+    if (message.member.roles.color) return;
+  
     // don't handle message where spam is unlikely (short, no embeds, no attachments)
     if (!message.attachments.size && !message.embeds.length && message.content.length < settings.data.spamProtection.characterThreshold) return;
 
     // mentions everyone and contains a link or attachments or embeds
     let isSpamSingleMessage =
-        !message.member.roles.color &&
         !message.member.permissions.has(PermissionFlagsBits.MentionEveryone) &&
         (message.content.includes('@everyone') || message.content.includes('@here')) &&
         (message.content.includes('http') || message.attachments.size > 0 || message.embeds.length > 0);
